@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>趣加 - 我的</title>
+  <script src="//static2.pgaot.com/Assets/js/jquery-2.2.4.min.js"></script>
+  <script src="//static2.pgaot.com/Assets/js.class/pgdbs.class.js"></script>
+  <script src="//shequ.pgaot.com/AdminPages/pages/Mysqldb/vip/pickduckDBJQ.0e6fb026ce576a9d922d52068fc3e55a2abf9ef4ba6d5bab6791f73d80b2caa9.js"></script>
+  <script src="//shequ.pgaot.com/AdminPages/pages/Mysqldb/vip/pickduckDBJQ.6d4470deee6cee4a19c69524a769bc300690620472b9110ed4f427d285b1ac76.js"></script>
+  <script src="//shequ.pgaot.com/AdminPages/pages/Mysqldb/vip/pickduckDBJQ.56a041f93f025090f8ee06c5f53bf3e77c212ffbb76b1d2434e8b029f91825b0.js"></script> <!-- 查询HTML的资源库 -->
+  <script src="//static2.pgaot.com/Assets/js/sipg_jcokxlcsd9.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<style>
+/* 定位在 myPostsWrapper 的右上角 */
+#myPostsWrapper {
+  position: relative;           /* 允许绝对定位子元素 */
+  margin: 30px 20px;
+  padding: 20px;
+  background: #e6f3ff;
+  border-radius: 15px;
+  max-height: 600px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.add-post-btn {
+  position: absolute;
+  top: 20px;      /* 与容器 padding 一致 */
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  background-color: #007BFF;
+  color: white;
+  font-size: 24px;
+  line-height: 38px;
+  text-align: center;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+/* 圆角加号按钮，定位在 myPostsWrapper 右下角 */
+.add-post-btn {
+  position: absolute;
+  right: 30px;    /* 根据 myPostsWrapper 的 padding 调整 */
+  bottom: 40px;   /* 留出下方滚动区域 */
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #007BFF;
+  color: white;
+  font-size: 32px;
+  line-height: 46px;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  z-index: 10;
+}
+.add-post-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 32px;      /* 缩小宽度 */
+  height: 32px;     /* 缩小高度 */
+  font-size: 20px;  /* 调整字体大小 */
+  line-height: 30px;
+  border-radius: 6px; /* 小一点圆角 */
+  /* 其余保持不变 */
+}
+
+/* 弹窗遮罩 */
+#postModalMask {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 弹窗主体 */
+#postModal {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* 弹窗各个输入元素 */
+#postModal input[type="text"],
+#postModal textarea {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 15px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+/* 大文本框 */
+#postModal textarea {
+  height: 100px;
+  resize: vertical;
+}
+
+/* 发布按钮 */
+#postModal button.publish-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* 关闭按钮 */
+#postModal .close-btn {
+  position: absolute;
+  top: 10px; right: 10px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+  
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding-bottom: 60px;
+      background: #f9f9f9;
+    }
+
+    #topbar {
+      margin-top: 40px;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+    }
+
+    #avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      cursor: pointer;
+    }
+
+    #username {
+      font-size: 22px;
+      font-weight: bold;
+      margin-left: 15px;
+      cursor: pointer;
+    }
+
+    #settingsBtn {
+      margin-left: auto;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+    }
+
+    #settingsMenu {
+      position: absolute;
+      top: 130px;
+      right: 20px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      display: none;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    #settingsMenu button {
+      padding: 12px 18px;
+      width: 100%;
+      text-align: left;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #settingsMenu button:hover {
+      background: #f5f5f5;
+    }
+
+#myPostsWrapper {
+  margin: 30px 20px;
+  padding: 20px;
+  background: #e6f3ff;
+  border-radius: 15px;
+  max-height: 600px;     /* 再拉长一点 */
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.dynamic-square {
+  word-wrap: break-word;
+  overflow-x: hidden;
+}
+
+/* 让动态列表中的图片宽度等于蓝色框宽度 */
+.dynamic-square .dynamic-item img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+    #myPostsWrapper h2 {
+      margin-top: 0;
+      font-size: 18px;
+      color: #333;
+    }
+
+    #myPostsContent {
+      font-size: 16px;
+      color: gray;
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    #loginBox {
+      margin: 100px 20px 30px;
+      background: #e6f3ff;
+      padding: 30px 20px;
+      border-radius: 15px;
+      text-align: center;
+    }
+
+    #loginBox input {
+      width: 90%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    #loginBox button {
+      width: 90%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #loginBox button:hover {
+      background-color: #0056b3;
+    }
+
+    #register {
+      margin-top: 12px;
+      color: #007bff;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    #tabbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      background: white;
+      border-top: 1px solid #ddd;
+      padding: 10px 0;
+    }
+
+    .tab {
+      flex: 1;
+      text-align: center;
+      font-size: 14px;
+      text-decoration: none;
+      color: gray;
+    }
+
+    .tab img {
+      width: 24px;
+      height: 24px;
+      display: block;
+      margin: 0 auto 5px;
+    }
+
+    .active {
+      color: blue;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+<div id="content">
+
+<div id="loginBox">
+  <input type="text" id="email" placeholder="请输入账号">
+  <input type="password" id="password" placeholder="请输入密码">
+  <button id="loginBtn">登录</button>
+  <div id="register">立即注册</div>
+</div>
+
+<div id="userInfo" style="display: none;">
+  <div id="topbar">
+    <img id="avatar" src="" alt="头像">
+    <div id="username">点击修改昵称</div>
+    <img id="settingsBtn" src="https://static.codemao.cn/pickduck/B1OsjsYJle.png?hash=FnivydRSkrP60S0G4eZbHf-QIewV" alt="设置">
+  </div>
+
+  <div id="settingsMenu">
+    <button id="logoutBtn">退出登录</button>
+  </div>
+
+  <input type="file" id="fileInput" style="display: none;" />
+
+  <div id="myPostsWrapper">
+    <h2>我的动态</h2>
+<button id="addPostBtn" class="add-post-btn">+</button>
+  
+
+    <div class="dynamic-square" id="dynamic-square">
+        
+    </div>
+  
+  </div>
+
+</div>
+
+
+
+
+</div>
+
+
+<!-- 发布动态弹窗 -->
+<div id="postModalMask">
+  <div id="postModal">
+    <button class="close-btn" id="closePostModal">×</button>
+    <input type="text" id="postTitle" placeholder="请输入标题">
+
+
+
+<input type="file" id="postImageInput" style="display: none;" />
+
+
+
+    <button id="uploadImageBtn">上传图片</button>
+<div id="imagePreviewList" style="margin-top:8px;"></div>
+    <textarea id="postContent" placeholder="请输入正文"></textarea>
+    <button class="publish-btn" id="publishPostBtn">立即发布</button>
+  </div>
+</div>
+
+<div id="tabbar">
+  <a href="javascript:history.back();" class="tab">
+    <img src="https://static.codemao.cn/pickduck/HyaM739syx.jpeg?hash=Ftl4ZEyNDd2xNGxgYNRrrYdyVvv-" alt="首页">
+    <div>首页</div>
+  </a>
+  <a href="#" class="tab active">
+    <img src="https://static.codemao.cn/pickduck/ry2QXncjyl.jpeg?hash=FsNrnWAmpCXwmKfLdfRj0YHV0TBy" alt="我的">
+    <div>我的</div>
+  </a>
+</div>
+
+
+  <script>
+function emojiToHtmlEntity(str) {
+  return [...str].map(char => {
+    const code = char.codePointAt(0);
+    // 判断是否是 emoji（常用 emoji 范围）
+    if (
+      (code >= 0x1F300 && code <= 0x1F6FF) || // emoji pictographs
+      (code >= 0x1F900 && code <= 0x1F9FF) || // supplemental symbols
+      (code >= 0x1FA70 && code <= 0x1FAFF) || // symbols and pictographs extended
+      (code >= 0x2600 && code <= 0x26FF) ||   // miscellaneous symbols
+      (code >= 0x2700 && code <= 0x27BF) ||   // dingbats
+      (code >= 0x1F1E6 && code <= 0x1F1FF)    // flags
+    ) {
+      return `&#${code};`;
+    } else {
+      return char;
+    }
+  }).join('');
+}
+function htmlEntityToEmoji(str) {
+  return str.replace(/&#(\d+);/g, (_, dec) => {
+    return String.fromCodePoint(parseInt(dec));
+  });
+}
+</script>
+
+<script>
+
+
+
+
+
+    $(document).ready(function() {
+      let userId = localStorage.getItem("userid");
+let firstImageUrl = ""; 
+      if (userId) {
+        $("#loginBox").hide();
+        $("#userInfo").show();
+
+
+ var table2 = new pgdbs(dbs_0e6fb026ce576a9d922d52068fc3e55a2abf9ef4ba6d5bab6791f73d80b2caa9);
+      table2.onGetData((json) => {
+			
+        if (json.fields && json.fields.length > 0) {
+          let user = json.fields[0];
+          $("#avatar").attr("src", user.picture || "https://static2.pgaot.com/default-avatar.png");
+          $("#username").text(htmlEntityToEmoji(user.name) || "用户");
+        }
+      });
+
+      table2.getTableData({
+        page: 1,
+        limit: 1,
+        id: "getTableData",
+        filter: 'createdAt="' + userId + '"'
+      });
+
+     
+
+        // 修改昵称
+        $("#username").click(function() {
+          let newName = prompt("设置昵称");
+
+
+          if (newName) {
+
+newName = emojiToHtmlEntity(newName);
+
+            var tablewritename = new pgdbs(dbs_0e6fb026ce576a9d922d52068fc3e55a2abf9ef4ba6d5bab6791f73d80b2caa9);
+            let insertConfig = {
+              type: "UPDATE",
+              filter: 'createdAt="' + userId + '"',
+              fields: 'name="' + newName + '"',
+              id: "writename"
+            };
+            tablewritename.setTableData(insertConfig);
+
+//更新数据到评论区
+				var nexttablewritename = new pgdbs(dbs_6d4470deee6cee4a19c69524a769bc300690620472b9110ed4f427d285b1ac76);
+            let insertConfig2 = {
+              type: "UPDATE",
+              filter: 'userid="' + userId + '"',
+              fields: 'name="' + newName + '"',
+              id: "nextwritename"
+            };
+            nexttablewritename.setTableData(insertConfig2);
+            alert("修改成功");
+            location.reload();
+
+
+          }
+
+
+        });
+
+
+
+        // 点击头像上传
+        $("#avatar").click(function() {
+          $("#fileInput").click();
+        });
+
+        $("#fileInput").change(function() {
+          var file = this.files[0];
+          if (!file) return;
+
+          var formdata = new FormData();
+          formdata.append("file", file);
+          formdata.append("path", "bcx");
+
+          var myHeaders = new Headers();
+          myHeaders.append("User-Agent", "Apifox/1.0.0 (https://apifox.com)");
+
+          var requestOptions = {
+            method: 'POST',
+            headers: myHeaders,
+            body: formdata,
+            redirect: 'follow'
+          };
+
+          fetch("https://api.pgaot.com/user/up_cat_file", requestOptions)
+            .then(response => response.json())
+            .then(result => {
+              if (result.code === 200) {
+                
+                // 更新头像数据
+var tablewritepicture = new pgdbs(dbs_0e6fb026ce576a9d922d52068fc3e55a2abf9ef4ba6d5bab6791f73d80b2caa9);
+            let insertConfig = {
+              type: "UPDATE",
+              filter: 'createdAt="' + userId + '"',
+              fields: 'picture="' + result.url + '"',
+              id: "writename"
+            };
+            tablewritepicture.setTableData(insertConfig);
+            
+
+//更新数据到评论区
+var nexttablewritepicture = new pgdbs(dbs_6d4470deee6cee4a19c69524a769bc300690620472b9110ed4f427d285b1ac76);
+            let insertConfig2 = {
+              type: "UPDATE",
+              filter: 'userid="' + userId + '"',
+              fields: 'picture="' + result.url + '"',
+              id: "nextwritepicture"
+            };
+            nexttablewritepicture.setTableData(insertConfig2);
+            alert("修改成功");
+            location.reload();
+
+
+
+
+
+
+
+              } else {
+                alert("头像更新失败：" + result.message);
+              }
+            })
+            .catch(error => {
+              alert("头像更新出错：" + error);
+            });
+        });
+      }
+
+      $("#loginBtn").click(function() {
+        let emailValue = $("#email").val().trim();
+        let passwordValue = $("#password").val().trim();
+
+        if (!emailValue || !passwordValue) {
+          alert("请输入账号和密码");
+          return;
+        }
+
+
+        let hashedPassword = CryptoJS.MD5(passwordValue).toString();
+        var table1 = new pgdbs(dbs_0e6fb026ce576a9d922d52068fc3e55a2abf9ef4ba6d5bab6791f73d80b2caa9);
+        table1.onGetData((json, id, url) => {
+          if (json.fields && json.fields.length === 1) {
+            let userId = json.fields[0].createdAt;
+            localStorage.setItem("userid", userId);
+            alert("登录成功");
+            location.reload();
+          } else {
+            alert("账号密码错误");
+          }
+        });
+
+        table1.getTableData({
+          page: 1,
+          limit: 1,
+          id: "getTableData",
+          filter: 'mail="' + emailValue + '" and password="' + hashedPassword + '"'
+        });
+      });
+
+      $("#logoutBtn").click(function() {
+        localStorage.removeItem("userid");
+        location.reload();
+      });
+
+      $("#register").click(function() {
+        window.location.href = "web.html?url=" + encodeURIComponent("https://app.qujiayingyong.online/qujia/setup.html");
+      });
+    
+  
+
+
+
+    $("#settingsBtn").click(function () {
+      $("#settingsMenu").toggle();
+    });
+
+    $("#logoutBtn").click(function () {
+      localStorage.removeItem("userid");
+      location.reload();
+    });
+  });
+</script>
+
+
+
+    <script>
+
+        function openWeb(url) {
+            window.location.href = 'web.html?url=' + encodeURIComponent(url);
+        }
+
+        // 查询数据库
+
+        var table1 = new pgdbs(dbs_56a041f93f025090f8ee06c5f53bf3e77c212ffbb76b1d2434e8b029f91825b0);
+        table1.onGetData((json, id, url) => {
+            
+            var container = document.getElementById("dynamic-square");
+
+            json.fields.forEach(item => {
+                var div = document.createElement("div");
+                div.className = "dynamic-item";
+                div.innerHTML = htmlEntityToEmoji(`<img src="${item.picture}" onclick="openWeb('https://qujiaweb.top/blog/article.html?id=${item.createdAt}')">
+                                 <p>${item.title}</p>`);
+                container.appendChild(div);
+            });
+        });
+let userId = localStorage.getItem("userid");
+
+        table1.getTableData({
+            page: 1,
+            limit: 9999999,
+            id: "getTableData",
+            filter:'userid="' + userId + '"',
+        });
+
+
+
+        
+    </script>
+
+
+
+    <script>
+
+
+
+
+var plusReady = function (callback) {  
+    if (window.plus) {  
+        callback();  
+    } else {  
+        document.addEventListener('plusready', callback);  
+    }  
+};  
+
+plusReady(function () {  
+    var firstBack = 0;  
+    var handleBack = function () {  
+        var currentWebview = plus.webview.currentWebview();  
+        var topWebview = plus.webview.getTopWebview();  
+        var now = Date.now || function () {  
+            return new Date().getTime();  
+        };  
+
+        currentWebview.canBack(function (evt) {  
+            /**  
+             * 有可后退的历史记录，则后退。  
+             * 否则，关闭当前窗口。  
+             * 如果当前窗口是入口页，那么执行退出的逻辑。  
+             */  
+            if (currentWebview.id === plus.runtime.appid) {  
+                if (!firstBack) {  
+                    firstBack = now();  
+                    plus.nativeUI.toast('再按一次退出应用');  
+
+                    setTimeout(function () {  
+                        firstBack = 0;  
+                    }, 2000);  
+                } else if (now() - firstBack < 2000) {  
+                    plus.runtime.quit();  
+                }  
+            } else {  
+                if (evt.canBack) {  
+                    history.back();  
+                } else {  
+                    currentWebview.close('auto');  
+                }  
+            }  
+        });  
+    };  
+
+    plus.key.addEventListener('backbutton', handleBack);  
+});
+        //返回键处理
+
+
+
+
+
+
+
+
+
+
+
+
+// 打开弹窗
+$('#addPostBtn').on('click', function() {
+  $('#postModalMask').css('display','flex');
+});
+
+// 关闭弹窗
+$('#closePostModal, #postModalMask').on('click', function(e) {
+  if (e.target.id === 'postModalMask' || e.target.id === 'closePostModal') {
+    $('#postModalMask').hide();
+  }
+});
+
+// 阻止点击弹窗内容时关闭
+$('#postModal').on('click', function(e){
+  e.stopPropagation();
+});
+
+
+let uploadedUrls = [];
+
+// 当用户点击“上传图片”时，触发发布动态专用的文件输入框
+$('#uploadImageBtn').on('click', function() {
+  $('#postImageInput').click();
+});
+
+// 选文件后上传到 pgaot 并展示预览
+$('#postImageInput').on('change', function() {
+  const file = this.files[0];
+  if (!file) return;
+  const form = new FormData();
+  form.append('file', file);
+  form.append('path', 'bcx');
+
+  fetch('https://api.pgaot.com/user/up_cat_file', {
+    method: 'POST',
+    body: form
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (res.code === 200) {
+      const url = res.url;
+      uploadedUrls.push(url);
+      // 只在上传第一张图时记录
+      if (uploadedUrls.length === 1) {
+        firstImageUrl = url;
+        console.log("记录第一张图片 URL：", firstImageUrl);
+      }
+      // ...生成缩略图预览和删除逻辑...
+
+      // 在预览列表里添加带“×”的小图
+      const thumb = $(`
+        <div class="thumb">
+          <img src="${url}" style="width:60px;height:60px;border-radius:4px;">
+          <span class="remove-thumb" style="
+             position:absolute; top:-5px; right:-5px;
+             background:red;color:white;width:16px;height:16px;
+             border-radius:50%;text-align:center;cursor:pointer;
+             font-size:12px; line-height:16px;">×</span>
+        </div>
+      `).css({ position:'relative', display:'inline-block', margin:'0 8px 8px 0' });
+
+      $('#imagePreviewList').append(thumb);
+
+      // 点击叉号删除
+      thumb.find('.remove-thumb').on('click', () => {
+        const idx = uploadedUrls.indexOf(url);
+        if (idx>-1) uploadedUrls.splice(idx,1);
+        thumb.remove();
+      });
+    } else {
+      alert('上传失败');
+    }
+  })
+  .catch(()=>alert('上传出错'));
+});
+
+
+
+
+
+
+
+$('#publishPostBtn').on('click', () => {
+  // 取标题
+  const title = $('#postTitle').val().trim();
+  
+
+
+  var nickname = $('#username').text(); // 获取昵称框中的昵称
+  var currentTime = new Date().toLocaleString(); // 获取当前时间
+
+
+ 
+  
+  
+  // 组装 HTML：先每张图，再正文
+  let html ='';
+html += `<h6>时间：${currentTime}  发布人：${nickname}</h6>`;
+
+
+
+
+
+
+  uploadedUrls.forEach(u => {
+    html += `
+
+<img src="${u}" style="width:100%">`;
+  });
+  const content = $('#postContent').val();
+  html += `<div>${content}</div>`;
+
+  
+
+
+let userId = localStorage.getItem("userid");
+  
+
+
+
+    
+var tablenew = new pgdbs(dbs_56a041f93f025090f8ee06c5f53bf3e77c212ffbb76b1d2434e8b029f91825b0);
+            
+
+// 将 html 编码为 Base64，避免转义麻烦
+html = encodeURIComponent(html);
+let htmlBase64 = btoa(unescape(html));
+
+let insertConfig3 = {
+  type: "INSERT",
+  filter: 'title,picture,html,recommend,class,userid',
+  fields: '("' + emojiToHtmlEntity(title) + '","' + firstImageUrl + '","' + htmlBase64 + '","true","","' + userId + '")',
+  id: "tablenew"
+};
+tablenew.setTableData(insertConfig3);
+alert("发布成功");
+location.reload();
+
+
+
+     
+
+});
+
+
+
+
+
+    </script>
+</body>
+</html>
+
+

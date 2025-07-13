@@ -1,1 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
 
+
+
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>趣加</title>
+
+    <!-- 引入库 -->
+    <script src="https://static2.pgaot.com/Assets/js/jquery-2.2.4.min.js"></script> <!-- jQuery -->
+    <script src="https://static2.pgaot.com/Assets/js.class/pgdbs.class.js"></script> <!-- 核心逻辑 -->
+    <script src="https://shequ.pgaot.com/AdminPages/pages/Mysqldb/vip/pickduckDBJQ.56a041f93f025090f8ee06c5f53bf3e77c212ffbb76b1d2434e8b029f91825b0.js"></script> <!-- 查询HTML的资源库 -->
+    <script src="https://static2.pgaot.com/Assets/js/sipg_jcokxlcsd9.js"></script> <!-- 签名 -->
+
+<script>
+function emojiToHtmlEntity(str) {
+  return [...str].map(char => {
+    const code = char.codePointAt(0);
+    // 判断是否是 emoji（常用 emoji 范围）
+    if (
+      (code >= 0x1F300 && code <= 0x1F6FF) || // emoji pictographs
+      (code >= 0x1F900 && code <= 0x1F9FF) || // supplemental symbols
+      (code >= 0x1FA70 && code <= 0x1FAFF) || // symbols and pictographs extended
+      (code >= 0x2600 && code <= 0x26FF) ||   // miscellaneous symbols
+      (code >= 0x2700 && code <= 0x27BF) ||   // dingbats
+      (code >= 0x1F1E6 && code <= 0x1F1FF)    // flags
+    ) {
+      return `&#${code};`;
+    } else {
+      return char;
+    }
+  }).join('');
+}
+function htmlEntityToEmoji(str) {
+  return str.replace(/&#(\d+);/g, (_, dec) => {
+    return String.fromCodePoint(parseInt(dec));
+  });
+}
+</script>
+    <style>
+#dynamic-square .dynamic-item p {
+  text-align: left;
+  margin: 5px 0 0;
+  padding: 0 5px;
+  font-size: 14px;
+  color: #333;
+}
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        
+        /* 搜索框 */
+        .search-bar {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: white;
+        }
+        .search-input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 20px;
+            background: #eee;
+            border: none;
+        }
+
+        /* 轮播大图 */
+        .banner {
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%;
+            background: url('https://static.codemao.cn/pickduck/ryIORe6pJg.png?hash=FliRYTFjTEW4cwLYZmb2E6ew7oPy') center/cover no-repeat;
+            cursor: pointer;
+        }
+
+        /* 小圆圈按钮 */
+        .circle-menu {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            padding: 15px;
+            background: white;
+        }
+        .circle-menu .item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 20%;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .circle-menu img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-bottom: 5px;
+        }
+        .circle-menu span {
+            font-size: 14px;
+        }
+
+        /* 动态广场 */
+        .dynamic-square {
+            background: white;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        .dynamic-item {
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+        .dynamic-item img {
+            width: 100%;
+            border-radius: 10px;
+        }
+        .dynamic-item p {
+            text-align: center;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        /* 底部导航栏 */
+        #tabbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            background: white;
+            border-top: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        .tab { 
+            flex: 1; 
+            text-align: center; 
+            font-size: 14px; 
+            text-decoration: none; 
+            color: gray;
+        }
+        .tab img { width: 24px; height: 24px; display: block; margin: 0 auto 5px; }
+        .active { color: blue; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <!-- 搜索栏 -->
+    <div class="search-bar">
+        <input type="text" class="search-input" placeholder="搜索">
+    </div>
+
+    <!-- 轮播大图 -->
+    <div class="banner" onclick="openWeb('https://www.wjx.cn/vm/tUFTwxH.aspx# ')"></div>
+
+    
+    <!-- 小圆圈菜单 -->
+    <div class="circle-menu">
+        <!--
+        <div class="item" onclick="openWeb('https://app.qujiayingyong.online/qujia/article.html?id=1743745468')"><img src="https://static.codemao.cn/pickduck/BJ5UPgNh1x.jpeg?hash=FizEUnL6cbKeLz-VbddahBZ1MEq_"><span>公告</span></div>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+        <div class="item" onclick="openWeb('https://app.qujiayingyong.online/qujia/article.html?id=1743745535')"><img src="https://static.codemao.cn/pickduck/B1ipAPCa1x.jpeg?hash=Fil8rcoPzkOoYWoTHvv3gQQHyk6I"><span>节目单</span></div>
+
+        -->
+ <div class="item" onclick="openWeb('音乐.html ')"><img src="https://static.codemao.cn/pickduck/HJNG-_A6Jx.jpeg?hash=FmYSiC6gq4t4WxHvyobY8Eo-0YJU"><span>音乐</span></div>
+        <div class="item" onclick="openWeb('播客.html')"><img src="https://static.codemao.cn/pickduck/ryS2ve4hyx.jpeg?hash=FtwpdxCtrybW4oozEw0k0LItS2Nd"><span>播客</span></div>
+
+
+<div class="item" onclick="openWeb('随手拍.html')"><img src="https://static.codemao.cn/pickduck/rJ7yOg4nye.jpeg?hash=FrXs4Qs8UrYpZLuhloDBsxM4Vpwn"><span>随手拍</span></div>
+<div class="item" onclick="openWeb('https://qujiaweb.top/blog/article.html?id=1743685068')"><img src="https://static.codemao.cn/pickduck/Sy35DeEn1l.jpeg?hash=Fq5bH1KdfvTtCjm42C-wJmTvO_QK"><span>直播</span></div>
+        
+       
+
+        <div class="item" onclick="openWeb('https://www.wjx.cn/vm/mzzbjiv.aspx# ')"><img src="https://static.codemao.cn/pickduck/HkQrdeVhkg.jpeg?hash=FsW7droX6-NYWAsa9MtDc2NDSjZQ"><span>反馈</span></div>
+        <!--
+        <div class="item" onclick="openWeb('https://app.qujiayingyong.online/qujia/母亲节.html')"><img src="https://static.codemao.cn/pickduck/HkOnXORTke.jpeg?hash=FslD-FgWr_YEiLN4CfAm-78WWsdt"><span>母亲节</span></div>
+        
+        <div class="item" onclick="openWeb('https://app.qujiayingyong.online/qujia/漂流瓶')"><img src="https://static.codemao.cn/pickduck/BkmVXOATJe.jpeg?hash=FlBEDsN0HcjajaOVZFAIUsZ6tCbX"><span>漂流瓶</span></div>
+        <div class="item" onclick="openWeb('https://app.qujiayingyong.online/qujia/article.html?id=1743842552')"><img src="https://static.codemao.cn/pickduck/H1CyxdCpkg.jpeg?hash=FgaFklhMLFjG1MHm8II9TH1TSlIx"><span>奖品</span></div>
+
+
+        
+    
+        -->
+    </div>
+
+    <!-- 动态广场 -->
+    <div class="dynamic-square" id="dynamic-square">
+        <h3>动态广场</h3>
+    </div>
+
+    <!-- 底部导航 -->
+    <div id="tabbar">
+        <a href="index.html" class="tab active">
+            <img src="https://static.codemao.cn/pickduck/rkljkX2cikx.jpeg">
+            <div>首页</div>
+        </a>
+        <a href="me.html" class="tab">
+            <img src="https://static.codemao.cn/pickduck/ryiZQ3qiye.jpeg">
+            <div>我的</div>
+        </a>
+    </div>
+
+    <script>
+        function openWeb(url) {
+            window.location.href = 'web.html?url=' + encodeURIComponent(url);
+        }
+
+        // 查询数据库
+        var table1 = new pgdbs(dbs_56a041f93f025090f8ee06c5f53bf3e77c212ffbb76b1d2434e8b029f91825b0);
+        table1.onGetData((json, id, url) => {
+            
+            var container = document.getElementById("dynamic-square");
+
+            json.fields.forEach(item => {
+                var div = document.createElement("div");
+                div.className = "dynamic-item";
+                div.innerHTML = htmlEntityToEmoji(`<img src="${item.picture}" onclick="openWeb('https://app.qujiayingyong.online/qujia/article.html?id=${item.createdAt}')">
+                                 <p>${item.title}</p>`);
+                container.appendChild(div);
+            });
+        });
+
+        table1.getTableData({
+            page: 1,
+            limit: 9999999,
+            id: "getTableData",
+            filter:'recommend="true"',
+        });
+
+        // 搜索功能
+        document.querySelector(".search-input").addEventListener("input", function() {
+            var keyword = this.value.toLowerCase();
+            document.querySelectorAll(".dynamic-item").forEach(item => {
+                var title = item.querySelector("p").textContent.toLowerCase();
+                item.style.display = title.includes(keyword) ? "block" : "none";
+            });
+        });
+    </script>
+
+
+    
+
+
+
+    <script>
+
+
+
+
+var plusReady = function (callback) {  
+    if (window.plus) {  
+        callback();  
+    } else {  
+        document.addEventListener('plusready', callback);  
+    }  
+};  
+
+plusReady(function () {  
+    var firstBack = 0;  
+    var handleBack = function () {  
+        var currentWebview = plus.webview.currentWebview();  
+        var topWebview = plus.webview.getTopWebview();  
+        var now = Date.now || function () {  
+            return new Date().getTime();  
+        };  
+
+        currentWebview.canBack(function (evt) {  
+            /**  
+             * 有可后退的历史记录，则后退。  
+             * 否则，关闭当前窗口。  
+             * 如果当前窗口是入口页，那么执行退出的逻辑。  
+             */  
+            if (currentWebview.id === plus.runtime.appid) {  
+                if (!firstBack) {  
+                    firstBack = now();  
+                    plus.nativeUI.toast('再按一次退出应用');  
+
+                    setTimeout(function () {  
+                        firstBack = 0;  
+                    }, 2000);  
+                } else if (now() - firstBack < 2000) {  
+                    plus.runtime.quit();  
+                }  
+            } else {  
+                if (evt.canBack) {  
+                    history.back();  
+                } else {  
+                    currentWebview.close('auto');  
+                }  
+            }  
+        });  
+    };  
+
+    plus.key.addEventListener('backbutton', handleBack);  
+});
+        //返回键处理
+    </script>
+
+
+</body>
+</html>
