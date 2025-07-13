@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>趣加应用登录</title>
+    <link rel="stylesheet" href="login.css">
+    <script src="//static2.pgaot.com/Assets/js/jquery-2.2.4.min.js"></script>
+    <script src="//static2.pgaot.com/Assets/js/sipg_jcokxlcsd9.js"></script>
+    <script src="//static2.pgaot.com/Assets/js.class/pgdbs.class.js"></script>
+
+    <script>
+        // 实例化数据表
+        var table1 = new pgdbs(dbs_21add8e7caad2dd6f75d13aaa2872a571d36739a22ff91e88d047261f8fec421);
+        
+        // 点击登录按钮时执行验证逻辑
+        function handleLogin() {
+          alert("抱歉网页端暂停维护");
+        }
+
+        // 回调函数处理返回的 JSON 数据
+        table1.onGetData((json, id, url) => {
+            // 检查返回的字段长度
+            if (json.fields && json.fields.length === 1) {
+                var userData = json.fields[0];
+                var email = userData["邮箱"];
+                var avatar = userData["头像"];
+                var nickname = userData["昵称"];
+
+                // 将数据存入 cookie
+                //document.cookie = "email=" + email;
+                //document.cookie = "avatar=" + avatar;
+                //document.cookie = "nickname=" + nickname;
+
+                // 提示登录成功并跳转
+                alert("抱歉网页端暂停维护");
+                //window.location.href = "index.html";
+            } else {
+                alert("账号密码错误");
+            }
+        });
+    </script>
+</head>
+<body>
+
+<div class="top-banner">
+  <img src="https://creation.codemao.cn/716/appcraft/IMAGE_PXpyfl3Pb_1719185625141.jpeg" 
+       alt="趣加应用优享版" 
+       class="full-width-img">
+</div>
+
+
+
+
+
+    <!-- 登录表单 -->
+    <div class="login-container">
+        <form onsubmit="handleLogin(); return false;">
+            <input type="text" placeholder="账号" class="input-field" id="username">
+            <input type="password" placeholder="密码" class="input-field" id="password">
+            <button type="submit" class="login-button">登录</button>
+        </form>
+    </div>
+
+
+
+
+
+</body>
+</html>
