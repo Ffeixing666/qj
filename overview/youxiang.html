@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+    <title>趣加应用·优享版</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+    <div class="header">
+        <div class="date"></div>
+        <div class="greeting"></div>
+        <div class="avatar">
+            <img src="https://static.codemao.cn/pickduck/Skysohyxee.png?hash=FpFGPF9E7DX_Yci_Ir3RSwWk90hk" alt="头像">
+        </div>
+    </div>
+    
+    <div class="content">
+        <!-- 顶部大图 -->
+        <div class="top-image">
+            <img src="https://static.codemao.cn/pickduck/HyS4MSexgx.jpeg?hash=FkvIL9YG6BP2_iix2TLfFzHhMoXs" alt="优享版">
+        </div>
+        
+        <!-- 说明文字 -->
+        <div class="description-box">
+            <div class="description-text">
+                欢迎来到趣加应用优享版，本页面专为旧安卓设备定制，例如安卓5等，（本站其他页面可能需要更高内核的浏览器访问）页面精选了适合低系统设备安装的软件包，可在某些低版本安卓设备安装使用，像搭载安卓4的电视大屏等。如果有自己想要加入优享本页的资源可以点击投稿，如果只是想分享应用请下载趣加应用App随时分享。我们只有一个目的：致力于优质资源分享～请珍惜我们的劳动成果！
+            </div>
+            <div class="toggle-btn" onclick="toggleDescription()">展开</div>
+        </div>
+        
+        <!-- 搜索和投稿按钮 -->
+        <div class="action-buttons">
+            <div class="search-btn" onclick="toggleSearch()">搜索</div>
+            <div class="submit-btn" onclick="navigate('https://www.wjx.cn/vm/Q2mwBFx.aspx')">投稿</div>
+<div class="submit-btn" onclick="navigate('https://www.wjx.cn/vm/wpB1PFD.aspx# ')">许愿</div>
+        </div>
+        
+        <!-- 搜索框 -->
+        <div class="search-box" style="display:none;">
+            <input type="text" id="searchInput" placeholder="输入应用名称搜索">
+            <div class="cancel-btn" onclick="clearSearch()">取消</div>
+        </div>
+        
+        <!-- 应用列表 -->
+        <div class="app-list" id="appList">
+            <!-- 应用列表将通过JS动态生成 -->
+        </div>
+    </div>
+    
+    <div class="tab-bar">
+        <div class="tab" onclick="navigate('index.html')">首页</div>
+        <div class="tab" onclick="navigate('me.html')">我的</div>
+        
+    </div>
+    
+    <script type="text/javascript" src="script.js"></script>
+    <script type="text/javascript" src="youxiang.js"></script>
+</body>
+</html>

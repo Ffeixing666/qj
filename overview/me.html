@@ -1,0 +1,72 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+    <title>趣加应用·我的</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+    <div id="copy-tip" style="
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 123, 255, 0.9);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    z-index: 9999;
+">
+    内容已复制到剪贴板！
+</div>
+    <div class="header">
+        <div class="date"></div>
+        <div class="greeting"></div>
+        <div class="avatar">
+            <img src="https://static.codemao.cn/pickduck/Skysohyxee.png?hash=FpFGPF9E7DX_Yci_Ir3RSwWk90hk" alt="头像">
+        </div>
+    </div>
+    
+    <div class="menu-content">
+        <div class="menu-item" onclick="navigate('https://qm.qq.com/q/logPbDZGNi')">
+            <div class="menu-text">加入QQ群</div>
+            <div class="menu-arrow">></div>
+        </div>
+        <div class="menu-item" onclick="navigate('http://qujiayingyong.online/qujiayingyong.html')">
+            <div class="menu-text">官方App「趣加应用」下载</div>
+            <div class="menu-arrow">></div>
+        </div>
+        <div class="menu-item" onclick="navigate('http://qujiayingyong.online/qujiayinyue.html')">
+            <div class="menu-text">官方App「趣加音乐」下载</div>
+            <div class="menu-arrow">></div>
+        </div>
+   <div class="menu-item" onclick="navigate('https://qjyy.mysxl.cn/1')">
+            <div class="menu-text">我要反馈</div>
+            <div class="menu-arrow">></div>
+        </div>
+        <div class="menu-item" onclick="navigate('clean_cache')">
+            <div class="menu-text">清空缓存</div>
+            <div class="menu-arrow">></div>
+        </div>
+
+<div class="menu-item" onclick="shareApp()">
+    <div class="menu-text">^_^觉得好用，分享给朋友</div>
+    <div class="menu-arrow">></div>
+</div>
+        
+
+
+        
+    </div>
+    
+    <div class="tab-bar">
+        <div class="tab" onclick="navigate('index.html')">首页</div>
+        <div class="tab active" onclick="navigate('me.html')">我的</div>
+    </div>
+    
+    <script type="text/javascript" src="script.js"></script>
+</body>
+</html>
