@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>趣加应用网页版</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 顶部图片 -->
+    <div class="header">
+        <img id="refreshImage" src="https://static.codemao.cn/pickduck/HJq3zfnpA.png?hash=FpnRz5DG1WgDACzX2QVn209Tqv5b" alt="刷新图片" onclick="location.reload();">
+    </div>
+
+
+    <a href="https://www.wjx.cn/vm/eaBYOwf.aspx" target="_blank">
+        <div class="image-login"></div>
+    </a>
+
+
+    <a href="login.html" target="_blank">
+        <div class="image-button"></div>
+    </a>
+
+    <!-- 搜索框 -->
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="搜索...">
+    </div>
+
+<div class="button-slider">
+  <button id="news">最新</button>
+  <button id="star">最热</button>
+  <button id="musics">影视音乐</button>
+  <button id="tools">实用工具</button>
+  <button id="studys">学习必备</button>
+  <button id="games">娱乐游戏</button>
+  <button id="hellos">社交生活</button>
+</div>
+
+
+
+
+    <!-- 可滚动列表 -->
+    <div id="appList" class="scrollable-list">
+        <!-- 列表项由JS生成 -->
+    </div>
+
+
+
+
+  
+
+
+
+
+    <div class="footer-link">
+        <a href="https://qjyy.mysxl.cn" target="_blank">
+            <img src="https://static.codemao.cn/pickduck/BJeKwa3AC.png?hash=FpV_VyFiTrD-lMWyAm7_yxq_pokK" alt="Link Image">
+        </a>
+    </div>
+
+
+
+
+
+<script>
+        // 检查 cookie 中是否有邮箱数据
+        window.onload = function() {
+            var email = getCookie('email');
+            var avatar = getCookie('avatar'); // 假设头像 URL 存储在 cookie 中，键为 avatar
+
+            if (email) {
+                // 如果有数据，改变右上角 class 为 image-button 的 a 标签图标为 cookie 中的头像
+                document.querySelector('.image-button').style.backgroundImage = `url(${avatar})`;
+            }
+
+            // 当右上角 class 为 image-button 的 a 标签被点击时
+            document.querySelector('.image-button').onclick = function(event) {
+                if (email) {
+                    // 如果 cookie 中有邮箱数据，显示提示
+                    event.preventDefault();
+                    alert("需下载App才可进入个人中心");
+                } else {
+                    // 否则跳转至 login.html
+                    window.location.href = "login.html";
+                }
+            };
+        };
+
+        // 获取 cookie 的辅助函数
+        function getCookie(name) {
+            var value = "; " + document.cookie;
+            var parts = value.split("; " + name + "=");
+            if (parts.length === 2) return parts.pop().split(";").shift();
+        }
+
+
+
+</script>
+
+    
+    <!-- jQuery 和其他外部脚本 -->
+    <!-- jquery-2.2.4.min.js 可替换成其他链接的jq文件，导入一次即可 -->
+    <script src="//static2.pgaot.com/Assets/js/jquery-2.2.4.min.js"></script>
+
+    <!-- PGAoT的请求的签名方式，导入一次即可 -->
+    <script src="//static2.pgaot.com/Assets/js/sipg_jcokxlcsd9.js"></script>
+
+    <!-- 数据表JavaScript(支持jquery环境)核心处理逻辑类，导入一次即可 -->
+    <script src="//static2.pgaot.com/Assets/js.class/pgdbs.class.js"></script>
+
+    <!-- pgdbsUser_<数据表ID>.js 自己生成的JS用户配置类 -->
+    <script src="//shequ.pgaot.com/AdminPages/pages/Mysqldb/vip/pickduckDBJQ.14473b2a64a496b156686ae453162cfe329e2bbaabbb5da81bdca6b0dcdde4ea.js"></script>
+
+    <!-- 实例化和表数据获取逻辑 -->
+<script>
+    // 实例化
+    var table1 = new pgdbs(dbs_14473b2a64a496b156686ae453162cfe329e2bbaabbb5da81bdca6b0dcdde4ea);
+
+    // 设置数据成功回调函数
+    table1.onGetData((json, id, url) => {
+        // 清空列表“展示”
+        展示.length = 0;
+
+        // 获取json中键“fields”的长度，并遍历插入数据
+        var fields = json.fields;
+
+        for (let i = 0; i < fields.length; i++) {
+            // 获取图片字段并分割为列表
+            let 图片列表 = fields[i]['图片'].split(',');
+
+            // 插入一行字典格式数据到“展示”，包括简介
+            展示.push({
+                icon: fields[i]['图标'],
+                name: fields[i]['名称'],
+                link: fields[i]['链接'],
+                pwd: fields[i]['密码'],
+                简介: fields[i]['简介'].substring(0,800), // 新增简介字段
+                图片一: 图片列表[0] || '', // 获取图片列表中的第一项
+                图片二: 图片列表[1] || ''  // 获取图片列表中的第二项，如果没有则为空
+            });
+        }
+
+        // 更新页面展示数据
+        updateDisplay();
+    });
+
+    // 调用获取数据表方法，将结果返回到自定义的成功回调函数
+table1.getTableData({page: 1, limit: 1000, id: 'getTableData',filter: '是否推荐="推荐"'});
+
+    // 更新页面展示的函数
+    function updateDisplay() {
+        // 根据更新的展示列表重新渲染页面数据
+        let listContainer = document.getElementById('appList');
+        listContainer.innerHTML = ''; // 清空现有内容
+
+        展示.forEach(item => {
+            // 创建并添加每个项目
+            let listItem = document.createElement('div');
+            listItem.className = 'app-item';
+            listItem.innerHTML = `
+                <img src="${item.icon}" alt="${item.name}" class="app-icon">
+                <div class="app-info">
+                    <h3>${item.name}</h3>
+                </div>
+            `;
+
+            listItem.onclick = function() {
+                // 切换到app.html并传递该行数据，包括简介
+                window.location.href = `app.html?icon=${encodeURIComponent(item.icon)}&name=${encodeURIComponent(item.name)}&link=${encodeURIComponent(item.link)}&pwd=${encodeURIComponent(item.pwd)}&图片一=${encodeURIComponent(item.图片一)}&图片二=${encodeURIComponent(item.图片二)}&简介=${encodeURIComponent(item.简介)}`;
+            };
+
+            listContainer.appendChild(listItem);
+        });
+    }
+
+
+
+
+
+
+document.getElementById('star').addEventListener('click', function() {
+    // 在这里执行点击时的操作
+        table1.getTableData({page: 1, limit: 1000, id: 'getTableData',filter: '星标排行="星标"'});
+});
+
+document.getElementById('news').addEventListener('click', function() {
+    // 在这里执行点击时的操作
+        table1.getTableData({page: 1, limit: 1000, id: 'getTableData',filter: '是否推荐="推荐"'});
+});
+
+
+
+document.getElementById('news').addEventListener('click', function() {
+    // 在这里执行点击时的操作
+        table1.getTableData({page: 1, limit: 1000, id: 'getTableData',filter: '是否推荐="推荐"'});
+});
+
+document.getElementById('musics').addEventListener('click', function() {
+    // 在这里执行点击时的操作
+        table1.getTableData({page: 1, limit: 1000, id: 'getTableData',filter: '分类 ="影视音乐"'});
+});
+
+document.getElementById('studys').addEventListener('click', function() {
+    // 在这里执行点击时的操作
+        table1.getTableData({page: 1, limit: 1000, id: 'getTableData',filter: '分类 ="学习必备"'});
+});
+
+document.getElementById('games').addEventListener('click', function() {
+    // 在这里执行点击时的操作
+        table1.getTableData({page: 1, limit: 1000, id: 'getTableData',filter: '分类 ="娱乐游戏"'});
+});
+
+
+document.getElementById('hellos').addEventListener('click', function() {
+    // 在这里执行点击时的操作
+        table1.getTableData({page: 1, limit: 1000, id: 'getTableData',filter: '分类 ="社交生活"'});
+});
+
+
+document.getElementById('tools').addEventListener('click', function() {
+    // 在这里执行点击时的操作
+        table1.getTableData({page: 1, limit: 1000, id: 'getTableData',filter: '分类 ="实用工具"'});
+});
+
+
+
+
+
+
+
+</script>
+
+
+<div></div>
+    <!-- 应用数据处理的 JS 脚本 -->
+    <script src="script.js"></script>
+</body>
+</html>
