@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>合集页面</title>
+    <style>
+        /* CSS 样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background-color: #0073e6;
+            color: white;
+        }
+
+        .banner {
+            width: 100%;
+            height: auto;
+            max-height: 200px;
+        }
+
+        .category {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            background-color: #fff;
+            border-top: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .category span {
+            font-weight: bold;
+            color: #0073e6;
+        }
+
+        .article-list {
+            display: flex;
+            flex-direction: column;
+            margin: 10px;
+        }
+
+        .article-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: white;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            color: black;
+            cursor: pointer;
+        }
+
+        .article-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        .article-info h2 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .date, .views {
+            font-size: 12px;
+            color: #777;
+        }
+
+        /* 隐藏文章内容部分 */
+        #article {
+            display: none;
+            padding: 20px;
+        }
+
+        #article h1 {
+            font-size: 22px;
+            color: #0073e6;
+            margin-bottom: 10px;
+        }
+
+        #article .date {
+            font-size: 12px;
+            color: #777;
+        }
+
+        #article .content {
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+
+        #article .content img {
+            max-width: 100%;
+            height: auto;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+
+        #back-button {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #0073e6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="https://static.codemao.cn/pickduck/B151yDd7ye.jpeg?hash=FhrVfWGv5WRKKuGhH9I4JBxrhToj" alt="横幅" class="banner">
+        <h1>精选活动</h1>
+    </div>
+    
+    <div class="category">
+        <span>全部</span>
+        <span>最热</span>
+    </div>
+  
+
+
+
+
+    <div class="article-list">
+
+
+
+
+
+
+
+         <div class="article-item" onclick="showArticle(4)">
+            <img src="https://static.codemao.cn/pickduck/rJjenwEW1e.png?hash=FnM60Ia9GSuNBRr9-WRgCs19tUSC" alt="文章图片" class="article-image">
+            <div class="article-info">
+               <h2>精彩回顾 | 趣加应用2025新年特别策划--《一起跨年》</h2>
+                <p class="date">01-01</p>
+                <p class="views">1k+ 次浏览</p>
+            </div>
+        </div>
+
+        <div class="article-item" onclick="showArticle(1)">
+            <img src="https://static.codemao.cn/pickduck/rJjenwEW1e.png?hash=FnM60Ia9GSuNBRr9-WRgCs19tUSC" alt="文章图片" class="article-image">
+            <div class="article-info">
+
+                <h2>精彩回顾｜趣加应用2024中秋特别活动</h2>
+                <p class="date">09-14</p>
+                <p class="views">-- 次浏览</p>
+            </div>
+        </div>
+
+
+
+        <div class="article-item" onclick="showArticle(2)">
+            <img src="https://static.codemao.cn/pickduck/rJjenwEW1e.png?hash=FnM60Ia9GSuNBRr9-WRgCs19tUSC" alt="文章图片" class="article-image">
+            <div class="article-info">
+                <h2>精彩回顾｜趣加应用2024国庆特别活动</h2>
+                <p class="date">09-30</p>
+                <p class="views">-- 次浏览</p>
+            </div>
+        </div>
+
+
+
+         <div class="article-item" onclick="showArticle(3)">
+            <img src="https://static.codemao.cn/pickduck/rJjenwEW1e.png?hash=FnM60Ia9GSuNBRr9-WRgCs19tUSC" alt="文章图片" class="article-image">
+            <div class="article-info">
+               <h2><a href="https://www.wjx.cn/vm/eqHYoTl.aspx"style='text-decoration:none;color:black;'>公益支持｜成为管理员</a></h2>
+                <p class="date"></p>
+                <p class="views">-- 次浏览</p>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- 模拟文章页面内容，用 JavaScript 动态填充 -->
+    <div id="article">
+        <h1 id="article-title"></h1>
+        <p class="date" id="article-date"></p>
+        <div class="content" id="article-content"></div>
+        <button id="back-button" onclick="goBack()">返回</button>
+    </div>
+
+    <script>
+        // 定义每篇文章的内容
+        const articles = {
+            1: {
+                title: "精彩回顾 | 趣加应用2024中秋特别活动",
+                date: "趣加应用APP综合 ·2024-09-14",
+                content: "^_−☆叮，祝各位中秋节快乐～<br>「趣加应用」中秋福利，扫描下方二维码查看兑换码，获取若干趣币。拼手速♪(´ε｀ )（进入App-“我的”-“趣币”-“兑换码”兑换哦～）<br>同时也欢迎各位来持续分享资源，谢谢各位了<br><img src='https://static.codemao.cn/pickduck/ryoeYKdQ1l.jpeg?hash=Ft2LOe4lbstyjVN43Kw23FPiXS7t' alt='文章配图'><br>活动已结束"
+            },
+            2: {
+                title: "精彩回顾 | 趣加应用2024国庆特别活动",
+                date: "趣加应用APP综合 · 2024-09-30",
+                content: "^_−☆叮，祝各位国庆快乐～<br>「趣加应用」国庆特别活动--抽红包，送惊喜<br>「奖品说明」包括但不限于WPS大会员月卡、随机趣币等<br>点击趣加应用首页轮播图参加活动哦<br><img src='https://static.codemao.cn/pickduck/BkCSd__Qyg.jpeg?hash=FucZ5EP-jC1WxCkgKUt5h0jSDTrd' alt='文章配图'>活动已结束"
+            },
+            3: {
+                title: "趣加应用｜我要成为管理员",
+                date: "趣加应用APP综合",
+                content: "请填写下表，24小时内将审核完毕<br>https://www.wjx.cn/vm/eqHYoTl.aspx#（将自动跳转或复制到浏览器打开）<br><img src='https://static.codemao.cn/pickduck/BJHcvOumyl.webp?hash=FoU4w53dVZXKeBcz6bsDe5kKKhIO' alt='文章配图'>成为趣加应用管理员可审核资源、维护互动、查看数据等额外功能，其他要求详见相关页面。<br>"
+            },
+
+
+4: {
+                title: "精彩回顾 | 趣加应用2025新年特别策划--《一起跨年》",
+                date: "趣加应用APP综合 · 2025-01-01",
+                content: "一起跨年，留下你的新年祝福吧～<br><img src='https://static.codemao.cn/pickduck/ryag1KV_ke.heic?hash=Fgb85MdY33g6CNPb72N2hrPSAmml' alt='文章配图'><br>往年活动又来喽，快快参与吧。<br>"
+            }
+        };
+
+        // 显示文章内容
+        function showArticle(articleId) {
+            // 获取文章内容
+            const article = articles[articleId];
+            if (article) {
+                document.getElementById('article-title').innerText = article.title;
+                document.getElementById('article-date').innerText = article.date;
+                document.getElementById('article-content').innerHTML = article.content;  // 使用 innerHTML 支持图片和换行
+
+                // 隐藏主页，显示文章内容
+                document.querySelector('.header').style.display = 'none';
+                document.querySelector('.category').style.display = 'none';
+                document.querySelector('.article-list').style.display = 'none';
+                document.getElementById('article').style.display = 'block';
+            }
+        }
+
+        // 返回到主页
+        function goBack() {
+            document.querySelector('.header').style.display = 'block';
+            document.querySelector('.category').style.display = 'flex';
+            document.querySelector('.article-list').style.display = 'flex';
+            document.getElementById('article').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
