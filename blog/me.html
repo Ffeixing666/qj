@@ -621,6 +621,7 @@ let userId = localStorage.getItem("userid");
             page: 1,
             limit: 9999999,
             id: "getTableData",
+	    fields:'createdAt,title,picture',
             filter:'userid="' + userId + '"',
         });
 
