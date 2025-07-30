@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>静谧 - 放松助手</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <style>
+        /* 重置与基础设置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            /* 亮色模式变量 */
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --primary-dark: #4f46e5;
+            --secondary: #f3f4f6;
+            --background: #ffffff;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --border: #e5e7eb;
+            --success: #10b981;
+            --danger: #ef4444;
+            --card-bg: #ffffff;
+            --player-bg: #ffffff;
+            --modal-bg: rgba(0, 0, 0, 0.5);
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --card-radius: 16px;
+            --spacing-xs: 0.5rem;
+            --spacing-sm: 1rem;
+            --spacing-md: 1.5rem;
+            --spacing-lg: 2rem;
+            --spacing-xl: 3rem;
+            --header-height: 64px;
+            --player-height: 120px;
+        }
+
+        /* 深色模式变量 */
+        [data-theme="dark"] {
+            --primary: #818cf8;
+            --primary-light: #a5b4fc;
+            --primary-dark: #6366f1;
+            --secondary: #374151;
+            --background: #111827;
+            --text: #f9fafb;
+            --text-light: #9ca3af;
+            --border: #374151;
+            --success: #10b981;
+            --danger: #f87171;
+            --card-bg: #1f2937;
+            --player-bg: #1f2937;
+            --modal-bg: rgba(0, 0, 0, 0.7);
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: "SF Pro Display", "SF Pro", "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.5;
+            font-size: 16px;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 通用样式与工具类 */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-md);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-primary {
+            color: var(--primary);
+        }
+
+        .shadow {
+            box-shadow: var(--card-shadow);
+        }
+
+        .rounded {
+            border-radius: var(--card-radius);
+        }
+
+        /* 布局组件 */
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background-color: var(--card-bg);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 900;
+            border-bottom: 1px solid var(--border);
+            padding: 0 var(--spacing-md);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .logo i {
+            margin-right: var(--spacing-xs);
+        }
+
+        .header-controls {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        .main-content {
+            flex: 1;
+            margin-top: var(--header-height);
+            margin-bottom: var(--player-height);
+            overflow-y: auto;
+            padding-bottom: var(--spacing-md);
+        }
+
+        /* 分类导航 */
+        .category-nav {
+            position: sticky;
+            top: 0;
+            background-color: var(--background);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 800;
+            padding: var(--spacing-md) 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .category-list {
+            display: flex;
+            overflow-x: auto;
+            gap: var(--spacing-sm);
+            padding-bottom: var(--spacing-xs);
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .category-list::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-item {
+            flex-shrink: 0;
+            padding: var(--spacing-xs) var(--spacing-md);
+            background-color: var(--secondary);
+            border-radius: 30px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .category-item.active {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+        }
+
+        /* 声音卡片网格 */
+        .sounds-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-md);
+            padding: 0 var(--spacing-xs);
+        }
+
+        @media (min-width: 640px) {
+            .sounds-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: var(--spacing-lg);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .sounds-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .sound-card {
+            aspect-ratio: 1;
+            background-color: var(--card-bg);
+            border-radius: var(--card-radius);
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border);
+            padding: var(--spacing-md);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sound-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        .sound-card:active {
+            transform: scale(0.98);
+        }
+
+        .sound-card.active {
+            border: 2px solid var(--primary);
+        }
+
+        .sound-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-sm);
+            color: var(--text);
+            transition: all 0.3s ease;
+        }
+
+        .sound-card.active .sound-icon {
+            color: var(--primary);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .sound-title {
+            font-weight: 500;
+            font-size: 1rem;
+            text-align: center;
+            color: var(--text);
+        }
+
+        /* 播放器 */
+        .player {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: var(--player-height);
+            background-color: var(--player-bg);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 950;
+            padding: var(--spacing-md);
+            display: flex;
+            flex-direction: column;
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+        }
+
+        .player-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-sm);
+        }
+
+        .player-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--secondary);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text);
+        }
+
+        .player-btn:active {
+            transform: scale(0.95);
+        }
+
+        .player-btn.main {
+            width: 64px;
+            height: 64px;
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .player-btn.active {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .player-btn i {
+            font-size: 1.25rem;
+        }
+
+        .player-btn.main i {
+            font-size: 1.5rem;
+        }
+
+        .timer-display {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-top: var(--spacing-xs);
+        }
+
+        .timer-display span {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .progress-container {
+            width: 100%;
+            margin-top: var(--spacing-sm);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background-color: var(--secondary);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary);
+            width: 0%;
+            transition: width 0.2s linear;
+        }
+
+        /* 音量指示器 */
+        .volume-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            height: 30px;
+            margin-top: var(--spacing-xs);
+        }
+
+        .volume-dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background-color: var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .volume-dot.active {
+            background-color: var(--primary-light);
+            transform: scale(1.5);
+        }
+
+        /* 模态窗口 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--modal-bg);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            width: 90%;
+            max-width: 480px;
+            max-height: 80vh;
+            background-color: var(--card-bg);
+            border-radius: var(--card-radius);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            padding: var(--spacing-lg);
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.open .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-md);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .modal-close {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--secondary);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1.25rem;
+            color: var(--text);
+        }
+
+        .modal-close:active {
+            transform: scale(0.95);
+        }
+
+        /* 定时器选项 */
+        .timer-section {
+            margin-top: var(--spacing-md);
+        }
+
+        .section-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: var(--spacing-sm);
+            color: var(--text);
+        }
+
+        .timer-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-sm);
+        }
+
+        .timer-option {
+            padding: var(--spacing-sm);
+            border-radius: 12px;
+            background-color: var(--secondary);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .timer-option:active {
+            transform: scale(0.97);
+        }
+
+        .timer-option.active {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+        }
+
+        /* 混音面板 */
+        .mixer-section {
+            margin-top: var(--spacing-lg);
+        }
+
+        .mixer-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+        }
+
+        .mixer-item {
+            display: flex;
+            align-items: center;
+            padding: var(--spacing-md);
+            background-color: var(--secondary);
+            border-radius: 14px;
+        }
+
+        .mixer-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--card-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: var(--spacing-md);
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .mixer-info {
+            flex: 1;
+        }
+
+        .mixer-title {
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+            color: var(--text);
+        }
+
+        .mixer-volume {
+            width: 100%;
+        }
+
+        .volume-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background-color: rgba(127, 127, 127, 0.2);
+            outline: none;
+            margin-top: var(--spacing-xs);
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .remove-sound-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--card-bg);
+            color: var(--danger);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            margin-left: var(--spacing-sm);
+        }
+
+        .remove-sound-btn:active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* 无声音状态 */
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-xl) var(--spacing-md);
+            color: var(--text-light);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-md);
+            opacity: 0.5;
+        }
+
+        .empty-message {
+            font-size: 1.1rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .empty-subtitle {
+            font-size: 0.9rem;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部 -->
+    <header class="app-header">
+        <div class="logo">
+            <i class="fas fa-leaf"></i>
+            <span>静谧</span>
+        </div>
+        <div class="header-controls">
+            <button id="mixerBtn" class="player-btn">
+                <i class="fas fa-sliders"></i>
+            </button>
+            <button id="themeToggleBtn" class="player-btn">
+                <i class="fas fa-moon"></i> <!-- 默认深色模式图标 -->
+            </button>
+        </div>
+    </header>
+
+    <!-- 主要内容 -->
+    <main class="main-content">
+        <!-- 分类导航 -->
+        <div class="category-nav">
+            <div class="container">
+                <div class="category-list">
+                    <div class="category-item active" data-category="all">全部</div>
+                    <div class="category-item" data-category="nature">自然</div>
+                    <div class="category-item" data-category="ambient">环境</div>
+                    <div class="category-item" data-category="meditation">冥想</div>
+                    <div class="category-item" data-category="weather">天气</div>
+                    <div class="category-item" data-category="urban">城市</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 声音网格 -->
+        <div class="container">
+            <div id="soundsGrid" class="sounds-grid">
+                <!-- 声音卡片将由JS动态填充 -->
+            </div>
+        </div>
+    </main>
+
+    <!-- 播放器 -->
+    <div class="player">
+        <div id="volumeIndicator" class="volume-indicator">
+            <!-- 音量指示点将由JS动态填充 -->
+        </div>
+        <div class="player-controls">
+            <button id="timerBtn" class="player-btn">
+                <i class="fas fa-clock"></i>
+            </button>
+            <button id="playPauseBtn" class="player-btn main">
+                <i class="fas fa-play"></i>
+            </button>
+            <button id="savePresetBtn" class="player-btn">
+                <i class="fas fa-heart"></i>
+            </button>
+        </div>
+        <div class="timer-display">
+            剩余时间: <span id="timerDisplay">∞</span>
+        </div>
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div id="progressFill" class="progress-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 混音器模态窗口 -->
+    <div id="mixerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">混音面板</h3>
+                <button class="modal-close" id="mixerCloseBtn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="activeSoundsList" class="mixer-list">
+                <!-- 活跃声音列表将由JS动态填充 -->
+                <div class="empty-state" id="emptyMixerState">
+                    <i class="fas fa-volume-mute"></i>
+                    <div class="empty-message">没有正在播放的声音</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 定时器模态窗口 -->
+    <div id="timerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">设置定时关闭</h3>
+                <button class="modal-close" id="timerCloseBtn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="timer-section">
+                <h4 class="section-title">选择时长</h4>
+                <div class="timer-options">
+                    <div class="timer-option" data-time="5">5分钟</div>
+                    <div class="timer-option" data-time="15">15分钟</div>
+                    <div class="timer-option" data-time="30">30分钟</div>
+                    <div class="timer-option" data-time="60">1小时</div>
+                    <div class="timer-option" data-time="120">2小时</div>
+                    <div class="timer-option" data-time="0">关闭</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+const soundsData = [
+    { id: 'rain', title: '雨声', icon: 'fas fa-cloud-rain', category: 'weather', file: 'http://m.webcats.cn/bx/25637/49018/sounds/rain.mp3' },
+    { id: 'thunder', title: '雷声', icon: 'fas fa-bolt', category: 'weather', file: 'http://m.webcats.cn/bx/25637/49018/sounds/thunder.mp3' },
+    { id: 'wind', title: '寒风', icon: 'fas fa-wind', category: 'weather', file: 'http://m.webcats.cn/bx/25637/49018/sounds/wind.mp3' },
+    { id: 'fire', title: '篝火', icon: 'fas fa-fire', category: 'nature', file: 'http://m.webcats.cn/bx/25637/49018/sounds/fire.mp3' },
+    { id: 'forest', title: '森林小路', icon: 'fas fa-tree', category: 'nature', file: 'http://m.webcats.cn/bx/25637/49018/sounds/forest.mp3' },
+    { id: 'birds', title: '鸟鸣', icon: 'fas fa-dove', category: 'nature', file: 'http://m.webcats.cn/bx/25637/49018/sounds/birds.mp3' },
+    { id: 'waves', title: '海浪', icon: 'fas fa-water', category: 'nature', file: 'http://m.webcats.cn/bx/25637/49018/sounds/waves.mp3' },
+    { id: 'stream', title: '溪流', icon: 'fas fa-water', category: 'nature', file: 'http://m.webcats.cn/bx/25637/49018/sounds/stream.mp3' },
+    { id: 'cafe', title: '咖啡厅', icon: 'fas fa-coffee', category: 'urban', file: 'http://m.webcats.cn/bx/25637/49018/sounds/cafe.mp3' },
+    { id: 'city', title: '城市', icon: 'fas fa-city', category: 'urban', file: 'http://m.webcats.cn/bx/25637/49018/sounds/city.mp3' },
+    { id: 'keyboard', title: '键盘', icon: 'fas fa-keyboard', category: 'urban', file: 'http://m.webcats.cn/bx/25637/49018/sounds/keyboard.mp3' },
+    { id: 'whitenoise', title: '白噪音', icon: 'fas fa-music', category: 'meditation', file: 'http://m.webcats.cn/bx/25637/49018/sounds/whitenoise.mp3' },
+    { id: 'meditation', title: '冥想音乐', icon: 'fas fa-om', category: 'meditation', file: 'http://m.webcats.cn/bx/25637/49018/sounds/meditation.mp3' },
+    { id: 'breathing', title: '呼吸', icon: 'fas fa-lungs', category: 'meditation', file: 'http://m.webcats.cn/bx/25637/49018/sounds/breathing.mp3' },
+    { id: 'fan', title: '风扇', icon: 'fas fa-fan', category: 'ambient', file: 'http://m.webcats.cn/bx/25637/49018/sounds/fan.mp3' },
+    { id: 'clock', title: '时钟', icon: 'fas fa-clock', category: 'ambient', file: 'http://m.webcats.cn/bx/25637/49018/sounds/clock.mp3' },
+    { id: 'ear-tone', title: '耳音', icon: 'fas fa-headphones', category: 'ambient', file: 'http://m.webcats.cn/bx/25637/49018/sounds/ear.mp3' },
+    { id: 'horse-galopp', title: '马蹄声', icon: 'fas fa-horse', category: 'nature', file: 'http://m.webcats.cn/bx/25637/49018/sounds/horse-galopp.mp3' },
+    { id: 'paper', title: '翻书', icon: 'fas fa-book', category: 'ambient', file: 'http://m.webcats.cn/bx/25637/49018/sounds/paper.mp3' },
+    { id: 'wind-chimes', title: '风铃', icon: 'fas fa-bell', category: 'ambient', file: 'http://m.webcats.cn/bx/25637/49018/sounds/wind-chimes.mp3' },
+    { id: 'typewriter', title: '打字机', icon: 'fas fa-keyboard', category: 'urban', file: 'http://m.webcats.cn/bx/25637/49018/sounds/typewriter.mp3' },
+    { id: 'whale', title: '鲸鱼', icon: 'fas fa-fish', category: 'nature', file: 'http://m.webcats.cn/bx/25637/49018/sounds/whale.mp3' },
+    { id: 'snow-walk', title: '雪地行走', icon: 'fas fa-shoe-prints', category: 'nature', file: 'https://www.ppbzy.com/audio/Others/Walk_fa-person-walking/On snow 6_64.m4a' },
+    { id: 'tent-rain', title: '帐篷上的雨声', icon: 'fas fa-cloud-rain', category: 'weather', file: 'https://www.ppbzy.com/audio/Background/Rain_fa-cloud-showers-heavy/Rain%20on%20the%20tent_64.m4a' },
+    { id: 'ping-pong', title: '打乒乓球', icon: 'fas fa-table-tennis-paddle-ball', category: 'urban', file: 'https://soundvery.com/KUpload/file/20221011/20221011174537_8521.mp3' },
+    { id: 'pour-wine', title: '倒红酒', icon: 'fas fa-wine-glass', category: 'ambient', file: 'https://soundvery.com/KUpload/file/20221009/20221009143230_8991.mp3' },
+{ id: 'chop-celery', title: '切芹菜', icon: 'fas fa-carrot', category: 'ambient', file: 'https://soundvery.com/KUpload/file/20221009/20221009143424_4305.mp3' },
+{ id: 'iced-soda', title: '冰镇汽水', icon: 'fas fa-glass-water', category: 'ambient', file: 'https://soundvery.com/KUpload/file/20221009/20221009145022_4163.mp3' },
+{ id: 'beach-drive', title: '行驶在沙滩上', icon: 'fas fa-car', category: 'urban', file: 'https://soundvery.com/KUpload/file/20221014/20221014162548_5490.mp3' },
+{ id: 'fantasy-realm', title: '幻境', icon: 'fas fa-om', category: 'meditation', file: 'https://pics.tide.moreless.io/demo_sounds/FmhPlOosEwbBu-uZFG_bPUbKx_Le' },
+{ id: 'walk-in-water', title: '走在水里', icon: 'fas fa-water', category: 'nature', file: 'https://soundvery.com/KUpload/file/20220930/20220930165928_0015.mp3' },
+{ id: 'walk-by-river', title: '走在江边', icon: 'fas fa-water', category: 'nature', file: 'https://soundvery.com/KUpload/file/20220930/20220930122448_5512.mp3' }
+    
+];
+
+// DOM 元素
+const soundsGrid = document.getElementById('soundsGrid');
+const categoryItems = document.querySelectorAll('.category-item');
+const playPauseBtn = document.getElementById('playPauseBtn');
+const timerBtn = document.getElementById('timerBtn');
+const mixerBtn = document.getElementById('mixerBtn');
+const savePresetBtn = document.getElementById('savePresetBtn');
+const themeToggleBtn = document.getElementById('themeToggleBtn');
+const timerModal = document.getElementById('timerModal');
+const mixerModal = document.getElementById('mixerModal');
+const timerOptions = document.querySelectorAll('.timer-option');
+const timerCloseBtn = document.getElementById('timerCloseBtn');
+const mixerCloseBtn = document.getElementById('mixerCloseBtn');
+const timerDisplay = document.getElementById('timerDisplay');
+const activeSoundsList = document.getElementById('activeSoundsList');
+const emptyMixerState = document.getElementById('emptyMixerState');
+const volumeIndicator = document.getElementById('volumeIndicator');
+const progressFill = document.getElementById('progressFill');
+const progressContainer = document.getElementById('progressContainer');
+
+// 应用状态
+let activeSounds = [];
+let isPlaying = false;
+let currentCategory = 'all';
+let timerDuration = 0;
+let timerRemaining = 0;
+let timerInterval = null;
+let isPresetSaved = false;
+let notificationId = 1;
+let lastNotificationUpdate = 0;
+let isFirstLoad = true;
+let loadedSoundsCount = 0;
+let failedSounds = [];
+let cachedSounds = new Set();
+
+// 为音量指示器创建点
+for (let i = 0; i < 15; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'volume-dot';
+    volumeIndicator.appendChild(dot);
+}
+const volumeDots = document.querySelectorAll('.volume-dot');
+
+// 检查 WebApp 环境
+function isWebAppEnvironment() {
+    return typeof webapp !== 'undefined' && typeof webapp.notify === 'function';
+}
+
+// 创建自定义提示模态窗口
+function showCustomModal(message) {
+    const existingModal = document.getElementById('custom-modal');
+    if (existingModal) existingModal.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'custom-modal';
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 300px; padding: var(--spacing-md);">
+            <div class="text-center" style="color: var(--text);">${message}</div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    setTimeout(() => {
+        modal.classList.add('open');
+    }, 10);
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('open');
+            setTimeout(() => modal.remove(), 300);
+        }
+    });
+}
+
+// 从通知暂停播放的全局函数
+window.pauseFromNotification = function() {
+    if (isPlaying) {
+        stopPlayback();
+        sendPausedNotification();
+        if (isWebAppEnvironment() && typeof webapp.minimize === 'function') {
+            webapp.minimize();
+        }
+    }
+};
+
+// 发送暂停状态的通知
+function sendPausedNotification() {
+    if (!isWebAppEnvironment()) return;
+
+    try {
+        const soundTitles = activeSounds.map(sound => sound.title).join(', ');
+        const timerText = timerDuration > 0 ? `${Math.floor(timerRemaining / 60)}:${(timerRemaining % 60).toString().padStart(2, '0')}` : '无定时';
+        const content = `已暂停: ${soundTitles || '无声音'} | ${timerText}`;
+        console.log('发送暂停通知:', { id: notificationId, title: '静谧 - 已暂停', content });
+        webapp.notify(
+            notificationId,
+            '静谧 - 已暂停',
+            content,
+            "window.startFromNotification();"
+        );
+        lastNotificationUpdate = Date.now();
+    } catch (error) {
+        console.error('发送暂停通知失败:', error);
+        showCustomModal('通知发送失败');
+    }
+}
+
+// 从通知恢复播放的全局函数
+window.startFromNotification = function() {
+    if (!isPlaying && activeSounds.length > 0) {
+        startPlayback();
+        if (isWebAppEnvironment() && typeof webapp.minimize === 'function') {
+            webapp.minimize();
+        }
+    }
+};
+
+// 修改后的发送播放状态通知函数，移除时间限制
+function sendPlaybackNotification() {
+    if (!isWebAppEnvironment()) {
+        console.warn('非 WebApp 环境，跳过通知');
+        return;
+    }
+
+    try {
+        const soundTitles = activeSounds.map(sound => sound.title).join(', ');
+        const timerText = timerDuration > 0 ? `${Math.floor(timerRemaining / 60)}:${(timerRemaining % 60).toString().padStart(2, '0')}` : '永久';
+        const content = `${soundTitles || '无声音'} | ${timerText} | 点击暂停`;
+        
+        console.log('发送通知:', { id: notificationId, title: '静谧 - 播放状态', content });
+        webapp.notify(
+            notificationId,
+            '静谧 - 播放状态',
+            content,
+            "window.pauseFromNotification();"
+        );
+        lastNotificationUpdate = Date.now();
+    } catch (error) {
+        console.error('发送通知失败:', error);
+        showCustomModal('通知发送失败');
+    }
+}
+
+// 移除通知
+function removeNotification() {
+    if (!isWebAppEnvironment()) return;
+
+    try {
+        console.log('移除通知:', notificationId);
+        webapp.remove(notificationId);
+        lastNotificationUpdate = 0;
+    } catch (error) {
+        console.error('移除通知失败:', error);
+    }
+}
+
+// 主题切换函数
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
+    location.reload();
+}
+
+// 更新主题图标
+function updateThemeIcon(theme) {
+    themeToggleBtn.innerHTML = theme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+}
+
+// 加载保存的主题
+function loadTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+    } else {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const defaultTheme = prefersDark ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', defaultTheme);
+        localStorage.setItem('theme', defaultTheme);
+        updateThemeIcon(defaultTheme);
+    }
+}
+
+// 检查音频是否已缓存
+async function isAudioCached(url) {
+    if (cachedSounds.has(url)) {
+        return true;
+    }
+    try {
+        const response = await fetch(url, { method: 'HEAD', cache: 'only-if-cached' });
+        if (response.ok) {
+            cachedSounds.add(url);
+            return true;
+        }
+        return false;
+    } catch {
+        return false;
+    }
+}
+
+// 预加载音频并跟踪状态
+async function preloadSounds() {
+    const loadPromises = soundsData.map(async sound => {
+        const isCached = await isAudioCached(sound.file);
+        if (isCached) {
+            loadedSoundsCount++;
+            console.log(`${sound.title} 已缓存，跳过加载`);
+            return { id: sound.id, success: true };
+        }
+
+        return new Promise((resolve) => {
+            const audio = new Audio(sound.file);
+            audio.preload = 'auto';
+            audio.addEventListener('canplaythrough', () => {
+                loadedSoundsCount++;
+                cachedSounds.add(sound.file);
+                resolve({ id: sound.id, success: true });
+            });
+            audio.addEventListener('error', () => {
+                failedSounds.push(sound.title);
+                resolve({ id: sound.id, success: false });
+            });
+            audio.load();
+        });
+    });
+
+    return Promise.all(loadPromises);
+}
+
+// 初始化
+async function init() {
+    try {
+        console.log('开始初始化应用...');
+        loadTheme();
+
+        if (!soundsGrid) {
+            console.error('soundsGrid 元素未找到，请检查 HTML');
+            // showCustomModal('界面初始化失败：未找到声音网格');
+            return;
+        }
+
+        renderSounds();
+        setupEventListeners();
+        setInterval(updateVolumeVisualization, 100);
+        loadSavedPreset();
+        checkNotificationPermission();
+
+        if (isFirstLoad) {
+            console.log('开始预加载音频...');
+            await preloadSounds();
+            console.log(`预加载完成：成功 ${loadedSoundsCount}/${soundsData.length}`);
+            
+            if (loadedSoundsCount < soundsData.length) {
+                const message = `音频加载完成：${loadedSoundsCount}/${soundsData.length}<br>未加载成功：${failedSounds.join(', ') || '无'}`;
+                showCustomModal(message);
+            } else {
+                console.log('所有音频加载成功，无需通知');
+            }
+            isFirstLoad = false;
+            renderSounds();
+        }
+
+        console.log('初始化完成');
+    } catch (error) {
+        console.error('初始化失败:', error);
+        //showCustomModal('应用初始化失败: ' + error.message);
+    }
+}
+/* 
+// 检查通知权限
+function checkNotificationPermission() {
+    if (!isWebAppEnvironment()) {
+        console.warn('非 WebApp 环境，通知功能不可用');
+        showCustomModal('请在听风内使用');
+        return false;
+    }
+
+    try {
+        if (webapp.block()) {
+            console.log('通知权限已启用');
+            return true;
+        } else {
+            console.log('通知权限被屏蔽，提示用户开启');
+            webapp.unseal();
+            showCustomModal('请在设置中启用通知权限');
+            return false;
+        }
+    } catch (error) {
+        console.error('检查通知权限失败:', error);
+        showCustomModal('检查通知权限失败');
+        return false;
+    }
+} */
+
+// 渲染声音卡片
+function renderSounds() {
+    if (!soundsGrid) {
+        console.error('soundsGrid 未定义');
+        return;
+    }
+
+    soundsGrid.innerHTML = '';
+    const filteredSounds = soundsData.filter(sound => currentCategory === 'all' || sound.category === currentCategory);
+    
+    if (filteredSounds.length === 0) {
+        console.warn('没有符合条件的音频卡片');
+        soundsGrid.innerHTML = '<p>暂无音频</p>';
+        return;
+    }
+
+    filteredSounds.forEach(sound => {
+        const card = document.createElement('div');
+        card.className = 'sound-card';
+        card.dataset.id = sound.id;
+        const isActive = activeSounds.some(activeSound => activeSound.id === sound.id);
+        if (isActive) card.classList.add('active');
+        card.innerHTML = `
+            <div class="sound-icon">
+                <i class="${sound.icon}"></i>
+            </div>
+            <div class="sound-title">${sound.title}</div>
+        `;
+        soundsGrid.appendChild(card);
+    });
+    console.log(`渲染了 ${filteredSounds.length} 个音频卡片`);
+}
+
+// 设置事件监听器
+function setupEventListeners() {
+    try {
+        categoryItems.forEach(item => {
+            item.addEventListener('click', () => {
+                categoryItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                currentCategory = item.dataset.category;
+                renderSounds();
+            });
+        });
+        
+        soundsGrid.addEventListener('click', e => {
+            const card = e.target.closest('.sound-card');
+            if (card) toggleSound(card.dataset.id);
+        });
+        
+        playPauseBtn.addEventListener('click', togglePlayPause);
+        timerBtn.addEventListener('click', () => {
+            timerModal.classList.add('open');
+            timerOptions.forEach(option => {
+                option.classList.toggle('active', parseInt(option.dataset.time) === timerDuration);
+            });
+        });
+        
+        mixerBtn.addEventListener('click', () => {
+            mixerModal.classList.add('open');
+            renderMixer();
+        });
+        
+        savePresetBtn.addEventListener('click', toggleSavePreset);
+        
+        themeToggleBtn.addEventListener('click', toggleTheme);
+        
+        timerOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                const time = parseInt(option.dataset.time);
+                setTimer(time);
+                timerOptions.forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+                timerModal.classList.remove('open');
+            });
+        });
+        
+        timerCloseBtn.addEventListener('click', () => timerModal.classList.remove('open'));
+        mixerCloseBtn.addEventListener('click', () => mixerModal.classList.remove('open'));
+        timerModal.addEventListener('click', e => { if (e.target === timerModal) timerModal.classList.remove('open'); });
+        mixerModal.addEventListener('click', e => { if (e.target === mixerModal) mixerModal.classList.remove('open'); });
+        
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && isPlaying) {
+                sendPlaybackNotification();
+            } else if (!document.hidden && !isPlaying && activeSounds.length > 0) {
+                sendPausedNotification();
+            } else if (!document.hidden) {
+                removeNotification();
+            }
+        });
+    } catch (error) {
+        console.error('事件监听器设置失败:', error);
+    }
+}
+
+// 修改后的切换声音开关函数，点击卡片立即播放并刷新通知
+async function toggleSound(soundId) {
+    try {
+        const soundData = soundsData.find(s => s.id === soundId);
+        const existingIndex = activeSounds.findIndex(s => s.id === soundId);
+        
+        if (existingIndex !== -1) {
+            // 声音已激活，移除它并暂停
+            const sound = activeSounds[existingIndex];
+            sound.audio.pause();
+            sound.audio.currentTime = 0;
+            activeSounds.splice(existingIndex, 1);
+            // 如果没有剩余声音，停止播放状态
+            if (activeSounds.length === 0) {
+                stopPlayback();
+                removeNotification();
+            } else {
+                // 还有其他声音在播放，刷新通知
+                sendPlaybackNotification();
+            }
+        } else {
+            // 激活新声音并立即播放
+            const audio = new Audio(soundData.file);
+            audio.loop = true;
+            if (await isAudioCached(soundData.file)) {
+                console.log(`${soundData.title} 已缓存，直接使用`);
+            }
+            audio.volume = 0.5;
+            activeSounds.push({ ...soundData, audio, volume: 0.5 });
+            // 立即播放新添加的声音
+            audio.play();
+            // 更新播放状态
+            isPlaying = true;
+            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            if (timerDuration > 0 && !timerInterval) startTimer();
+            // 强制刷新通知
+            sendPlaybackNotification();
+        }
+        
+        renderSounds();
+        renderMixer();
+    } catch (error) {
+        console.error('切换声音失败:', error);
+        showCustomModal('播放失败: ' + error.message);
+    }
+}
+
+// 切换播放/暂停
+function togglePlayPause() {
+    if (isPlaying) stopPlayback();
+    else startPlayback();
+}
+
+// 开始播放
+function startPlayback() {
+    if (activeSounds.length === 0) return;
+    activeSounds.forEach(sound => sound.audio.play());
+    isPlaying = true;
+    playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+    if (timerDuration > 0 && !timerInterval) startTimer();
+    sendPlaybackNotification();
+}
+
+// 停止播放
+function stopPlayback() {
+    activeSounds.forEach(sound => sound.audio.pause());
+    isPlaying = false;
+    playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+    if (document.hidden && activeSounds.length > 0) {
+        sendPausedNotification();
+    } else {
+        removeNotification();
+    }
+    clearInterval(timerInterval);
+    timerInterval = null;
+}
+
+// 设置定时器
+function setTimer(minutes) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    timerDuration = minutes;
+    progressFill.style.width = '0%';
+    
+    if (minutes === 0) {
+        timerRemaining = 0;
+        timerDisplay.textContent = '∞';
+        progressContainer.classList.add('hidden');
+    } else {
+        timerRemaining = minutes * 60;
+        updateTimerDisplay();
+        progressContainer.classList.remove('hidden');
+        if (isPlaying) startTimer();
+    }
+    if (isPlaying) sendPlaybackNotification();
+}
+
+// 启动定时器
+function startTimer() {
+    if (timerDuration === 0) return;
+    clearInterval(timerInterval);
+    if (timerRemaining <= 0) timerRemaining = timerDuration * 60;
+    const startTime = Date.now();
+    
+    timerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        timerRemaining = timerDuration * 60 - elapsed;
+        
+        if (timerRemaining <= 0) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            timerRemaining = 0;
+            stopPlayback();
+            progressFill.style.width = '100%';
+        } else {
+            updateTimerDisplay();
+            const progress = ((timerDuration * 60 - timerRemaining) / (timerDuration * 60)) * 100;
+            progressFill.style.width = `${progress}%`;
+            if (isPlaying) sendPlaybackNotification();
+        }
+    }, 1000);
+}
+
+// 更新定时器显示
+function updateTimerDisplay() {
+    if (timerRemaining <= 0) {
+        timerDisplay.textContent = '已结束';
+        return;
+    }
+    const minutes = Math.floor(timerRemaining / 60);
+    const seconds = timerRemaining % 60;
+    timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+// 渲染混音器
+function renderMixer() {
+    if (activeSounds.length === 0) {
+        emptyMixerState.classList.remove('hidden');
+        activeSoundsList.innerHTML = '';
+        activeSoundsList.appendChild(emptyMixerState);
+        return;
+    }
+    
+    emptyMixerState.classList.add('hidden');
+    activeSoundsList.innerHTML = '';
+    
+    activeSounds.forEach(sound => {
+        const mixerItem = document.createElement('div');
+        mixerItem.className = 'mixer-item';
+        mixerItem.innerHTML = `
+            <div class="mixer-icon">
+                <i class="${sound.icon}"></i>
+            </div>
+            <div class="mixer-info">
+                <div class="mixer-title">${sound.title}</div>
+                <div class="mixer-volume">
+                    <input type="range" class="volume-slider" min="0" max="1" step="0.01" value="${sound.volume}" data-id="${sound.id}">
+                </div>
+            </div>
+            <button class="remove-sound-btn" data-id="${sound.id}">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        activeSoundsList.appendChild(mixerItem);
+    });
+    
+    const volumeSliders = document.querySelectorAll('.volume-slider');
+    volumeSliders.forEach(slider => {
+        slider.addEventListener('input', e => {
+            const soundId = e.target.dataset.id;
+            const volume = parseFloat(e.target.value);
+            const sound = activeSounds.find(s => s.id === soundId);
+            if (sound) {
+                sound.volume = volume;
+                sound.audio.volume = volume;
+                if (isPlaying) sendPlaybackNotification();
+            }
+        });
+    });
+    
+    const removeButtons = document.querySelectorAll('.remove-sound-btn');
+    removeButtons.forEach(button => {
+        button.addEventListener('click', e => {
+            e.stopPropagation();
+            const soundId = button.dataset.id;
+            toggleSound(soundId);
+        });
+    });
+}
+
+// 更新音量可视化
+function updateVolumeVisualization() {
+    if (!isPlaying || activeSounds.length === 0) {
+        volumeDots.forEach(dot => dot.classList.remove('active'));
+        return;
+    }
+    const avgVolume = activeSounds.reduce((sum, sound) => sum + sound.volume, 0) / activeSounds.length;
+    const activeDotsCount = Math.floor(avgVolume * volumeDots.length);
+    const activeDotIndices = [];
+    for (let i = 0; i < activeDotsCount; i++) {
+        let index;
+        do {
+            index = Math.floor(Math.random() * volumeDots.length);
+        } while (activeDotIndices.includes(index));
+        activeDotIndices.push(index);
+    }
+    volumeDots.forEach((dot, index) => dot.classList.toggle('active', activeDotIndices.includes(index)));
+}
+
+// 保存/取消保存预设
+function toggleSavePreset() {
+    if (activeSounds.length === 0) {
+        showCustomModal('选择一个声音来保存预设');
+        return;
+    }
+    
+    if (isPresetSaved) {
+        localStorage.removeItem('savedPreset');
+        isPresetSaved = false;
+        savePresetBtn.classList.remove('active');
+        savePresetBtn.innerHTML = '<i class="fas fa-heart"></i>';
+        showCustomModal('已取消保存预设');
+    } else {
+        const preset = activeSounds.map(sound => ({
+            id: sound.id,
+            volume: sound.volume
+        }));
+        localStorage.setItem('savedPreset', JSON.stringify(preset));
+        isPresetSaved = true;
+        savePresetBtn.classList.add('active');
+        savePresetBtn.innerHTML = '<i class="fas fa-heart"></i>';
+        showCustomModal('预设已保存');
+    }
+}
+
+// 加载保存的预设
+function loadSavedPreset() {
+    const savedPreset = localStorage.getItem('savedPreset');
+    if (savedPreset) {
+        const preset = JSON.parse(savedPreset);
+        activeSounds = [];
+        
+        preset.forEach(presetSound => {
+            const soundData = soundsData.find(s => s.id === presetSound.id);
+            if (soundData) {
+                const audio = new Audio(soundData.file);
+                audio.loop = true;
+                audio.volume = presetSound.volume;
+                activeSounds.push({
+                    ...soundData,
+                    audio,
+                    volume: presetSound.volume
+                });
+            }
+        });
+        
+        isPresetSaved = true;
+        savePresetBtn.classList.add('active');
+        renderSounds();
+        renderMixer();
+    }
+}
+
+// 初始化应用
+init();
+if (isWebAppEnvironment()) {
+    webapp.renew(false);
+} else {
+    console.warn('非 WebApp 环境，跳过 webapp.renew');
+}
+    </script>
+</body>
+</html>

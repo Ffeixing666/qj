@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>现代移动秒表</title>
+    <style>
+        :root {
+            --primary-blue: #007AFF;
+            --accent-red: #FF3B30;
+            --surface-light: #F8F9FA;
+            --text-primary: #1C1C1E;
+            --text-secondary: #636366;
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'SF Pro Text', -apple-system, system-ui;
+            user-select: none;
+        }
+
+        body {
+            background: #FFFFFF;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .container {
+            height: 100vh;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .time-display {
+            font-size: 72px;
+            font-weight: 700;
+            letter-spacing: -2px;
+            color: var(--text-primary);
+            display: flex;
+            gap: 4px;
+            align-items: baseline;
+            margin: 48px 0;
+            font-variant-numeric: tabular-nums;
+            font-family: 'SF Mono', monospace;
+            height: 120px;
+            flex-shrink: 0;
+        }
+
+        .time-display span {
+            font-size: 0.6em;
+            color: var(--text-secondary);
+            margin: 0 2px;
+        }
+
+        .record-list {
+            width: 100%;
+            max-width: 400px;
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 16px;
+            margin: 0 0 12px 0;
+            scroll-behavior: smooth;
+            -ms-overflow-style: none; /* IE 和 Edge */
+            scrollbar-width: none; /* Firefox */
+        }
+
+        .record-list::-webkit-scrollbar {
+            display: none; /* Chrome, Safari 和 Opera */
+        }
+
+        .record-item {
+            padding: 16px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .record-item:first-child {
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .record-label {
+            color: var(--text-secondary);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .record-label::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            background: var(--primary-blue);
+            border-radius: 50%;
+        }
+
+        .record-time {
+            font-family: 'SF Mono', monospace;
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 16px;
+            padding: 24px;
+            background: linear-gradient(to top, white 80%, rgba(255,255,255,0.9));
+            width: 100%;
+            max-width: 400px;
+            height: 100px;
+            flex-shrink: 0;
+        }
+
+        .btn {
+            flex: 1;
+            height: 52px;
+            border-radius: 14px;
+            border: none;
+            font-size: 17px;
+            font-weight: 600;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .reset-btn {
+            background: var(--surface-light);
+            color: var(--accent-red);
+        }
+
+        .control-btn {
+            background: var(--primary-blue);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .record-btn {
+            background: var(--surface-light);
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 480px) {
+            .time-display {
+                font-size: 64px;
+                margin: 32px 0;
+                height: 100px;
+            }
+            
+            .record-list {
+                padding: 0 12px;
+            }
+            
+            .button-group {
+                gap: 12px;
+                padding: 16px;
+                height: 80px;
+            }
+            
+            .btn {
+                height: 48px;
+                font-size: 16px;
+                border-radius: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="time-display">
+            00<span>:</span>00<span>:</span>00
+        </div>
+        <div class="record-list"></div>
+        <div class="button-group">
+            <button class="btn reset-btn">重置</button>
+            <button class="btn control-btn">开始</button>
+            <button class="btn record-btn">记录</button>
+        </div>
+    </div>
+
+    <script>
+        class ModernStopwatch {
+            constructor() {
+                this.startTime = 0;
+                this.elapsed = 0;
+                this.isRunning = false;
+                this.animationFrame = null;
+                this.timeDisplay = document.querySelector('.time-display');
+                this.controlBtn = document.querySelector('.control-btn');
+                this.recordBtn = document.querySelector('.record-btn');
+                this.resetBtn = document.querySelector('.reset-btn');
+                this.recordList = document.querySelector('.record-list');
+                this.container = document.querySelector('.container');
+                this.init();
+            }
+
+            init() {
+                this.controlBtn.addEventListener('click', () => this.toggle());
+                this.recordBtn.addEventListener('click', () => this.recordTime());
+                this.resetBtn.addEventListener('click', () => this.reset());
+                this.container.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('btn')) return;
+                    this.recordTime();
+                });
+            }
+
+            toggle() {
+                this.isRunning ? this.pause() : this.start();
+            }
+
+            start() {
+                if (!this.isRunning) {
+                    this.startTime = Date.now() - this.elapsed;
+                    this.isRunning = true;
+                    this.controlBtn.textContent = '暂停';
+                    this.update();
+                }
+            }
+
+            pause() {
+                this.isRunning = false;
+                this.controlBtn.textContent = '继续';
+                cancelAnimationFrame(this.animationFrame);
+            }
+
+            reset() {
+                this.isRunning = false;
+                this.elapsed = 0;
+                this.startTime = 0;
+                this.controlBtn.textContent = '开始';
+                cancelAnimationFrame(this.animationFrame);
+                this.timeDisplay.innerHTML = '00<span>:</span>00<span>:</span>00';
+                this.recordList.innerHTML = '';
+            }
+
+            update() {
+                if (this.isRunning) {
+                    this.animationFrame = requestAnimationFrame(() => this.update());
+                    this.elapsed = Date.now() - this.startTime;
+                    this.render();
+                }
+            }
+
+            render() {
+                const totalSeconds = this.elapsed / 1000;
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = Math.floor(totalSeconds % 60);
+                const milliseconds = Math.floor((this.elapsed % 1000) / 10);
+                this.timeDisplay.innerHTML = `
+                    ${String(minutes).padStart(2, '0')}<span>:</span>
+                    ${String(seconds).padStart(2, '0')}<span>:</span>
+                    ${String(milliseconds).padStart(2, '0')}
+                `;
+            }
+
+            recordTime() {
+                if (!this.isRunning || this.elapsed === 0) return;
+
+                const recordItem = document.createElement('div');
+                recordItem.classList.add('record-item');
+                recordItem.innerHTML = `
+                    <div class="record-label">记录 ${this.recordList.children.length + 1}</div>
+                    <div class="record-time">${this.timeDisplay.textContent}</div>
+                `;
+
+                this.recordList.prepend(recordItem);
+                this.recordList.scrollTo(0, 0);
+            }
+        }
+
+        new ModernStopwatch();
+    </script>
+</body>
+</html>

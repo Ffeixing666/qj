@@ -1,564 +1,421 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
+<!doctype html>
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AI工具聚合平台</title>
-    <style>
-        /* 提示框样式 */
-        .welcome-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .welcome-modal.show {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal-content {
-            background: linear-gradient(135deg, #ffffff, #f8f9fa);
-            border-radius: 16px;
-            width: 90%;
-            max-width: 500px;
-            padding: 30px 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            position: relative;
-            transform: translateY(20px);
-            transition: transform 0.3s ease;
-        }
-
-        .welcome-modal.show .modal-content {
-            transform: translateY(0);
-        }
-
-        .modal-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-icon {
-            width: 70px;
-            height: 70px;
-            background-color: var(--primary-color);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto 15px;
-            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
-        }
-
-        .modal-icon::after {
-            content: '🎉';
-            font-size: 36px;
-        }
-
-        .modal-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 5px;
-        }
-
-        .modal-message {
-            font-size: 16px;
-            line-height: 1.7;
-            color: var(--text-color);
-            margin-bottom: 25px;
-            text-align: center;
-        }
-
-        .modal-footer {
-            display: flex;
-            justify-content: center;
-        }
-
-        .modal-button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(74, 144, 226, 0.3);
-        }
-
-        .modal-button:hover {
-            background-color: var(--primary-dark);
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(74, 144, 226, 0.4);
-        }
-
-        /* 动画效果 */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-
-        .animate-fade-in {
-            animation: fadeIn 0.5s ease forwards;
-        }
-
-        /* 响应式调整 */
-        @media (max-width: 480px) {
-            .modal-content {
-                padding: 20px 15px;
-            }
-
-            .modal-title {
-                font-size: 18px;
-            }
-
-            .modal-message {
-                font-size: 14px;
-            }
-
-            .modal-button {
-                padding: 10px 20px;
-                font-size: 14px;
-            }
-        }
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=5,user-scalable=yes">
+    <link href="css/m.1fa67fb2.css" rel="stylesheet">
+    <style type="text/css">
         :root {
-            --primary-color: #4a90e2;
-            --primary-dark: #357ABD;
-            --secondary-color: #6c757d;
-            --background-color: #f4f6f9;
-            --card-bg: #ffffff;
+            --primary-color: #4A6FFF;
+            --secondary-color: #6B8AFF;
+            --background-color: #F5F7FA;
+            --card-bg-color: #FFFFFF;
             --text-color: #333333;
-            --border-radius: 12px;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            --hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-            --transition: all 0.3s ease;
+            --border-radius: 16px;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+        }
+        .banner img {
+            transition: transform 8s ease-in-out;
+        }
+        .banner:hover img {
+            transform: scale(1.05);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--background-color);
-            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            color: var(--text-color);
-            line-height: 1.6;
-            padding-bottom: 60px;
-        }
-
-        .container {
-            width: 92%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 15px 0;
-        }
-
-        /* 问候语区域 */
-        .greeting {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-            color: white;
-            padding: 30px 20px;
-            border-radius: var(--border-radius);
-            margin: 20px 0;
-            box-shadow: 0 8px 24px rgba(74, 144, 226, 0.3);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .greeting-text {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 5px;
-            animation: fadeInUp 1s ease-out;
-        }
-
-        .greeting-subtext {
-            font-size: 16px;
-            opacity: 0.9;
-            animation: fadeInUp 1s ease-out 0.3s both;
-        }
-
-        .greeting-decoration {
-            position: absolute;
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            top: -50px;
-            right: -50px;
-            animation: pulse 6s infinite ease-in-out;
-        }
-
-        .greeting-decoration::before {
-            content: '';
-            position: absolute;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.15);
-            bottom: -120px;
-            left: 100px;
-            animation: pulse 4s infinite ease-in-out 1s;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-                opacity: 0.1;
-            }
-            50% {
-                transform: scale(1.2);
-                opacity: 0.2;
-            }
-        }
-
-        /* 标题区域 */
-        .section-title {
-            font-size: 20px;
-            font-weight: 700;
-            margin: 30px 0 15px;
-            padding-left: 12px;
-            border-left: 4px solid var(--primary-color);
-        }
-
-        /* AI功能专区样式 */
-        .ai-section {
-            background-color: var(--card-bg);
-            border-radius: var(--border-radius);
-            margin-bottom: 25px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-
-        .ai-section-header {
-            padding: 18px 20px;
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--primary-color);
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .ai-section-header span {
-            transition: transform 0.3s ease;
-            font-size: 20px;
-        }
-
-        .ai-section-content {
-            padding: 20px;
-            display: none;
-        }
-
-        .ai-section.open .ai-section-content {
-            display: block;
-        }
-
-        .ai-section.open .ai-section-header span {
-            transform: rotate(180deg);
-        }
-
-        .tool-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .tool-item {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 10px 18px;
-            border-radius: 25px;
-            font-size: 14px;
-            text-decoration: none;
-            transition: var(--transition);
-            box-shadow: 0 3px 6px rgba(74, 144, 226, 0.3);
-        }
-
-        .tool-item:hover {
-            background-color: var(--primary-dark);
-            transform: translateY(-3px);
-            box-shadow: 0 5px 12px rgba(74, 144, 226, 0.4);
-        }
-
-        /* 工具合集样式 */
-        .tools-collection {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-            padding: 20px;
-            background-color: var(--card-bg);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-        }
-
-        .tool-card {
-            background-color: var(--card-bg);
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            text-decoration: none;
-            color: var(--text-color);
-            position: relative;
-            transform-origin: center;
-            overflow: hidden;
-        }
-
-        .tool-card:hover {
-            transform: translateY(-10px) scale(1.03);
-            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
-        }
-
-        .tool-image {
-            width: 100%;
-            height: 140px;
-            object-fit: cover;
-            background-color: #f5f5f5;
-            transition: transform 0.5s ease;
-        }
-
-        .tool-card:hover .tool-image {
-            transform: scale(1.1);
-        }
-
-        .tool-name {
-            padding: 15px 10px;
-            text-align: center;
-            font-size: 16px;
-            font-weight: 600;
-            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0.8));
-            position: relative;
-            z-index: 1;
-        }
-
-        /* 响应式调整 */
-        @media (max-width: 768px) {
-            .greeting {
-                font-size: 18px;
-                padding: 20px 15px;
-            }
-
-            .section-title {
-                font-size: 18px;
-            }
-
-            .ai-section-header {
-                font-size: 16px;
-                padding: 15px;
-            }
-
-            .tools-collection {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-                gap: 12px;
-            }
-
-            .tool-image {
-                height: 100px;
-            }
-
-            .tool-name {
-                font-size: 14px;
+        /* 响应式调整 - 手机端适配 */
+        @media screen and (max-width: 768px) {
+            .app-list {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 10px;
                 padding: 10px;
             }
+            .item {
+                height: 120px;
+                margin: 5px;
+                padding: var(--spacing-sm);
+            }
+            .img-wrap {
+                width: 45px;
+                height: 45px;
+            }
+            .app-name {
+                font-size: 12px;
+                max-width: 80px;
+            }
+            .nav {
+                padding: 15px var(--spacing-sm);
+            }
+            .logo {
+                font-size: 18px;
+                padding-left: 28px;
+            }
+            .logo::before {
+                width: 20px;
+                height: 20px;
+            }
+            .user-profile {
+                padding: var(--spacing-md);
+                margin: var(--spacing-sm);
+            }
         }
-
-
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            color: var(--text-color);
+        }
+        .app-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 15px;
+            padding: 15px;
+        }
+        .item {
+            background: linear-gradient(145deg, var(--card-bg-color), #f8f9fa);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-md);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 150px;
+            overflow: hidden;
+            margin: 8px;
+        }
+        .item:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--hover-shadow);
+        }
+        .img-wrap {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: var(--spacing-sm);
+            background-color: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.3s ease;
+        }
+        .item:hover .img-wrap img {
+            transform: scale(1.1) rotate(2deg);
+            filter: brightness(1.05);
+        }
+        .item:hover .img-wrap img {
+            transform: scale(1.05);
+        }
+        .app-name {
+            color: var(--text-color);
+            font-size: 14px;
+            text-align: center;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100px;
+        }
+        #sidebar {
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            box-shadow: var(--card-shadow);
+            padding: var(--spacing-md) 0;
+        }
+        .sidebar-link {
+            border-radius: 0 var(--border-radius) var(--border-radius) 0;
+            margin: var(--spacing-sm) 0;
+            padding: 10px var(--spacing-md);
+            transition: all 0.2s ease;
+        }
+        .sidebar-link:hover {
+            background-color: rgba(74, 111, 255, 0.1);
+        }
+        #openSidebarBtn {
+            border-radius: 50%;
+            box-shadow: var(--card-shadow);
+            padding: 8px;
+            background-color: var(--card-bg-color);
+            transition: all 0.2s ease;
+        }
+        #openSidebarBtn:hover {
+            transform: scale(1.05);
+            box-shadow: var(--hover-shadow);
+        }
+        .user-profile {
+            background-color: var(--card-bg-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: var(--spacing-lg);
+            margin: var(--spacing-md);
+        }
+        .photo-wrap {
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--primary-color);
+        }
+        .tab-item a {
+            display: inline-block;
+            padding: 6px 12px;
+            background-color: rgba(74, 111, 255, 0.1);
+            border-radius: 20px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+        .tab-item a {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: rgba(74, 111, 255, 0.1);
+            border-radius: 20px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 13px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .tab-item a::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 0.5s ease;
+        }
+        .tab-item a:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(74, 111, 255, 0.3);
+        }
+        .tab-item a:hover::before {
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .nav {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    box-shadow: var(--card-shadow);
+    padding: 20px var(--spacing-md);
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+    text-align: center;
+}
+.logo {
+            display: block;
+            height: 36px;
+            line-height: 36px;
+            color: white;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            background: linear-gradient(90deg, #ffffff, #e0e7ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            position: relative;
+            padding-left: 32px;
+        }
+        .logo::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            background-image: url('favicon.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
     </style>
+    <link rel="stylesheet" href="侧边栏.css">
 </head>
+
 <body>
-    <div class="container">
-        <!-- 问候语区域 -->
-        <div class="greeting">
-                <div class="greeting-decoration"></div>
-                <div class="greeting-text" id="greetingText">Hi，早上好</div>
-                <div class="greeting-subtext">趣加AI</div>
-            </div>
+    <div id="sidebar" class="sidebar">
+        <a href="深色.html" class="sidebar-link">深色模式</a>
+        <a href="浅色.html" class="sidebar-link">浅色模式</a>
+        <a href="javascript:void(0)" onclick="exitApplication()" class="sidebar-link">退出程序</a>
+    </div>
+    <img id="openSidebarBtn" src="侧边栏.png" alt="打开侧边栏">
+    <script src="侧边栏.js"></script>
+    <div id="app">
+        <div data-v-1f9b29e2="" class="page-wrap">
+            <div data-v-1f9b29e2="" class="main-page" style="padding-top: 54px;">
+                <div data-v-1f9b29e2="" class="nav">
+                    <span data-v-1f9b29e2="" class="logo"></span>
+                    <!-- 
+   <a data-v-1f9b29e2="" href="http://api.yujn.cn/api/qqmp.php?qq=1347526903" class="app-qr">广告招收</a> -->
+                </div>
+                <div data-v-1f9b29e2="" class="new-header">
+                    <div data-v-1f9b29e2="" class="user-profile">
+                        <div data-v-1f9b29e2="" class="photo-wrap">
+                            <div data-v-1f9b29e2="" class="photo">
+                                <a href="134.html"> <img data-v-1f9b29e2="" src="favicon.png"></a>
+                            </div>
+                        </div>
+                        <div data-v-1f9b29e2="" class="body">
+                            <div data-v-1f9b29e2="" class="tab-list"></div>
+                        </div>
+                        <div data-v-1f9b29e2="" class="app-list">
+                            <a data-v-1f9b29e2="" href="静谧.html" class="item" style="opacity: 1;">
+                                <div data-v-1f9b29e2="" class="content-wrap">
+                                    <div data-v-1f9b29e2="" class="img-wrap">
+                                        <img data-v-1f9b29e2="" src="白噪音.png" alt="">
+                                    </div>
+                                    <p data-v-1f9b29e2="" class="app-name">静谧之声</p>
+                                </div>
+                            </a>
+                            <a data-v-1f9b29e2="" href="yn/战力.html" class="item" style="opacity: 1;">
+                                <div data-v-1f9b29e2="" class="content-wrap">
+                                    <div data-v-1f9b29e2="" class="img-wrap">
+                                        <img data-v-1f9b29e2="" src="img/1.png" alt="">
+                                    </div>
+                                    <p data-v-1f9b29e2="" class="app-name">王者战力</p>
+                                </div>
+                            </a>
+                            <a data-v-1f9b29e2="" href="GPT.html" class="item" style="opacity: 1;">
+                                <div data-v-1f9b29e2="" class="content-wrap">
+                                    <div data-v-1f9b29e2="" class="img-wrap">
+                                        <img data-v-1f9b29e2="" src="img/90.png" alt="">
+                                    </div>
+                                    <p data-v-1f9b29e2="" class="app-name">语言模型
+                                        <!--<p-->
+                                    </p>
+                                </div>
+                            </a>
+                            <a data-v-1f9b29e2="" href="http://xz.xtdrugs.com/index.php/home/constell/cardindex/csrc/1" class="item" style="opacity: 1;">
+                                <div data-v-1f9b29e2="" class="content-wrap">
+                                    <div data-v-1f9b29e2="" class="img-wrap">
+                                        <img data-v-1f9b29e2="" src="img/1314.png" alt="">
+                                    </div>
+                                    <p data-v-1f9b29e2="" class="app-name">每日星座</p>
+                                </div>
+                            </a>
+                            <a data-v-1f9b29e2="" href="云原神.html" class="item" style="opacity: 1;">
+                                <div data-v-1f9b29e2="" class="content-wrap">
+                                    <div data-v-1f9b29e2="" class="img-wrap">
+                                        <img data-v-1f9b29e2="" src="img/520.png" alt="">
+                                    </div>
+                                    <p data-v-1f9b29e2="" class="app-name">内置游戏</p>
+                                </div>
+                            </a>
+                            <a data-v-1f9b29e2="" href="工具箱.html" class="item" style="opacity: 1;">
+                                <div data-v-1f9b29e2="" class="content-wrap">
+                                    <div data-v-1f9b29e2="" class="img-wrap">
+                                        <img data-v-1f9b29e2="" src="img/12.png" alt="">
+                                    </div>
+                                    <p data-v-1f9b29e2="" class="app-name">日常工具</p>
+                                </div>
+                            </a>
+                            <a data-v-1f9b29e2="" href="https://mu-jie.cc/musicBoxAPP/" class="item" style="opacity: 1;">
+                                <div data-v-1f9b29e2="" class="content-wrap">
+                                    <div data-v-1f9b29e2="" class="img-wrap">
+                                        <img data-v-1f9b29e2="" src="img/音乐人.png" alt="">
+                                    </div>
+                                    <p data-v-1f9b29e2="" class="app-name">享受音乐</p>
+                                </div>
+                            </a>
+                            <a data-v-1f9b29e2="" href="备忘录.html" class="item" style="opacity: 1;">
+                                <div data-v-1f9b29e2="" class="content-wrap">
+                                    <div data-v-1f9b29e2="" class="img-wrap">
+                                        <img data-v-1f9b29e2="" src="img/备忘录.png" alt="">
+                                    </div>
+                                    <p data-v-1f9b29e2="" class="app-name">每日笔记</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div data-v-1f9b29e2="" class="app-list">
+                            <a data-v-1f9b29e2="" href="浅色.html" class="item" style="opacity: 1;">
+                                <div data-v-1f9b29e2="" class="content-wrap">
+                                    <div data-v-1f9b29e2="" class="img-wrap">
+                                        <img data-v-1f9b29e2="" src="img/浅色.png" alt="">
+                                    </div>
+                                    <p data-v-1f9b29e2="" class="app-name">浅色模式</p>
+                                </div>
+                            </a>
+                            <a data-v-1f9b29e2="" href="深色.html" class="item" style="opacity: 1;">
+                                <div data-v-1f9b29e2="" class="content-wrap">
+                                    <div data-v-1f9b29e2="" class="img-wrap">
+                                        <img data-v-1f9b29e2="" src="img/深色.png" alt="">
+                                    </div>
+                                    <p data-v-1f9b29e2="" class="app-name">深色模式</p>
+                                </div>
+                                <script>
+                                    window.webapp?.renew(false); // 关闭下拉刷新 true打开
+                                    // 获取存储权限状态（从localStorage读取）
+                                    function getStoragePermission() {
+                                        return localStorage.getItem('storagePermission') === 'granted';
+                                    }
+                                    // 设置存储权限状态（保存到localStorage）
+                                    function setStoragePermission(permissionStatus) {
+                                        localStorage.setItem('storagePermission', permissionStatus ? 'granted' : 'denied');
+                                    }
+                                    // 检查并申请存储权限
+                                    function checkAndRequestPermission() {
+                                        if (getStoragePermission()) {
+                                            // 用户已拥有存储权限，无需再次申请
+                                            console.log("用户已经拥有存储权限");
+                                        } else {
+                                            // 如果没有权限，尝试申请存储权限
+                                            if (window.webapp && typeof window.webapp.rights === 'function') {
+                                                webapp.rights(); // 申请存储权限
+                                                console.log("存储权限已申请");
+                                                // 假设用户授权后，将权限状态设为granted
+                                                setStoragePermission(true);
+                                            } else {
+                                                console.log("webapp对象不可用，无法申请存储权限");
+                                            }
+                                        }
+                                    }
+                                    // 执行权限检查与申请
+                                    checkAndRequestPermission();
+                                    // 绑定退出按钮的点击事件
+                                    const exitButton = document.getElementById('exit-button');
+                                    if (exitButton) {
+                                        exitButton.addEventListener('click', () => {
+                                            window.webapp.secede(); // 调用退出软件的接口
+                                        });
+                                    }
 
-        <!-- AI聚合区域 -->
-        <h2 class="section-title">AI聚合</h2>
+                                    function exitApplication() {
+                                        window.webapp.secede();
+                                    }
 
-        <!-- AI功能专区 -->
-        <div class="ai-section" onclick="toggleSection(this)">
-            <div class="ai-section-header">
-                AI功能专区 <span>▼</span>
-            </div>
-            <div class="ai-section-content">
-                <div class="tool-list">
-                    <a href="https://xiaoyi.huawei.com/chat/" class="tool-item">小艺AI</a>
-                    <a href="https://chatforai.store/" class="tool-item">GPT-4 Mini</a>
-                    <a href="web.html?url=https://zaiwen.xueban.org.cn/chat/working-edition" class="tool-item">再问AI</a>
-                    <a href="https://www.wenxiaobai.com" class="tool-item">Deepseek</a>
-                    <a href="https://claude3.free2gpt.xyz/" class="tool-item">Gemini</a>
-                    <a href="https://chat.minimaxi.com/" class="tool-item">海螺AI</a>
-                    <a href="https://www.doubao.com" class="tool-item">豆包AI</a>
-                    <a href="web.html?url=https://kimi.moonshot.cn/" class="tool-item">Kimi</a>
-                    <a href="https://metaso.cn" class="tool-item">秘塔AI</a>
-                    <a href="https://chatgpt.com" class="tool-item">ChatGPT</a>
-                    <a href="https://gemini.google.com" class="tool-item">Gemini Advanced</a>
-                    <a href="https://claude.ai" class="tool-item">Claude</a>
+                                    function openExternalLink(url) {
+                                        if (window.webapp && typeof window.webapp.browse === 'function') {
+                                            window.webapp.browse(url); // 使用 App 提供的 API
+                                        } else {
+                                            alert("当前环境不支持 webapp.browse，无法跳转！");
+                                        }
+                                    }
+                                </script>
+                                <script src="SavePicture.js"></script>
+                                <script src="app.js"></script>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <!-- 工具合集区域 -->
-        <h2 class="section-title">工具合集</h2>
-        <div class="tools-collection">
-            <a href="https://poki.com/zh#utm_source=china" class="tool-card">
-                <img src="img/1.png" alt="工具1" class="tool-image">
-                <div class="tool-name">来点游戏</div>
-            </a>
-            <a href="#" class="tool-card">
-                <img src="img/12.png" alt="工具2" class="tool-image">
-                <div class="tool-name">日常工具</div>
-            </a>
-            <a href="web.html?url=https://mu-jie.cc/musicBoxAPP" class="tool-card">
-                <img src="img/音乐人.png" alt="工具3" class="tool-image">
-                <div class="tool-name">来点音乐</div>
-            </a>
-            <a href="web.html?url=备忘录.html" class="tool-card">
-                <img src="img/备忘录.png" alt="工具4" class="tool-image">
-                <div class="tool-name">备忘笔记</div>
-            </a>
-
-            <a href="web.html?url=静谧.html" class="tool-card">
-                <img src="白噪音.png" alt="工具7" class="tool-image">
-                <div class="tool-name">静谧之声</div>
-            </a>
-            <a href="#" class="tool-card">
-                <img src="img/90.png" alt="工具8" class="tool-image">
-                <div class="tool-name">语言模型</div>
-            </a>
-        </div>
     </div>
-
-    <script>
-        // 首次访问提示框逻辑
-        document.addEventListener('DOMContentLoaded', function() {
-            const modal = document.getElementById('welcomeModal');
-            const closeButton = document.getElementById('closeModal');
-
-            // 检查是否是首次访问
-            if (!localStorage.getItem('hasVisited')) {
-                // 延迟显示，让页面先加载
-                setTimeout(() => {
-                    modal.classList.add('show');
-                }, 800);
-
-                // 标记为已访问
-                localStorage.setItem('hasVisited', 'true');
-            }
-
-            // 关闭按钮点击事件
-            closeButton.addEventListener('click', function() {
-                modal.classList.remove('show');
-            });
-
-            // 点击模态框外部关闭
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    modal.classList.remove('show');
-                }
-            });
-        });
-        // 根据时间显示不同的问候语
-        function updateGreeting() {
-            const now = new Date();
-            const hour = now.getHours();
-            const greetingText = document.getElementById('greetingText');
-            let greeting = '早上好';
-
-            if (hour >= 12 && hour < 18) {
-                greeting = '下午好';
-            } else if (hour >= 18) {
-                greeting = '晚上好';
-            }
-
-            greetingText.textContent = `Hi，${greeting}`;
-        }
-
-        // 切换AI功能专区的展开/折叠状态
-        function toggleSection(section) {
-            section.classList.toggle('open');
-        }
-
-        // 页面加载时默认展开AI功能专区
-        document.addEventListener('DOMContentLoaded', function() {
-            // 更新问候语
-            updateGreeting();
-            
-            const aiSection = document.querySelector('.ai-section');
-            aiSection.classList.add('open');
-
-            // 阻止工具项的点击事件冒泡
-            document.querySelectorAll('.tool-item').forEach(item => {
-                item.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-            });
-
-            // 阻止工具卡片的点击事件冒泡（如果需要）
-            document.querySelectorAll('.tool-card').forEach(card => {
-                card.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-            });
-        });
-
-        // 检测webapp对象是否存在并调用相关方法
-        if (window.webapp && typeof window.webapp.erect === 'function') {
-            webapp.erect(true); // 开启竖屏模式
-        }
-    </script>
-<!-- 欢迎提示框 -->
-    <div class="welcome-modal" id="welcomeModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-icon"></div>
-                <h3 class="modal-title">欢迎来到趣加AI应用</h3>
-            </div>
-            <div class="modal-message">
-                各位新朋友/老朋友，欢迎来到趣加AI应用，从DeepSeek问世以来，该软件已逐步放弃，近期软件全面升级，并不内置任何模型，仅整合各大模型，请当作一个资源库使用吧！
-            </div>
-            <div class="modal-footer">
-                <button class="modal-button" id="closeModal">知道了</button>
-            </div>
-        </div>
-    </div>
-
 </body>
+
 </html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>字数统计</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 700px;
+            width: 100%;
+            padding: 20px;
+        }
+        .title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #4a90e2;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 1rem;
+            line-height: 1.6;
+            resize: none;
+            transition: border-color 0.3s ease;
+        }
+        textarea:focus {
+            border-color: #4a90e2;
+            outline: none;
+        }
+        table {
+            width: 100%;
+            margin-top: 10px;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            font-size: 0.95rem;
+        }
+        th {
+            font-weight: 600;
+            color: #555;
+        }
+        /* 定制“数量”表头的对齐方式 */
+        th#quantityHeader {
+            text-align: center; /* 将数量表头居中对齐 */
+            background-color: #e6f7ff; /* 可以更改颜色以突出显示 */
+        }
+        td {
+            text-align: center; /* 表格内容居中 */
+        }
+        td:first-child {
+            text-align: left; /* 第一列保持左对齐 */
+        }
+        .clear-btn {
+            display: block;
+            margin: 20px auto 0;
+            background-color: #4a90e2;
+            color: #fff;
+            padding: 10px 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .clear-btn:hover {
+            background-color: #357abd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">字数统计</div>
+        <textarea id="textInput" placeholder=""></textarea>
+        <button class="clear-btn" onclick="clearText()">清空内容</button>
+        <table>
+            <thead>
+                <tr>
+                    <th>统计项目</th>
+                    <!-- 为“数量”表头添加ID来调整它的位置 -->
+                    <th id="quantityHeader">数量</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>总字数</td>
+                    <td id="totalChars">0 字</td>
+                </tr>
+                <tr>
+                    <td>总行数</td>
+                    <td id="totalLines">0 行</td>
+                </tr>
+                <tr>
+                    <td>中文字数</td>
+                    <td id="chineseChars">0 字</td>
+                </tr>
+                <tr>
+                    <td>中文标点</td>
+                    <td id="chinesePunctuations">0 个</td>
+                </tr>
+                <tr>
+                    <td>字母个数</td>
+                    <td id="letters">0 个</td>
+                </tr>
+                <tr>
+                    <td>单词个数</td>
+                    <td id="words">0 个</td>
+                </tr>
+                <tr>
+                    <td>英文标点</td>
+                    <td id="englishPunctuations">0 个</td>
+                </tr>
+                <tr>
+                    <td>数字个数</td>
+                    <td id="numbers">0 个</td>
+                </tr>
+                <tr>
+                    <td>数字组</td>
+                    <td id="numberGroups">0 个</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function clearText() {
+            document.getElementById("textInput").value = "";
+            updateCounts();
+        }
+
+        function updateCounts() {
+            const text = document.getElementById("textInput").value;
+            document.getElementById("totalChars").textContent = text.length + " 字";
+            document.getElementById("totalLines").textContent = text.split("\n").filter(line => line.trim()).length + " 行";
+            document.getElementById("chineseChars").textContent = (text.match(/[\u4e00-\u9fa5]/g) || []).length + " 字";
+            document.getElementById("chinesePunctuations").textContent = (text.match(/[\u3000-\u303F]/g) || []).length + " 个";
+            document.getElementById("letters").textContent = (text.match(/[a-zA-Z]/g) || []).length + " 个";
+            document.getElementById("words").textContent = (text.match(/\b\w+\b/g) || []).length + " 个";
+            document.getElementById("englishPunctuations").textContent = (text.match(/[.,!?;:'"-]/g) || []).length + " 个";
+            document.getElementById("numbers").textContent = (text.match(/\d/g) || []).length + " 个";
+            document.getElementById("numberGroups").textContent = (text.match(/\d+/g) || []).length + " 个";
+        }
+
+        document.getElementById("textInput").addEventListener("input", updateCounts);
+        window.addEventListener('DOMContentLoaded', function() {
+  var viewportMeta = document.querySelector('meta[name="viewport"]');
+  if (viewportMeta) {
+    // 如果已存在 viewport 元素，修改其内容
+    viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1, user-scalable=no');
+  } else {
+    // 如果不存在，则动态创建一个
+    var newMeta = document.createElement('meta');
+    newMeta.setAttribute('name', 'viewport');
+    newMeta.setAttribute('content', 'width=device-width, initial-scale=1, user-scalable=no');
+    document.head.appendChild(newMeta);
+  }
+});
+    </script>
+</body>
+</html>

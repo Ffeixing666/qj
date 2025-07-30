@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="height: 100%">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>九宫格切图</title>
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            user-select: none;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            background: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-bar {
+            height: 56px;
+            background: #4f46e5;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .app-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin-left: 16px;
+        }
+
+        .content {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+            background: #e0e7ff;
+            border: 2px solid #4f46e5;
+            border-radius: 8px;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .grid-item.selected {
+            outline: 2px solid #4f46e5;
+            background: rgba(79, 70, 229, 0.1) !important;
+        }
+
+        .action-bar {
+            height: 64px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 16px;
+        }
+
+        .btn {
+            height: 40px;
+            padding: 0 24px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 15px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeOut 1s 1s forwards;
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; visibility: hidden; }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading">
+        <svg viewBox="0 0 50 50" style="width: 48px;height: 48px">
+            <circle cx="25" cy="25" r="20" fill="none" stroke="#4f46e5" stroke-width="4" stroke-dasharray="80 30"/>
+        </svg>
+    </div>
+
+    <div class="app-bar">
+        <svg viewBox="0 0 24 24" style="width: 24px;height: 24px;fill: white">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8.5 6a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm-3 4h3v6h-3v-6zm5 9h-1V9h1v10zm6-9h-3v1.5h3V15h-3V13h3v-1.5h-3V9h3v6z"/>
+        </svg>
+        <div class="app-title">九宫格切图</div>
+    </div>
+
+    <div class="content">
+        <div class="card">
+            <div class="grid-container" id="gridPreview" style="aspect-ratio: 1"></div>
+        </div>
+
+        <div class="card">
+            <button class="btn" id="btnUpload" style="width: 100%">
+                <svg viewBox="0 0 24 24" style="width: 20px;height: 20px;fill: white">
+                    <path d="M19 13v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5h2v5h12v-5h2zm-7-1.67l3.59-3.58L17 10l-6 6-6-6 1.41-1.41L12 11.33zM12 4l-5 5h3v4h4V9h3l-5-5z"/>
+                </svg>
+                选择图片
+            </button>
+            <input type="file" id="imageInput" hidden accept="image/*">
+        </div>
+
+        <div class="card">
+            <div style="margin-bottom:12px;color: #64748b">裁剪设置</div>
+            <div style="display: grid;gap: 16px">
+                <div>
+                    <div style="margin-bottom:8px">图片质量</div>
+                    <input type="range" id="qualitySlider" min="0.5" max="1" step="0.1" value="0.8" 
+                           style="width:100%;height:4px;accent-color: #4f46e5">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-bar">
+        <button class="btn" id="saveAllBtn" style="flex:1">保存全部</button>
+        <div style="width:16px"></div>
+        <button class="btn" id="saveSelectedBtn" style="flex:1">保存选中</button>
+    </div>
+
+    <canvas id="previewCanvas" style="display:none"></canvas>
+
+    <script>
+        let originalImage = null;
+        let gridImages = Array(9).fill(null);
+        let selectedIndices = new Set();
+        let fileName = '';
+
+        const imageInput = document.getElementById('imageInput');
+        const gridPreview = document.getElementById('gridPreview');
+        const qualitySlider = document.getElementById('qualitySlider');
+        const previewCanvas = document.createElement('canvas');
+        const ctx = previewCanvas.getContext('2d');
+
+        // 初始化九宫格
+        function initGrid() {
+            gridPreview.innerHTML = Array(9).fill().map((_, i) => `
+                <div class="grid-item ${selectedIndices.has(i) ? 'selected' : ''}" data-index="${i}" style="
+                    aspect-ratio:1;
+                    background:${i % 2 ? '#f1f5f9' : '#e2e8f0'};
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    overflow:hidden;
+                ">${gridImages[i] ? `<img src="${gridImages[i]}" style="width:100%">` : ''}</div>
+            `).join('');
+
+            gridPreview.querySelectorAll('.grid-item').forEach(el => {
+                el.onclick = () => {
+                    if (!gridImages[el.dataset.index]) return;
+                    const index = parseInt(el.dataset.index);
+                    if (selectedIndices.has(index)) {
+                        selectedIndices.delete(index);
+                        el.classList.remove('selected');
+                    } else {
+                        selectedIndices.add(index);
+                        el.classList.add('selected');
+                    }
+                };
+            });
+        }
+
+        // 裁剪图片
+        function cropImage() {
+            if (!originalImage) return;
+
+            const size = Math.min(originalImage.width, originalImage.height);
+            previewCanvas.width = size;
+            previewCanvas.height = size;
+
+            ctx.drawImage(
+                originalImage,
+                (originalImage.width - size) / 2,
+                (originalImage.height - size) / 2,
+                size, size, 0, 0, size, size
+            );
+
+            const segmentSize = size / 3;
+            gridImages = Array(9).fill().map((_, i) => {
+                const col = i % 3;
+                const row = Math.floor(i / 3);
+                
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = segmentSize;
+                tempCanvas.height = segmentSize;
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                tempCtx.drawImage(
+                    previewCanvas,
+                    col * segmentSize,
+                    row * segmentSize,
+                    segmentSize, segmentSize,
+                    0, 0, segmentSize, segmentSize
+                );
+                
+                return tempCanvas.toDataURL('image/jpeg', parseFloat(qualitySlider.value));
+            });
+        }
+
+        // 图片上传处理
+        imageInput.addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                fileName = e.target.files[0].name.split('.')[0];
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    originalImage = new Image();
+                    originalImage.onload = function() {
+                        selectedIndices.clear();
+                        gridImages.fill(null);
+                        cropImage();
+                        initGrid();
+                        // webapp.toast('图片上传成功'); // 注释掉未定义的 toast
+                    };
+                    originalImage.src = event.target.result;
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+
+        // 保存图片
+        function saveImage(dataUrl, filename) {
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 保存全部
+        document.getElementById('saveAllBtn').addEventListener('click', () => {
+            gridImages.forEach((img, i) => {
+                if (img) setTimeout(() => saveImage(img, `${fileName}_part_${i + 1}.jpg`), i * 100);
+            });
+        });
+
+        // 保存选中
+        document.getElementById('saveSelectedBtn').addEventListener('click', () => {
+            if (selectedIndices.size === 0) {
+                alert('请至少选择一张图片');
+                return;
+            }
+            selectedIndices.forEach(index => {
+                if (gridImages[index]) {
+                    saveImage(gridImages[index], `${fileName}_part_${index + 1}.jpg`);
+                }
+            });
+        });
+
+        // 事件绑定
+        document.getElementById('btnUpload').addEventListener('click', () => imageInput.click());
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.ondragstart = () => false;
+
+        // 初始化
+        initGrid();
+    </script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="UTF-8">
+</head>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+    
+    
+
+    <style>
+        .centered {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="centered">
+    <p>正在开启深色模式……</p>
+    </div>
+    <script>
+        setTimeout(function() {
+            window.history.back();
+        }, 0);
+       window.webapp.night(true);
+    </script>
+</body>
+</html>

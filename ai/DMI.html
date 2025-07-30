@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健康体重计算器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+        .gender-btn {
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .gender-btn.active {
+            transform: scale(1.02);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .result-scale {
+            height: 10px;
+            border-radius: 5px;
+            background: linear-gradient(to right, #4ade80, #fbbf24, #ef4444);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .indicator {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            transform: translateX(-50%) translateY(-25%);
+            transition: left 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            border: 2px solid white;
+        }
+        .header-bg {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        input {
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        input:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        .result-card {
+            background: linear-gradient(to bottom, #ffffff 0%, #f8fafc 100%);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.025);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .calculate-btn {
+            background: linear-gradient(to right, #3b82f6 0%, #2563eb 100%);
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);
+            transition: all 0.3s ease;
+        }
+        .calculate-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 8px rgba(37, 99, 235, 0.4);
+        }
+        .calculate-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(37, 99, 235, 0.3);
+        }
+        .status-card {
+            transition: all 0.4s ease;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <!-- 头部 -->
+    <div class="header-bg p-6 text-white">
+        <div class="max-w-md mx-auto">
+            <h1 class="text-2xl font-bold flex items-center">
+                <i class="fas fa-heartbeat mr-3"></i>
+                健康体重计算器
+            </h1>
+            <p class="text-blue-100 mt-2 opacity-90">了解您的健康体重指数，关爱身体健康</p>
+        </div>
+    </div>
+    
+    <!-- 主要内容 -->
+    <main class="flex-1 p-6 max-w-md mx-auto w-full">
+        <!-- 表单部分 -->
+        <div>
+            <!-- 性别选择 -->
+            <div class="mb-6">
+                <label class="block text-gray-700 font-medium mb-3 text-sm uppercase tracking-wider">选择性别</label>
+                <div class="flex space-x-4">
+                    <button id="male-btn" class="gender-btn flex-1 py-3 px-4 rounded-xl border-2 border-blue-200 bg-blue-50 text-blue-700 flex items-center justify-center">
+                        <i class="fas fa-mars mr-2 text-lg"></i>男性
+                    </button>
+                    <button id="female-btn" class="gender-btn flex-1 py-3 px-4 rounded-xl border-2 border-pink-200 bg-pink-50 text-pink-700 flex items-center justify-center">
+                        <i class="fas fa-venus mr-2 text-lg"></i>女性
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 身高输入 -->
+            <div class="mb-6">
+                <label for="height" class="block text-gray-700 font-medium mb-2 flex items-center">
+                    <i class="fas fa-ruler-vertical mr-2 text-blue-500"></i>
+                    身高 (cm)
+                </label>
+                <div class="relative">
+                    <input type="number" id="height" class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-300 focus:border-blue-400 placeholder-gray-400" placeholder="例如：170">
+                    <div class="absolute right-4 top-4 text-gray-400 font-medium">cm</div>
+                </div>
+            </div>
+            
+            <!-- 体重输入 -->
+            <div class="mb-8">
+                <label for="weight" class="block text-gray-700 font-medium mb-2 flex items-center">
+                    <i class="fas fa-weight-hanging mr-2 text-blue-500"></i>
+                    体重 (kg)
+                </label>
+                <div class="relative">
+                    <input type="number" id="weight" class="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-300 focus:border-blue-400 placeholder-gray-400" placeholder="例如：65">
+                    <div class="absolute right-4 top-4 text-gray-400 font-medium">kg</div>
+                </div>
+            </div>
+            
+            <!-- 计算按钮 -->
+            <button id="calculate-btn" class="w-full calculate-btn text-white font-bold py-4 px-4 rounded-xl flex items-center justify-center mt-2">
+                <i class="fas fa-calculator mr-2 text-lg"></i> 计算健康指数
+            </button>
+        </div>
+        
+        <!-- 结果部分 (初始隐藏) -->
+        <div id="result-section" class="hidden mt-8">
+            <div class="result-card rounded-xl p-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-chart-pie mr-3 text-blue-500"></i>
+                    <span>您的健康报告</span>
+                </h2>
+                
+                <!-- DMI 数值 -->
+                <div class="flex items-center justify-between mb-5 bg-blue-50 rounded-lg p-4 border border-blue-100">
+                    <div class="text-gray-600 font-medium">体重指数(DMI)</div>
+                    <div id="dmi-value" class="text-4xl font-bold text-blue-600">--</div>
+                </div>
+                
+                <!-- 健康状态 -->
+                <div id="health-status" class="mb-5 p-4 rounded-lg hidden status-card">
+                    <div class="flex items-start">
+                        <i id="status-icon" class="fas mr-3 text-2xl mt-1"></i>
+                        <div>
+                            <div id="status-text" class="font-bold text-lg"></div>
+                            <p id="status-desc" class="text-gray-700 mt-2 leading-relaxed"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- DMI 刻度尺 -->
+                <div class="mb-5">
+                    <div class="flex justify-between text-xs text-gray-500 mb-2 font-medium">
+                        <span>偏瘦</span>
+                        <span>正常</span>
+                        <span>超重</span>
+                        <span>肥胖</span>
+                    </div>
+                    <div class="result-scale relative mb-1">
+                        <div id="indicator" class="indicator bg-blue-600 absolute top-1/2" style="left: 50%;"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500 mt-1 px-1">
+                        <span>18.5</span>
+                        <span>24</span>
+                        <span>28</span>
+                    </div>
+                </div>
+                
+                <!-- 标准范围 -->
+                <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 text-sm text-blue-800">
+                    <div class="font-bold mb-2 flex items-center">
+                        <i class="fas fa-info-circle mr-2"></i> DMI 标准参考
+                    </div>
+                    <div id="standard-range" class="space-y-1">
+                        <div class="flex items-center"><div class="w-3 h-3 bg-green-400 rounded-full mr-2"></div> 正常: 18.5-23.9</div>
+                        <div class="flex items-center"><div class="w-3 h-3 bg-yellow-400 rounded-full mr-2"></div> 超重: 24-27.9</div>
+                        <div class="flex items-center"><div class="w-3 h-3 bg-red-400 rounded-full mr-2"></div> 肥胖: ≥28</div>
+                        <div class="flex items-center"><div class="w-3 h-3 bg-blue-400 rounded-full mr-2"></div> 偏瘦: &lt;18.5</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 性别选择
+            const maleBtn = document.getElementById('male-btn');
+            const femaleBtn = document.getElementById('female-btn');
+            let selectedGender = 'male';
+            
+            maleBtn.addEventListener('click', function() {
+                selectedGender = 'male';
+                maleBtn.classList.add('active', 'bg-blue-100', 'border-blue-400');
+                femaleBtn.classList.remove('active', 'bg-pink-100', 'border-pink-400');
+            });
+            
+            femaleBtn.addEventListener('click', function() {
+                selectedGender = 'female';
+                femaleBtn.classList.add('active', 'bg-pink-100', 'border-pink-400');
+                maleBtn.classList.remove('active', 'bg-blue-100', 'border-blue-400');
+            });
+            
+            // 默认选择男性
+            maleBtn.click();
+            
+            // 计算按钮
+            document.getElementById('calculate-btn').addEventListener('click', function() {
+                const height = parseFloat(document.getElementById('height').value);
+                const weight = parseFloat(document.getElementById('weight').value);
+                
+                if (isNaN(height) || isNaN(weight) || height <= 0 || weight <= 0) {
+                    alert('请输入有效的身高和体重数值');
+                    return;
+                }
+                
+                // 计算 DMI (体重kg / (身高m)^2)
+                const heightInMeter = height / 100;
+                const dmi = weight / (heightInMeter * heightInMeter);
+                const roundedDmi = Math.round(dmi * 10) / 10;
+                
+                // 显示结果
+                document.getElementById('dmi-value').textContent = roundedDmi;
+                
+                // 更新指示器位置
+                updateIndicatorPosition(roundedDmi);
+                
+                // 评估健康状况
+                evaluateHealthStatus(roundedDmi, selectedGender);
+                
+                // 显示结果区域
+                document.getElementById('result-section').classList.remove('hidden');
+                
+                // 滚动到结果区域
+                document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+            });
+            
+            // 更新指示器位置
+            function updateIndicatorPosition(dmi) {
+                const indicator = document.getElementById('indicator');
+                let position = 0;
+                
+                if (dmi < 18.5) {
+                    position = (dmi / 18.5) * 25;
+                } else if (dmi < 24) {
+                    position = 25 + ((dmi - 18.5) / (24 - 18.5)) * 35;
+                } else if (dmi < 28) {
+                    position = 60 + ((dmi - 24) / (28 - 24)) * 20;
+                } else {
+                    position = 80 + Math.min((dmi - 28) / 5, 20);
+                }
+                
+                // 限制在0-100%之间
+                position = Math.max(0, Math.min(100, position));
+                indicator.style.left = `${position}%`;
+            }
+            
+            // 评估健康状况（性别差异化）
+            function evaluateHealthStatus(dmi, gender) {
+                const healthStatus = document.getElementById('health-status');
+                const statusIcon = document.getElementById('status-icon');
+                const statusText = document.getElementById('status-text');
+                const statusDesc = document.getElementById('status-desc');
+                
+                healthStatus.classList.remove('hidden', 'bg-green-50', 'text-green-800', 'border-green-200',
+                                           'bg-yellow-50', 'text-yellow-800', 'border-yellow-200',
+                                           'bg-red-50', 'text-red-800', 'border-red-200',
+                                           'bg-blue-50', 'text-blue-800', 'border-blue-200');
+                
+                if (dmi < 18.5) {
+                    // 偏瘦
+                    healthStatus.classList.add('bg-blue-50', 'text-blue-800', 'border-blue-200');
+                    statusIcon.className = 'fas fa-cloud-sun text-blue-500 mr-3 text-2xl mt-1';
+                    
+                    if (gender === 'female') {
+                        statusText.textContent = '苗条的小仙女';
+                        statusDesc.textContent = '您的体重低于标准范围呢~ 虽然现在流行瘦美，但健康更重要哦！建议适当增加营养摄入，可以多吃些坚果、牛油果这类健康高热量食物。如果增重困难，建议咨询营养师制定个性化方案。';
+                    } else {
+                        statusText.textContent = '体型偏瘦';
+                        statusDesc.textContent = '您的体重低于标准范围，可能是新陈代谢较快或营养摄入不足。建议增加蛋白质和健康脂肪的摄入，结合力量训练来增加肌肉量。如有需要可咨询专业营养师。';
+                    }
+                } else if (dmi < 24) {
+                    // 正常
+                    healthStatus.classList.add('bg-green-50', 'text-green-800', 'border-green-200');
+                    statusIcon.className = 'fas fa-check-circle text-green-500 mr-3 text-2xl mt-1';
+                    
+                    if (gender === 'female') {
+                        statusText.textContent = '完美体态！';
+                        statusDesc.textContent = '太棒了！您的体重在理想范围内呢~ 继续保持均衡饮食和适量运动就好。您现在的身材一定很迷人，健康就是最美的！记得每天都要爱自己多一点哦~';
+                    } else {
+                        statusText.textContent = '健康体重';
+                        statusDesc.textContent = '恭喜！您的体重在标准范围内，说明您的生活习惯很健康。继续保持均衡饮食和规律运动，这是最理想的状态。';
+                    }
+                } else if (dmi < 28) {
+                    // 超重
+                    healthStatus.classList.add('bg-yellow-50', 'text-yellow-800', 'border-yellow-200');
+                    statusIcon.className = 'fas fa-exclamation-triangle text-yellow-500 mr-3 text-2xl mt-1';
+                    
+                    if (gender === 'female') {
+                        statusText.textContent = '轻微超重';
+                        statusDesc.textContent = '亲爱的，您的体重稍微超出标准范围了呢~ 不过别担心，这只是个小提醒！建议适当增加一些有氧运动，比如跳舞、瑜伽或者快走都很适合。饮食上注意少油少糖，多吃蔬菜水果。记住，自信的女生最美，健康才是我们的目标！';
+                    } else {
+                        statusText.textContent = '超重';
+                        statusDesc.textContent = '您的体重超出标准范围，但还在可控范围内。建议增加有氧运动，控制精制碳水化合物的摄入，增加蔬菜和优质蛋白质的比例。每周3-5次、每次30分钟的中等强度运动会有明显改善。';
+                    }
+                } else {
+                    // 肥胖
+                    healthStatus.classList.add('bg-red-50', 'text-red-800', 'border-red-200');
+                    statusIcon.className = 'fas fa-heartbeat text-red-500 mr-3 text-2xl mt-1';
+                    
+                    if (gender === 'female') {
+                        statusText.textContent = '需要关注体重';
+                        statusDesc.textContent = '亲爱的，您的体重明显超出健康范围了，但这不代表你不美！只是从健康角度，我们需要重视起来。建议从今天开始，每天增加一些轻度运动，饮食上减少高油高糖食物。可以找闺蜜一起互相督促，或者咨询专业营养师制定温和的减重计划。记住，改变是为了更健康快乐的自己，而不是别人的眼光。我们一步一步来，你一定可以的！';
+                    } else {
+                        statusText.textContent = '肥胖';
+                        statusDesc.textContent = '您的体重明显超出标准范围，这可能会增加多种健康风险。建议立即开始改变生活方式：每周至少150分钟中等强度运动，控制总热量摄入，增加膳食纤维。最好能咨询医生或营养师制定科学的减重计划。坚持下去，健康改善会很快显现。';
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

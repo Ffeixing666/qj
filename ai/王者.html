@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+    <title>名字生成器</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #f4f6f9;
+            --card-bg: #ffffff;
+            --primary-text: #2d3436;
+            --secondary-text: #636e72;
+            --accent-color: #6c5ce7;
+            --accent-hover: #5649c0;
+            --border-color: #dfe6e9;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+        
+        body {
+            background-color: var(--primary-bg);
+            color: var(--primary-text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .generator-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-color);
+        }
+        
+        .result-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .result-display {
+            font-size: 32px;
+            text-align: center;
+            margin: 20px 0;
+            color: var(--primary-text);
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            font-weight: 500;
+            line-height: 1.4;
+            position: relative;
+            word-break: break-all;
+        }
+        
+        .result-display::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: var(--accent-color);
+            border-radius: 3px;
+            opacity: 0.5;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: var(--primary-bg);
+            color: var(--primary-text);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e8ebee;
+        }
+        
+        .history-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .history-title {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: var(--primary-text);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+        
+        .history-title::before {
+            content: "";
+            display: inline-block;
+            width: 4px;
+            height: 18px;
+            background: var(--accent-color);
+            margin-right: 10px;
+            border-radius: 2px;
+        }
+        
+        .history-list {
+            list-style-type: none;
+            max-height: 100%;
+            overflow-y: auto;
+            flex: 1;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        .history-list::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .history-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .history-item:hover {
+            background-color: var(--primary-bg);
+            transform: translateX(5px);
+        }
+        
+        .history-item::before {
+            content: "•";
+            color: var(--accent-color);
+            margin-right: 10px;
+            font-size: 20px;
+        }
+        
+        .empty-history {
+            color: var(--secondary-text);
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+        }
+        
+        .mode-selector {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        select, input {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+            background-color: var(--primary-bg);
+            color: var(--primary-text);
+            width: 100%;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        
+        .input-container {
+            display: none;
+            margin-top: 10px;
+        }
+        
+        .input-container.show {
+            display: block;
+        }
+        
+        @media (max-width: 480px) {
+            .generator-card, .history-card {
+                padding: 20px;
+            }
+            
+            .result-display {
+                font-size: 28px;
+                padding: 15px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="generator-card">
+            <div class="mode-selector">
+                <select id="modeSelect">
+                    <option value="repeat" selected>重复ID</option>
+                    <option value="blank">空白ID</option>
+                    <option value="normal">抖音ID</option>
+                    <option value="company">公司ID</option>
+                </select>
+            </div>
+            <div class="input-container show" id="inputContainer">
+                <input type="text" id="userInput" placeholder="输入名字（最多5个字）" maxlength="5">
+            </div>
+            <div class="result-container">
+                <div class="result-display" id="resultDisplay"></div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="generateBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                        <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                        <path d="M3 3v5h5"></path>
+                        <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+                        <path d="M16 16h5v5"></path>
+                    </svg>
+                    生成名字
+                </button>
+                <button class="btn btn-secondary" id="copyBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    复制
+                </button>
+            </div>
+        </div>
+        
+        <div class="history-card">
+            <h3 class="history-title">历史记录</h3>
+            <ul class="history-list" id="historyList">
+                <div class="empty-history">生成的名字将显示在这里</div>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+const drinks = [
+    // 碳酸饮料
+    "可乐", "百事", "旺仔", "芬达", "七喜", "美年达", "北冰洋",
+    
+    // 功能饮料
+    "红牛", "脉动", "宝矿力", "魔爪", "东鹏",
+    
+    // 茶饮
+    "冰红茶", "绿茶", "茉莉", "乌龙茶", "柠檬茶", "东方",
+    
+    // 果汁
+    "美汁源", "纯果乐", "汇源", "菠萝", "果粒橙",
+    
+    // 乳饮
+    "养乐多", "优酸乳", "QQ星", "AD", "银鹭", "杏仁露",
+    
+    // 水类
+    "农夫", "怡宝", "百岁山", "依云", "冰露",
+    
+    // 即饮咖啡
+    "雀巢", "星巴克", "贝纳颂",
+    
+    // 其他
+    "维他奶", "椰汁", "露露", "王老吉", "加多宝"
+];
+
+// 王者荣耀英雄列表
+const heroes = [
+    "廉颇", "小乔", "赵云", "墨子", "妲己", "嬴政", "孙尚香", "鲁班", "庄周", "刘禅",
+    "高渐离", "阿轲", "钟无艳", "孙膑", "扁鹊", "白起", "芈月", "吕布", "周瑜", "夏侯惇",
+    "甄姬", "曹操", "典韦", "宫本", "李白", "马可", "狄仁杰", "达摩", "项羽",
+    "武则天", "老夫子", "关羽", "貂蝉", "安琪拉", "程咬金", "露娜", "姜子牙", "刘邦",
+    "韩信", "王昭君", "兰陵王", "花木兰", "张良", "火舞", "露露", "橘右京",
+    "亚瑟", "孙悟空", "牛魔", "后羿", "刘备", "张飞", "李元芳", "虞姬", "钟馗",
+    "苍", "杨戬", "雅典娜", "蔡文姬", "太乙", "哪吒", "诸葛亮", "黄忠",
+    "大乔", "东皇", "干将", "鬼谷子", "铠", "百里", "玄策", "苏烈",
+    "梦奇", "女娲", "明世隐", "公孙离", "杨玉环", "裴擒虎", "弈星", "狂铁", "米莱狄",
+    "元歌", "孙策", "司马懿", "盾山", "伽罗", "沈梦溪", "李信", "上官婉儿", "嫦娥",
+    "猪八戒", "瑶", "云中君", "曜", "马超", "西施", "鲁班", "蒙犽", "镜", "蒙恬",
+    "阿古朵", "夏洛特", "澜", "司空震", "艾琳", "云缨", "金蝉", "暃", "桑启", "戈娅",
+    "海月", "赵怀真", "莱西奥", "姬小满", "亚连", "少司缘", "大司命", "孙权",
+    "影", "敖隐"
+];
+
+// 公司名+老板昵称（格式：公司名+小+姓氏）
+const companies = [
+    "腾讯小马", "阿里小马", "百度小李", "华为小任", "小米小雷",
+    "京东小刘", "美团小王", "抖音小张", "拼多小黄", "网易小丁",
+    "顺丰小王", "万达小王", "格力小董", "联想小柳", "蔚来小李",
+    "大疆小汪", "鸣潮小李", "雅迪小董", "原神小刘", "快手小程"
+];
+        
+        // 空白符号列表
+        const blankSymbols = ['⁦', '⁨', '⁮', '⁮', '⁨', '⁥', '⁮', '⁪', '⁦', '⁥', '⁥', '⁮', '⁨', '⁯', '⁥', '⁦', '⁦', '⁯', '⁯', '⁮', '⁬', '⁩', '⁭', '⁣', '⁠', ' ', ' ', '⁡', '⁯', '⁭', '⁦', '⁬', '⁬', '⁨', '⁦'];
+        
+        const resultDisplay = document.getElementById('resultDisplay');
+        const generateBtn = document.getElementById('generateBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const historyList = document.getElementById('historyList');
+        const modeSelect = document.getElementById('modeSelect');
+        const inputContainer = document.getElementById('inputContainer');
+        const userInput = document.getElementById('userInput');
+        
+        let history = [];
+        
+        // 随机选择不重复的空白符号
+        function getUniqueRandomSymbols(count) {
+            const availableSymbols = [...new Set(blankSymbols)]; // 去重后的符号列表
+            if (count > availableSymbols.length) {
+                return null; // 如果需要的符号数超过可用符号数，返回null
+            }
+            const result = [];
+            const indices = Array.from({ length: availableSymbols.length }, (_, i) => i);
+            for (let i = 0; i < count; i++) {
+                const randomIndex = Math.floor(Math.random() * indices.length);
+                result.push(availableSymbols[indices[randomIndex]]);
+                indices.splice(randomIndex, 1); // 移除已选的索引
+            }
+            return result;
+        }
+        
+        // 随机插入空白符号
+        function insertRandomSymbols(name, maxLength, numSymbols) {
+            let result = name.split('');
+            const symbols = getUniqueRandomSymbols(numSymbols);
+            if (!symbols) {
+                return name; // 如果无法获取足够的唯一符号，返回原名
+            }
+            const availablePositions = Array.from({ length: result.length + 1 }, (_, i) => i); // 所有可能的插入位置
+            for (let i = 0; i < numSymbols && availablePositions.length > 0; i++) {
+                const positionIndex = Math.floor(Math.random() * availablePositions.length);
+                const position = availablePositions.splice(positionIndex, 1)[0]; // 移除已使用的位置
+                result.splice(position, 0, symbols[i]);
+            }
+            return result.join('').slice(0, maxLength); // 确保不超过最大长度
+        }
+        
+        // 生成不重复的空白名
+        function generateUniqueBlankName() {
+            let name = '';
+            let attempts = 0;
+            const maxAttempts = 10; // 限制最大尝试次数，避免无限循环
+            do {
+                const symbols = getUniqueRandomSymbols(5);
+                if (!symbols) {
+                    return '符号不足'; // 如果可用符号不足
+                }
+                name = symbols.join('');
+                attempts++;
+            } while (history.includes(name) && attempts < maxAttempts);
+            return name;
+        }
+        
+        // 根据模式生成名字
+        function generateName(mode) {
+            if (mode === 'normal') {
+                // 普通模式：饮料+英雄名，不限制长度
+                const randomDrink = drinks[Math.floor(Math.random() * drinks.length)];
+                const randomHero = heroes[Math.floor(Math.random() * heroes.length)];
+                return randomDrink + randomHero;
+            } else if (mode === 'repeat') {
+                // 重复名模式：用户输入+空白符号，限制6个字符
+                let input = userInput.value.trim();
+                if (!input) {
+                    return '请输入名字';
+                }
+                if (input.length > 5) {
+                    input = input.slice(0, 5); // 限制输入最多5个字
+                }
+                const inputLength = input.length;
+                const numSymbols = 6 - inputLength; // 根据输入长度决定符号数量
+                let name = input;
+                name = insertRandomSymbols(name, 6, numSymbols); // 插入指定数量的空白符号
+                return name;
+            } else if (mode === 'blank') {
+                // 空白名模式：5个不同的空白符号
+                return generateUniqueBlankName();
+            } else if (mode === 'company') {
+                // 公司ID模式：随机选择一个公司名
+                return companies[Math.floor(Math.random() * companies.length)];
+            }
+        }
+        
+        // 更新显示
+        function updateDisplay(name) {
+            resultDisplay.textContent = name;
+            
+            // 添加到历史记录
+            if (!history.includes(name) && name !== '请输入名字' && name !== '' && name !== '符号不足') {
+                history.unshift(name);
+                if (history.length > 15) {
+                    history.pop();
+                }
+                updateHistoryList();
+            }
+        }
+        
+        // 更新历史记录列表
+        function updateHistoryList() {
+            if (history.length === 0) {
+                historyList.innerHTML = '<div class="empty-history">生成的名字将显示在这里</div>';
+                return;
+            }
+            
+            historyList.innerHTML = '';
+            history.forEach(name => {
+                const li = document.createElement('li');
+                li.className = 'history-item';
+                li.textContent = name || '[空白名]'; // 空白名显示为[空白名]
+                li.addEventListener('click', () => {
+                    resultDisplay.textContent = name;
+                });
+                historyList.appendChild(li);
+            });
+        }
+        
+        // 模式切换事件
+        modeSelect.addEventListener('change', () => {
+            const mode = modeSelect.value;
+            if (mode === 'repeat') {
+                inputContainer.classList.add('show');
+                userInput.value = ''; // 清空输入框
+            } else {
+                inputContainer.classList.remove('show');
+                userInput.value = ''; // 清空输入框
+            }
+            // 初始生成一个名字
+            updateDisplay(generateName(mode));
+        });
+        
+        // 生成按钮点击事件
+        generateBtn.addEventListener('click', () => {
+            const mode = modeSelect.value;
+            const name = generateName(mode);
+            updateDisplay(name);
+            
+            // 按钮点击动画
+            generateBtn.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                generateBtn.style.transform = 'scale(1)';
+            }, 200);
+        });
+        
+        // 复制按钮点击事件
+        copyBtn.addEventListener('click', () => {
+            const name = resultDisplay.textContent;
+            if (name && name !== '' && name !== '请输入名字' && name !== '符号不足') {
+                navigator.clipboard.writeText(name)
+                    .then(() => {
+                        const originalText = copyBtn.innerHTML;
+                        copyBtn.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            已复制
+                        `;
+                        setTimeout(() => {
+                            copyBtn.innerHTML = originalText;
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('复制失败: ', err);
+                        const textarea = document.createElement('textarea');
+                        textarea.value = name;
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                        const originalText = copyBtn.innerHTML;
+                        copyBtn.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            已复制
+                        `;
+                        setTimeout(() => {
+                            copyBtn.innerHTML = originalText;
+                        }, 2000);
+                    });
+            }
+        });
+        
+        // 初始化：设置默认模式为重复名模式并显示输入框
+        modeSelect.value = 'repeat';
+        inputContainer.classList.add('show');
+        updateDisplay('');
+    </script>
+</body>
+</html>

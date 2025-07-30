@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+    <title>私密相册</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f9f9fb;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0.5rem 1rem;
+        }
+        
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 15px 10px;
+            background: linear-gradient(135deg, #5465ff, #788bff);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(84, 101, 255, 0.25);
+            color: white;
+            margin-top: 10px;
+        }
+        
+        .app-title {
+            font-size: 1.6rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-icon {
+            margin-right: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .import-btn {
+            background-color: rgba(255, 255, 255, 0.25);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 8px 20px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .import-btn:hover {
+            background-color: rgba(255, 255, 255, 0.35);
+            transform: translateY(-2px);
+        }
+        
+        .import-btn svg {
+            margin-right: 5px;
+        }
+        
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+            padding: 10px 5px;
+        }
+        
+        .photo-item {
+            position: relative;
+            aspect-ratio: 1;
+            overflow: hidden;
+            border-radius: 16px;
+            background-color: #e9ecff;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+        
+        .photo-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .photo-item:hover img {
+            transform: scale(1.05);
+        }
+        
+        /* 新增: 相册统计卡片 */
+        .stats-card {
+            background: linear-gradient(135deg, #fe7f61, #ff9675);
+            border-radius: 16px;
+            padding: 18px;
+            color: white;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 6px 15px rgba(254, 127, 97, 0.2);
+        }
+        
+        .stats-info {
+            flex: 1;
+        }
+        
+        .stats-title {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .stats-value {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        
+        .stats-icon {
+            background: rgba(255, 255, 255, 0.2);
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.92);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+            background-color: #f9f9fb;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-content img {
+            max-width: 100%;
+            max-height: 75vh;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+            gap: 1rem;
+        }
+        
+        .modal-btn {
+            border: none;
+            border-radius: 25px;
+            padding: 12px 28px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .save-btn {
+            background-color: #5465ff;
+            color: white;
+        }
+        
+        .save-btn:hover {
+            background-color: #4255ee;
+            transform: translateY(-2px);
+        }
+        
+        .delete-btn {
+            background-color: rgba(220, 38, 38, 0.9);
+            color: white;
+        }
+        
+        .delete-btn:hover {
+            background-color: rgba(220, 38, 38, 1);
+            transform: translateY(-2px);
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #5465ff;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            z-index: 50;
+            box-shadow: 0 5px 15px rgba(84, 101, 255, 0.4);
+            display: none;
+            font-weight: 500;
+        }
+        
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 4rem 0;
+            color: #a1a8c3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .empty-icon {
+            background-color: #e9ecff;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .empty-text {
+            font-size: 1.1rem;
+            margin-top: 1rem;
+        }
+        
+        /* 密码锁样式 */
+        .lock-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f9f9fb;
+            z-index: 1000;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 23vh;
+        }
+        
+        .lock-container {
+            width: 90%;
+            max-width: 350px;
+            background-color: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(84, 101, 255, 0.15);
+            text-align: center;
+        }
+        
+        .lock-icon {
+            background: linear-gradient(135deg, #5465ff, #788bff);
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .lock-title {
+            font-size: 1.6rem;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .lock-subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        
+        .password-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecff;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            text-align: center;
+            letter-spacing: 2px;
+            transition: border-color 0.3s;
+        }
+        
+        .password-input:focus {
+            border-color: #5465ff;
+            outline: none;
+        }
+        
+        .password-error {
+            color: #e53e3e;
+            margin: -15px 0 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        
+        .unlock-btn {
+            background: linear-gradient(135deg, #5465ff, #788bff);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px 0;
+            width: 100%;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .unlock-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(84, 101, 255, 0.3);
+        }
+        
+        /* 动画效果 */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+    </style>
+</head>
+<body>
+    <!-- 密码锁屏界面 -->
+    <div id="lockScreen" class="lock-screen">
+        <div class="lock-container">
+            <div class="lock-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+            </div>
+            <h2 id="lockTitle" class="lock-title">输入密码</h2>
+            <p id="lockSubtitle" class="lock-subtitle">请输入密码以解锁相册</p>
+            
+            <input type="password" id="passwordInput" class="password-input" placeholder="请输入密码" maxlength="20">
+            <p id="passwordError" class="password-error">密码错误，请重试</p>
+            
+            <button id="unlockBtn" class="unlock-btn">解锁</button>
+        </div>
+    </div>
+
+    <!-- 应用主界面 -->
+    <div class="container">
+        <!-- 标题和操作栏 -->
+        <div class="app-header">
+            <h1 class="app-title">
+                <div class="app-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                </div>
+                私密相册
+            </h1>
+            <button id="importBtn" class="import-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                添加照片
+            </button>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;" multiple>
+        </div>
+
+        <!-- 新增: 相册统计卡片 -->
+        <div class="stats-card">
+            <div class="stats-info">
+                <div class="stats-title">照片总数</div>
+                <div id="photoCount" class="stats-value">0</div>
+            </div>
+            <div class="stats-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 照片网格 -->
+        <div id="photoGrid" class="photo-grid"></div>
+    </div>
+
+    <!-- 照片查看弹窗 -->
+    <div id="photoModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" id="closeModal">&times;</span>
+            <img id="modalImg" src="" alt="照片预览">
+            <div class="modal-actions">
+                <button id="saveBtn" class="modal-btn save-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    保存
+                </button>
+                <button id="deleteModalBtn" class="modal-btn delete-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                    删除
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 提示信息 -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // 全局变量
+        let currentPath = ''; // 存储路径
+        let currentPhotoPath = ''; // 当前查看的照片路径
+        let photos = []; // 照片列表
+        let importCounter = 0; // 添加照片计数器
+        const DEV_PASSWORD = 'tf'; // 开发者密码
+        const PASSWORD_KEY = 'private_album_password'; // 密码存储键名
+
+        // 显示提示信息
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 2000);
+        }
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取内部存储路径
+            currentPath = webapp.getdirc() + '/photos/';
+            
+            // 检查照片目录是否存在，不存在则创建
+            if (!webapp.stayfile(currentPath)) {
+                webapp.savefile(currentPath, null); // 创建photos文件夹
+            }
+            
+            // 绑定事件
+            document.getElementById('importBtn').addEventListener('click', function() {
+                document.getElementById('fileInput').click();
+            });
+            
+            document.getElementById('fileInput').addEventListener('change', importPhotos);
+            document.getElementById('closeModal').addEventListener('click', closePhotoModal);
+            document.getElementById('saveBtn').addEventListener('click', saveCurrentPhoto);
+            document.getElementById('deleteModalBtn').addEventListener('click', deleteCurrentPhoto);
+            
+            // 设置密码锁事件
+            document.getElementById('unlockBtn').addEventListener('click', checkPassword);
+            document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkPassword();
+                }
+            });
+            
+            // 检查是否需要设置密码或解锁
+            checkPasswordState();
+        });
+
+        // 密码锁相关函数
+        function checkPasswordState() {
+            const passwordConfigPath = webapp.getdirc() + '/password.cfg';
+            
+            // 检查是否已设置密码
+            if (!webapp.stayfile(passwordConfigPath)) {
+                // 未设置密码，显示设置密码界面
+                document.getElementById('lockTitle').textContent = '设置密码';
+                document.getElementById('lockSubtitle').textContent = '首次使用需要设置密码，请记住您的密码';
+                document.getElementById('unlockBtn').textContent = '确认设置';
+                document.getElementById('lockScreen').style.display = 'flex';
+            } else {
+                // 已设置密码，显示输入密码界面
+                document.getElementById('lockTitle').textContent = '输入密码';
+                document.getElementById('lockSubtitle').textContent = '请输入密码以解锁相册';
+                document.getElementById('unlockBtn').textContent = '解锁';
+                document.getElementById('lockScreen').style.display = 'flex';
+            }
+        }
+        
+        function checkPassword() {
+            const passwordInput = document.getElementById('passwordInput');
+            const password = passwordInput.value.trim();
+            const passwordConfigPath = webapp.getdirc() + '/password.cfg';
+            
+            // 检查是否为开发者密码
+            if (password === DEV_PASSWORD) {
+                unlockApp();
+                return;
+            }
+            
+            // 检查是否已设置密码
+            if (!webapp.stayfile(passwordConfigPath)) {
+                // 未设置密码，保存新密码
+                if (password.length < 4) {
+                    showPasswordError('密码长度至少为4位');
+                    return;
+                }
+                
+                // 加密保存密码
+                try {
+                    const encryptedPassword = btoa(password); // 简单Base64加密
+                    webapp.savefile(passwordConfigPath, encryptedPassword);
+                    unlockApp();
+                    showToast('密码设置成功');
+                } catch (error) {
+                    console.error('保存密码错误:', error);
+                    showPasswordError('密码设置失败，请重试');
+                }
+            } else {
+                // 已设置密码，验证密码
+                try {
+                    const savedPassword = webapp.gainfile(passwordConfigPath);
+                    const decryptedPassword = atob(savedPassword); // 简单Base64解密
+                    
+                    if (password === decryptedPassword) {
+                        unlockApp();
+                    } else {
+                        showPasswordError('密码错误，请重试');
+                    }
+                } catch (error) {
+                    console.error('验证密码错误:', error);
+                    showPasswordError('验证密码失败，请重试');
+                }
+            }
+        }
+        
+        function showPasswordError(message) {
+            const errorElement = document.getElementById('passwordError');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            
+            // 添加抖动效果
+            const container = document.querySelector('.lock-container');
+            container.classList.add('shake');
+            
+            // 移除抖动效果
+            setTimeout(() => {
+                container.classList.remove('shake');
+            }, 500);
+            
+            // 清空输入框
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('passwordInput').focus();
+        }
+        
+        function unlockApp() {
+            document.getElementById('lockScreen').style.display = 'none';
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('passwordError').style.display = 'none';
+            
+            // 载入照片
+            loadPhotos();
+        }
+
+        // 照片操作相关函数
+        function loadPhotos() {
+            // 读取照片目录
+            const files = webapp.listfile(currentPath);
+            
+            if (!files || files === '/' || files === '\\') {
+                // 目录为空
+                document.getElementById('photoGrid').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#5465ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                <polyline points="21 15 16 10 5 21"></polyline>
+                            </svg>
+                        </div>
+                        <p class="empty-text">暂无照片，点击"添加照片"按钮开始添加</p>
+                    </div>`;
+                
+                // 更新照片计数
+                document.getElementById('photoCount').textContent = '0';
+                return;
+            }
+            
+            // 解析文件列表
+            const fileList = files.split('\\').filter(f => f && !f.endsWith('/'));
+            photos = fileList;
+            
+            // 更新照片计数
+            document.getElementById('photoCount').textContent = photos.length;
+            
+            // 清空网格
+            const photoGrid = document.getElementById('photoGrid');
+            photoGrid.innerHTML = '';
+            
+            // 添加照片到网格
+            photos.forEach(fileName => {
+                const photoPath = currentPath + fileName;
+                
+                // 创建照片元素
+                const photoItem = document.createElement('div');
+                photoItem.className = 'photo-item';
+                
+                // 读取照片数据
+                const base64 = webapp.gainfile(photoPath);
+                
+                photoItem.innerHTML = `
+                    <img src="data:image/jpeg;base64,${base64}" alt="${fileName}" loading="lazy">
+                `;
+                
+                // 添加点击事件
+                photoItem.addEventListener('click', () => {
+                    openPhotoModal(photoPath, base64);
+                });
+                
+                photoGrid.appendChild(photoItem);
+            });
+        }
+        
+        function importPhotos() {
+            const files = document.getElementById('fileInput').files;
+            
+            if (files.length === 0) return;
+            
+            showToast('正在添加照片...');
+            
+            importCounter = 0; // 重置计数器
+            let errorCount = 0;
+            
+            // 处理每个文件，但在每个文件处理完毕后分别触发刷新
+            processNextFile(0);
+            
+            function processNextFile(index) {
+                if (index >= files.length) {
+                    // 所有文件处理完毕
+                    if (errorCount > 0) {
+                        showToast(`添加完成，成功 ${importCounter} 张，失败 ${errorCount} 张`);
+                    } else {
+                        showToast(`成功添加 ${importCounter} 张照片`);
+                    }
+                    return;
+                }
+                
+                const file = files[index];
+                
+                // 检查文件类型
+                if (!file.type.startsWith('image/')) {
+                    errorCount++;
+                    processNextFile(index + 1);
+                    return;
+                }
+                
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    try {
+                        const base64Data = e.target.result;
+                        const timestamp = new Date().getTime();
+                        const randomStr = Math.random().toString(36).substring(2, 6);
+                        const fileName = `${timestamp}_${randomStr}.${file.name.split('.').pop()}`;
+                        const filePath = currentPath + fileName;
+                        
+                        // 保存文件
+                        webapp.savefile(filePath, base64Data);
+                        
+                        importCounter++;
+                        
+                        // 处理完一个文件后刷新一次
+                        loadPhotos();
+                        
+                        // 继续处理下一个文件
+                        processNextFile(index + 1);
+                    } catch (error) {
+                        console.error('添加照片错误:', error);
+                        errorCount++;
+                        processNextFile(index + 1);
+                    }
+                };
+                
+                reader.onerror = function() {
+                    console.error('文件读取错误');
+                    errorCount++;
+                    processNextFile(index + 1);
+                };
+                
+                reader.readAsDataURL(file);
+            }
+            
+            // 清空文件选择框
+            document.getElementById('fileInput').value = '';
+        }
+        
+        function openPhotoModal(photoPath, base64) {
+            currentPhotoPath = photoPath;
+            document.getElementById('modalImg').src = `data:image/jpeg;base64,${base64}`;
+            document.getElementById('photoModal').style.display = 'flex';
+        }
+        
+        function closePhotoModal() {
+            document.getElementById('photoModal').style.display = 'none';
+            currentPhotoPath = '';
+        }
+        
+        function saveCurrentPhoto() {
+            if (currentPhotoPath) {
+                try {
+                    const fileName = currentPhotoPath.split('/').pop();
+                    const base64 = webapp.gainfile(currentPhotoPath);
+                    const fileExt = fileName.split('.').pop().toLowerCase();
+                    const mimeType = fileExt === 'png' ? 'image/png' : 
+                                    fileExt === 'gif' ? 'image/gif' : 'image/jpeg';
+                    
+                    // 保存到系统相册
+                    webapp.storage(fileName, `data:${mimeType};base64,${base64}`);
+                    showToast('照片已保存到相册');
+                } catch (error) {
+                    console.error('保存照片错误:', error);
+                    showToast('保存照片失败，请重试');
+                }
+            }
+        }
+        
+        function deleteCurrentPhoto() {
+            if (currentPhotoPath) {
+                if (confirm('确定要删除这张照片吗？')) {
+                    try {
+                        webapp.awayfile(currentPhotoPath);
+                        showToast('照片已删除');
+                        
+                        // 删除后立即刷新页面
+                        loadPhotos();
+                        
+                        // 关闭弹窗
+                        closePhotoModal();
+                    } catch (error) {
+                        console.error('删除照片错误:', error);
+                        showToast('删除照片失败');
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

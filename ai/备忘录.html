@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>备忘录</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --primary-dark: #357ABD;
+            --background-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        .container {
+            width: 92%;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 15px 0;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 20px;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            font-size: 20px;
+            font-weight: 600;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: var(--shadow);
+        }
+
+        .notes-container {
+            background-color: var(--card-bg);
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            padding: 15px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .note {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .note:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .note-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary-color);
+            word-break: break-word;
+        }
+
+        .note-date {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .note-content {
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+
+        .note-image {
+            max-width: 100%;
+            border-radius: 6px;
+            margin-top: 10px;
+            display: block;
+        }
+
+        .note-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .note:hover .note-actions {
+            opacity: 1;
+        }
+
+        .action-btn {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+        }
+
+        .action-btn:hover {
+            background-color: white;
+            transform: scale(1.1);
+        }
+
+        .edit-btn {
+            color: #4caf50;
+        }
+
+        .delete-btn {
+            color: #f44336;
+        }
+
+        .add-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4);
+            transition: var(--transition);
+            z-index: 100;
+        }
+
+        .add-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.5);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 450px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #888;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .file-upload {
+            margin: 15px 0;
+            border: 2px dashed #ddd;
+            border-radius: 6px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .file-upload:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(74, 144, 226, 0.05);
+        }
+
+        .file-upload input {
+            display: none;
+        }
+
+        .file-upload-text {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .file-preview {
+            margin-top: 15px;
+            max-width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: #f5f5f5;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #888;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                width: 96%;
+            }
+
+            .note-actions {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>备忘录</header>
+        <div class="notes-container" id="notesContainer"></div>
+    </div>
+
+    <button class="add-btn" id="addBtn">+</button>
+
+    <!-- 新建/编辑笔记模态框 -->
+    <div class="modal" id="noteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">新建笔记</h3>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <form id="noteForm">
+                <div class="form-group">
+                    <label for="noteTitle" class="form-label">标题</label>
+                    <input type="text" id="noteTitle" class="form-input" placeholder="请输入标题">
+                </div>
+                <div class="form-group">
+                    <label for="noteContent" class="form-label">内容</label>
+                    <textarea id="noteContent" class="form-textarea" placeholder="请输入内容"></textarea>
+                </div>
+                <div class="file-upload" id="fileUpload">
+                    <input type="file" id="imageInput" accept="image/*" multiple>
+                    <div class="file-upload-text">点击或拖拽图片到此处上传</div>
+                </div>
+                <img id="imagePreview" class="file-preview">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM元素
+            const notesContainer = document.getElementById('notesContainer');
+            const addBtn = document.getElementById('addBtn');
+            const noteModal = document.getElementById('noteModal');
+            const closeModal = document.getElementById('closeModal');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const noteForm = document.getElementById('noteForm');
+            const noteTitle = document.getElementById('noteTitle');
+            const noteContent = document.getElementById('noteContent');
+            const modalTitle = document.getElementById('modalTitle');
+            const fileUpload = document.getElementById('fileUpload');
+            const imageInput = document.getElementById('imageInput');
+            const imagePreview = document.getElementById('imagePreview');
+
+            // 状态变量
+            let notes = JSON.parse(localStorage.getItem('notes')) || [];
+            let editingIndex = -1;
+            let currentImages = []; // 改为数组存储多张图片
+
+            // 渲染笔记列表
+            function renderNotes() {
+                if (notes.length === 0) {
+                    notesContainer.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📝</div>
+                            <p>暂无笔记，点击右下角按钮创建</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                notesContainer.innerHTML = '';
+                // 按创建时间降序排列
+                const sortedNotes = [...notes].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+                sortedNotes.forEach((note, index) => {
+                    const noteElement = document.createElement('div');
+                    noteElement.classList.add('note');
+
+                    // 格式化日期
+                    const date = new Date(note.createdAt);
+                    const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+
+                    // 生成图片HTML
+                    let imagesHtml = '';
+                    if (note.imageUrls && note.imageUrls.length > 0) {
+                        imagesHtml = '<div class="note-images" style="display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px;">';
+                        note.imageUrls.forEach(imageUrl => {
+                            imagesHtml += `<img src="${imageUrl}" alt="笔记图片" style="max-width: 100px; max-height: 100px; object-fit: contain; border-radius: 4px;">`;
+                        });
+                        imagesHtml += '</div>';
+                    } else if (note.imageUrl) {
+                        // 兼容旧数据格式
+                        imagesHtml = `<img src="${note.imageUrl}" alt="笔记图片" class="note-image">`;
+                    }
+
+                    noteElement.innerHTML = `
+                        <div class="note-header">
+                            <h3 class="note-title">${note.title || '无标题笔记'}</h3>
+                            <span class="note-date">${formattedDate}</span>
+                        </div>
+                        <div class="note-content">${note.content || ''}</div>
+                        ${imagesHtml}
+                        <div class="note-actions">
+                            <button class="action-btn edit-btn" data-index="${index}"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></button>
+                            <button class="action-btn delete-btn" data-index="${index}"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                        </div>
+                    `;
+
+                    notesContainer.appendChild(noteElement);
+                });
+
+                // 添加编辑和删除事件监听
+                document.querySelectorAll('.edit-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        editNote(index);
+                    });
+                });
+
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        deleteNote(index);
+                    });
+                });
+            }
+
+            // 打开添加笔记模态框
+            function openAddModal() {
+                modalTitle.textContent = '新建笔记';
+                noteTitle.value = '';
+                noteContent.value = '';
+                currentImages = [];
+                editingIndex = -1;
+                noteModal.classList.add('active');
+
+                // 移除所有预览图片
+                const oldPreviews = document.querySelectorAll('.image-preview-item');
+                oldPreviews.forEach(preview => preview.remove());
+            
+
+            // 编辑笔记
+            function editNote(index) {
+                const note = notes[index];
+                modalTitle.textContent = '编辑笔记';
+                noteTitle.value = note.title || '';
+                noteContent.value = note.content || '';
+                editingIndex = index;
+                currentImages = note.imageUrls ? [...note.imageUrls] : [];
+
+                // 移除所有预览图片
+                const oldPreviews = document.querySelectorAll('.image-preview-item');
+                oldPreviews.forEach(preview => preview.remove());
+
+                // 显示当前图片
+                currentImages.forEach(imageUrl => {
+                    // 创建预览容器
+                    const previewContainer = document.createElement('div');
+                    previewContainer.className = 'image-preview-item';
+                    previewContainer.style.position = 'relative';
+                    previewContainer.style.display = 'inline-block';
+                    previewContainer.style.margin = '5px';
+                    previewContainer.style.maxWidth = '100px';
+
+                    // 创建预览图片
+                    const img = document.createElement('img');
+                    img.src = imageUrl;
+                    img.style.maxWidth = '100%';
+                    img.style.maxHeight = '100px';
+                    img.style.objectFit = 'contain';
+                    img.style.borderRadius = '4px';
+
+                    // 创建删除按钮
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = '×';
+                    deleteBtn.style.position = 'absolute';
+                    deleteBtn.style.top = '0';
+                    deleteBtn.style.right = '0';
+                    deleteBtn.style.background = 'rgba(255, 0, 0, 0.7)';
+                    deleteBtn.style.color = 'white';
+                    deleteBtn.style.border = 'none';
+                    deleteBtn.style.borderRadius = '50%';
+                    deleteBtn.style.width = '20px';
+                    deleteBtn.style.height = '20px';
+                    deleteBtn.style.cursor = 'pointer';
+                    deleteBtn.style.display = 'flex';
+                    deleteBtn.style.alignItems = 'center';
+                    deleteBtn.style.justifyContent = 'center';
+                    deleteBtn.style.fontSize = '12px';
+
+                    // 删除按钮事件
+                    deleteBtn.onclick = function() {
+                        const index = currentImages.indexOf(imageUrl);
+                        if (index > -1) {
+                            currentImages.splice(index, 1);
+                        }
+                        previewContainer.remove();
+                    };
+
+                    // 添加到DOM
+                    previewContainer.appendChild(img);
+                    previewContainer.appendChild(deleteBtn);
+                    fileUpload.parentNode.insertBefore(previewContainer, imagePreview.nextSibling);
+                });
+
+                noteModal.classList.add('active');
+            }
+
+            // 保存笔记
+            function saveNote(e) {
+                e.preventDefault();
+
+                const title = noteTitle.value.trim();
+                const content = noteContent.value.trim();
+
+                if (!title && !content) {
+                    alert('标题和内容不能同时为空');
+                    return;
+                }
+
+                const noteData = {
+                    title,
+                    content,
+                    createdAt: new Date().toISOString()
+                };
+
+                if (currentImages.length > 0) {
+                    noteData.imageUrls = [...currentImages]; // 存储多张图片
+                }
+
+                if (editingIndex === -1) {
+                    // 新增笔记
+                    notes.push(noteData);
+                } else {
+                    // 编辑笔记
+                    notes[editingIndex] = noteData;
+                }
+
+                // 保存到本地存储
+                localStorage.setItem('notes', JSON.stringify(notes));
+
+                // 关闭模态框
+                noteModal.classList.remove('active');
+
+                // 重新渲染笔记
+                renderNotes();
+            }
+
+            // 删除笔记
+            function deleteNote(index) {
+                if (confirm('确定要删除这条笔记吗？')) {
+                    notes.splice(index, 1);
+                    localStorage.setItem('notes', JSON.stringify(notes));
+                    renderNotes();
+                }
+            }
+
+            // 处理图片上传
+            function handleImageUpload(files) {
+                if (!files || files.length === 0) return;
+
+                // 不清空当前图片数组，以便添加新图片
+
+                // 处理每个文件
+                Array.from(files).forEach(file => {
+                    if (!file.type.startsWith('image/')) {
+                        alert('请上传图片文件');
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const imageUrl = e.target.result;
+                        currentImages.push(imageUrl);
+
+                        // 创建预览容器
+                        const previewContainer = document.createElement('div');
+                        previewContainer.className = 'image-preview-item';
+                        previewContainer.style.position = 'relative';
+                        previewContainer.style.display = 'inline-block';
+                        previewContainer.style.margin = '5px';
+                        previewContainer.style.maxWidth = '100px';
+
+                        // 创建预览图片
+                        const img = document.createElement('img');
+                        img.src = imageUrl;
+                        img.style.maxWidth = '100%';
+                        img.style.maxHeight = '100px';
+                        img.style.objectFit = 'contain';
+                        img.style.borderRadius = '4px';
+
+                        // 创建删除按钮
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.textContent = '×';
+                        deleteBtn.style.position = 'absolute';
+                        deleteBtn.style.top = '0';
+                        deleteBtn.style.right = '0';
+                        deleteBtn.style.background = 'rgba(255, 0, 0, 0.7)';
+                        deleteBtn.style.color = 'white';
+                        deleteBtn.style.border = 'none';
+                        deleteBtn.style.borderRadius = '50%';
+                        deleteBtn.style.width = '20px';
+                        deleteBtn.style.height = '20px';
+                        deleteBtn.style.cursor = 'pointer';
+                        deleteBtn.style.display = 'flex';
+                        deleteBtn.style.alignItems = 'center';
+                        deleteBtn.style.justifyContent = 'center';
+                        deleteBtn.style.fontSize = '12px';
+
+                        // 删除按钮事件
+                        deleteBtn.onclick = function() {
+                            const index = currentImages.indexOf(imageUrl);
+                            if (index > -1) {
+                                currentImages.splice(index, 1);
+                            }
+                            previewContainer.remove();
+                        };
+
+                        // 添加到DOM
+                        previewContainer.appendChild(img);
+                        previewContainer.appendChild(deleteBtn);
+                        fileUpload.parentNode.insertBefore(previewContainer, imagePreview.nextSibling);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            // 事件监听
+            addBtn.addEventListener('click', openAddModal);
+            closeModal.addEventListener('click', () => noteModal.classList.remove('active'));
+            cancelBtn.addEventListener('click', () => noteModal.classList.remove('active'));
+            noteForm.addEventListener('submit', saveNote);
+
+            // 点击模态框外部关闭
+            noteModal.addEventListener('click', function(e) {
+                if (e.target === noteModal) {
+                    noteModal.classList.remove('active');
+                }
+            });
+
+            // 图片上传 - 支持多文件
+            imageInput.addEventListener('change', function() {
+                if (this.files && this.files.length > 0) {
+                    handleImageUpload(this.files);
+                }
+            });
+
+            // 拖拽上传
+            fileUpload.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.style.borderColor = 'var(--primary-color)';
+            });
+
+            fileUpload.addEventListener('dragleave', function() {
+                this.style.borderColor = '#ddd';
+            });
+
+            fileUpload.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#ddd';
+
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    handleImageUpload(e.dataTransfer.files);
+                }
+            });
+
+            // 点击上传区域触发文件选择
+            fileUpload.addEventListener('click', function() {
+                imageInput.click();
+            });
+
+            // 初始渲染
+            renderNotes();
+        });
+    </script>
+</body>
+</html>

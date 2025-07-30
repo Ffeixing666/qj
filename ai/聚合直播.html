@@ -1,0 +1,53 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+</head>
+<body>
+
+<script>
+webapp.shine(true);
+        window.location.replace("https://lemonlive.deno.dev/huya");
+
+        // 注入内容
+        window.webapp.script(`
+
+// 监听全屏变化事件
+document.addEventListener("fullscreenchange", function() {
+  if (document.fullscreenElement) {
+    window.webapp.screen(true); // 开启横屏模式
+  } else {
+    window.webapp.screen(false); // 恢复默认横屏模式
+  }
+});
+
+document.addEventListener("webkitfullscreenchange", function() {
+  if (document.webkitFullscreenElement) {
+    window.webapp.screen(true); // 开启横屏模式
+  } else {
+    window.webapp.screen(false); // 恢复默认横屏模式
+  }
+});
+
+document.addEventListener("mozfullscreenchange", function() {
+  if (document.mozFullScreenElement) {
+    window.webapp.screen(true); // 开启横屏模式
+  } else {
+    window.webapp.screen(false); // 恢复默认横屏模式
+  }
+});
+
+document.addEventListener("msfullscreenchange", function() {
+  if (document.msFullscreenElement) {
+    window.webapp.screen(true); // 开启横屏模式
+  } else {
+    window.webapp.screen(false); // 恢复默认横屏模式
+  }
+});
+
+`);
+    </script>
+
+</body>
+</html>

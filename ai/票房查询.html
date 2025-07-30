@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>电影票房排行榜</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 100%;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        h1 {
+            text-align: center;
+            font-size: 22px;
+            margin: 15px 0;
+            color: #1a73e8;
+        }
+        .movie-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .movie-item {
+            background: #fff;
+            margin: 8px 0;
+            padding: 12px;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .movie-item:hover {
+            transform: translateY(-2px);
+        }
+        .movie-rank {
+            font-size: 16px;
+            font-weight: bold;
+            color: #d32f2f;
+            width: 30px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .movie-content {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .movie-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            display: inline;
+        }
+        .movie-info {
+            font-size: 14px;
+            color: #666;
+            display: inline;
+            margin-left: 8px;
+        }
+        .highlight {
+            color: #1a73e8;
+            font-weight: bold;
+        }
+        .flag {
+            font-size: 16px;
+            margin-left: 8px;
+            flex-shrink: 0;
+        }
+        footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 12px;
+            color: #888;
+            margin-top: auto;
+        }
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 18px;
+            }
+            .movie-item {
+                padding: 10px;
+            }
+            .movie-rank {
+                font-size: 14px;
+                width: 25px;
+            }
+            .movie-title {
+                font-size: 14px;
+            }
+            .movie-info {
+                font-size: 12px;
+                margin-left: 6px;
+            }
+            .flag {
+                font-size: 14px;
+                margin-left: 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>全球电影票房排行榜</h1>
+        <ul class="movie-list">
+            <li class="movie-item">
+                <span class="movie-rank">1</span>
+                <div class="movie-content">
+                    <span class="movie-title">阿凡达</span>
+                    <span class="flag">🇺🇸</span>
+                    <span class="movie-info">2009 | <span class="highlight">212.00亿元</span></span>
+                </div>
+            </li>
+            <li class="movie-item">
+                <span class="movie-rank">2</span>
+                <div class="movie-content">
+                    <span class="movie-title">复仇者联盟4：终局之战</span>
+                    <span class="flag">🇺🇸</span>
+                    <span class="movie-info">2019 | <span class="highlight">202.99亿元</span></span>
+                </div>
+            </li>
+            <li class="movie-item">
+                <span class="movie-rank">3</span>
+                <div class="movie-content">
+                    <span class="movie-title">阿凡达：水之道</span>
+                    <span class="flag">🇺🇸</span>
+                    <span class="movie-info">2022 | <span class="highlight">168.25亿元</span></span>
+                </div>
+            </li>
+            <li class="movie-item">
+                <span class="movie-rank">4</span>
+                <div class="movie-content">
+                    <span class="movie-title">泰坦尼克号</span>
+                    <span class="flag">🇺🇸</span>
+                    <span class="movie-info">1997 | <span class="highlight">164.23亿元</span></span>
+                </div>
+            </li>
+            <li class="movie-item">
+                <span class="movie-rank">5</span>
+                <div class="movie-content">
+                    <span class="movie-title">哪吒之魔童闹海</span>
+                    <span class="flag">🇨🇳</span>
+                    <span class="movie-info">2025 | <span class="highlight">159.08亿元</span> (国内155.05亿元)</span>
+                </div>
+            </li>
+            <li class="movie-item">
+                <span class="movie-rank">6</span>
+                <div class="movie-content">
+                    <span class="movie-title">星球大战：原力觉醒</span>
+                    <span class="flag">🇺🇸</span>
+                    <span class="movie-info">2015 | <span class="highlight">150.19亿元</span></span>
+                </div>
+            </li>
+            <li class="movie-item">
+                <span class="movie-rank">7</span>
+                <div class="movie-content">
+                    <span class="movie-title">复仇者联盟3：无限战争</span>
+                    <span class="flag">🇺🇸</span>
+                    <span class="movie-info">2018 | <span class="highlight">148.82亿元</span></span>
+                </div>
+            </li>
+            <li class="movie-item">
+                <span class="movie-rank">8</span>
+                <div class="movie-content">
+                    <span class="movie-title">蜘蛛侠：英雄无归</span>
+                    <span class="flag">🇺🇸</span>
+                    <span class="movie-info">2021 | <span class="highlight">141.60亿元</span></span>
+                </div>
+            </li>
+            <li class="movie-item">
+                <span class="movie-rank">9</span>
+                <div class="movie-content">
+                    <span class="movie-title">头脑特工队2</span>
+                    <span class="flag">🇺🇸</span>
+                    <span class="movie-info">2024 | <span class="highlight">123.19亿元</span></span>
+                </div>
+            </li>
+            <li class="movie-item">
+                <span class="movie-rank">10</span>
+                <div class="movie-content">
+                    <span class="movie-title">侏罗纪世界</span>
+                    <span class="flag">🇺🇸</span>
+                    <span class="movie-info">2015 | <span class="highlight">121.20亿元</span></span>
+                </div>
+            </li>
+            <li class="movie-item">
+                <span class="movie-rank">11</span>
+                <div class="movie-content">
+                    <span class="movie-title">狮子王</span>
+                    <span class="flag">🇺🇸</span>
+                    <span class="movie-info">2019 | <span class="highlight">120.51亿元</span></span>
+                </div>
+            </li>
+            <li class="movie-item">
+                <span class="movie-rank">12</span>
+                <div class="movie-content">
+                    <span class="movie-title">复仇者联盟</span>
+                    <span class="flag">🇺🇸</span>
+                    <span class="movie-info">2012 | <span class="highlight">110.26亿元</span></span>
+                </div>
+            </li>
+            <li class="movie-item">
+                <span class="movie-rank">13</span>
+                <div class="movie-content">
+                    <span class="movie-title">速度与激情7</span>
+                    <span class="flag">🇺🇸</span>
+                    <span class="movie-info">2015 | <span class="highlight">109.88亿元</span></span>
+                </div>
+            </li>
+            <li class="movie-item">
+                <span class="movie-rank">14</span>
+                <div class="movie-content">
+                    <span class="movie-title">壮志凌云2：独行侠</span>
+                    <span class="flag">🇺🇸</span>
+                    <span class="movie-info">2022 | <span class="highlight">108.45亿元</span></span>
+                </div>
+            </li>
+            <li class="movie-item">
+                <span class="movie-rank">15</span>
+                <div class="movie-content">
+                    <span class="movie-title">冰雪奇缘2</span>
+                    <span class="flag">🇺🇸</span>
+                    <span class="movie-info">2019 | <span class="highlight">105.45亿元</span></span>
+                </div>
+            </li>
+            <li class="movie-item">
+                <span class="movie-rank">16</span>
+                <div class="movie-content">
+                    <span class="movie-title">芭比</span>
+                    <span class="flag">🇺🇸</span>
+                    <span class="movie-info">2023 | <span class="highlight">104.93亿元</span></span>
+                </div>
+            </li>
+            <li class="movie-item">
+                <span class="movie-rank">17</span>
+                <div class="movie-content">
+                    <span class="movie-title">复仇者联盟2：奥创纪元</span>
+                    <span class="flag">🇺🇸</span>
+                    <span class="movie-info">2015 | <span class="highlight">101.88亿元</span></span>
+                </div>
+            </li>
+            <li class="movie-item">
+                <span class="movie-rank">18</span>
+                <div class="movie-content">
+                    <span class="movie-title">超级马里奥兄弟大电影</span>
+                    <span class="flag">🇺🇸🇯🇵</span>
+                    <span class="movie-info">2023 | <span class="highlight">98.68亿元</span></span>
+                </div>
+            </li>
+            <li class="movie-item">
+                <span class="movie-rank">19</span>
+                <div class="movie-content">
+                    <span class="movie-title">黑豹</span>
+                    <span class="flag">🇺🇸</span>
+                    <span class="movie-info">2018 | <span class="highlight">97.88亿元</span></span>
+                </div>
+            </li>
+            <li class="movie-item">
+                <span class="movie-rank">20</span>
+                <div class="movie-content">
+                    <span class="movie-title">哈利·波特与死亡圣器（下）</span>
+                    <span class="flag">🇬🇧🇺🇸</span>
+                    <span class="movie-info">2011 | <span class="highlight">97.35亿元</span></span>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <footer>
+        数据来源：2025年全球票房统计 | 仅供参考
+    </footer>
+</body>
+</html>

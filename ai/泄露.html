@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>信息查询</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        
+        body {
+            background-color: #f1f5f9;
+            color: #334155;
+            min-height: 100vh;
+        }
+        
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: #fff;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        }
+        
+        .content {
+            padding: 20px;
+            padding-top: 30px; /* 增加顶部内边距，避免内容紧贴顶部 */
+        }
+        
+        .search-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #475569;
+            font-size: 0.95rem;
+        }
+        
+        .input-group {
+            display: flex;
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        }
+        
+        .input {
+            flex: 1;
+            padding: 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        .input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        
+        .search-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .search-btn:hover {
+            background: #2563eb;
+        }
+        
+        .search-btn:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+        
+        .search-btn i {
+            margin-right: 6px;
+        }
+        
+        .error {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .error i {
+            margin-right: 6px;
+        }
+        
+        .result-container {
+            margin-top: 24px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .result-header {
+            display: flex;
+            align-items: center;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .result-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-left: 8px;
+        }
+        
+        .result-icon {
+            color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .result-item {
+            display: flex;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+        
+        .result-item:hover {
+            background: #f1f5f9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        
+        .item-icon {
+            width: 36px;
+            height: 36px;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #3b82f6;
+            margin-right: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            flex-shrink: 0;
+        }
+        
+        .item-content {
+            flex: 1;
+        }
+        
+        .item-label {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+        
+        .item-value {
+            font-weight: 500;
+            word-break: break-all;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+        
+        .empty-result {
+            text-align: center;
+            padding: 20px;
+            color: #64748b;
+        }
+        
+        .empty-result i {
+            font-size: 3rem;
+            color: #cbd5e1;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 480px) {
+            .app-container {
+                width: 100%;
+                box-shadow: none;
+            }
+            
+            .content {
+                padding: 16px;
+                padding-top: 24px;
+            }
+            
+            .search-card {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="content">
+            <div class="search-card">
+                <div class="form-group">
+                    <label for="qqInput" class="form-label">请输入有用信息</label>
+                    <div class="input-group">
+                        <input
+                            type="text"
+                            id="qqInput"
+                            class="input"
+                            placeholder="例如：10001"
+                            oninput="validateInput(this)"
+                        >
+                        <button id="queryBtn" class="search-btn" onclick="queryData()">
+                            <i class="fa-solid fa-search"></i>查询
+                        </button>
+                    </div>
+                    <div id="errorMsg" class="error" style="display: none;">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span id="errorText"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="resultContainer" class="result-container">
+                <div class="result-header">
+                    <div class="result-icon">
+                        <i class="fa-solid fa-database"></i>
+                    </div>
+                    <div class="result-title">查询结果</div>
+                </div>
+                
+                <div id="resultContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function validateInput(input) {
+            input.value = input.value.replace(/[^0-9]/g, '');
+            const errorMsg = document.getElementById('errorMsg');
+            if (input.value.length > 0) {
+                errorMsg.style.display = 'none';
+            }
+        }
+
+        async function queryData() {
+            const qqInput = document.getElementById('qqInput');
+            const queryBtn = document.getElementById('queryBtn');
+            const resultContainer = document.getElementById('resultContainer');
+            const resultContent = document.getElementById('resultContent');
+            const errorMsg = document.getElementById('errorMsg');
+            const errorText = document.getElementById('errorText');
+
+            const qq = qqInput.value.trim();
+            if (!qq) {
+                errorText.textContent = '请输入有效的信息';
+                errorMsg.style.display = 'flex';
+                return;
+            }
+
+            // 更改按钮状态为加载中
+            const originalBtnHtml = queryBtn.innerHTML;
+            queryBtn.disabled = true;
+            queryBtn.innerHTML = '<div class="loading-spinner"></div>查找';
+            resultContainer.style.display = 'none';
+            errorMsg.style.display = 'none';
+
+            try {
+                // 模拟网络延迟
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                const response = await fetch(`http://sucyan.cfd/api/privacy.php?value=${qq}`);
+                const data = await response.json();
+
+                if (data.code === 1) {
+                    const fields = [
+                        { key: 'names', label: '姓名', icon: 'fa-user' },
+                        { key: 'nicknames', label: '昵称', icon: 'fa-id-badge' },
+                        { key: 'phone_numbers', label: '手机号', icon: 'fa-phone' },
+                        { key: 'id_numbers', label: '身份证号', icon: 'fa-id-card' },
+                        { key: 'qq_numbers', label: 'QQ号', icon: 'fa-comment' },
+                        { key: 'wb_numbers', label: '微博号', icon: 'fa-weibo' },
+                        { key: 'passwords', label: '密码', icon: 'fa-lock' },
+                        { key: 'emails', label: '邮箱', icon: 'fa-envelope' },
+                        { key: 'addresses', label: '地址', icon: 'fa-location-dot' }
+                    ];
+
+                    let html = '';
+                    let hasData = false;
+                    
+                    fields.forEach(field => {
+                        if (data[field.key]) {
+                            hasData = true;
+                            html += `
+                                <div class="result-item">
+                                    <div class="item-icon">
+                                        <i class="fa-solid ${field.icon}"></i>
+                                    </div>
+                                    <div class="item-content">
+                                        <div class="item-label">${field.label}</div>
+                                        <div class="item-value">${data[field.key]}</div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+
+                    if (!hasData) {
+                        html = `
+                            <div class="empty-result">
+                                <i class="fa-solid fa-info-circle"></i>
+                                <p>未找到相关信息</p>
+                            </div>
+                        `;
+                    }
+
+                    resultContent.innerHTML = html;
+                    resultContainer.style.display = 'block';
+                } else {
+                    errorText.textContent = '查询失败，请稍后重试';
+                    errorMsg.style.display = 'flex';
+                }
+            } catch (error) {
+                errorText.textContent = '网络错误，请检查连接';
+                errorMsg.style.display = 'flex';
+            } finally {
+                queryBtn.disabled = false;
+                queryBtn.innerHTML = originalBtnHtml;
+            }
+        }
+
+        document.getElementById('qqInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') queryData();
+        });
+    </script>
+</body>
+</html>

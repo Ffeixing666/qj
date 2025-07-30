@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebCat-指南针</title>
+    <style>
+        * {
+            padding: 0px;
+            margin: 0px;
+            list-style: none;
+        }
+
+        :root,
+        body {
+            height: 100%;
+        }
+
+        body {
+            height: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .show {
+            height: 95%;
+            width: 350px;
+            transform: translate3D(0px, 20px, 0px);
+        }
+
+        .wrapper {
+            position: relative;
+            width: 700px;
+            height: 100%;
+            display: flex;
+        }
+
+        /* 第二页水平仪 */
+        .wrapper .gradienter-out {
+            position: relative;
+            height: 100%;
+            width: 350px;
+        }
+
+        .wrapper .gradienter-out span {
+            position: absolute;
+            left: calc(50% - 50px);
+            top: calc(50% - 50px);
+            height: 100px;
+            width: 100px;
+            border-radius: 50%;
+           
+        }
+
+        .wrapper .gradienter-out span div {
+            position: absolute;
+
+            height: 50px;
+            width: 100px;
+            top: calc(50% - 25px);
+            text-align: center;
+            line-height: 50px;
+            font-size: 30px;
+            font-weight: bold;
+            transform-origin: center center;
+        }
+
+
+        /* 第一页 */
+        .box {
+            position: relative;
+            width: 350px;
+            height: 100%;
+
+        }
+
+        /* 方向文字、经纬度 */
+        .box .text {
+            position: absolute;
+            width: 350px;
+            height: 120px;
+            left: calc(50% - 175px);
+            top: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .box .text .direction-angle {
+            height: 50px;
+            line-height: 50px;
+            text-align: center;
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+
+        .box .text .latitude {
+
+            float: left;
+            margin-left: 50px;
+            color: rgba(0, 0, 0, .5)
+        }
+
+        .box .text .longitude {
+            float: right;
+            margin-right: 50px;
+            color: rgba(0, 0, 0, .5)
+        }
+
+
+        /* 指针 */
+        .box .point {
+            position: absolute;
+            height: 25px;
+            width: 2px;
+            left: 50%;
+            top: 165px;
+            background-color: black;
+            z-index: 10;
+        }
+
+        /* 表盘 */
+
+        .box .dial {
+            position: relative;
+            height: 300px;
+            width: 300px;
+            top: 170px;
+            left: calc(50% - 155px);
+
+            transform-origin: 158px 111px;
+        }
+
+        /* 外圈表盘刻度 */
+
+        .box .dial .scale {
+            position: absolute;
+            height: 300px;
+            width: 300px;
+            border-radius: 50%;
+            transform-origin: 150px 150px;
+            transform: translatez(0px) rotate(11deg);
+        }
+
+        /* 小刻度 */
+        .box .dial .scale ul li {
+            position: absolute;
+            left: calc(50% - 1px);
+            width: 2px;
+            height: 10px;
+            background-color: #ddd;
+            transform-origin: center 110px;
+        }
+
+        /* 中刻度 */
+        .box .dial .scale ul li:nth-of-type(5n) {
+            height: 12px;
+        }
+
+        /* 大刻度 */
+        .box .dial .scale ul li:nth-of-type(10n) {
+            height: 15px;
+            background-color: rgba(0, 0, 0, .5);
+        }
+
+        /* 数字和方向 */
+        .box .dial .num ul li,
+        .box .dial .num .direction {
+            position: absolute;
+            height: 25px;
+            width: 34px;
+            left: calc(50% - 10px);
+            top: 20px;
+            text-align: center;
+            line-height: 25px;
+            font-family: '宋体';
+            font-weight: 500;
+            font-size: 10px;
+            transform-origin: center 90px;
+        }
+
+        .box .dial .num .direction {
+            top: 55px;
+            transform-origin: center 55px;
+        }
+
+        /* 红色小标记 */
+        .dial .num .sign {
+            position: absolute;
+            left: calc(50% - 4px);
+            top: 30px;
+            border-top: 10px solid transparent;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+
+            border-bottom: 10px solid red;
+        }
+
+        .dial .num .direction span {
+            position: absolute;
+            display: block;
+            height: 100%;
+            width: 100%;
+            text-align: center;
+            transform-origin: center;
+        }
+
+        .north {
+            color: red;
+        }
+
+        .box .gradienter-in {
+            position: relative;
+            left: calc(50% - 10px);
+            top: -6%;
+            height: 30px;
+            width: 30px;
+            border-radius: 50%;
+            box-sizing: border-box;
+            transform-origin: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="show">
+        <div class="wrapper">
+            <div class="box">
+
+                <div class="text">
+                    <div class="direction-angle">西北 123°</div>
+                    <div class="latitude">北纬 <span>123°5'23"</span></div>
+                    <div class="longitude">东经 <span> 123°5'23"</span></div>
+                </div>
+                <!-- 指针 -->
+                <div class="point"></div>
+
+                <!-- 表盘 -->
+                <div class="dial">
+
+                    <!-- 刻度 -->
+                    <div class="scale">
+                        <ul>
+                          <li>*180
+                        </ul>
+                    </div>
+
+                    <!-- 数字 -->
+                    <div class="num">
+                        <ul>
+                            <li>0</li>
+                            <li>20</li>
+                            <li>40</li>
+                            <li>60</li>
+                            <li>80</li>
+                            <li>100</li>
+                            <li>120</li>
+                            <li>140</li>
+                            <li>160</li>
+                            <li>180</li>
+                            <li>200</li>
+                            <li>220</li>
+                            <li>240</li>
+                            <li>260</li>
+                            <li>280</li>
+                            <li>300</li>
+                            <li>320</li>
+                            <li>340</li>
+
+                        </ul>
+                        <div class="sign"></div>
+                        <div class=" direction north"><span>北</span></div>
+                        <div class=" direction east"><span>东</span></div>
+                        <div class=" direction south"><span>南</span></div>
+                        <div class=" direction western"><span>西</span></div>
+                    </div>
+                </div>
+                <!-- 中心水平仪 -->
+                <div class="gradienter-in"></div>
+            </div>
+
+            <!-- 第二页水平仪 -->
+            <div class="gradienter-out">
+                <span>
+                    <div>12°</div>
+                </span>
+            </div>
+        </div>
+    </div>
+    <!-- <iframe id="geoPage" width=0 height=0 frameborder=0 style="display:none" scrolling="no" src="https://apis.map.qq.com/tools/geolocation?key=TMBBZ-5GYCP-AFQDK-L2QCS-K3323-HFBAX&referer=myapp" frameborder="0"></iframe> -->
+    <script>
+        var oScaleLiArr = document.getElementsByClassName('scale')[0].getElementsByTagName('li');
+        var oNumLiArr = document.getElementsByClassName('num')[0].getElementsByTagName('li');
+        var oDirectionLiArr = document.getElementsByClassName('direction');
+        var oLatitudeSpan = document.getElementsByClassName('latitude')[0].getElementsByTagName('span')[0]
+        var oLongitudeSpan = document.getElementsByClassName('longitude')[0].getElementsByTagName('span')[0];
+        var oGradienterOutSpan = document.getElementsByClassName('gradienter-out')[0].getElementsByTagName('span')[0];
+        var oGradienterOutDiv = document.getElementsByClassName('gradienter-out')[0].getElementsByTagName('div')[0];
+        var oGradienterIn = document.getElementsByClassName('gradienter-in')[0];
+        var oDial = document.getElementsByClassName('dial')[0];
+        var oPoint = document.getElementsByClassName('point')[0];
+        var oNorthSpan = document.getElementsByClassName('north')[0].getElementsByTagName('span')[0];
+        var oEastSpan = document.getElementsByClassName('east')[0].getElementsByTagName('span')[0];
+        var oSouthSpan = document.getElementsByClassName('south')[0].getElementsByTagName('span')[0];
+        var oWesternSpan = document.getElementsByClassName('western')[0].getElementsByTagName('span')[0];
+        var oDirecrionAngle = document.getElementsByClassName('direction-angle')[0];
+
+
+
+
+        // 让元素围成一圈
+        function rotateDom(domArr, deg) {
+            Array.prototype.slice.call(domArr, 0).forEach(function (ele, index) {
+                ele.style.transform = 'translatez(0px) rotate(' + deg * index + 'deg)';
+            })
+
+        }
+
+        // 获取经纬度
+
+        // 这是腾讯地图API定义好的事件
+        // window.addEventListener("message", function(e) {
+            // var loc = e.data;        瞎写的定位
+            var loc = {
+                module: 'geolocation',
+                nation: '中国',
+                province: '广东省',
+                city: '深圳市',
+                lat: '22.532332',
+                lng: '113.936553',
+            }
+        
+            oLatitudeSpan.innerHTML = parseInt(loc.lat) + '°' + parseInt((loc.lat - parseInt(loc.lat)) * 60) + "′" + parseInt(((loc.lat - parseInt(loc.lat)) * 60 - parseInt((loc.lat - parseInt(loc.lat)) * 60)) * 60) + "″";
+            oLongitudeSpan.innerHTML = parseInt(loc.lng) + '°' + parseInt((loc.lng - parseInt(loc.lng)) * 60) + "′" + parseInt(((loc.lng - parseInt(loc.lng)) * 60 - parseInt((loc.lng - parseInt(loc.lng)) * 60)) * 60) + "″";
+
+        // }, false);
+       
+       
+        // 绑定获取设备方位信息事件
+        window.addEventListener("deviceorientation", function (e) {
+            if (e.alpha) {
+
+                // 初始化表盘
+                rotateDom(oScaleLiArr, 2)
+                rotateDom(oNumLiArr, 20)
+                rotateDom(oDirectionLiArr, 90)
+
+                // 指北针
+                oDial.style.transform = "translatez(0px) rotate(" + Math.round(e.alpha) + "deg)";
+
+                var str = '';
+
+                // 判断方位
+                var dic = (Math.round((e.alpha) / 45) + 8) % 8;
+                switch (dic) {
+                    case 0:
+                        str = "北 ";
+                        break;
+                    case 1:
+                        str = "西北 ";
+                        break;
+                    case 2:
+                        str = "西 ";
+                        break;
+                    case 3:
+                        str = "西南 ";
+                        break;
+                    case 4:
+                        str = "南 ";
+                        break;
+                    case 5:
+                        str = "东南 ";
+                        break;
+                    case 6:
+                        str = "东 ";
+                        break;
+                    case 7:
+                        str = "东北 ";
+                        break;
+
+                };
+
+
+                // 方向角度 
+                oDirecrionAngle.innerHTML = str + Math.abs(Math.round(360 - e.alpha)) + '°';
+
+                // 第一页的水平仪和方位文字归正
+                oGradienterIn.style.transform = 'translate3D(0px, 0px, 0px) rotate(' + -Math.round(e.alpha) + 'deg)';
+                oNorthSpan.style.transform = 'translatez(0px) rotate(' + -Math.round(e.alpha) + 'deg)';
+                oEastSpan.style.transform = 'translatez(0px) rotate(' + -Math.round(e.alpha + 90) + 'deg)';
+                oSouthSpan.style.transform = 'translatez(0px) rotate(' + -Math.round(e.alpha + 180) + 'deg)';
+                oWesternSpan.style.transform = 'translatez(0px) rotate(' + -Math.round(e.alpha - 90) + 'deg)';
+
+
+                // 水平仪     必须这么写，否则不识别，注意每个值都要空格隔开  (得出的角度较大，为了美观除以一个数)
+                oGradienterOutSpan.style.cssText = "box-shadow: rgb(136, 135, 135) " + -Math.round(e.gamma) / 2 + "px " + -Math.round(e.beta) / 2 + "px 0px 0px, rgb(0, 0, 0) " + -Math.round(e.gamma) / 2 + "px " + -Math.round(e.beta) / 2 + "px 0px 0px inset;";
+                oGradienterIn.style.cssText = "box-shadow: rgb(136, 135, 135) " + -Math.round(e.gamma) / 5 + "px " + -Math.round(e.beta) / 5 + "px 0px 0px, rgb(0, 0, 0) " + -Math.round(e.gamma) / 5 + "px " + -Math.round(e.beta) / 5 + "px 0px 0px inset;";
+
+
+                // 指针指到正北时,指针变红；
+                if ((e.alpha) % 360 < 1 || (e.alpha) % 360 > 359) {
+                    oPoint.style.backgroundColor = "#f00";
+                } else {
+                    oPoint.style.backgroundColor = "#000"
+                }
+
+                // 第二页
+                // 设备哪个轴偏转量大就让圆圈里显示谁的值
+                if (e.beta > e.gamma) {
+                    oGradienterOutSpan.style.transform = 'translate3D(0px, 0px, 0px) rotate(' - Math.round(e.beta) + 'deg)'
+                    oGradienterOutDiv.innerHTML = Math.abs(Math.round(e.beta)) + '°';
+
+                } else {
+                    oGradienterOutDiv.innerHTML = Math.abs(Math.round(e.gamma)) + '°';
+
+                }
+            } else {
+                //alert("您的设备不支持Deviceorientation功能，请用Android设备打开！")
+            }
+
+        }, false)
+
+
+
+window.addEventListener('DOMContentLoaded', function() {
+  var viewportMeta = document.querySelector('meta[name="viewport"]');
+  if (viewportMeta) {
+    // 如果已存在 viewport 元素，修改其内容
+    viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1, user-scalable=no');
+  } else {
+    // 如果不存在，则动态创建一个
+    var newMeta = document.createElement('meta');
+    newMeta.setAttribute('name', 'viewport');
+    newMeta.setAttribute('content', 'width=device-width, initial-scale=1, user-scalable=no');
+    document.head.appendChild(newMeta);
+  }
+
+  // 禁止左右滚动，只使用 JavaScript
+  document.documentElement.style.overflowX = 'hidden';
+  document.body.style.overflowX = 'hidden';
+});
+
+    </script>
+
+</body>
+
+</html>

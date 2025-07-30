@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>AI工具聚合平台</title>
+    <style>
+        /* 提示框样式 */
+        .welcome-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .welcome-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            padding: 30px 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .welcome-modal.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-icon {
+            width: 70px;
+            height: 70px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 15px;
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+        }
+
+        .modal-icon::after {
+            content: '🎉';
+            font-size: 36px;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .modal-message {
+            font-size: 16px;
+            line-height: 1.7;
+            color: var(--text-color);
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: center;
+        }
+
+        .modal-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(74, 144, 226, 0.3);
+        }
+
+        .modal-button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(74, 144, 226, 0.4);
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 480px) {
+            .modal-content {
+                padding: 20px 15px;
+            }
+
+            .modal-title {
+                font-size: 18px;
+            }
+
+            .modal-message {
+                font-size: 14px;
+            }
+
+            .modal-button {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+        :root {
+            --primary-color: #4a90e2;
+            --primary-dark: #357ABD;
+            --secondary-color: #6c757d;
+            --background-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--background-color);
+            font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            color: var(--text-color);
+            line-height: 1.6;
+            padding-bottom: 60px;
+        }
+
+        .container {
+            width: 92%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px 0;
+        }
+
+        /* 问候语区域 */
+        .greeting {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 30px 20px;
+            border-radius: var(--border-radius);
+            margin: 20px 0;
+            box-shadow: 0 8px 24px rgba(74, 144, 226, 0.3);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .greeting-text {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .greeting-subtext {
+            font-size: 16px;
+            opacity: 0.9;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        .greeting-decoration {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            top: -50px;
+            right: -50px;
+            animation: pulse 6s infinite ease-in-out;
+        }
+
+        .greeting-decoration::before {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            bottom: -120px;
+            left: 100px;
+            animation: pulse 4s infinite ease-in-out 1s;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.1;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.2;
+            }
+        }
+
+        /* 标题区域 */
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 30px 0 15px;
+            padding-left: 12px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        /* AI功能专区样式 */
+        .ai-section {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .ai-section-header {
+            padding: 18px 20px;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-color);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .ai-section-header span {
+            transition: transform 0.3s ease;
+            font-size: 20px;
+        }
+
+        .ai-section-content {
+            padding: 20px;
+            display: none;
+        }
+
+        .ai-section.open .ai-section-content {
+            display: block;
+        }
+
+        .ai-section.open .ai-section-header span {
+            transform: rotate(180deg);
+        }
+
+        .tool-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .tool-item {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-size: 14px;
+            text-decoration: none;
+            transition: var(--transition);
+            box-shadow: 0 3px 6px rgba(74, 144, 226, 0.3);
+        }
+
+        .tool-item:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 12px rgba(74, 144, 226, 0.4);
+        }
+
+        /* 工具合集样式 */
+        .tools-collection {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .tool-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            color: var(--text-color);
+            position: relative;
+            transform-origin: center;
+            overflow: hidden;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
+        }
+
+        .tool-image {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            background-color: #f5f5f5;
+            transition: transform 0.5s ease;
+        }
+
+        .tool-card:hover .tool-image {
+            transform: scale(1.1);
+        }
+
+        .tool-name {
+            padding: 15px 10px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0.8));
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .greeting {
+                font-size: 18px;
+                padding: 20px 15px;
+            }
+
+            .section-title {
+                font-size: 18px;
+            }
+
+            .ai-section-header {
+                font-size: 16px;
+                padding: 15px;
+            }
+
+            .tools-collection {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 12px;
+            }
+
+            .tool-image {
+                height: 100px;
+            }
+
+            .tool-name {
+                font-size: 14px;
+                padding: 10px;
+            }
+        }
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 问候语区域 -->
+        <div class="greeting">
+                <div class="greeting-decoration"></div>
+                <div class="greeting-text" id="greetingText">Hi，早上好</div>
+                <div class="greeting-subtext">趣加AI</div>
+            </div>
+
+        <!-- AI聚合区域 -->
+        <h2 class="section-title">AI聚合</h2>
+
+        <!-- AI功能专区 -->
+        <div class="ai-section" onclick="toggleSection(this)">
+            <div class="ai-section-header">
+                AI功能专区 <span>▼</span>
+            </div>
+            <div class="ai-section-content">
+                <div class="tool-list">
+                    <a href="https://xiaoyi.huawei.com/chat/" class="tool-item">小艺AI</a>
+                    <a href="https://metaso.cn" class="tool-item">秘塔AI</a>
+
+                    <a href="web.html?url=https://zaiwen.xueban.org.cn/chat/working-edition" class="tool-item">再问AI</a>
+                    <a href="https://www.wenxiaobai.com" class="tool-item">Deepseek AI</a>
+                    <a href="https://claude3.free2gpt.xyz/" class="tool-item">Gemini AI</a>
+                    <a href="https://chat.minimaxi.com/" class="tool-item">海螺AI</a>
+                    <a href="https://www.doubao.com" class="tool-item">豆包AI</a>
+                    <a href="web.html?url=https://kimi.moonshot.cn/" class="tool-item">Kimi AI</a>
+                    <a href="https://chatforai.store/" class="tool-item">GPT-4 Mini AI</a>
+
+<!--                     <a href="https://chatgpt.com" class="tool-item">ChatGPT</a>
+                    <a href="https://gemini.google.com" class="tool-item">Gemini Advanced AI</a>
+                    <a href="https://claude.ai" class="tool-item">Claude AI</a> -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 工具合集区域 -->
+        <h2 class="section-title">工具合集</h2>
+        <div class="tools-collection">
+            <a href="https://poki.com/zh#utm_source=china" class="tool-card">
+                <img src="https://static.codemao.cn/pickduck/rk7dlqvPgl.png?hash=FiDqE-7NJVV8aVwxOETZ_bW_oH9E" alt="工具1" class="tool-image">
+                <div class="tool-name">来点游戏</div>
+            </a>
+            <a href="web.html?url=静谧.html" class="tool-card">
+                <img src="https://static.codemao.cn/pickduck/ByNpW5wwgl.png?hash=FvcEccGJJb_D265vBSj1Nag2n0hx" alt="工具7" class="tool-image">
+                <div class="tool-name">静谧之声</div>
+            </a>            
+
+            
+            <a href="web.html?url=https://mu-jie.cc/musicBoxAPP" class="tool-card">
+                <img src="https://static.codemao.cn/pickduck/BJx4x9wDle.png?hash=Fp-QDYeF7lOj8BpreVCu8wLKdiYh" alt="工具3" class="tool-image">
+                <div class="tool-name">来点音乐</div>
+            </a>
+            <a href="web.html?url=备忘录.html" class="tool-card">
+                <img src="https://static.codemao.cn/pickduck/rJTixqvPeg.png?hash=FhHmqsUoLmEjnG7pp3BzdVL1-4cx" alt="工具4" class="tool-image">
+                <div class="tool-name">备忘笔记</div>
+            </a>
+
+            <a href="web.html?url=工具箱.html" class="tool-card">
+                <img src="https://static.codemao.cn/pickduck/rJq-bqPwle.png?hash=FupkJDuyR8MKEe350UirveUQ-0sI" alt="工具2" class="tool-image">
+                <div class="tool-name">工具合集</div>
+
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // 首次访问提示框逻辑
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('welcomeModal');
+            const closeButton = document.getElementById('closeModal');
+
+            // 检查是否是首次访问
+            if (!localStorage.getItem('hasVisited')) {
+                // 延迟显示，让页面先加载
+                setTimeout(() => {
+                    modal.classList.add('show');
+                }, 800);
+
+                // 标记为已访问
+                localStorage.setItem('hasVisited', 'true');
+            }
+
+            // 关闭按钮点击事件
+            closeButton.addEventListener('click', function() {
+                modal.classList.remove('show');
+            });
+
+            // 点击模态框外部关闭
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.classList.remove('show');
+                }
+            });
+        });
+        // 根据时间显示不同的问候语
+        function updateGreeting() {
+            const now = new Date();
+            const hour = now.getHours();
+            const greetingText = document.getElementById('greetingText');
+            let greeting = '早上好';
+
+            if (hour >= 12 && hour < 18) {
+                greeting = '下午好';
+            } else if (hour >= 18) {
+                greeting = '晚上好';
+            }
+
+            greetingText.textContent = `Hi，${greeting}`;
+        }
+
+        // 切换AI功能专区的展开/折叠状态
+        function toggleSection(section) {
+            section.classList.toggle('open');
+        }
+
+        // 页面加载时默认展开AI功能专区
+        document.addEventListener('DOMContentLoaded', function() {
+            // 更新问候语
+            updateGreeting();
+            
+            const aiSection = document.querySelector('.ai-section');
+            aiSection.classList.add('open');
+
+            // 阻止工具项的点击事件冒泡
+            document.querySelectorAll('.tool-item').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            });
+
+            // 阻止工具卡片的点击事件冒泡（如果需要）
+            document.querySelectorAll('.tool-card').forEach(card => {
+                card.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            });
+        });
+
+        // 检测webapp对象是否存在并调用相关方法
+        if (window.webapp && typeof window.webapp.erect === 'function') {
+            webapp.erect(true); // 开启竖屏模式
+        }
+    </script>
+<!-- 欢迎提示框 -->
+    <div class="welcome-modal" id="welcomeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon"></div>
+                <h3 class="modal-title">欢迎来到趣加AI应用</h3>
+            </div>
+            <div class="modal-message">
+                各位新朋友/老朋友，欢迎来到趣加AI应用，从DeepSeek问世以来，该软件已逐步放弃，近期软件全面升级，并不内置任何模型，仅整合各大模型，请当作一个资源库使用吧！
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button" id="closeModal">知道了</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

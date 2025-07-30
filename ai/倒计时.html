@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+    <title>节假日倒计时</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            color: #333;
+            padding: 20px 15px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .add-form {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .add-form input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            min-width: 100px;
+        }
+
+        .add-btn {
+            background: #6B8DD6;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .add-btn:hover {
+            opacity: 0.9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            position: relative;
+            aspect-ratio: 1/1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .stat-item.completed {
+            background: #e0e0e0;
+            opacity: 0.7;
+        }
+
+        .stat-item.holiday {
+            background: #e3f2fd;
+        }
+
+        .stat-item.custom {
+            background: #fff3e0;
+        }
+
+        .stat-item.custom:hover {
+            background: #ffe0b2;
+            transition: background 0.3s ease;
+        }
+
+        .stat-label {
+            font-size: 1em;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .update-time {
+            text-align: center;
+            color: #888;
+            font-size: 0.9em;
+            margin-top: 20px;
+        }
+
+        /* 模态框样式 */
+        #edit-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .edit-date {
+            display: flex;
+            gap: 10px;
+        }
+
+        .edit-date input {
+            flex: 1;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-buttons button {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .modal-buttons button:hover {
+            opacity: 0.9;
+        }
+
+        .modal-buttons button:nth-child(1) {
+            background: #6B8DD6;
+            color: white;
+        }
+
+        .modal-buttons button:nth-child(2) {
+            background: #e57373;
+            color: white;
+        }
+
+        .modal-buttons button:nth-child(3) {
+            background: #bbb;
+            color: white;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 480px) {
+            .add-form input {
+                min-width: 100%;
+            }
+            .add-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 法定节假日 -->
+        <div class="card">
+            <h2 style="margin-bottom: 15px;" id="holidays-title"></h2>
+            <div class="stats-grid" id="holidays"></div>
+        </div>
+
+        <!-- 自定义节日 -->
+        <div class="card">
+            <h2 style="margin-bottom: 15px;">自定义节日</h2>
+            <div class="stats-grid" id="custom-festivals"></div>
+        </div>
+
+        <!-- 添加节日表单 -->
+        <div class="card add-form">
+            <input type="text" id="festival-title" placeholder="节日">
+            <input type="number" id="festival-year" placeholder="年份（不填为2025）" min="1000" max="9999">
+            <input type="number" id="festival-month" placeholder="月份" min="1" max="12">
+            <input type="number" id="festival-day" placeholder="日期" min="1" max="31">
+            <button class="add-btn" onclick="addCustomFestival()">➕ 添加节日</button>
+        </div>
+
+        <!-- 更新时间 -->
+        <div class="update-time" id="update-time"></div>
+
+        <!-- 编辑模态框 -->
+        <div id="edit-modal">
+            <div class="modal-content">
+                <h3>编辑节日</h3>
+                <input type="text" id="edit-title" placeholder="节日名称">
+                <div class="edit-date">
+                    <input type="number" id="edit-year" placeholder="年份（不填为2025）" min="1000" max="9999">
+                    <input type="number" id="edit-month" placeholder="月份" min="1" max="12">
+                    <input type="number" id="edit-day" placeholder="日期" min="1" max="31">
+                </div>
+                <div class="modal-buttons">
+                    <button onclick="saveEdit()">保存</button>
+                    <button onclick="deleteFestival()">删除</button>
+                    <button onclick="closeModal()">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+// 获取当前年份和日期
+const currentYear = new Date().getFullYear();
+const today = new Date();
+
+// 法定节假日数据（基于 2025 年假设日期，实际需根据官方调整）
+const holidays = [
+    { name: '元旦', date: `${currentYear}-01-01`, type: 'holiday' },
+    { name: '春节', date: `${currentYear}-01-29`, type: 'holiday' }, // 示例日期
+    { name: '清明', date: `${currentYear}-04-04`, type: 'holiday' },
+    { name: '劳动节', date: `${currentYear}-05-01`, type: 'holiday' },
+    { name: '端午', date: `${currentYear}-05-31`, type: 'holiday' }, // 示例日期
+    { name: '中秋', date: `${currentYear}-10-06`, type: 'holiday' }, // 示例日期
+    { name: '国庆', date: `${currentYear}-10-01`, type: 'holiday' }
+];
+
+// 加载自定义节日
+let customFestivals = [];
+let currentEditIndex = null;
+
+function loadCustomFestivals() {
+    const custom = localStorage.getItem('customFestivals');
+    if (custom) {
+        customFestivals = JSON.parse(custom);
+    }
+}
+loadCustomFestivals();
+
+// 计算倒计时
+function getCountdown(targetDate, isHoliday = false) {
+    const target = new Date(targetDate);
+    const diff = target - today;
+    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
+    if (diff < 0) {
+        return isHoliday ? '已过' : `已过 ${Math.abs(days)}天`;
+    }
+    if (diff === 0) return '今天';
+    return `还剩 ${days}天`;
+}
+
+// 排序节日
+function sortFestivals(festivals) {
+    return festivals.sort((a, b) => {
+        const aCountdown = getCountdown(a.date, a.type === 'holiday');
+        const bCountdown = getCountdown(b.date, b.type === 'holiday');
+        if (aCountdown.startsWith('已过') && !bCountdown.startsWith('已过')) return 1;
+        if (!aCountdown.startsWith('已过') && bCountdown.startsWith('已过')) return -1;
+        return new Date(a.date) - new Date(b.date); // 未过期按日期排序
+    });
+}
+
+// 渲染节日
+function renderFestivals() {
+    const holidayContainer = document.getElementById('holidays');
+    const customContainer = document.getElementById('custom-festivals');
+    const holidaysTitle = document.getElementById('holidays-title');
+    
+    holidaysTitle.innerHTML = `${currentYear}年法定节假日`;
+
+    holidayContainer.innerHTML = '';
+    customContainer.innerHTML = '';
+
+    // 渲染法定节假日
+    const sortedHolidays = sortFestivals(holidays);
+    sortedHolidays.forEach((festival) => {
+        const card = document.createElement('div');
+        card.className = `stat-item holiday ${getCountdown(festival.date, true).startsWith('已过') ? 'completed' : ''}`;
+        card.innerHTML = `
+            <div class="stat-label">${festival.name}</div>
+            <div class="stat-value">${getCountdown(festival.date, true)}</div>
+            <div style="font-size:0.9em;color:#888;margin-top:5px">${festival.date}</div>
+        `;
+        holidayContainer.appendChild(card);
+    });
+
+    // 渲染自定义节日
+    const sortedCustom = sortFestivals(customFestivals);
+    sortedCustom.forEach((festival, index) => {
+        const card = document.createElement('div');
+        card.className = `stat-item custom ${getCountdown(festival.date).startsWith('已过') ? 'completed' : ''}`;
+        card.innerHTML = `
+            <div class="stat-label">${festival.name}</div>
+            <div class="stat-value">${getCountdown(festival.date)}</div>
+            <div style="font-size:0.9em;color:#888;margin-top:5px">${festival.date}</div>
+        `;
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', () => openEditModal(index));
+        customContainer.appendChild(card);
+    });
+
+    // 更新时间
+    document.getElementById('update-time').innerHTML = 
+        `最后更新时间：${new Date().toLocaleTimeString()}`;
+}
+
+// 验证日期是否有效
+function isValidDate(year, month, day) {
+    const y = parseInt(year) || currentYear;
+    const m = parseInt(month);
+    const d = parseInt(day);
+
+    if (isNaN(m) || isNaN(d)) return false;
+    if (m < 1 || m > 12) return false;
+    if (d < 1) return false;
+
+    // 每月天数
+    const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    
+    // 检查闰年
+    if (m === 2) {
+        const isLeapYear = (y % 4 === 0 && y % 100 !== 0) || (y % 400 === 0);
+        daysInMonth[1] = isLeapYear ? 29 : 28;
+    }
+
+    return d <= daysInMonth[m - 1];
+}
+
+// 添加自定义节日
+function addCustomFestival() {
+    const titleInput = document.getElementById('festival-title');
+    const yearInput = document.getElementById('festival-year');
+    const monthInput = document.getElementById('festival-month');
+    const dayInput = document.getElementById('festival-day');
+
+    const title = titleInput.value.trim();
+    const year = yearInput.value || currentYear;
+    const month = monthInput.value;
+    const day = dayInput.value;
+
+    if (!title || !month || !day) {
+        alert('请填写完整的节日信息');
+        return;
+    }
+
+    if (!isValidDate(year, month, day)) {
+        alert('该日期无效');
+        return;
+    }
+
+    const date = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    customFestivals.push({ name: title, date, type: 'custom' });
+
+    localStorage.setItem('customFestivals', JSON.stringify(customFestivals));
+    titleInput.value = '';
+    yearInput.value = '';
+    monthInput.value = '';
+    dayInput.value = '';
+    renderFestivals();
+}
+
+// 打开编辑弹窗
+function openEditModal(index) {
+    currentEditIndex = index;
+    const festival = customFestivals[index];
+    const [year, month, day] = festival.date.split('-');
+
+    document.getElementById('edit-title').value = festival.name;
+    document.getElementById('edit-year').value = year;
+    document.getElementById('edit-month').value = parseInt(month);
+    document.getElementById('edit-day').value = parseInt(day);
+    document.getElementById('edit-modal').style.display = 'flex';
+}
+
+// 保存编辑
+function saveEdit() {
+    const title = document.getElementById('edit-title').value.trim();
+    const year = document.getElementById('edit-year').value || currentYear;
+    const month = document.getElementById('edit-month').value;
+    const day = document.getElementById('edit-day').value;
+
+    if (!title || !month || !day) {
+        alert('请填写完整的节日信息');
+        return;
+    }
+
+    if (!isValidDate(year, month, day)) {
+        alert('该日期无效');
+        return;
+    }
+
+    const formattedMonth = month.padStart(2, '0');
+    const formattedDay = day.padStart(2, '0');
+    customFestivals[currentEditIndex] = {
+        name: title,
+        date: `${year}-${formattedMonth}-${formattedDay}`,
+        type: 'custom'
+    };
+    localStorage.setItem('customFestivals', JSON.stringify(customFestivals));
+    closeModal();
+    renderFestivals();
+}
+
+// 删除节日
+function deleteFestival() {
+    customFestivals.splice(currentEditIndex, 1);
+    localStorage.setItem('customFestivals', JSON.stringify(customFestivals));
+    closeModal();
+    renderFestivals();
+}
+
+// 关闭弹窗
+function closeModal() {
+    document.getElementById('edit-modal').style.display = 'none';
+    currentEditIndex = null;
+}
+
+// 初始化渲染
+renderFestivals();
+// 每小时自动更新
+setInterval(renderFestivals, 3600000);
+</script>
+</body>
+</html>

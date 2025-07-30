@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文字循环生成器</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 20px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+  }
+  input, button {
+    padding: 10px;
+    margin: 10px 0;
+    width: 100%;
+    box-sizing: border-box;
+    border: none;
+    border-radius: 5px;
+    background-color: var(--input-bg-color);
+    color: var(--input-text-color);
+  }
+  button {
+    background-color: var(--button-bg-color);
+    color: var(--button-text-color);
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  button:hover {
+    background-color: var(--button-hover-bg-color);
+  }
+  #output {
+    padding: 10px;
+    background-color: var(--output-bg-color);
+    border: 1px solid var(--output-border-color);
+    min-height: 100px;
+    max-height: 200px;
+    overflow-y: auto;
+    word-wrap: break-word;
+    color: var(--output-text-color);
+  }
+</style>
+</head>
+<body>
+  <h2>文字循环生成器</h2>
+  <input type="text" id="textInput" placeholder="输入文字">
+  <input type="number" id="numberInput" placeholder="循环次数" min="1">
+  <button id="noNumberHorizontalBtn">无序号横排</button>
+  <button id="horizontalNumberedBtn">添加横排序号</button>
+  <button id="noNumberVerticalBtn">无序号竖排</button>
+  <button id="verticalNumberedBtn">添加竖排序号</button>
+  
+  <button id="copyBtn">一键复制</button>
+  <button id="refreshBtn">一键清除</button>
+  <div id="output"></div>
+
+  <script>
+    const themes = {
+      light: {
+        '--bg-color': '#f4f4f9',
+        '--text-color': '#333',
+        '--input-bg-color': '#fff',
+        '--input-text-color': '#333',
+        '--button-bg-color': '#6200ea',
+        '--button-text-color': '#fff',
+        '--button-hover-bg-color': '#3700b3',
+        '--output-bg-color': '#fff',
+        '--output-border-color': '#6200ea',
+        '--output-text-color': '#333'
+      },
+      dark: {
+        '--bg-color': '#1e1e1e',
+        '--text-color': '#f4f4f9',
+        '--input-bg-color': '#333',
+        '--input-text-color': '#f4f4f9',
+        '--button-bg-color': '#6200ea',
+        '--button-text-color': '#fff',
+        '--button-hover-bg-color': '#3700b3',
+        '--output-bg-color': '#2d2d2d',
+        '--output-border-color': '#6200ea',
+        '--output-text-color': '#f4f4f9'
+      }
+    };
+
+    function applyTheme(theme) {
+      const root = document.documentElement;
+      for (let [key, value] of Object.entries(theme)) {
+        root.style.setProperty(key, value);
+      }
+    }
+
+    function detectTheme() {
+      const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      if (prefersDarkScheme) {
+        applyTheme(themes.dark);
+      } else {
+        applyTheme(themes.light);
+      }
+    }
+
+    detectTheme();
+
+    // 获取DOM元素
+    const textInput = document.getElementById('textInput');
+    const numberInput = document.getElementById('numberInput');
+    const output = document.getElementById('output');
+    const noNumberHorizontalBtn = document.getElementById('noNumberHorizontalBtn');
+    const horizontalNumberedBtn = document.getElementById('horizontalNumberedBtn');
+    const noNumberVerticalBtn = document.getElementById('noNumberVerticalBtn');
+    const verticalNumberedBtn = document.getElementById('verticalNumberedBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const clearBtn = document.getElementById('clearBtn');
+
+    // 更新输出内容
+    function updateOutput(content) {
+      output.innerHTML = content;
+    }
+
+    // 获取输入内容
+    function getInputData() {
+      const text = textInput.value.trim();
+      const count = parseInt(numberInput.value) || 1;
+      return { text, count };
+    }
+
+    // 无序号横排
+    noNumberHorizontalBtn.addEventListener('click', () => {
+      const { text, count } = getInputData();
+      const result = Array.from({ length: count }, () => text).join(' ');
+      updateOutput(result);
+    });
+
+    // 添加横排序号
+    horizontalNumberedBtn.addEventListener('click', () => {
+      const { text, count } = getInputData();
+      const result = Array.from({ length: count }, (_, i) => `${i + 1}. ${text}`).join(' ');
+      updateOutput(result);
+    });
+
+    // 无序号竖排
+    noNumberVerticalBtn.addEventListener('click', () => {
+      const { text, count } = getInputData();
+      const result = Array.from({ length: count }, () => text).join('<br>');
+      updateOutput(result);
+    });
+
+    // 添加竖排序号
+    verticalNumberedBtn.addEventListener('click', () => {
+      const { text, count } = getInputData();
+      const result = Array.from({ length: count }, (_, i) => `${i + 1}. ${text}`).join('<br>');
+      updateOutput(result);
+    });
+
+    // 一键复制
+copyBtn.addEventListener('click', () => {
+  const content = output.innerText;  // Use innerText to get the content
+  navigator.clipboard.writeText(content).then(() => {
+    alert('复制成功');
+  }).catch(err => {
+    console.error('Error copying text: ', err);
+  });
+});
+
+    // 清除生成的内容
+refreshBtn.addEventListener('click', () => {
+  location.reload();  // 刷新页面
+});
+
+window.addEventListener('DOMContentLoaded', function() {
+  var viewportMeta = document.querySelector('meta[name="viewport"]');
+  if (viewportMeta) {
+    // 如果已存在 viewport 元素，修改其内容
+    viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1, user-scalable=no');
+  } else {
+    // 如果不存在，则动态创建一个
+    var newMeta = document.createElement('meta');
+    newMeta.setAttribute('name', 'viewport');
+    newMeta.setAttribute('content', 'width=device-width, initial-scale=1, user-scalable=no');
+    document.head.appendChild(newMeta);
+  }
+});
+  </script>
+</body>
+</html>

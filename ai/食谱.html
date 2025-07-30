@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+    <title>美食食谱</title>
+    <style>
+    /* 全局样式重置 */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    body {
+        background-color: #f5f5f5;
+        line-height: 1.6;
+    }
+
+    /* 应用容器 */
+    .app-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px 15px;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    
+    }
+
+    /* 搜索容器 */
+    .search-container {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    #searchInput {
+        flex: 1;
+        padding: 14px 20px;
+        border: none;
+        border-radius: 25px;
+        font-size: 16px;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+
+    #searchInput:focus {
+        outline: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .search-container button {
+        padding: 0 25px;
+        border: none;
+        border-radius: 25px;
+        background: #4ecdc4;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        transition: all 0.2s ease;
+    }
+
+    .search-container button:active {
+        transform: scale(0.96);
+        background: #3da89f;
+    }
+
+    /* 食谱卡片 */
+    #recipes {
+        display: grid;
+        gap: 1.5rem;
+    }
+
+    .recipe-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        transition: transform 0.3s ease;
+        animation: cardEntrance 0.6s ease-out;
+    }
+
+    .recipe-card img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-bottom: 1px solid #eee;
+    }
+
+    .recipe-card h3 {
+        color: #333;
+        padding: 16px 20px 8px;
+        font-size: 1.4rem;
+    }
+
+    .recipe-card p {
+        color: #666;
+        padding: 0 20px 12px;
+        font-size: 0.95rem;
+    }
+
+    .recipe-card p strong {
+        color: #4ecdc4;
+    }
+
+    /* 加载状态 */
+    .loading {
+        text-align: center;
+        color: #999;
+        padding: 2rem;
+        font-size: 1.1rem;
+    }
+
+    /* 动画效果 */
+    @keyframes cardEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 480px) {
+        .app-container {
+            padding: 15px 10px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+        }
+
+        .search-container {
+            flex-direction: column;
+        }
+
+        .search-container button {
+            padding: 14px;
+            width: 100%;
+        }
+    }
+</style>
+</head>
+<body>
+
+    <div class="app-container">
+        <h1>美食食谱</h1>
+        
+        <!-- 搜索框 -->
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="输入菜名">
+            <button onclick="searchRecipe()">搜索</button>
+        </div>
+
+        <!-- 食谱展示区域 -->
+        <div id="recipes">
+            <div class="loading">请输入菜名，搜索美味食谱</div>
+        </div>
+    </div>
+
+    <script>
+        function searchRecipe() {
+            let searchQuery = document.getElementById('searchInput').value;
+            if (!searchQuery) return;
+
+            let recipesContainer = document.getElementById('recipes');
+            recipesContainer.innerHTML = '<div class="loading">正在搜索，请稍候...</div>';
+
+            let apiUrl = `https://api.pearktrue.cn/api/cookbook/?search=${searchQuery}`;
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    let recipes = data.data;
+                    recipesContainer.innerHTML = '';
+
+                    if (recipes.length === 0) {
+                        recipesContainer.innerHTML = '<div class="loading">未找到相关食谱，请尝试其他菜名</div>';
+                        return;
+                    }
+
+                    recipes.forEach(recipe => {
+                        let recipeCard = document.createElement('div');
+                        recipeCard.classList.add('recipe-card');
+
+                        recipeCard.innerHTML = `
+                            <img src="${recipe.image}" alt="${recipe.name}">
+                            <h3>${recipe.name}</h3>
+                            <p>${recipe.description}</p>
+                            <p><strong>材料:</strong> ${recipe.materials}</p>
+                            <p><strong>做法:</strong> ${recipe.practice}</p>
+                        `;
+                        recipesContainer.appendChild(recipeCard);
+                    });
+                })
+                .catch(error => {
+                    console.error('获取食谱数据失败:', error);
+                    recipesContainer.innerHTML = '<div class="loading">网络错误，请稍后重试</div>';
+                });
+        }
+    </script>
+
+</body>
+</html>

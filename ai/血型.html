@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no">
+    <title>血型遗传计算器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .blood-type-btn {
+            transition: all 0.3s ease;
+        }
+        .blood-type-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .blood-type-btn.selected {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        .result-item {
+            transition: all 0.3s ease;
+        }
+        .result-item:hover {
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-purple-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-md">
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden p-6 mb-8">
+            <h1 class="text-2xl font-bold text-center text-purple-800 mb-2">
+                <i class="fas fa-tint text-red-500 mr-2"></i>血型遗传计算器
+            </h1>
+            <p class="text-gray-600 text-center text-sm mb-6">选择父母血型，预测子女可能的血型</p>
+            
+            <div class="mb-8">
+                <h2 class="text-lg font-semibold text-gray-700 mb-3 flex items-center">
+                    <i class="fas fa-male text-blue-500 mr-2"></i>父亲血型
+                </h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <button class="blood-type-btn py-3 px-4 rounded-lg bg-blue-100 text-blue-800 border-2 border-blue-200" data-type="A">A型</button>
+                    <button class="blood-type-btn py-3 px-4 rounded-lg bg-red-100 text-red-800 border-2 border-red-200" data-type="B">B型</button>
+                    <button class="blood-type-btn py-3 px-4 rounded-lg bg-yellow-100 text-yellow-800 border-2 border-yellow-200" data-type="AB">AB型</button>
+                    <button class="blood-type-btn py-3 px-4 rounded-lg bg-gray-100 text-gray-800 border-2 border-gray-200" data-type="O">O型</button>
+                </div>
+            </div>
+            
+            <div class="mb-8">
+                <h2 class="text-lg font-semibold text-gray-700 mb-3 flex items-center">
+                    <i class="fas fa-female text-pink-500 mr-2"></i>母亲血型
+                </h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <button class="blood-type-btn py-3 px-4 rounded-lg bg-blue-100 text-blue-800 border-2 border-blue-200" data-type="A">A型</button>
+                    <button class="blood-type-btn py-3 px-4 rounded-lg bg-red-100 text-red-800 border-2 border-red-200" data-type="B">B型</button>
+                    <button class="blood-type-btn py-3 px-4 rounded-lg bg-yellow-100 text-yellow-800 border-2 border-yellow-200" data-type="AB">AB型</button>
+                    <button class="blood-type-btn py-3 px-4 rounded-lg bg-gray-100 text-gray-800 border-2 border-gray-200" data-type="O">O型</button>
+                </div>
+            </div>
+            
+            <button id="calculate-btn" class="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-semibold shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                <i class="fas fa-calculator mr-2"></i>计算遗传概率
+            </button>
+        </div>
+        
+        <div id="result-section" class="bg-white rounded-2xl shadow-xl overflow-hidden p-6 hidden">
+            <h2 class="text-xl font-bold text-center text-purple-800 mb-4">
+                <i class="fas fa-baby text-pink-500 mr-2"></i>子女可能血型
+            </h2>
+            <div id="result-container" class="space-y-3"></div>
+            
+            <div class="mt-6 pt-4 border-t border-gray-200">
+                <h3 class="text-sm font-semibold text-gray-600 mb-2">血型遗传小知识</h3>
+                <p class="text-xs text-gray-500">血型遗传遵循孟德尔遗传规律，A和B是显性基因，O是隐性基因。父母血型组合决定子女可能的血型。</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 血型遗传表，定义可能的基因型
+            const bloodTypeInheritance = {
+                'A': { genes: ['AA', 'AO'] },
+                'B': { genes: ['BB', 'BO'] },
+                'AB': { genes: ['AB'] },
+                'O': { genes: ['OO'] }
+            };
+            
+            let fatherBloodType = null;
+            let motherBloodType = null;
+            
+            // 选择血型按钮
+            const bloodTypeBtns = document.querySelectorAll('.blood-type-btn');
+            bloodTypeBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const parentSection = this.closest('div').previousElementSibling;
+                    const isFather = parentSection.textContent.includes('父亲');
+                    
+                    // 移除同一组中其他按钮的选中状态
+                    this.parentNode.querySelectorAll('.blood-type-btn').forEach(b => {
+                        b.classList.remove('selected', 'border-blue-500', 'border-pink-500');
+                        b.classList.add('border-transparent');
+                    });
+                    
+                    // 添加选中状态
+                    this.classList.add('selected');
+                    this.classList.remove('border-transparent');
+                    this.classList.add(isFather ? 'border-blue-500' : 'border-pink-500');
+                    
+                    // 保存选择
+                    if (isFather) {
+                        fatherBloodType = this.dataset.type;
+                    } else {
+                        motherBloodType = this.dataset.type;
+                    }
+                    
+                    // 启用计算按钮
+                    document.getElementById('calculate-btn').disabled = !(fatherBloodType && motherBloodType);
+                });
+            });
+            
+            // 计算按钮
+            document.getElementById('calculate-btn').addEventListener('click', function() {
+                if (!fatherBloodType || !motherBloodType) return;
+                
+                // 计算可能的血型组合
+                const possibleTypes = calculatePossibleBloodTypes(fatherBloodType, motherBloodType);
+                
+                // 显示结果
+                displayResults(possibleTypes);
+                
+                // 显示结果区域
+                document.getElementById('result-section').classList.remove('hidden');
+                
+                // 滚动到结果区域
+                document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+            });
+            
+            // 计算可能的血型
+            function calculatePossibleBloodTypes(father, mother) {
+                const fatherGenes = bloodTypeInheritance[father].genes;
+                const motherGenes = bloodTypeInheritance[mother].genes;
+
+                const possibleCombinations = [];
+
+                // 生成所有可能的基因组合
+                for (const fGene of fatherGenes) {
+                    for (const mGene of motherGenes) {
+                        for (const fAllele of fGene.split('')) { // 拆分父亲基因
+                            for (const mAllele of mGene.split('')) { // 拆分母亲基因
+                                // 组合两个等位基因（排序以确保AB和BA被视为相同）
+                                const combination = [fAllele, mAllele].sort().join('');
+                                possibleCombinations.push(combination);
+                            }
+                        }
+                    }
+                }
+
+                // 计算每种血型的概率
+                const typeCounts = { 'A': 0, 'B': 0, 'AB': 0, 'O': 0 };
+                possibleCombinations.forEach(comb => {
+                    if (comb === 'AA' || comb === 'AO') typeCounts['A']++;
+                    else if (comb === 'BB' || comb === 'BO') typeCounts['B']++;
+                    else if (comb === 'AB') typeCounts['AB']++;
+                    else if (comb === 'OO') typeCounts['O']++;
+                });
+
+                // 转换为概率百分比
+                const total = possibleCombinations.length;
+                const probabilities = {};
+                for (const type in typeCounts) {
+                    if (typeCounts[type] > 0) {
+                        probabilities[type] = Math.round((typeCounts[type] / total) * 100);
+                    }
+                }
+
+                return probabilities;
+            }
+            
+            // 显示结果
+            function displayResults(results) {
+                const resultContainer = document.getElementById('result-container');
+                resultContainer.innerHTML = '';
+                
+                // 按概率排序
+                const sortedResults = Object.entries(results).sort((a, b) => b[1] - a[1]);
+                
+                if (sortedResults.length === 0) {
+                    resultContainer.innerHTML = '<p class="text-gray-500 text-center">无法确定可能的血型</p>';
+                    return;
+                }
+                
+                sortedResults.forEach(([type, probability]) => {
+                    let bgColor = '';
+                    let icon = '';
+                    switch(type) {
+                        case 'A':
+                            bgColor = 'bg-blue-100 text-blue-800';
+                            icon = '<i class="fas fa-dna text-blue-500 mr-2"></i>';
+                            break;
+                        case 'B':
+                            bgColor = 'bg-red-100 text-red-800';
+                            icon = '<i class="fas fa-dna text-red-500 mr-2"></i>';
+                            break;
+                        case 'AB':
+                            bgColor = 'bg-yellow-100 text-yellow-800';
+                            icon = '<i class="fas fa-dna text-yellow-500 mr-2"></i>';
+                            break;
+                        case 'O':
+                            bgColor = 'bg-gray-100 text-gray-800';
+                            icon = '<i class="fas fa-dna text-gray-500 mr-2"></i>';
+                            break;
+                    }
+                    
+                    const resultItem = document.createElement('div');
+                    resultItem.className = `result-item flex justify-between items-center p-3 rounded-lg ${bgColor}`;
+                    resultItem.innerHTML = `
+                        <div class="flex items-center">
+                            ${icon}
+                            <span class="font-semibold">${type}型</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="font-bold mr-1">${probability}%</span>
+                            <div class="w-16 h-2 bg-white rounded-full overflow-hidden">
+                                <div class="h-full ${bgColor.replace('100', '400')}" style="width: ${probability}%"></div>
+                            </div>
+                        </div>
+                    `;
+                    resultContainer.appendChild(resultItem);
+                });
+                
+                // 添加父母信息
+                const parentsInfo = document.createElement('div');
+                parentsInfo.className = 'text-center text-sm text-gray-500 mt-4 mb-2';
+                parentsInfo.textContent = `父亲: ${fatherBloodType}型 | 母亲: ${motherBloodType}型`;
+                resultContainer.prepend(parentsInfo);
+            }
+        });
+    </script>
+</body>
+</html>

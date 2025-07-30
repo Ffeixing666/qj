@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<style>
+/* 定义 CSS 变量 */
+:root {
+  --card-bg-light: #fff;
+  --card-bg-dark: #333;
+  --card-border-radius: 15px;
+  --card-shadow: rgba(0, 0, 0, 0.1) 0px 4px 8px;
+  --button-bg-light: #1a73e8;
+  --button-bg-dark: #367c39;
+  --button-hover-bg: #567a4f;
+  --button-text-color: white;
+  --button-padding: 10px 24px;
+  --font-size-base: 16px;
+  --font-size-heading: 2em;
+  --shadow-color: rgba(0, 0, 0, 0.2);
+}
+
+body {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  background-color: #f4f4f4;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.card {
+  background-color: var(--card-bg-light);
+  border-radius: var(--card-border-radius);
+  box-shadow: var(--card-shadow);
+  width: 90%;
+  max-width: 400px;
+  margin: 40px auto;
+  padding: 20px;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+h1 {
+  font-size: var(--font-size-heading);
+  color: #333;
+  margin: 10px 0;
+}
+
+p {
+  font-size: var(--font-size-base);
+  color: #555;
+  margin: 10px 0;
+}
+
+.button {
+  background-color: var(--button-bg-light);
+  border: none;
+  color: var(--button-text-color);
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: var(--font-size-base);
+  padding: var(--button-padding);
+  cursor: pointer;
+  border-radius: 50px;
+  box-shadow: 0px 4px 8px var(--shadow-color);
+  transition: box-shadow 0.3s;
+  margin-top: 20px;
+}
+
+.button:hover {
+  box-shadow: 0px 8px 16px var(--shadow-color);
+}
+
+.button:active {
+  background-color: var(--button-hover-bg);
+}
+
+img {
+  width: 100%;
+  max-width: 350px;
+  height: auto;
+  margin-top: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 平板和桌面端样式 */
+@media only screen and (min-width: 768px) {
+  .button {
+    font-size: 2vw;
+    padding: 1.5vw 3vw;
+  }
+
+  img {
+    max-width: 500px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>给点儿呗~</h1>
+  
+  <img id="image" src="" alt="BZBZ" onclick="changeImage()"><br/><br/>
+  <a href="weixin://" class="button">截图去微信扫码</a>
+</div>
+
+<script>
+// 图片数组
+const images = {
+  light: "图片2.png",  // 确保路径正确
+};
+
+// 设置图片路径
+document.getElementById('image').src = images.light;
+</script>
+
+</body>
+</html>

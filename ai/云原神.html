@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>工具分类</title>
+  <style>
+    body {
+      background: #f4f6f9;
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #333;
+      user-select: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* 去掉长按时的蓝色高亮 */
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .container {
+      width: 90%;
+      margin: 0 auto;
+      padding: 20px 0;
+      box-sizing: border-box;
+    }
+
+    .section {
+      margin-bottom: 30px;
+      border-radius: 10px;
+      background: #ffffff;
+      box-shadow: 5px 5px 10px #d1d1d1, -5px -5px 10px #ffffff;
+      padding: 15px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .section:hover {
+      background-color: #f1f1f1;
+    }
+
+    .section h2 {
+      font-size: 22px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      color: #4a90e2;
+    }
+
+    .section h2::before {
+      content: "✦";
+      margin-right: 8px;
+      color: #4a90e2;
+    }
+
+    .section h2 span {
+      margin-left: auto;
+      font-size: 16px;
+      transition: transform 0.3s ease;
+    }
+
+    .tool-list {
+      display: none; /* 默认隐藏 */
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .tool-item {
+      background: #4a90e2;
+      border-radius: 25px;
+      padding: 10px 18px;
+      font-size: 14px;
+      color: white;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease, transform 0.1s ease;
+      border: none;
+    }
+
+    .tool-item:hover {
+      background: #357ABD;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+      transform: translateY(-4px);
+    }
+
+    .tool-item:active {
+      background: #357ABD;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      transform: translateY(2px);
+    }
+
+    /* 深色模式样式 */
+    .dark-mode {
+      background-color: #333;
+      color: #fff;
+    }
+
+    .dark-mode .section {
+      background-color: #444;
+      box-shadow: 5px 5px 10px #222, -5px -5px 10px #555;
+    }
+
+    .dark-mode .tool-item {
+      background: #357ABD;
+    }
+
+    .dark-mode .section.open h2 span {
+      transform: rotate(90deg);
+    }
+
+    /* 展开状态箭头 */
+    .section.open h2 span {
+      transform: rotate(90deg);
+    }
+
+  </style>
+</head>
+<body>
+
+        <div class="container">
+        
+        <div class="section" onclick="toggleVisibility('system-tools', this)">
+      <h2>洛克王国<span>▶</span></h2>
+      <div class="tool-list" id="system-tools">
+         <a href="洛克王国.html" class="tool-item">洛克王国lite</a>
+      </div>
+    </div>
+        
+        
+   
+    <div class="section" onclick="toggleVisibility('daily-tools', this)">
+      <h2>小游戏<span>▶</span></h2>
+      <div class="tool-list" id="daily-tools">
+      <a href="游戏.html" class="tool-item">poki</a>
+      <a href="https://321fa.cn/0/5/" class="tool-item">合成大西瓜</a>
+      </div>
+    </div>
+
+
+
+
+
+
+
+    <div class="section" onclick="toggleVisibility('movie-tools', this)">
+      <h2>网游<span>▶</span></h2>
+      <div class="tool-list" id="movie-tools">
+        <a href="原神.html" class="tool-item">原神</a>
+        <a href="崩铁.html" class="tool-item">崩坏：星穹铁道</a>
+        <a href="鸣潮.html" class="tool-item">鸣潮</a>
+        
+        
+      </div>
+    </div>
+    
+
+
+
+<script>
+    // 完善后的toggleVisibility函数
+    function toggleVisibility(id, element) {
+      const toolList = document.getElementById(id);
+      const section = element.closest('.section');
+      const arrow = section.querySelector('h2 span');
+
+      // 精准判断当前状态
+      const isCurrentlyOpen = window.getComputedStyle(toolList).display !== 'none';
+      const newState = !isCurrentlyOpen;
+
+      // 更新显示状态
+      toolList.style.display = newState ? 'flex' : 'none';
+      section.classList.toggle('open', newState);
+      arrow.textContent = newState ? '◁' : '▶';
+
+      // 持久化存储
+      localStorage.setItem(id, newState.toString());
+    }
+
+    // 增强的初始化逻辑
+    window.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.section').forEach(section => {
+        const id = section.querySelector('.tool-list').id;
+        const toolList = document.getElementById(id);
+        const arrow = section.querySelector('h2 span');
+
+        // 读取存储状态（优先使用存储值，默认展开）
+        const storedState = localStorage.getItem(id);
+        const initialOpen = storedState !== null ? storedState === 'true' : true;
+
+        // 应用初始状态
+        toolList.style.display = initialOpen ? 'flex' : 'none';
+        section.classList.toggle('open', initialOpen);
+        arrow.textContent = initialOpen ? '◁' : '▶';
+      });
+
+      // 阻止工具项的点击冒泡
+      document.querySelectorAll('.tool-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation(); // 关键修复：阻止事件冒泡
+        });
+      });
+    });
+    
+    webapp.erect(true);
+   //开启竖屏模式false恢复默认
+   webapp.entire(false); //开启全屏模式false退出全屏 
+   
+   window.addEventListener('DOMContentLoaded', function() {
+  var viewportMeta = document.querySelector('meta[name="viewport"]');
+  if (viewportMeta) {
+    // 如果已存在 viewport 元素，修改其内容
+    viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1, user-scalable=no');
+  } else {
+    // 如果不存在，则动态创建一个
+    var newMeta = document.createElement('meta');
+    newMeta.setAttribute('name', 'viewport');
+    newMeta.setAttribute('content', 'width=device-width, initial-scale=1, user-scalable=no');
+    document.head.appendChild(newMeta);
+  }
+});
+   
+</script>
+
+ 
+</body>
+</html>

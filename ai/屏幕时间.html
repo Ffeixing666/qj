@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.1, maximum-scale=1">
+<title>横屏时间显示</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: black;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        user-select: none; /* 禁止选中文本 */
+    }
+    #clock {
+        color: white;
+        font-size: 11em; /* 默认字体大小 */
+        text-align: center;
+        font-family: 'Courier New', monospace; /* 使用等宽字体 */
+        font-weight: bold; /* 添加此行使字体加粗 */
+        letter-spacing: -0.1em;
+    }
+</style>
+</head>
+<body>
+<div id="clock"></div>
+
+<script>
+window.webapp.entire(true);
+window.webapp.screen(true);
+// 请求屏幕常亮
+let wakeLock = null;
+
+async function requestWakeLock() {
+    try {
+        wakeLock = await navigator.wakeLock.request('screen');
+        console.log('Screen Wake Lock acquired');
+    } catch (err) {
+        console.error(`${err.name}, ${err.message}`);
+    }
+}
+
+// 更新时间
+function updateClock() {
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+    const timeString = `${hours}:${minutes}:${seconds}`;
+    document.getElementById('clock').textContent = timeString;
+}
+
+// 初始化
+async function init() {
+    await requestWakeLock();
+    setInterval(updateClock, 1000);
+    updateClock();
+}
+
+// 初始化页面
+init();
+
+// 在页面离开时释放屏幕常亮
+window.addEventListener('unload', () => {
+    if (wakeLock !== null) {
+        wakeLock.release();
+        console.log('Screen Wake Lock released');
+    }
+});
+
+// 禁止右键菜单
+document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+});
+</script>
+</body>
+</html>

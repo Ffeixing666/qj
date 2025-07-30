@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全屏滚动长图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            min-height: 100vh;
+            background: #000;
+            overflow-y: auto;
+        }
+        #fullscreen-image {
+            width: 100%;
+            height: auto;
+            display: none;
+            margin: 0 auto;
+            max-width: 1200px;
+        }
+        .loading {
+            color: white;
+            text-align: center;
+            padding: 20px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .save-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: #ffffff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z'/%3E%3C/svg%3E");
+            background-size: 50%;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: none;
+        }
+        .save-button.active {
+            display: block;
+        }
+        .progress {
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            color: white;
+            background: rgba(0,0,0,0.7);
+            padding: 5px 10px;
+            border-radius: 3px;
+            display: none;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="loading">数据加载中...</div>
+    <img id="fullscreen-image" alt="全屏长图">
+    <div class="progress" id="download-progress">下载中: 0%</div>
+    <button class="save-button" onclick="saveImage()"></button>
+
+    <script>
+        const imageSources = [
+            'http://shp.qpic.cn/collector/1347526903/1baf524a-1d20-40b5-8836-ff302287fda7/0'
+        ];
+
+        const saveImageUrl = 'http://shp.qpic.cn/collector/1347526903/1baf524a-1d20-40b5-8836-ff302287fda7/0';
+        const FILE_NAME = 'image_' + Date.now() + '.jpg';
+
+        // 下载功能带进度
+        async function saveImage() {
+            if (!webapp.bestow()) {
+                webapp.toast('请授予存储权限');
+                webapp.rights();
+                return;
+            }
+
+            const button = document.querySelector('.save-button');
+            const progress = document.getElementById('download-progress');
+            button.disabled = true;
+            progress.style.display = 'block';
+
+            try {
+                const response = await fetch(saveImageUrl);
+                const total = parseInt(response.headers.get('content-length') || '0');
+                const reader = response.body.getReader();
+                const chunks = [];
+                let loaded = 0;
+
+                while(true) {
+                    const {done, value} = await reader.read();
+                    if (done) break;
+                    
+                    chunks.push(value);
+                    loaded += value.length;
+                    if (total > 0) {
+                        const percentage = Math.round((loaded / total) * 100);
+                        progress.textContent = `下载中: ${percentage}%`;
+                    }
+                }
+
+                const blob = new Blob(chunks);
+                const base64 = await blobToBase64(blob);
+                webapp.savefile('/storage/emulated/0/Download/' + FILE_NAME, base64);
+                webapp.toast('已保存到Download目录');
+            } catch (error) {
+                webapp.toast('下载失败');
+            } finally {
+                button.disabled = false;
+                progress.style.display = 'none';
+            }
+        }
+
+        // Blob转Base64
+        function blobToBase64(blob) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result.split(',')[1]);
+                reader.readAsDataURL(blob);
+            });
+        }
+
+        // 图片加载
+        function loadImageWithFallback(sources, targetElement) {
+            let currentIndex = 0;
+            
+            function tryNextSource() {
+                if (currentIndex >= sources.length) {
+                    document.querySelector('.loading').textContent = '加载失败';
+                    return;
+                }
+
+                const img = new Image();
+                img.src = sources[currentIndex];
+                
+                img.onload = function() {
+                    targetElement.src = this.src;
+                    targetElement.style.display = 'block';
+                    document.querySelector('.loading').style.display = 'none';
+                    document.querySelector('.save-button').classList.add('active');
+                };
+                
+                img.onerror = function() {
+                    currentIndex++;
+                    tryNextSource();
+                };
+            }
+
+            tryNextSource();
+        }
+
+        // 初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            loadImageWithFallback(imageSources, document.getElementById('fullscreen-image'));
+            webapp.hidden(false);  // 关闭下载确认
+            webapp.forbid(false);  // 启用下载功能
+        });
+    </script>
+</body>
+</html>

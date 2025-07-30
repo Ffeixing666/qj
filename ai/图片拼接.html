@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="height: 100%">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#4f46e5" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>图片拼接</title>
+  <style>
+    * {
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      user-select: none;
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      background: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', sans-serif;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .content {
+      flex: 1;
+      padding: 16px;
+      padding-top: 24px; /* 增加顶部内边距，避免内容紧贴顶部 */
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .preview-container {
+      background: #e0e7ff;
+      border: 2px solid #4f46e5;
+      border-radius: 8px;
+      overflow: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      max-height: 60vh;
+      min-height: 200px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .preview-container.horizontal {
+      aspect-ratio: 16/9;
+    }
+
+    .preview-container.vertical {
+      aspect-ratio: 9/16;
+      display: flex;
+      justify-content: center;
+    }
+
+    .preview-container img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .preview-placeholder {
+      color: #818cf8;
+      font-size: 48px;
+      text-align: center;
+      width: 100%;
+    }
+
+    .image-strip {
+      display: flex;
+      overflow-x: auto;
+      gap: 8px;
+      padding-bottom: 8px;
+      scrollbar-width: none;
+    }
+
+    .image-strip::-webkit-scrollbar {
+      display: none;
+    }
+
+    .image-card {
+      flex: 0 0 auto;
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .image-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .image-card .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .image-card:hover .overlay {
+      opacity: 1;
+    }
+
+    .overlay-btn {
+      color: white;
+      background: rgba(255,255,255,0.2);
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 2px;
+      cursor: pointer;
+    }
+
+    .add-card {
+      background: #e0e7ff;
+      color: #4f46e5;
+      font-size: 32px;
+      cursor: pointer;
+    }
+
+    .btn {
+      height: 40px;
+      padding: 0 24px;
+      background: #4f46e5;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      font-size: 15px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+      opacity: 0.9;
+    }
+
+    .action-bar {
+      height: 64px;
+      background: white;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 16px;
+    }
+
+    .direction-btn {
+      flex: 1;
+      margin: 0 4px;
+      background: #e0e7ff;
+      color: #4f46e5;
+    }
+
+    .direction-btn.selected {
+      background: #4f46e5;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="content">
+    <div class="card">
+      <div class="preview-container horizontal" id="stitchPreview">
+        <div class="preview-placeholder">🖼️</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="margin-bottom:12px;color: #64748b">选择图片（最多9张）</div>
+      <div class="image-strip" id="imageStrip"></div>
+      <input type="file" id="imageInput" hidden accept="image/*" multiple />
+    </div>
+
+    <div class="card">
+      <div style="margin-bottom:12px;color: #64748b">拼接方向</div>
+      <div style="display: flex; gap: 8px; margin-bottom: 16px">
+        <button class="btn direction-btn selected" data-direction="horizontal">横向</button>
+        <button class="btn direction-btn" data-direction="vertical">竖向</button>
+      </div>
+      <button class="btn" id="stitchBtn" style="width:100%">
+        <svg viewBox="0 0 24 24" style="width: 20px;height: 20px;fill: white">
+          <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 9h10V7H7v2zm5 8h-2v-4H7v-2h6v6z"/>
+        </svg>
+        开始拼接
+      </button>
+    </div>
+  </div>
+
+  <div class="action-bar">
+    <button class="btn" id="saveBtn" style="flex:1">保存图片</button>
+  </div>
+
+  <canvas id="stitchCanvas" style="display:none"></canvas>
+
+  <script>
+    let imageFiles = []; // 存储文件路径
+    let direction = 'horizontal';
+    let stitchedImage = null;
+    const tempDir = '/data/user/0/com.tf.mt.TL2/files/';
+    const saveDir = '/storage/emulated/0/Download/';
+    const maxResolution = 1920; // 单边最大分辨率
+    const maxSize = 9 * 1024 * 1024; // 9MB
+
+    const imageInput = document.getElementById('imageInput');
+    const imageStrip = document.getElementById('imageStrip');
+    const preview = document.getElementById('stitchPreview');
+    const stitchCanvas = document.getElementById('stitchCanvas');
+    const ctx = stitchCanvas.getContext('2d');
+
+    // 检查存储权限
+    function checkStoragePermission() {
+      if (typeof webapp === 'undefined') {
+        alert('webapp 接口未定义');
+        return false;
+      }
+      if (!webapp.bestow()) {
+        webapp.rights();
+        webapp.toast('请授予存储权限以操作文件');
+        return false;
+      }
+      return true;
+    }
+
+    // 保存图片（不压缩）
+    function saveImage(file, callback) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          const fileName = `temp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
+
+          if (!checkStoragePermission()) {
+            callback(null);
+            return;
+          }
+
+          try {
+            webapp.savefile(`${tempDir}${fileName}`, ev.target.result);
+            callback({ path: `${tempDir}${fileName}`, dataUrl: ev.target.result });
+          } catch (e) {
+            webapp?.toast('保存临时图片失败');
+            console.error(e);
+            callback(null);
+          }
+        };
+        img.onerror = () => {
+          webapp?.toast('图片加载失败');
+          callback(null);
+        };
+        img.src = ev.target.result;
+      };
+      reader.onerror = () => {
+        webapp?.toast('读取图片失败');
+        callback(null);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // 更新图片条
+    function updateImageStrip() {
+      imageStrip.innerHTML = '';
+
+      imageFiles.forEach((file, i) => {
+        const div = document.createElement('div');
+        div.className = 'image-card';
+        div.innerHTML = `
+          <img src="${file.dataUrl}" />
+          <div class="overlay">
+            <button class="overlay-btn" data-action="replace">↻</button>
+          </div>
+        `;
+        
+        div.addEventListener('click', (e) => {
+          const action = e.target.closest('[data-action]')?.dataset.action;
+          if (action === 'replace') {
+            replaceImage(i);
+          } else {
+            preview.innerHTML = `<img src="${file.dataUrl}" alt="预览图" style="max-height:100%">`;
+          }
+        });
+        
+        imageStrip.appendChild(div);
+      });
+
+      if (imageFiles.length < 9) {
+        const addBtn = document.createElement('div');
+        addBtn.className = 'image-card add-card';
+        addBtn.textContent = '➕';
+        addBtn.addEventListener('click', () => {
+          imageInput.click();
+        });
+        imageStrip.appendChild(addBtn);
+      }
+    }
+
+    // 替换图片
+    function replaceImage(index) {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = (e) => {
+        if (e.target.files.length > 0) {
+          const file = e.target.files[0];
+          saveImage(file, (result) => {
+            if (result) {
+              // 删除旧图片
+              if (imageFiles[index]?.path) {
+                try {
+                  webapp.awayfile(imageFiles[index].path);
+                } catch (e) {
+                  console.error('删除旧图片失败', e);
+                }
+              }
+              imageFiles[index] = result;
+              updateImageStrip();
+              stitchedImage = null;
+              preview.innerHTML = '<div class="preview-placeholder">🖼️</div>';
+            }
+          });
+        }
+      };
+      input.click();
+    }
+
+    // 删除所有临时图片
+    function clearTempImages() {
+      imageFiles.forEach(file => {
+        if (file.path) {
+          try {
+            webapp.awayfile(file.path);
+          } catch (e) {
+            console.error('删除临时图片失败', e);
+          }
+        }
+      });
+      imageFiles = [];
+      updateImageStrip();
+      stitchedImage = null;
+      preview.innerHTML = '<div class="preview-placeholder">🖼️</div>';
+    }
+
+    document.querySelectorAll('.direction-btn').forEach(btn => {
+      btn.onclick = () => {
+        direction = btn.dataset.direction;
+        document.querySelectorAll('.direction-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        
+        preview.className = 'preview-container ' + direction;
+      };
+    });
+
+    imageInput.addEventListener('change', e => {
+      const files = Array.from(e.target.files).slice(0, 9 - imageFiles.length);
+      if (files.length === 0) return;
+      
+      let count = 0;
+
+      files.forEach(file => {
+        saveImage(file, (result) => {
+          if (result) {
+            imageFiles.push(result);
+          }
+          count++;
+          if (count === files.length) {
+            updateImageStrip();
+            stitchedImage = null;
+            preview.innerHTML = '<div class="preview-placeholder">🖼️</div>';
+          }
+        });
+      });
+
+      e.target.value = '';
+    });
+
+    document.getElementById('stitchBtn').addEventListener('click', () => {
+      if (imageFiles.length === 0) {
+        webapp?.toast('请至少选择一张图片');
+        return;
+      }
+
+      let maxWidth = 0, maxHeight = 0;
+      let loadedImages = [];
+
+      // 逐一加载图片
+      let loadCount = 0;
+      imageFiles.forEach((file, i) => {
+        const img = new Image();
+        img.onload = () => {
+          maxWidth = Math.max(maxWidth, img.width);
+          maxHeight = Math.max(maxHeight, img.height);
+          loadedImages[i] = img;
+          loadCount++;
+          if (loadCount === imageFiles.length) {
+            // 所有图片加载完成，开始拼接
+            stitchImages(loadedImages, maxWidth, maxHeight);
+          }
+        };
+        img.onerror = () => {
+          webapp?.toast(`加载图片 ${file.path} 失败`);
+          loadCount++;
+          if (loadCount === imageFiles.length) {
+            stitchImages(loadedImages, maxWidth, maxHeight);
+          }
+        };
+        img.src = file.dataUrl; // 使用 dataUrl 加载
+      });
+    });
+
+    function stitchImages(loadedImages, maxWidth, maxHeight) {
+      let canvasWidth = direction === 'horizontal' ? maxWidth * loadedImages.length : maxWidth;
+      let canvasHeight = direction === 'vertical' ? maxHeight * loadedImages.length : maxHeight;
+
+      try {
+        stitchCanvas.width = canvasWidth;
+        stitchCanvas.height = canvasHeight;
+
+        loadedImages.forEach((img, i) => {
+          if (img) {
+            let x = direction === 'horizontal' ? i * maxWidth : 0;
+            let y = direction === 'vertical' ? i * maxHeight : 0;
+            ctx.drawImage(img, x, y, maxWidth, maxHeight);
+          }
+        });
+
+        stitchedImage = stitchCanvas.toDataURL('image/jpeg', 0.9);
+        preview.innerHTML = `<img src="${stitchedImage}" alt="预览图" style="max-height:100%">`;
+        webapp?.toast('拼接完成');
+
+        // 清理画布
+        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+      } catch (e) {
+        webapp?.toast('拼接失败，可能是内存不足，请减少图片数量');
+        console.error(e);
+      }
+    }
+
+    document.getElementById('saveBtn').onclick = () => {
+      if (!stitchedImage) {
+        webapp?.toast('请先拼接图片');
+        return;
+      }
+
+      if (!checkStoragePermission()) return;
+
+      const timestamp = Date.now();
+      const fileName = `stitched_${timestamp}.jpg`;
+      const base64Data = stitchedImage.replace(/^data:image\/jpeg;base64,/, '');
+
+      try {
+        // 保存到 Download 目录
+        webapp.savefile(`${saveDir}${fileName}`, `data:image/jpeg;base64,${base64Data}`);
+        webapp.toast(`图片已保存到 ${saveDir}${fileName}`);
+
+        // 删除临时图片
+        clearTempImages();
+      } catch (e) {
+        webapp?.toast('保存失败，请检查存储权限或路径');
+        console.error(e);
+      }
+    };
+
+    // 初始化
+    updateImageStrip();
+  </script>
+</body>
+</html>

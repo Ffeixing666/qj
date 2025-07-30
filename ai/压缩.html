@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN" style="height: 100%">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>图片压缩</title>
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            user-select: none;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            background: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-bar {
+            height: 56px;
+            background: #4f46e5;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .app-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin-left: 16px;
+        }
+
+        .content {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .preview-container {
+            aspect-ratio: 1;
+            background: #e0e7ff;
+            border: 2px solid #4f46e5;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .preview-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        .compression-info {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(79, 70, 229, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .action-bar {
+            height: 64px;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 16px;
+        }
+
+        .btn {
+            height: 40px;
+            padding: 0 16px;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        .quality-btn {
+            flex: 1;
+            margin: 0 2px;
+            background: #e0e7ff;
+            color: #4f46e5;
+            padding: 0 4px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .quality-btn.selected {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .quality-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .quality-container .quality-btn {
+            margin: 0;
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeOut 1s 1s forwards;
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; visibility: hidden; }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading">
+        <svg viewBox="0 0 50 50" style="width: 48px;height: 48px">
+            <circle cx="25" cy="25" r="20" fill="none" stroke="#4f46e5" stroke-width="4" stroke-dasharray="80 30"/>
+        </svg>
+    </div>
+
+    <div class="app-bar">
+        <svg viewBox="0 0 24 24" style="width: 24px;height: 24px;fill: white">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM8.5 6a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm-3 4h3v6h-3v-6zm5 9h-1V9h1v10zm6-9h-3v1.5h3V15h-3V13h3v-1.5h-3V9h3v6z"/>
+        </svg>
+        <div class="app-title">图片压缩</div>
+    </div>
+
+    <div class="content">
+        <div class="card">
+            <div class="preview-container" id="imagePreview">
+                
+            </div>
+        </div>
+
+        <div class="card">
+            <button class="btn" id="btnUpload" style="width: 100%">
+                <svg viewBox="0 0 24 24" style="width: 20px;height: 20px;fill: white">
+                    <path d="M19 13v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5h2v5h12v-5h2zm-7-1.67l3.59-3.58L17 10l-6 6-6-6 1.41-1.41L12 11.33zM12 4l-5 5h3v4h4V9h3l-5-5z"/>
+                </svg>
+                选择图片
+            </button>
+            <input type="file" id="imageInput" hidden accept="image/*">
+        </div>
+
+        <div class="card">
+            <div style="margin-bottom:12px;color: #64748b">压缩设置</div>
+            <div class="quality-container">
+                <button class="btn quality-btn" data-quality="1.0">原图</button>
+                <button class="btn quality-btn" data-quality="0.9">极高</button>
+                <button class="btn quality-btn" data-quality="0.8">高质量</button>
+                <button class="btn quality-btn" data-quality="0.6">中高</button>
+                <button class="btn quality-btn" data-quality="0.5">中质量</button>
+                <button class="btn quality-btn" data-quality="0.3">低质量</button>
+            </div>
+            <button class="btn" id="compressBtn" style="width:100%">
+                <svg viewBox="0 0 24 24" style="width: 20px;height: 20px;fill: white">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 9h10V7H7v2zm5 8h-2v-4H7v-2h6v6z"/>
+                </svg>
+                开始压缩
+            </button>
+        </div>
+    </div>
+
+    <div class="action-bar">
+        <button class="btn" id="saveBtn" style="flex:1">保存图片</button>
+    </div>
+
+    <canvas id="compressCanvas" style="display:none"></canvas>
+
+    <script>
+        let originalImage = null;
+        let compressedImage = null;
+        let fileName = '';
+        let selectedQuality = 0.5; // Default to medium quality
+        let originalSize = 0;
+        let compressedSize = 0;
+
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const compressCanvas = document.getElementById('compressCanvas');
+        const ctx = compressCanvas.getContext('2d');
+
+        // Initialize preview
+        function initPreview() {
+            imagePreview.innerHTML = originalImage ? 
+                `<img src="${originalImage.src}" alt="Preview">` : '';
+        }
+
+        // Format file size to readable format
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + 'B';
+            else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + 'KB';
+            else return (bytes / 1048576).toFixed(2) + 'MB';
+        }
+
+        // Calculate the size of a base64 string in bytes
+        function getBase64Size(base64String) {
+            // Remove the data URL prefix
+            let string = base64String;
+            if (string.startsWith('data:')) {
+                string = string.split(',')[1];
+            }
+            // Calculate size
+            return Math.ceil((string.length * 3) / 4);
+        }
+
+        // Quality button handling
+        document.querySelectorAll('.quality-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                selectedQuality = parseFloat(btn.dataset.quality);
+                document.querySelectorAll('.quality-btn').forEach(b => {
+                    b.classList.toggle('selected', b === btn);
+                });
+            });
+        });
+
+        // Set default quality (medium)
+        document.querySelector('.quality-btn[data-quality="0.5"]').classList.add('selected');
+
+        // Image upload handling
+        imageInput.addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                fileName = e.target.files[0].name.split('.')[0];
+                originalSize = e.target.files[0].size;
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    originalImage = new Image();
+                    originalImage.onload = function() {
+                        compressedImage = null;
+                        initPreview();
+                        webapp.toast('图片上传成功');
+                    };
+                    originalImage.src = event.target.result;
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+
+        // Compression handling
+        document.getElementById('compressBtn').addEventListener('click', function() {
+            if (!originalImage) return;
+
+            // Resize to maintain reasonable dimensions (max 1920px)
+            let width = originalImage.width;
+            let height = originalImage.height;
+            const maxSize = 1920;
+            if (width > maxSize || height > maxSize) {
+                const ratio = Math.min(maxSize / width, maxSize / height);
+                width = Math.round(width * ratio);
+                height = Math.round(height * ratio);
+            }
+
+            compressCanvas.width = width;
+            compressCanvas.height = height;
+
+            // Draw image
+            ctx.drawImage(originalImage, 0, 0, width, height);
+
+            // Compress based on quality
+            compressedImage = compressCanvas.toDataURL('image/jpeg', selectedQuality);
+            
+            // Calculate compressed size
+            compressedSize = getBase64Size(compressedImage);
+            
+            // Show compression info
+            imagePreview.innerHTML = `
+                <img src="${compressedImage}" alt="Compressed Preview">
+                <div class="compression-info">
+                    ${formatSize(originalSize)} → ${formatSize(compressedSize)}
+                    (${Math.round((compressedSize / originalSize) * 100)}%)
+                </div>
+            `;
+            
+            webapp.toast('压缩完成');
+        });
+
+        // Save functionality
+        function saveImage(dataUrl, filename) {
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        document.getElementById('saveBtn').addEventListener('click', () => {
+            if (compressedImage) {
+                saveImage(compressedImage, `${fileName}_compressed.jpg`);
+            } else {
+                webapp.toast('请先压缩图片');
+            }
+        });
+
+        // Webapp toast method (placeholder implementation)
+        const webapp = {
+            toast: (message) => {
+                console.log(message);
+                // Implement actual toast functionality if needed
+            }
+        };
+
+        // Event bindings
+        document.getElementById('btnUpload').addEventListener('click', () => imageInput.click());
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.ondragstart = () => false;
+
+        // Initialize
+        initPreview();
+    </script>
+</body>
+</html>
