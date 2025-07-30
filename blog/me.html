@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>趣加 - 我的</title>
-  <script src="//static2.pgaot.com/Assets/js/jquery-2.2.4.min.js"></script>
-  <script src="//static2.pgaot.com/Assets/js.class/pgdbs.class.js"></script>
-  <script src="//shequ.pgaot.com/AdminPages/pages/Mysqldb/vip/pickduckDBJQ.0e6fb026ce576a9d922d52068fc3e55a2abf9ef4ba6d5bab6791f73d80b2caa9.js"></script>
-  <script src="//shequ.pgaot.com/AdminPages/pages/Mysqldb/vip/pickduckDBJQ.6d4470deee6cee4a19c69524a769bc300690620472b9110ed4f427d285b1ac76.js"></script>
-  <script src="//shequ.pgaot.com/AdminPages/pages/Mysqldb/vip/pickduckDBJQ.56a041f93f025090f8ee06c5f53bf3e77c212ffbb76b1d2434e8b029f91825b0.js"></script> <!-- 查询HTML的资源库 -->
-  <script src="//static2.pgaot.com/Assets/js/sipg_jcokxlcsd9.js"></script>
+  <script src="https://static2.pgaot.com/Assets/js/jquery-2.2.4.min.js"></script>
+  <script src="https://static2.pgaot.com/Assets/js.class/pgdbs.class.js"></script>
+  <script src="https://shequ.pgaot.com/AdminPages/pages/Mysqldb/vip/pickduckDBJQ.0e6fb026ce576a9d922d52068fc3e55a2abf9ef4ba6d5bab6791f73d80b2caa9.js"></script>
+  <script src="https://shequ.pgaot.com/AdminPages/pages/Mysqldb/vip/pickduckDBJQ.6d4470deee6cee4a19c69524a769bc300690620472b9110ed4f427d285b1ac76.js"></script>
+  <script src="https://shequ.pgaot.com/AdminPages/pages/Mysqldb/vip/pickduckDBJQ.56a041f93f025090f8ee06c5f53bf3e77c212ffbb76b1d2434e8b029f91825b0.js"></script> <!-- 查询HTML的资源库 -->
+  <script src="https://static2.pgaot.com/Assets/js/sipg_jcokxlcsd9.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <style>
 /* 定位在 myPostsWrapper 的右上角 */
@@ -573,7 +573,7 @@ var nexttablewritepicture = new pgdbs(dbs_6d4470deee6cee4a19c69524a769bc30069062
       });
 
       $("#register").click(function() {
-        window.location.href = "web.html?url=" + encodeURIComponent("https://app.qujiayingyong.online/qujia/setup.html");
+        window.location.href = "web.html?url=" + encodeURIComponent("https://qujiaweb.top/blog/setup.html");
       });
     
   
@@ -805,7 +805,7 @@ html += `<h6>时间：${currentTime}  发布人：${nickname}</h6>`;
 <img src="${u}" style="width:100%">`;
   });
   const content = $('#postContent').val();
-  html += `<div>${content}</div>`;
+  html += `<div>${content.replace(/\n/g, '<br>')}</div>`;
 
   
 
