@@ -3,247 +3,440 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>合集页面</title>
+    <title>趣加应用精选活动</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* CSS 样式 */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --primary-light: #4895ef;
+            --primary-dark: #3a0ca3;
+            --secondary: #f72585;
+            --accent: #4cc9f0;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --border-radius: 12px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
         }
 
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
         }
 
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px 40px;
+        }
+
+        /* 头部样式 */
         .header {
             text-align: center;
-            padding: 20px;
-            background-color: #0073e6;
+            padding: 25px 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             color: white;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
         }
 
         .banner {
             width: 100%;
+            max-width: 600px;
             height: auto;
-            max-height: 200px;
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
-        .category {
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        /* 搜索框 */
+        .search-container {
+            margin: 20px auto;
+            max-width: 600px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 20px;
+            padding-left: 45px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            background-color: white;
+        }
+
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        /* 分类选项卡 */
+        .category-tabs {
             display: flex;
-            justify-content: space-around;
-            padding: 10px;
-            background-color: #fff;
-            border-top: 1px solid #ddd;
-            border-bottom: 1px solid #ddd;
+            justify-content: center;
+            margin: 20px auto;
+            background: white;
+            border-radius: 30px;
+            padding: 5px;
+            box-shadow: var(--shadow);
+            max-width: 400px;
         }
 
-        .category span {
-            font-weight: bold;
-            color: #0073e6;
+        .category-tab {
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            background: transparent;
+            font-size: 0.95rem;
+            color: var(--gray);
         }
 
+        .category-tab.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        /* 文章列表 */
         .article-list {
-            display: flex;
-            flex-direction: column;
-            margin: 10px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 20px;
         }
 
         .article-item {
             display: flex;
-            align-items: center;
-            padding: 10px;
-            background-color: white;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            text-decoration: none;
-            color: black;
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
             cursor: pointer;
         }
 
+        .article-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
         .article-image {
-            width: 80px;
-            height: 80px;
-            border-radius: 5px;
-            margin-right: 10px;
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .article-info {
+            padding: 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .article-info h2 {
-            font-size: 16px;
-            margin-bottom: 5px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--dark);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .article-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--gray);
+            font-size: 0.85rem;
         }
 
         .date, .views {
-            font-size: 12px;
-            color: #777;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
-        /* 隐藏文章内容部分 */
+        .hot-tag {
+            background: linear-gradient(135deg, #f72585 0%, #b5179e 100%);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+
+        /* 文章详情页 */
         #article {
             display: none;
-            padding: 20px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin-top: 20px;
         }
 
         #article h1 {
-            font-size: 22px;
-            color: #0073e6;
+            font-size: 1.5rem;
+            color: var(--primary-dark);
             margin-bottom: 10px;
         }
 
         #article .date {
-            font-size: 12px;
-            color: #777;
+            color: var(--gray);
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
         #article .content {
-            margin-top: 10px;
-            line-height: 1.6;
+            line-height: 1.7;
+            font-size: 1rem;
         }
 
         #article .content img {
             max-width: 100%;
             height: auto;
-            margin: 10px 0;
-            border-radius: 8px;
+            border-radius: var(--border-radius);
+            margin: 15px 0;
+            display: block;
         }
 
         #back-button {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: #0073e6;
+            margin-top: 25px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 30px;
+            font-weight: 500;
             cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(67, 97, 238, 0.2);
+        }
+
+        #back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .article-item {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .article-image {
+                width: 100%;
+                height: 160px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <img src="https://static.codemao.cn/pickduck/B151yDd7ye.jpeg?hash=FhrVfWGv5WRKKuGhH9I4JBxrhToj" alt="横幅" class="banner">
-        <h1>精选活动</h1>
-    </div>
-    
-    <div class="category">
-        <span>全部</span>
-        <span>最热</span>
-    </div>
-  
-
-
-
-
-    <div class="article-list">
-
-
-
-
-
-
-
-         <div class="article-item" onclick="showArticle(4)">
-            <img src="https://static.codemao.cn/pickduck/rJjenwEW1e.png?hash=FnM60Ia9GSuNBRr9-WRgCs19tUSC" alt="文章图片" class="article-image">
-            <div class="article-info">
-               <h2>精彩回顾 | 趣加应用2025新年特别策划--《一起跨年》</h2>
-                <p class="date">01-01</p>
-                <p class="views">1k+ 次浏览</p>
-            </div>
+    <div class="container">
+        <div class="header">
+            <img src="https://static.codemao.cn/pickduck/ByRkw9gdel.jpeg?hash=FnC8wQC87zsXtdxVj4CJo-Q3aD19" alt="趣加应用精选活动" class="banner">
+          <!--  <h1>精选活动</h1>> -->
+        </div>
+        
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-input" placeholder="搜索活动..." id="searchInput">
+        </div>
+        
+        <div class="category-tabs">
+            <button class="category-tab active" onclick="filterArticles('all')">全部活动</button>
+            <button class="category-tab" onclick="filterArticles('hot')">最热活动</button>
         </div>
 
-        <div class="article-item" onclick="showArticle(1)">
-            <img src="https://static.codemao.cn/pickduck/rJjenwEW1e.png?hash=FnM60Ia9GSuNBRr9-WRgCs19tUSC" alt="文章图片" class="article-image">
-            <div class="article-info">
-
-                <h2>精彩回顾｜趣加应用2024中秋特别活动</h2>
-                <p class="date">09-14</p>
-                <p class="views">-- 次浏览</p>
-            </div>
+        <div class="article-list" id="articleList">
+            <!-- 活动列表将通过JavaScript动态生成 -->
         </div>
 
-
-
-        <div class="article-item" onclick="showArticle(2)">
-            <img src="https://static.codemao.cn/pickduck/rJjenwEW1e.png?hash=FnM60Ia9GSuNBRr9-WRgCs19tUSC" alt="文章图片" class="article-image">
-            <div class="article-info">
-                <h2>精彩回顾｜趣加应用2024国庆特别活动</h2>
-                <p class="date">09-30</p>
-                <p class="views">-- 次浏览</p>
-            </div>
+        <!-- 文章详情页 -->
+        <div id="article">
+            <h1 id="article-title"></h1>
+            <p class="date" id="article-date"></p>
+            <div class="content" id="article-content"></div>
+            <button id="back-button" onclick="goBack()"><i class="fas fa-arrow-left"></i> 返回活动列表</button>
         </div>
-
-
-
-         <div class="article-item" onclick="showArticle(3)">
-            <img src="https://static.codemao.cn/pickduck/rJjenwEW1e.png?hash=FnM60Ia9GSuNBRr9-WRgCs19tUSC" alt="文章图片" class="article-image">
-            <div class="article-info">
-               <h2><a href="https://www.wjx.cn/vm/eqHYoTl.aspx"style='text-decoration:none;color:black;'>公益支持｜成为管理员</a></h2>
-                <p class="date"></p>
-                <p class="views">-- 次浏览</p>
-            </div>
-        </div>
-        </div>
-    </div>
-
-    <!-- 模拟文章页面内容，用 JavaScript 动态填充 -->
-    <div id="article">
-        <h1 id="article-title"></h1>
-        <p class="date" id="article-date"></p>
-        <div class="content" id="article-content"></div>
-        <button id="back-button" onclick="goBack()">返回</button>
     </div>
 
     <script>
-        // 定义每篇文章的内容
-        const articles = {
-            1: {
-                title: "精彩回顾 | 趣加应用2024中秋特别活动",
-                date: "趣加应用APP综合 ·2024-09-14",
-                content: "^_−☆叮，祝各位中秋节快乐～<br>「趣加应用」中秋福利，扫描下方二维码查看兑换码，获取若干趣币。拼手速♪(´ε｀ )（进入App-“我的”-“趣币”-“兑换码”兑换哦～）<br>同时也欢迎各位来持续分享资源，谢谢各位了<br><img src='https://static.codemao.cn/pickduck/ryoeYKdQ1l.jpeg?hash=Ft2LOe4lbstyjVN43Kw23FPiXS7t' alt='文章配图'><br>活动已结束"
-            },
-            2: {
-                title: "精彩回顾 | 趣加应用2024国庆特别活动",
-                date: "趣加应用APP综合 · 2024-09-30",
-                content: "^_−☆叮，祝各位国庆快乐～<br>「趣加应用」国庆特别活动--抽红包，送惊喜<br>「奖品说明」包括但不限于WPS大会员月卡、随机趣币等<br>点击趣加应用首页轮播图参加活动哦<br><img src='https://static.codemao.cn/pickduck/BkCSd__Qyg.jpeg?hash=FucZ5EP-jC1WxCkgKUt5h0jSDTrd' alt='文章配图'>活动已结束"
-            },
-            3: {
-                title: "趣加应用｜我要成为管理员",
-                date: "趣加应用APP综合",
-                content: "请填写下表，24小时内将审核完毕<br>https://www.wjx.cn/vm/eqHYoTl.aspx#（将自动跳转或复制到浏览器打开）<br><img src='https://static.codemao.cn/pickduck/BJHcvOumyl.webp?hash=FoU4w53dVZXKeBcz6bsDe5kKKhIO' alt='文章配图'>成为趣加应用管理员可审核资源、维护互动、查看数据等额外功能，其他要求详见相关页面。<br>"
-            },
-
-
-4: {
+        // 活动数据
+        const activities = [
+            {
+                id: 1,
                 title: "精彩回顾 | 趣加应用2025新年特别策划--《一起跨年》",
-                date: "趣加应用APP综合 · 2025-01-01",
-                content: "一起跨年，留下你的新年祝福吧～<br><img src='https://static.codemao.cn/pickduck/ryag1KV_ke.heic?hash=Fgb85MdY33g6CNPb72N2hrPSAmml' alt='文章配图'><br>往年活动又来喽，快快参与吧。<br>"
+                date: "2025-01-01",
+                views: "1.2k",
+                image: "https://static.codemao.cn/pickduck/r1k6Pcx_gg.jpeg?hash=FmFVchIJ8YCknVXHEn3fcBSVpmUm",
+                isHot: false,
+                content: "<p>一起跨年，留下你的新年祝福吧～</p><img src='https://static.codemao.cn/pickduck/ryag1KV_ke.heic?hash=Fgb85MdY33g6CNPb72N2hrPSAmml' alt='跨年活动'><p>活动已结束</p>"
+            },
+            {
+                id: 2,
+                title: "精彩回顾｜趣加应用2024中秋特别活动",
+                date: "2024-09-14",
+                views: "1.3k",
+                image: "https://static.codemao.cn/pickduck/r1TawqxOgl.jpeg?hash=Fiwkpx2img2L5OEDQ_wo0gMym6rB",
+                isHot: false,
+                content: "<p>^_−☆叮，祝各位中秋节快乐～</p><p>「趣加应用」中秋福利，扫描下方二维码查看兑换码，获取若干趣币。</p><img src='https://static.codemao.cn/pickduck/ryoeYKdQ1l.jpeg?hash=Ft2LOe4lbstyjVN43Kw23FPiXS7t' alt='中秋活动二维码'><p class='highlight'>活动已结束</p>"
+            },
+            {
+                id: 3,
+                title: "精彩回顾｜趣加应用2024国庆特别活动",
+                date: "2024-09-30",
+                views: "1.0k",
+                image: "https://static.codemao.cn/pickduck/rJjAvqe_xx.jpeg?hash=FgY_1bsbIaTagkw-I_D-vnlmIUcI",
+                isHot: false,
+                content: "<p>^_−☆叮，祝各位国庆快乐～</p><p>「趣加应用」国庆特别活动--抽红包，送惊喜</p><img src='https://static.codemao.cn/pickduck/BkCSd__Qyg.jpeg?hash=FucZ5EP-jC1WxCkgKUt5h0jSDTrd' alt='国庆活动海报'><p class='highlight'>活动已结束</p>"
+            },
+            {
+                id: 4,
+                title: "公益支持｜成为管理员",
+                date: "长期有效",
+                views: "1.5k",
+                image: "https://static.codemao.cn/pickduck/BkFe_cgdee.jpeg?hash=Fmi6omEAhWcgyLPm9iMbxOYsmrKE",
+                isHot: true,
+                content: "<p>请填写下表，24小时内将审核完毕</p><p><a href='https://www.wjx.cn/vm/eqHYoTl.aspx' style='color: var(--primary); text-decoration: none; font-weight: 500;'>点击填写申请表</a></p><img src='https://static.codemao.cn/pickduck/BJHcvOumyl.webp?hash=FoU4w53dVZXKeBcz6bsDe5kKKhIO' alt='管理员申请'><p>成为趣加应用管理员可审核资源、维护互动、查看数据等额外功能，其他要求详见相关页面。</p>"
             }
-        };
+        ];
 
-        // 显示文章内容
-        function showArticle(articleId) {
-            // 获取文章内容
-            const article = articles[articleId];
-            if (article) {
-                document.getElementById('article-title').innerText = article.title;
-                document.getElementById('article-date').innerText = article.date;
-                document.getElementById('article-content').innerHTML = article.content;  // 使用 innerHTML 支持图片和换行
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            renderActivities(activities);
+            
+            // 搜索功能
+            document.getElementById('searchInput').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const filtered = activities.filter(activity => 
+                    activity.title.toLowerCase().includes(searchTerm) || 
+                    activity.content.toLowerCase().includes(searchTerm)
+                );
+                renderActivities(filtered);
+            });
+        });
 
-                // 隐藏主页，显示文章内容
-                document.querySelector('.header').style.display = 'none';
-                document.querySelector('.category').style.display = 'none';
-                document.querySelector('.article-list').style.display = 'none';
-                document.getElementById('article').style.display = 'block';
+        // 渲染活动列表
+        function renderActivities(activitiesToShow) {
+            const articleList = document.getElementById('articleList');
+            
+            if (activitiesToShow.length === 0) {
+                articleList.innerHTML = '<div class="no-results"><i class="far fa-folder-open"></i><p>没有找到相关活动</p></div>';
+                return;
+            }
+            
+            articleList.innerHTML = activitiesToShow.map(activity => `
+                <div class="article-item" onclick="showActivity(${activity.id})">
+                    <img src="${activity.image}" alt="${activity.title}" class="article-image">
+                    <div class="article-info">
+                        <h2>${activity.title} ${activity.isHot ? '<span class="hot-tag">最热</span>' : ''}</h2>
+                        <div class="article-meta">
+                            <div class="date"><i class="far fa-calendar-alt"></i> ${activity.date}</div>
+                            <div class="views"><i class="far fa-eye"></i> ${activity.views}次浏览</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 筛选活动
+        function filterArticles(type) {
+            // 更新选项卡样式
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            if (type === 'all') {
+                renderActivities(activities);
+            } else if (type === 'hot') {
+                const hotActivities = activities.filter(activity => activity.isHot);
+                renderActivities(hotActivities);
             }
         }
 
-        // 返回到主页
+        // 显示活动详情
+        function showActivity(id) {
+            const activity = activities.find(a => a.id === id);
+            if (activity) {
+                document.getElementById('article-title').innerText = activity.title;
+                document.getElementById('article-date').innerHTML = `<i class="far fa-calendar-alt"></i> ${activity.date}`;
+                document.getElementById('article-content').innerHTML = activity.content;
+
+                // 隐藏列表，显示详情
+                document.querySelector('.header').style.display = 'none';
+                document.querySelector('.search-container').style.display = 'none';
+                document.querySelector('.category-tabs').style.display = 'none';
+                document.getElementById('articleList').style.display = 'none';
+                document.getElementById('article').style.display = 'block';
+                
+                // 滚动到顶部
+                window.scrollTo({top: 0, behavior: 'smooth'});
+            }
+        }
+
+        // 返回活动列表
         function goBack() {
             document.querySelector('.header').style.display = 'block';
-            document.querySelector('.category').style.display = 'flex';
-            document.querySelector('.article-list').style.display = 'flex';
+            document.querySelector('.search-container').style.display = 'block';
+            document.querySelector('.category-tabs').style.display = 'flex';
+            document.getElementById('articleList').style.display = 'grid';
             document.getElementById('article').style.display = 'none';
+            
+            // 滚动到顶部
+            window.scrollTo({top: 0, behavior: 'smooth'});
         }
     </script>
 </body>
