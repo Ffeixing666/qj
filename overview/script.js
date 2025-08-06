@@ -78,6 +78,6 @@ window.onload = function() {
 
     if (!isMobile) {
         // 如果不是移动设备，跳转到指定链接
-        //window.location.href = "http://qujiayingyong.online";
+        window.location.href = "https://qujiaweb.top/pcweb";
     }
 };
