@@ -2,229 +2,326 @@
 
 
 
-/* 设置按钮容器的样式 */
-.button-slider {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  width: 90%;
-  height: 50px; /* 和搜索框高度一致 */
-  overflow-x: auto; /* 横向滚动 */
-  overflow-y: hidden; /* 禁止纵向滚动 */
-  white-space: nowrap; /* 禁止按钮换行 */
-  margin: 10px auto;
-  padding: 10px;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-/* 设置按钮的样式 */
-.button-slider button {
-  flex: 0 0 auto; /* 使按钮保持固定宽度 */
-  margin-right: 10px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  background-color: blve; /* 按钮背景颜色 */
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.button-slider button:hover {
-  background-color: #45a049; /* 按钮悬停时的背景颜色 */
-}
-
-/* 隐藏滚动条 */
-.button-slider::-webkit-scrollbar {
-  display: none;
-}
-
-
-
-
-
-
-
-
-
-.image-button {
-            position: absolute;
-            top: 10px;    /* 距离页面顶部 10px */
-            right: 10px;  /* 距离页面右侧 10px */
-            width: 35px;  /* 宽度设置为 20px */
-            height: 35px; /* 高度设置为 20px */
-            background: url('https://static.codemao.cn/pickduck/ryp6_ndk1x.png?hash=Fk9qGrnGwoeQRSFA-5FhwNcqLXYE') no-repeat center center; /* 图片地址 */
-            background-size: cover;  /* 确保图片充满按钮区域 */
-            cursor: pointer; /* 鼠标悬停时显示手型 */
-            border: none;    /* 移除默认边框 */
-        }
-
-
-   
-.image-login {
-            position: absolute;
-            top: 10px;    /* 距离页面顶部 10px */
-            left: 10px;  /* 距离页面右侧 10px */
-            width: 35px;  /* 宽度设置为 20px */
-            height: 35px; /* 高度设置为 20px */
-            background: url('https://static.bcmcdn.com/coco/player/unstable/Sk2GvtpAA.image/png?hash=Fm0eBYJnS8OAN3URenwARJ2RKho8') no-repeat center center; /* 图片地址 */
-            background-size: cover;  /* 确保图片充满按钮区域 */
-            cursor: pointer; /* 鼠标悬停时显示手型 */
-            border: none;    /* 移除默认边框 */
-        }
-
-
-
-
-
-        .image-button:hover {
-            opacity: 0.8; /* 鼠标悬停时图片稍微变透明 */
-        }
-
-
-        button {
-            display: inline-block;
-            margin: 0 5px; /* 控制按钮之间的间距 */
-            padding: 10px 20px;
-				color:white;
-				border-radius:10px;
-				background-color:#8CB7F4;
-        }
-
-
-
-
-
-
-
-
-
-        /* 确保图片始终位于底部 */
-        .footer-link {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            background-color: white;
-        }
-
-        .footer-link img {
-            max-width: 100%;
-            height: auto;
-        }
-
-
-
-
-/* 通用样式 */
-body {
-    font-family: Arial, sans-serif;
-    background-color: #e6f0fa;
+/* 全局样式重置与主题定义 */
+* {
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    height: 100vh;
+    box-sizing: border-box;
 }
 
-/* 顶部图片 */
+:root {
+    --primary: #5B7BDF;
+    --primary-light: #7A95F5;
+    --primary-dark: #4362CC;
+    --accent: #FF6B6B;
+    --text: #333333;
+    --text-light: #666666;
+    --background: #F5F7FF;
+    --card: #FFFFFF;
+    --border: #E0E5F2;
+    --radius: 16px;
+    --shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 基础样式 */
+body {
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    background-color: var(--background);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 70px; /* 减少底部预留空间 */
+}
+
+/* 顶部图片区域 - 美化版 */
 .header {
     width: 100%;
     text-align: center;
-    margin-top: 10px;
+    padding: 20px 0;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    box-shadow: 0 6px 25px rgba(74, 108, 247, 0.2);
+    margin-bottom: 24px;
+    border-radius: 0 0 var(--radius) var(--radius); /* 底部圆角 */
 }
 
 #refreshImage {
-    width: 150px;
+    width: 170px;
     height: auto;
     cursor: pointer;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    /* 移除白色背景 */
+    /* 移除过渡动画 */
 }
 
-/* 搜索框样式 */
+/* 移除悬停动画效果 */
+/* #refreshImage:hover {
+    transform: scale(1.05) rotate(2deg);
+} */
+
+/* 登录和个人中心按钮 - 优化版 */
+.image-login, .image-button {
+    position: absolute;
+    top: 20px;
+    width: 52px;
+    height: 52px;
+    background-size: cover;
+    background-position: center;
+    cursor: pointer;
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    transition: var(--transition);
+    border: 3px solid white;
+    z-index: 10;
+}
+
+.image-login {
+    left: 20px;
+    background-image: url('https://static.codemao.cn/pickduck/H1aLhbX_gl.png?hash=FirOperPCAX5BuZhCtpSPA8Mu6ek');
+}
+
+.image-button {
+    right: 20px;
+    background-image: url('https://static.codemao.cn/pickduck/Hy4H3ZmOge.png?hash=FudliYL1pKqjqzRwJQ2AnHS0Lpa3');
+}
+
+.image-login:hover, .image-button:hover {
+    transform: scale(1.1) translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* 搜索框 - 美化版 */
 .search-container {
-    margin: 20px 0;
     width: 90%;
-    max-width: 600px;
+    max-width: 640px;
+    margin: 0 auto 24px;
+    position: relative;
 }
 
 #searchInput {
     width: 100%;
-    padding: 10px;
+    padding: 16px 24px 16px 50px; /* 左侧预留空间给图标 */
     font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: none;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    background-color: var(--card);
+    transition: var(--transition);
 }
 
-/* 可滚动列表 */
+/* 搜索图标 */
+.search-container::before {
+    content: '🔍';
+    position: absolute;
+    left: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: var(--text-light);
+}
+
+#searchInput:focus {
+    outline: none;
+    box-shadow: 0 10px 30px rgba(91, 123, 223, 0.2);
+}
+
+/* 分类按钮容器 */
+.button-slider {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 90%;
+    max-width: 640px;
+    height: 60px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    margin: 0 auto 24px;
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    background-color: var(--card);
+    box-shadow: var(--shadow);
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.button-slider::-webkit-scrollbar {
+    display: none;
+}
+
+/* 分类按钮 - 优化版 */
+.button-slider button {
+    flex: 0 0 auto;
+    margin-right: 12px;
+    padding: 10px 22px;
+    border: none;
+    border-radius: 30px;
+    background-color: var(--primary);
+    color: white;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 4px 12px rgba(91, 123, 223, 0.25);
+}
+
+.button-slider button:hover {
+    background-color: var(--primary-light);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(91, 123, 223, 0.35);
+}
+
+.button-slider button:active {
+    transform: translateY(0);
+}
+
+/* 应用列表 */
 .scrollable-list {
     width: 90%;
-    max-width: 600px;
-    height: 400px;
-    overflow-y: scroll;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: #fff;
-    padding: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    max-width: 640px;
+    height: calc(100vh - 340px);
+    overflow-y: auto;
+    border-radius: var(--radius);
+    background-color: var(--card);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    margin: 0 auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-light) var(--background);
 }
 
+.scrollable-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scrollable-list::-webkit-scrollbar-track {
+    background: var(--background);
+    border-radius: 10px;
+}
+
+.scrollable-list::-webkit-scrollbar-thumb {
+    background-color: var(--primary-light);
+    border-radius: 10px;
+}
+
+/* 应用列表项 */
 .app-item {
     display: flex;
     align-items: center;
-    padding: 10px;
-    border-bottom: 1px solid #eee;
+    padding: 16px;
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    background-color: var(--background);
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: var(--transition);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .app-item:hover {
-    background-color: #f1f1f1;
+    background-color: #EEF2FF;
+    transform: translateX(8px);
+    box-shadow: 0 5px 15px rgba(91, 123, 223, 0.1);
 }
 
 .app-icon {
-    width: 50px;
-    height: 50px;
-    margin-right: 15px;
+    width: 70px;
+    height: 70px;
+    border-radius: 16px;
+    margin-right: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    object-fit: cover;
+}
+
+.app-info {
+    flex: 1;
 }
 
 .app-name {
     font-size: 18px;
-    color: #333;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
 }
 
-/* 圆角矩形下载按钮 */
+.app-description {
+    font-size: 14px;
+    color: var(--text-light);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 底部链接优化 - 消除空白 */
+/* 底部链接样式 - 增加图片高度 */
+.footer-link {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    background-color: var(--card);
+    padding: 6px 0; /* 轻微增加内边距以适应更高的图片 */
+    box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.05);
+    margin: 0;
+}
+
+.footer-link img {
+    max-width: 100%;
+    height: 72px; /* 增加高度到72px，比之前的56px更高 */
+    width: auto;
+    object-fit: cover;
+    transition: var(--transition);
+    margin: 0;
+    padding: 0;
+    display: block;
+    margin: 0 auto;
+    border-radius: 8px; /* 可选：添加圆角使图片更美观 */
+}
+
+.footer-link img:hover {
+    transform: scale(1.05);
+}
+
+/* 下载按钮 */
 .download-button {
-    padding: 10px 20px;
-    background-color: #4CAF50;
+    padding: 14px 32px;
+    background-color: var(--primary);
     color: white;
     border: none;
-    border-radius: 20px;  /* 圆角矩形 */
+    border-radius: 32px;
     cursor: pointer;
     font-size: 16px;
+    font-weight: 600;
     text-align: center;
     display: inline-block;
     text-decoration: none;
+    transition: var(--transition);
+    box-shadow: 0 5px 15px rgba(91, 123, 223, 0.3);
 }
 
 .download-button:hover {
-    background-color: #45a049;
+    background-color: var(--primary-light);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(91, 123, 223, 0.4);
 }
 
-/* app.html 的布局调整 */
+.download-button:active {
+    transform: translateY(0);
+}
+
+/* 应用详情页面 */
 .app-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 90%;
-    max-width: 600px;
-    margin: auto;
-    padding-top: 20px;
+    max-width: 640px;
+    margin: 30px auto;
+    padding: 24px;
+    background-color: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
 }
 
 .app-details {
@@ -232,55 +329,3269 @@ body {
     align-items: center;
     justify-content: space-between;
     width: 100%;
+    margin-bottom: 24px;
 }
 
 .app-details img {
-    width: 50px;
-    height: 50px;
+    width: 90px;
+    height: 90px;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .app-details h1 {
-    margin-left: 10px;
+    margin-left: 20px;
     flex-grow: 1;
-    font-size: 24px;
-    color: #333;
+    font-size: 26px;
+    color: var(--text);
 }
 
-/* 左右排放的两张图片，比例为 9:16 */
+/* 应用图片展示 */
 .app-images {
     display: flex;
     justify-content: space-between;
-    margin-top: 20px;
+    margin: 24px 0;
     width: 100%;
+    gap: 16px;
 }
 
 .app-images img {
     width: 48%;
     height: auto;
     aspect-ratio: 9 / 16;
-    border: 1px solid #ccc;
-    border-radius: 8px;
+    border-radius: var(--radius);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    object-fit: cover;
+    transition: var(--transition);
 }
 
-/* 简介文本 */
+.app-images img:hover {
+    transform: scale(1.02);
+}
+
+/* 应用描述 */
 .app-description {
-    margin-top: 20px;
+    margin: 24px 0;
     font-size: 16px;
-    line-height: 1.5;
-    color: #333;
+    line-height: 1.7;
+    color: var(--text);
 }
 
-/* 手机端适配 */
-@media (max-width: 600px) {
+/* 响应式设计 */
+@media (max-width: 640px) {
     #refreshImage {
-        width: 100px;
+        width: 140px;
     }
 
-    .search-container, .scrollable-list, .app-container {
+    .image-login, .image-button {
+        width: 44px;
+        height: 44px;
+        top: 15px;
+    }
+
+    .search-container, .button-slider, .scrollable-list, .app-container {
         width: 95%;
     }
 
-    .app-images img {
-        width: 48%;
+    .button-slider button {
+        padding: 8px 18px;
+        font-size: 14px;
     }
+
+    .app-item {
+        padding: 14px;
+    }
+
+    .app-icon {
+        width: 60px;
+        height: 60px;
+    }
+
+    .app-name {
+        font-size: 16px;
+    }
+
+    .footer-link img {
+        height: 40px;
+    }
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+}
+
+.app-item, .button-slider button, .download-button {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.app-item:nth-child(1) { animation-delay: 0.1s; }
+.app-item:nth-child(2) { animation-delay: 0.2s; }
+.app-item:nth-child(3) { animation-delay: 0.3s; }
+.app-item:nth-child(4) { animation-delay: 0.4s; }
+.app-item:nth-child(5) { animation-delay: 0.5s; }
+
+#refreshImage {
+    animation: pulse 3s infinite;
+}
+
+/* 电脑端提示区域样式 */
+.desktop-prompt {
+    display: none; /* 默认隐藏 */
+    justify-content: center;
+    align-items: center;
+    margin: 30px auto;
+    padding: 20px;
+    width: 90%;
+    max-width: 500px;
+    background-color: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.prompt-content {
+    text-align: center;
+}
+
+.qr-code {
+    width: 200px;
+    height: 200px;
+    margin-bottom: 15px;
+    border: 5px solid white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+}
+
+.prompt-text {
+    font-size: 18px;
+    color: #333;
+    font-weight: 500;
+}
+
+/* 调整现有布局，为电脑端提示区域腾出空间 */
+@media (min-width: 768px) {
+    .scrollable-list {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+}
+
+.app-item, .button-slider button, .download-button {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.app-item:nth-child(1) { animation-delay: 0.1s; }
+.app-item:nth-child(2) { animation-delay: 0.2s; }
+.app-item:nth-child(3) { animation-delay: 0.3s; }
+.app-item:nth-child(4) { animation-delay: 0.4s; }
+.app-item:nth-child(5) { animation-delay: 0.5s; }
+
+#refreshImage {
+    animation: pulse 3s infinite;
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
+}
+
+.download-button:active {
+    transform: translateY(0);
 }
