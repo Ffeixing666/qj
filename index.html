@@ -2,456 +2,392 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta name="baidu-site-verification" content="codeva-SgvugVd693" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>趣加应用官网</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #4a6bdf;
+            --primary-dark: #3a56b2;
+            --secondary: #6c757d;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
-            color: #fff;
-            min-height: 100vh;
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f5f7ff;
+            color: var(--dark);
+            line-height: 1.6;
             overflow-x: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
         }
         
-        .particles-container {
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* 粒子背景 */
+        #particles-js {
             position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
-            z-index: 1;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            opacity: 0.5;
         }
         
-        .content {
-            position: relative;
-            z-index: 2;
+        /* 头部 */
+        header {
+            padding: 60px 0 40px;
             text-align: center;
-            padding: 2rem;
-            max-width: 800px;
-            width: 90%;
-        }
-        
-        .logo {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 1.5rem;
-            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 30px rgba(255, 107, 107, 0.6);
-            animation: pulse 3s infinite;
-        }
-        
-        .logo i {
-            font-size: 4rem;
-            color: white;
+            position: relative;
         }
         
         .title {
-            font-size: 3.5rem;
-            margin-bottom: 3rem;
+            font-size: clamp(2rem, 5vw, 3.5rem);
             font-weight: 700;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-            letter-spacing: 1px;
-            position: relative;
-            display: inline-block;
+            margin-bottom: 40px;
+            background: linear-gradient(90deg, var(--primary), #8a2be2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease-out forwards;
         }
         
-        .title::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 4px;
-            background: linear-gradient(90deg, transparent, #ff6b6b, transparent);
-            border-radius: 2px;
-        }
-        
-        .buttons-container {
+        /* 按钮区域 */
+        .button-group {
             display: flex;
-            flex-direction: column;
-            gap: 2rem;
-            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 80px;
         }
         
         .btn {
+            position: relative;
             display: inline-flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 1.2rem 3rem;
-            border-radius: 50px;
-            font-size: 1.4rem;
-            font-weight: 600;
+            padding: 18px 30px;
+            border-radius: 12px;
+            font-weight: 500;
             text-decoration: none;
-            transition: all 0.4s ease;
-            position: relative;
+            transition: var(--transition);
             overflow: hidden;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-            z-index: 3;
-        }
-        
-        .btn i {
-            margin-right: 10px;
-            font-size: 1.6rem;
+            z-index: 1;
+            min-width: 220px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transform: translateY(20px);
         }
         
         .btn-primary {
-            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+            background: var(--primary);
             color: white;
-            width: 300px;
-            border: none;
-            transform: scale(1);
-            animation: float 3s ease-in-out infinite;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 15px 30px rgba(255, 107, 107, 0.4);
+            animation: fadeInUp 0.8s ease-out 0.2s forwards;
         }
         
         .btn-secondary {
-            background: linear-gradient(45deg, #4e54c8, #8f94fb);
-            color: white;
-            width: 250px;
+            background: white;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            animation: fadeInUp 0.8s ease-out 0.3s forwards;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
         }
         
         .btn-secondary:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(79, 84, 200, 0.4);
+            background: rgba(74, 107, 223, 0.05);
         }
         
-        .note {
+        .btn-text {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+        
+        .btn-subtext {
             font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.7);
-            margin-top: 8px;
-            font-style: italic;
+            opacity: 0.8;
         }
         
+        /* 特性区域 */
         .features {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-top: 4rem;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 80px;
         }
         
-        .feature {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 1.5rem;
-            border-radius: 15px;
-            width: 150px;
-            transition: transform 0.3s ease;
+        .feature-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            opacity: 0;
+            transform: translateY(20px);
         }
         
-        .feature:hover {
-            transform: translateY(-10px);
-            background: rgba(255, 255, 255, 0.15);
+        .feature-card:nth-child(1) {
+            animation: fadeInUp 0.8s ease-out 0.4s forwards;
         }
         
-        .feature i {
+        .feature-card:nth-child(2) {
+            animation: fadeInUp 0.8s ease-out 0.5s forwards;
+        }
+        
+        .feature-card:nth-child(3) {
+            animation: fadeInUp 0.8s ease-out 0.6s forwards;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-icon {
             font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+        
+        .feature-title {
+            font-size: 1.4rem;
+            font-weight: 600;
             margin-bottom: 15px;
-            color: #ff6b6b;
+            color: var(--dark);
         }
         
-        .feature h3 {
+        .feature-desc {
+            color: var(--secondary);
             font-size: 1rem;
-            margin-bottom: 8px;
         }
         
-        .feature p {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.7);
-        }
-        
-        .footer {
-            margin-top: 4rem;
+        /* 页脚 */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--secondary);
             font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.6);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
         }
         
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7); }
-            70% { box-shadow: 0 0 0 20px rgba(255, 107, 107, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
+        /* 动画 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
-        
-        /* 响应式设计 */
+        /* 响应式调整 */
         @media (max-width: 768px) {
-            .title {
-                font-size: 2.5rem;
+            .button-group {
+                flex-direction: column;
+                align-items: center;
             }
             
             .btn {
-                padding: 1rem 2rem;
-                font-size: 1.2rem;
                 width: 100%;
-                max-width: 300px;
-            }
-            
-            .logo {
-                width: 100px;
-                height: 100px;
-            }
-            
-            .logo i {
-                font-size: 3rem;
+                max-width: 280px;
             }
             
             .features {
-                gap: 1rem;
-            }
-            
-            .feature {
-                width: 130px;
-                padding: 1rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .title {
-                font-size: 2rem;
-            }
-            
-            .features {
-                flex-direction: column;
-                align-items: center;
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <!-- 粒子背景容器 -->
-    <div class="particles-container" id="particles"></div>
+    <div id="particles-js"></div>
     
-    <div class="content">
-        <div class="logo">
-            <i class="fas fa-rocket"></i>
-        </div>
-        
-        <h1 class="title">Welcome to 趣加应用</h1>
-        
-        <div class="buttons-container">
-            <a href="https://static.codemao.cn/pickduck/SJKITwgOeg.apk?hash=llSroP6jbZYj7-nhsx2WZ4vApXnz" class="btn btn-primary">
-                <i class="fas fa-download"></i> 立即下载
-            </a>
+    <div class="container">
+        <header>
+            <h1 class="title">Welcome to 趣加应用</h1>
             
-            <div>
-                <a href="http://qujiaweb.top/overview" class="btn btn-secondary">
-                    <i class="fas fa-globe"></i> 访问网页版
+            <div class="button-group">
+                <a href="https://static.codemao.cn/pickduck/SJKITwgOeg.apk?hash=llSroP6jbZYj7-nhsx2WZ4vApXnz" class="btn btn-primary">
+                    <span class="btn-text">立即下载</span>
+                    <span class="btn-subtext">最新版本v1.0.4|250806</span>
                 </a>
-                <div class="note">前往一个较旧的网页版</div>
+                
+                <a href="http://qujiaweb.top/overview" class="btn btn-secondary">
+                    <span class="btn-text">访问网页版</span>
+                    <span class="btn-subtext">仅下载资源可前往一个较久的网页版</span>
+                </a>
             </div>
-        </div>
+        </header>
         
-        <div class="features">
-            <div class="feature">
-                <i class="fas fa-bolt"></i>
-                <h3>无忧互动</h3>
-                <p>畅所欲言，闪电响应</p>
+        <main>
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h3 class="feature-title">应用分享</h3>
+                    <p class="feature-desc">自由上传，随心下载</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3 class="feature-title">网页共享</h3>
+                    <p class="feature-desc">闪电分享，超多实用</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-gem"></i>
+                    </div>
+                    <h3 class="feature-title">免费畅享</h3>
+                    <p class="feature-desc">纯洁无广，无忧体验</p>
+                </div>
             </div>
-            <div class="feature">
-                <i class="fas fa-shield-alt"></i>
-                <h3>随心上传</h3>
-                <p>去除繁琐，一起分享</p>
-            </div>
-            <div class="feature">
-                <i class="fas fa-sync-alt"></i>
-                <h3>免费畅享</h3>
-                <p>纯净无广，畅享资源</p>
-            </div>
-        </div>
+        </main>
         
-        <div class="footer">
-            <p>© 2025 趣味加倍科技</p>
-        </div>
+        <footer>
+            趣味加倍科技2025 永久官网qujiaweb.top
+        </footer>
     </div>
-
+    
+    <!-- 粒子效果库 -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
-        // 粒子动画效果
+        // 初始化粒子效果
         document.addEventListener('DOMContentLoaded', function() {
-            const container = document.getElementById('particles');
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            container.appendChild(canvas);
-            
-            // 设置canvas尺寸为窗口大小
-            function resizeCanvas() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            }
-            
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-            
-            // 粒子数组
-            const particles = [];
-            const particleCount = 150;
-            
-            // 创建粒子
-            for (let i = 0; i < particleCount; i++) {
-                particles.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    radius: Math.random() * 3 + 1,
-                    speedX: (Math.random() - 0.5) * 1.5,
-                    speedY: (Math.random() - 0.5) * 1.5,
-                    color: `rgba(${Math.floor(Math.random() * 100 + 155)}, 
-                            ${Math.floor(Math.random() * 100 + 50)}, 
-                            ${Math.floor(Math.random() * 155 + 100)}, 
-                            ${Math.random() * 0.5 + 0.3})`
-                });
-            }
-            
-            // 绘制粒子
-            function drawParticles() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                // 更新并绘制粒子
-                for (let i = 0; i < particles.length; i++) {
-                    const p = particles[i];
-                    
-                    // 更新位置
-                    p.x += p.speedX;
-                    p.y += p.speedY;
-                    
-                    // 边界反弹
-                    if (p.x < 0 || p.x > canvas.width) p.speedX *= -1;
-                    if (p.y < 0 || p.y > canvas.height) p.speedY *= -1;
-                    
-                    // 绘制粒子
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                    ctx.fillStyle = p.color;
-                    ctx.fill();
-                    
-                    // 绘制粒子间的连线
-                    for (let j = i + 1; j < particles.length; j++) {
-                        const p2 = particles[j];
-                        const distance = Math.sqrt(Math.pow(p.x - p2.x, 2) + Math.pow(p.y - p2.y, 2));
-                        
-                        if (distance < 100) {
-                            ctx.beginPath();
-                            ctx.strokeStyle = `rgba(255, 255, 255, ${0.2 * (1 - distance/100)})`;
-                            ctx.lineWidth = 0.5;
-                            ctx.moveTo(p.x, p.y);
-                            ctx.lineTo(p2.x, p2.y);
-                            ctx.stroke();
+            particlesJS('particles-js', {
+                "particles": {
+                    "number": {
+                        "value": 80,
+                        "density": {
+                            "enable": true,
+                            "value_area": 800
+                        }
+                    },
+                    "color": {
+                        "value": "#4a6bdf"
+                    },
+                    "shape": {
+                        "type": "circle",
+                        "stroke": {
+                            "width": 0,
+                            "color": "#000000"
+                        },
+                        "polygon": {
+                            "nb_sides": 5
+                        }
+                    },
+                    "opacity": {
+                        "value": 0.3,
+                        "random": false,
+                        "anim": {
+                            "enable": false,
+                            "speed": 1,
+                            "opacity_min": 0.1,
+                            "sync": false
+                        }
+                    },
+                    "size": {
+                        "value": 3,
+                        "random": true,
+                        "anim": {
+                            "enable": false,
+                            "speed": 40,
+                            "size_min": 0.1,
+                            "sync": false
+                        }
+                    },
+                    "line_linked": {
+                        "enable": true,
+                        "distance": 150,
+                        "color": "#4a6bdf",
+                        "opacity": 0.2,
+                        "width": 1
+                    },
+                    "move": {
+                        "enable": true,
+                        "speed": 2,
+                        "direction": "none",
+                        "random": false,
+                        "straight": false,
+                        "out_mode": "out",
+                        "bounce": false,
+                        "attract": {
+                            "enable": false,
+                            "rotateX": 600,
+                            "rotateY": 1200
                         }
                     }
-                }
-                
-                requestAnimationFrame(drawParticles);
-            }
-            
-            drawParticles();
-            
-            // 添加鼠标交互效果
-            let mouseX = 0;
-            let mouseY = 0;
-            let mouseRadius = 100;
-            
-            canvas.addEventListener('mousemove', (e) => {
-                mouseX = e.clientX;
-                mouseY = e.clientY;
-            });
-            
-            canvas.addEventListener('touchmove', (e) => {
-                mouseX = e.touches[0].clientX;
-                mouseY = e.touches[0].clientY;
-                e.preventDefault();
-            }, { passive: false });
-            
-            canvas.addEventListener('mouseout', () => {
-                mouseX = 0;
-                mouseY = 0;
-            });
-            
-            // 在动画循环中加入鼠标交互
-            function interactWithMouse() {
-                for (let i = 0; i < particles.length; i++) {
-                    const p = particles[i];
-                    const dx = p.x - mouseX;
-                    const dy = p.y - mouseY;
-                    const distance = Math.sqrt(dx*dx + dy*dy);
-                    
-                    if (distance < mouseRadius && mouseX !== 0 && mouseY !== 0) {
-                        const force = (mouseRadius - distance) / mouseRadius;
-                        p.speedX += dx * force * 0.05;
-                        p.speedY += dy * force * 0.05;
-                    }
-                }
-            }
-            
-            // 修改drawParticles函数加入交互
-            function drawParticlesWithInteraction() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                interactWithMouse();
-                
-                for (let i = 0; i < particles.length; i++) {
-                    const p = particles[i];
-                    p.x += p.speedX;
-                    p.y += p.speedY;
-                    
-                    if (p.x < 0 || p.x > canvas.width) p.speedX *= -1;
-                    if (p.y < 0 || p.y > canvas.height) p.speedY *= -1;
-                    
-                    // 限制最大速度
-                    const speed = Math.sqrt(p.speedX*p.speedX + p.speedY*p.speedY);
-                    if (speed > 5) {
-                        p.speedX = p.speedX * 5 / speed;
-                        p.speedY = p.speedY * 5 / speed;
-                    }
-                    
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                    ctx.fillStyle = p.color;
-                    ctx.fill();
-                    
-                    for (let j = i + 1; j < particles.length; j++) {
-                        const p2 = particles[j];
-                        const distance = Math.sqrt(Math.pow(p.x - p2.x, 2) + Math.pow(p.y - p2.y, 2));
-                        
-                        if (distance < 100) {
-                            ctx.beginPath();
-                            ctx.strokeStyle = `rgba(255, 255, 255, ${0.2 * (1 - distance/100)})`;
-                            ctx.lineWidth = 0.5;
-                            ctx.moveTo(p.x, p.y);
-                            ctx.lineTo(p2.x, p2.y);
-                            ctx.stroke();
+                },
+                "interactivity": {
+                    "detect_on": "canvas",
+                    "events": {
+                        "onhover": {
+                            "enable": true,
+                            "mode": "grab"
+                        },
+                        "onclick": {
+                            "enable": true,
+                            "mode": "push"
+                        },
+                        "resize": true
+                    },
+                    "modes": {
+                        "grab": {
+                            "distance": 140,
+                            "line_linked": {
+                                "opacity": 1
+                            }
+                        },
+                        "bubble": {
+                            "distance": 400,
+                            "size": 40,
+                            "duration": 2,
+                            "opacity": 8,
+                            "speed": 3
+                        },
+                        "repulse": {
+                            "distance": 200,
+                            "duration": 0.4
+                        },
+                        "push": {
+                            "particles_nb": 4
+                        },
+                        "remove": {
+                            "particles_nb": 2
                         }
                     }
-                }
-                
-                requestAnimationFrame(drawParticlesWithInteraction);
-            }
-            
-            drawParticlesWithInteraction();
+                },
+                "retina_detect": true
+            });
         });
     </script>
 </body>
