@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试 localStorage usermail</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-left: 4px solid #4CAF50;
+            word-break: break-all;
+        }
+        .no-data {
+            color: #777;
+            font-style: italic;
+        }
+        button {
+            padding: 8px 16px;
+            margin-top: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>测试 localStorage usermail</h1>
+        <p>此页面将显示 localStorage 中 'usermail' 的值：</p>
+        <div class="result" id="usermailResult"></div>
+        <button onclick="refreshUsermail()">刷新</button>
+        <button onclick="setTestUsermail()">设置测试值</button>
+    </div>
+
+    <script>
+        // 页面加载时执行
+        window.onload = function() {
+            displayUsermail();
+        };
+
+        // 显示 usermail 值
+        function displayUsermail() {
+            var user = localStorage.getItem('usermail') || '';
+            var resultElement = document.getElementById('usermailResult');
+
+            if (user) {
+                resultElement.innerHTML = '<strong>usermail 值:</strong> ' + user;
+                resultElement.classList.remove('no-data');
+            } else {
+                resultElement.innerHTML = '<span class="no-data">未找到 usermail 值</span>';
+                resultElement.classList.add('no-data');
+            }
+        }
+
+        // 刷新显示
+        function refreshUsermail() {
+            displayUsermail();
+        }
+
+        // 设置测试值
+        function setTestUsermail() {
+            var testValue = 'test@example.com';
+            localStorage.setItem('usermail', testValue);
+            alert('已设置测试 usermail 值: ' + testValue);
+            displayUsermail();
+        }
+    </script>
+</body>
+</html>
