@@ -4,142 +4,146 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>趣味加倍科技</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-        <script>
-        window.onload = function() {
-            // 检测是否为移动设备
-            function isMobile() {
-                return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            }
-
-            if (isMobile()) {
-                // 如果是移动设备，跳转到指定链接
-                window.location.href = "https://qujiaweb.top/overview";
-            }
-        };
-    </script>
 </head>
 <body>
+    <div id="particles-js"></div>
     <!-- 导航栏 -->
     <nav class="navbar">
         <div class="logo">趣味加倍科技</div>
-        <button class="menu-toggle" onclick="toggleMenu()">☰</button>
-        <ul class="nav-links" id="nav-links">
+        <ul class="nav-links">
             <li><a href="index.html">首页</a></li>
             <li><a href="qujiayingyong.html">趣加应用</a></li>
             <li><a href="qujiayinyue.html">趣加音乐</a></li>
-            <li><a href="https://qujiaweb.top/ai">趣加AI</a></li>
+            <li><a href="qujiaai.html">趣加AI</a></li>
             <li><a href="about.html">更新日志</a></li>
         </ul>
     </nav>
 
-    <!-- 首页内容 -->
-    <header class="hero">
-        <h1>Hi，趣味加倍</h1>
-        <H2>趣味加倍，效率加倍，体验加倍</H2>
-    </header>
+    <div class="container">
+        <header>
+            <h1 class="title">趣味加倍科技</h1>
+            <p>趣味加倍，效率加倍，体验加倍</p>
+        </header>
 
-    <section class="products">
-        <div class="product" onclick="location.href='qujiayingyong.html';">
-            <img src="https://static.codemao.cn/pickduck/H1Kyxe-uel.png?hash=FkQs--hO1V2QZy-uHpiLwJvId4Yy" alt="趣加应用">
-            <h2>趣加应用</h2>
-            <p>致力于优质安卓资源分享</p>
-        </div>
-        <div class="product" onclick="location.href='qujiayinyue.html';">
-            <img src="https://static.codemao.cn/pickduck/BkoXeebuxx.png?hash=FpRsQkClDFQyDYSqrvqdVa_xQhYV" alt="趣加音乐">
-            <h2>趣加音乐</h2>
-            <p>一起免费畅听</p>
-        </div>
-        
-        <div class="product" onclick="location.href='https://qujiaweb.top/ai';">
-            <img src="https://static.bcmcdn.com/coco/player/unstable/BJxHVddXJe.image/png?hash=Fn0NpsOyYzMAL3lyolaWT8VlS3NV" alt="趣加AI">
-            <h2>趣加AI</h2>
-            <p>仅人工智能聚合，暂停维护了</p>
-        </div>
-        
-        <div class="product" onclick="location.href='https://qujiaweb.top/pcresource/';">
-            <img src="https://static.codemao.cn/pickduck/HJHoZhdDyg.png?hash=FtGvmDasLASOF5rXUb0b09rfHGLz" alt="趣加AI">
-            <h2>趣加资源</h2>
-            <p>PC资源库·软件+网站</p>
-        </div>
-    </section>
+        <section class="products">
+            <div class="product" onclick="location.href='qujiayingyong.html'">
+                <img src="https://static.codemao.cn/pickduck/SkyC3_jdxe.png?hash=FrE0pXRMYBBltFvTP_EDpjYbWFiv" alt="趣加应用">
+                <h2>趣加应用</h2>
+                <p>致力于优质安卓资源分享</p>
+            </div>
+            <div class="product" onclick="location.href='qujiayinyue.html'">
+                <img src="https://static.codemao.cn/pickduck/SJAL6OoOgg.png?hash=Fo76T5JP_HQ0Fk1pM4CXA9n-GH0G" alt="趣加音乐">
+                <h2>趣加音乐</h2>
+                <p>一起免费畅听</p>
+            </div>
+            
+            <div class="product" onclick="location.href='qujiaai.html'">
+                <img src="https://static.codemao.cn/pickduck/SJ6ladsOge.png?hash=Fjm-PYfube5F8q1Pr1EEKsrqTA98" alt="趣加AI">
+                <h2>趣加AI</h2>
+                <p>在线工具及人工智能聚合</p>
+            </div>
+            
+            <div class="product" onclick="location.href='https://qujiaweb.top/pcresource/'">
+                <img src="https://static.codemao.cn/pickduck/Byr7Tusuex.png?hash=Fvzdbi1o148wQPYp3J9zDs-HPptb" alt="趣加资源">
+                <h2>趣加资源</h2>
+                <p>致力于优质PC资源分享</p>
+            </div>
+        </section>
 
-
-
-
-    <section class="about">
-        <!--
-
-
-        <h2>趣味加倍科技期待你的加入</h2>
-        <a href="https://kaoshi.wjx.top/vm/rQzfkg5.aspx" target="_blank">加入我们：戳这里</a>
-        
-        <p>推荐掌握的技能：<br>
-            ✅ 前后端开发知识（HTML+CSS+JavaScript+Vue等；Java、Python等）可为我们提供开发思路等<br>
-            ✅ 图文设计（PR、PS等）可为我们管理资源库、html、轮播图、活动等
-        </p>
-    -->
-    <h2>产品与服务</h2>
-    
-    <div class="images-row" style="display: flex; flex-wrap: wrap;">
-        <img src="https://static.codemao.cn/pickduck/S1YWn2ZFJe.png?hash=FmHj8pIgaU237tiUqXuba8wjh6WL" alt="Image 1"
-            style="max-width: 33%; height: auto; flex: 1 1 30%;">
-        <img src="https://static.codemao.cn/pickduck/HJ8QR3bFJx.png?hash=FiyEXS8p8xxw1ExXcnNi0ICi8Yep" alt="Image 2"
-            style="max-width: 33%; height: auto; flex: 1 1 30%;">
-        <img src="https://static.codemao.cn/pickduck/SyX_Jp-Kke.png?hash=Fh-qxws2s8Lo-kC72KopOhBtACXf" alt="Image 3"
-            style="max-width: 33%; height: auto; flex: 1 1 30%;">
+        <section class="about">
+            <h2>关于我们</h2>
+            <p>
+                趣味加倍科技是非经营软件平台，主打优质软件是趣加应用，畅所分享安卓软件和网站，近期其他项目有趣加音乐、趣加AI、趣加资源网等。希望我们的软件对你有帮助，祝你天天开心！
+            </p>
+            
+            <p>
+                想和我们一起交流讨论？👉<a href="https://qm.qq.com/cgi-bin/qm/qr?authKey=5z2ScOfVqEATFJxh8ddHXXd8BjW%2BWoT3oqYTXezolaBaEeyTfL8L9dY9ZRt4X%2B3Z&k=j5PqrSdDyLryfZgrW4UL-osMTlD4HrW3&noverify=0#">戳这里</a>
+            </p>
+        </section>
     </div>
 
+    <!-- 粒子效果库 -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // 初始化粒子效果
+        document.addEventListener('DOMContentLoaded', function() {
+            particlesJS('particles-js', {
+                "particles": {
+                    "number": {
+                        "value": 80,
+                        "density": {
+                            "enable": true,
+                            "value_area": 800
+                        }
+                    },
+                    "color": {
+                        "value": "#4a6bdf"
+                    },
+                    "shape": {
+                        "type": "circle"
+                    },
+                    "opacity": {
+                        "value": 0.3,
+                        "random": false
+                    },
+                    "size": {
+                        "value": 3,
+                        "random": true
+                    },
+                    "line_linked": {
+                        "enable": true,
+                        "distance": 150,
+                        "color": "#4a6bdf",
+                        "opacity": 0.2,
+                        "width": 1
+                    },
+                    "move": {
+                        "enable": true,
+                        "speed": 2,
+                        "direction": "none",
+                        "random": false,
+                        "straight": false,
+                        "out_mode": "out",
+                        "bounce": false
+                    }
+                },
+                "interactivity": {
+                    "detect_on": "canvas",
+                    "events": {
+                        "onhover": {
+                            "enable": true,
+                            "mode": "grab"
+                        },
+                        "onclick": {
+                            "enable": true,
+                            "mode": "push"
+                        },
+                        "resize": true
+                    },
+                    "modes": {
+                        "grab": {
+                            "distance": 140,
+                            "line_linked": {
+                                "opacity": 1
+                            }
+                        },
+                        "push": {
+                            "particles_nb": 4
+                        }
+                    }
+                },
+                "retina_detect": true
+            });
+        });
+    </script>
 
-
-
-    </section>
-
-    <section class="about">
-    
-    <h2>关于我们</h2>
-        <p>
-            <div class="log-entry">
-                
-                <p>趣味加倍科技是非经营软件平台，近期优质内容有趣加应用、趣加音乐、趣加AI等。希望我们的软件对你有帮助，祝你天天开心！</p>
-                   
-                
-
-                <a href="https://qjyy.mysxl.cn/3" target="_blank">
-                    <img src="https://static.codemao.cn/pickduck/ryRBhG0Fkl.png?hash=FhmGGmVtOfT0zYZd3djIpBmyupNo" alt="公告/文章"
-                        style="width: 140px; height: auto;">
-                </a>
-                
-                
-                <!--
-                <a href="https://qjyy.mysxl.cn/3"target="_blank">公告/文章</a>
-                <a href="https://www.wjx.cn/vm/OMQNbq4.aspx# "target="_blank">我要反馈</a>
-                <a href="https://www.wjx.cn/vm/eaBYOwf.aspx"target="_blank">在线资源提交</a><br>
-            -->
-        </p>
-
-        
-
-
-
-        <p>
-            <div class="log-entry">想和我们一起交流讨论？👉<a href="https://qm.qq.com/cgi-bin/qm/qr?authKey=5z2ScOfVqEATFJxh8ddHXXd8BjW%2BWoT3oqYTXezolaBaEeyTfL8L9dY9ZRt4X%2B3Z&k=j5PqrSdDyLryfZgrW4UL-osMTlD4HrW3&noverify=0#">戳这里</a></div>
-        </p>
-    
-        
-    </section>
-
-
-
-<!-- 页脚 -->
+    <!-- 页脚 -->
     <footer>
-        Copyright © 2025 趣味加倍科技. All Rights Reserved</div>
+        Copyright © 2025 趣味加倍科技. All Rights Reserved
     </footer>
 
-    <script>
-        function toggleMenu() {
-            document.getElementById('nav-links').classList.toggle('active');
-        }
-    </script>
 </body>
 </html>

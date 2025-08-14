@@ -3,26 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>趣加AI</title>
+    <title>趣加AI - 趣味加倍科技</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="particles-js"></div>
+    <!-- 导航栏 -->
     <nav class="navbar">
-        <a href="index.html" class="return-home">返回首页</a>
-        </nav>
+        <div class="logo">趣味加倍科技</div>
+        <ul class="nav-links">
+            <li><a href="index.html">首页</a></li>
+            <li><a href="qujiayingyong.html">趣加应用</a></li>
+            <li><a href="qujiayinyue.html">趣加音乐</a></li>
+            <li><a href="qujiaai.html">趣加AI</a></li>
+            <li><a href="about.html">更新日志</a></li>
+        </ul>
+    </nav>
 
+    <div class="container">
+        <header>
+            <h1 class="title">趣加AI</h1>
+            <p>你的人工智能好帮手</p>
+        </header>
 
-    <div class="download-card">
-        <a href=https://static.codemao.cn/pickduck/ByNadE0vxx.apk?hash=FpglFpjSE-Cp-gU-NYjKFQvPj_5q"" target="_blank">Android v1.0.3下载</a>
-</div>
+        <section class="download-section">
+            <div class="download-card">
+                <div class="card-header">
+                    <h2>趣加AI安卓版</h2>
 
+                </div>
+                <div class="card-body">
+                    <div class="version-info">
+                        <span class="version">版本: v1.0.3</span>
+                        <span class="platform">Android</span>
+                    </div>
+                    <div class="download-buttons">
+                        <a href="https://qujiaweb.top/app/app.html?icon=https%3A%2F%2Fstatic.codemao.cn%2Fbcx%2FrJFXXjwDlx.png%3Fhash%3DFqe6YdMhcrWI6pxVt15AhkAGQCcr&name=趣加AI&link=https%3A%2F%2Fwww.123684.com%2Fs%2FsBhZVv-T2i4H&pwd=Ko9R&简介=【最近更新】%0A修改了一些内容%0A【应用介绍】%0A官方软件，内容来自网络&图片一=https%3A%2F%2Fstatic.codemao.cn%2Fbcx%2FBJWNQsDDll.jpg%3Fhash%3DFsUeTtJLfs1w0Ec-NuryOcLuvc92&图片二=https%3A%2F%2Fstatic.codemao.cn%2Fbcx%2FS1U4Qiwwgl.jpg%3Fhash%3DFqy14VbHM-OOQjoGBRNgz2e9wnZ8" class="btn-download">
+                            <i class="fas fa-download"></i> 立即下载
+                        </a>
+                    </div>
+                    <div class="card-description">
+                        <p>趣加AI（安卓版）当前仅聚合多种人工智能工具，没有内置任何模型，亦包含诸多在线小工具</p>
+                        
+                    </div>
+                </div>
+            </div>
 
+            <div class="download-card">
+                <div class="card-header">
+                    <h2>趣加AI Windows版</h2>
 
-        <iframe src="https://qujiaweb.top/ai"></iframe>
+                </div>
+                <div class="card-body">
+                    <div class="version-info">
+                        <span class="version">版本: v1.0.3</span>
+                        <span class="platform">Windows</span>
+                    </div>
+                    <div class="download-buttons">
+                        <a href="http://qujiaweb.top/pcweb/Quai.msi" class="btn-download">
+                            <i class="fas fa-download"></i> 立即下载
+                        </a>
+                    </div>
+                    <div class="card-description">
+                        <p>趣加AI（Windows版）当前仅聚合多种人工智能工具，没有内置任何模型，亦包含诸多在线小工具</p>
+                    </div>
+                </div>
+            </div>
 
+             <div class="download-card">
+                <div class="card-header">
+                    <h2>趣加AI网页版</h2>
 
+                </div>
+                <div class="card-body">
+                    <div class="version-info">
+                        <span class="version">版本: v1.0.3</span>
+                        <span class="platform">Web</span>
+                    </div>
+                    <div class="download-buttons">
+                        <a href="https://qujiaweb.top/ai" class="btn-download">
+                            <i class="fas fa-download"></i> 立即打开
+                        </a>
+                    </div>
+                    <div class="card-description">
+                        <p>趣加AI（网页版）当前仅聚合多种人工智能工具，没有内置任何模型，亦包含诸多在线小工具</p>
+                        
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </div>
+
+    <!-- 粒子效果库 -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // 初始化粒子效果
+        document.addEventListener('DOMContentLoaded', function() {
+            particlesJS('particles-js', {
+                "particles": {
+                    "number": {
+                        "value": 80,
+                        "density": {
+                            "enable": true,
+                            "value_area": 800
+                        }
+                    },
+                    "color": {
+                        "value": "#4a6bdf"
+                    },
+                    "shape": {
+                        "type": "circle"
+                    },
+                    "opacity": {
+                        "value": 0.3,
+                        "random": false
+                    },
+                    "size": {
+                        "value": 3,
+                        "random": true
+                    },
+                    "line_linked": {
+                        "enable": true,
+                        "distance": 150,
+                        "color": "#4a6bdf",
+                        "opacity": 0.2,
+                        "width": 1
+                    },
+                    "move": {
+                        "enable": true,
+                        "speed": 2,
+                        "direction": "none",
+                        "random": false,
+                        "straight": false,
+                        "out_mode": "out",
+                        "bounce": false
+                    }
+                },
+                "interactivity": {
+                    "detect_on": "canvas",
+                    "events": {
+                        "onhover": {
+                            "enable": true,
+                            "mode": "grab"
+                        },
+                        "onclick": {
+                            "enable": true,
+                            "mode": "push"
+                        },
+                        "resize": true
+                    },
+                    "modes": {
+                        "grab": {
+                            "distance": 140,
+                            "line_linked": {
+                                "opacity": 1
+                            }
+                        },
+                        "push": {
+                            "particles_nb": 4
+                        }
+                    }
+                },
+                "retina_detect": true
+            });
+        });
+    </script>
+
+    <!-- 页脚 -->
     <footer>
-            Copyright © 2025 趣味加倍科技. All Rights Reserved</div>
+        Copyright © 2025 趣味加倍科技. All Rights Reserved
     </footer>
+
 </body>
 </html>
