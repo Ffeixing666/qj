@@ -38,13 +38,13 @@ function navigate(url) {
 
 // 分享函数
 function shareApp() {
-    navigator.clipboard.writeText('我发现了一个宝藏网站--趣加应用，分享给你：https://qujiaweb.top在浏览器打开')
+    navigator.clipboard.writeText('我发现了一个宝藏网站--趣加应用，分享给你：https://qujiaweb.top（推荐在浏览器打开）')
     // 检查浏览器是否支持Web Share API
     if (navigator.share) {
         navigator.share({
             title: '趣加应用分享',
-            text: '我发现了一个宝藏网站--趣加应用，分享给你：https://qujiaweb.top（在浏览器打开）',
-            url: 'https://jqyy.store'
+            text: '我发现了一个宝藏网站--趣加应用，分享给你：https://qujiaweb.top（推荐在浏览器打开）',
+            url: 'https://qujiaweb.top'
         }).catch(err => {
             console.log('分享失败:', err);
             fallbackShare();
