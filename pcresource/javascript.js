@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
         ],
         "常见问题": [
-            { title: "下载1G以上大文件", url: "https://blog.csdn.net/a13879442471/article/details/146482725", imageUrl: "" },
+            
             { title: "检测到病毒无法下载", url: "https://blog.csdn.net/shandongjiushen/article/details/148660610", imageUrl: "" },
             { title: "「趣加应用APP」致力于优质安卓资源分享", url: "https://qjyy.mysxl.cn", imageUrl: "" }
             
@@ -116,26 +116,127 @@ document.addEventListener('DOMContentLoaded', function() {
         nav.appendChild(navItem);
     }
 
+    // 123云盘直链解析函数
+    function parse123CloudLink(shareLink) {
+        console.log('开始解析123云盘链接:', shareLink);
+        const authorization = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTk1ODY0MTUsImlhdCI6MTc1ODk4MTYxNSwiaWQiOjE4MTQ0MDc2NTAsIm1haWwiOiIiLCJuaWNrbmFtZSI6IjEzODE5NTUzMTUzIiwic3VwcGVyIjpmYWxzZSwidXNlcm5hbWUiOjEzODE5NTUzMTUzLCJ2IjowfQ.e0FhxQHT7UimTWfD1a8ootiebsLnKOcpI6xr1P7N0uQ';
+        
+        // 根据API文档，使用正确的API地址和参数格式
+        const apiUrl = `https://api.pearktrue.cn/api/123panparse/?url=${encodeURIComponent(shareLink)}&Authorization=${authorization}`;
+        console.log('API请求URL:', apiUrl);
+        
+        return fetch(apiUrl)
+            .then(response => {
+                console.log('API响应状态:', response.status);
+                if (!response.ok) {
+                    throw new Error(`网络请求失败: HTTP ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('API响应数据:', data);
+                // 根据日志修正字段路径：应该是data.data.downloadurl
+                if (data && data.code === 200 && data.data && data.data.downloadurl) {
+                    console.log('成功解析到下载链接:', data.data.downloadurl);
+                    console.log('文件名:', data.data.filename);
+                    console.log('文件大小:', data.data.size);
+                    console.log('上传时间:', data.data.uptime);
+                    // 去除downloadurl中的反引号和空格
+                    let downloadUrl = data.data.downloadurl;
+                    console.log('原始下载链接:', downloadUrl);
+                    // 去除可能的反引号和前后空格
+                    downloadUrl = downloadUrl.replace(/[`]/g, '').trim();
+                    console.log('处理后的下载链接:', downloadUrl);
+                    return downloadUrl;
+                }
+                throw new Error(`解析失败: ${data?.msg || '未找到下载链接'}`);
+            })
+            .catch(error => {
+                console.error('解析123云盘链接时出错:', error);
+                // 给用户显示错误提示
+                alert(`解析123云盘链接失败: ${error.message}\n将尝试直接打开原始链接`);
+                // 如果解析失败，返回原始链接
+                return shareLink;
+            });
+    }
+
     // 加载资源
-   // 加载资源
     function loadResources(category) {
         resourceContainer.innerHTML = '';
         resources[category].forEach(resource => {
             const resourceBox = document.createElement('div');
             resourceBox.className = 'resource-box';
+
             const resourceTitle = document.createElement('h3');
             resourceTitle.textContent = resource.title;
-            const resourceLink = document.createElement('a');
-            resourceLink.href = resource.url;
-            resourceLink.textContent = '打开';
             resourceBox.appendChild(resourceTitle);
+
+            const resourceLink = document.createElement('a');
+            // 对于123云盘链接，显示'下载'而非'打开'
+            if (resource.url && resource.url.includes('123')) {
+                resourceLink.textContent = '✔️下载';
+            } else {
+                resourceLink.textContent = '✔️打开';
+            }
+            
+            // 判断是否为123云盘链接
+            if (resource.url && resource.url.includes('123')) {
+                resourceLink.href = 'javascript:void(0);';
+                // 不设置target='_blank'，因为我们会在onclick中明确控制打开方式
+                resourceLink.onclick = async function() {
+                    try {
+                        console.log('用户点击了123云盘链接:', resource.title, resource.url);
+                        // 显示加载状态
+                        resourceLink.textContent = '解析中...';
+                        
+                        // 解析123云盘链接
+                        const downloadUrl = await parse123CloudLink(resource.url);
+                        
+                        console.log('准备打开链接:', downloadUrl);
+                        // 打开下载链接
+                        const newWindow = window.open(downloadUrl, '_blank');
+                        
+                        // 检查窗口是否成功打开
+                        if (!newWindow) {
+                            console.warn('浏览器可能阻止了新窗口的打开');
+                            alert('浏览器可能阻止了新窗口的打开，请检查浏览器设置');
+                        }
+                        
+                        // 恢复按钮状态
+                        if (resource.url && resource.url.includes('123')) {
+                            resourceLink.textContent = '✔️下载';
+                        } else {
+                            resourceLink.textContent = '✔️打开';
+                        }
+                    } catch (error) {
+                        console.error('打开链接时出错:', error);
+                        // 恢复按钮状态
+                        if (resource.url && resource.url.includes('123')) {
+                            resourceLink.textContent = '✔️下载';
+                        } else {
+                            resourceLink.textContent = '✔️打开';
+                        }
+                        // 如果解析失败，尝试直接打开原始链接
+                        console.log('尝试直接打开原始链接:', resource.url);
+                        window.open(resource.url, '_blank');
+                    }
+                };
+            } else {
+                resourceLink.href = resource.url || '#';
+                resourceLink.onclick = function() {
+                    console.log('用户点击了非123云盘链接:', resource.title, resource.url);
+                };
+            }
+            
             resourceBox.appendChild(resourceLink);
+
             // 添加迅雷下载按钮
             const downloadButton = document.createElement('a');
             downloadButton.href = 'https://pan.xunlei.com/s/VOHLbqhS0fCwSSUSS8zAOYWKA1?pwd=xaj3';
-            //downloadButton.textContent = '迅雷下载';
+            //downloadButton.textContent = ' （🔥备用迅雷）';
             downloadButton.target = '_blank'; // 在新标签页中打开
             resourceBox.appendChild(downloadButton);
+
             // 添加图片
             if (resource.imageUrl) {
                 const resourceImage = document.createElement('img');
@@ -145,48 +246,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 resourceImage.style.borderRadius = '10px';
                 resourceBox.insertBefore(resourceImage, resourceTitle);
             }
+
             resourceContainer.appendChild(resourceBox);
         });
     }
-    // ... (existing code)
-     
-     // 加载资源
-     function loadResources(category) {
-         resourceContainer.innerHTML = '';
-         resources[category].forEach(resource => {
-             const resourceBox = document.createElement('div');
-             resourceBox.className = 'resource-box';
-     
-             const resourceTitle = document.createElement('h3');
-             resourceTitle.textContent = resource.title;
-             resourceBox.appendChild(resourceTitle);
-     
-             const resourceLink = document.createElement('a');
-             resourceLink.href = resource.url;
-             resourceLink.target = '_blank'; //new 在新标签页中打开
-             resourceLink.textContent = '✔️打开';
-             resourceBox.appendChild(resourceLink);
-     
-             // 添加迅雷下载按钮
-             const downloadButton = document.createElement('a');
-             downloadButton.href = 'https://pan.xunlei.com/s/VOHLbqhS0fCwSSUSS8zAOYWKA1?pwd=xaj3';
-             //downloadButton.textContent = ' （🔥备用迅雷）';
-             downloadButton.target = '_blank'; // 在新标签页中打开
-             resourceBox.appendChild(downloadButton);
-     
-             // 添加图片
-             if (resource.imageUrl) {
-                 const resourceImage = document.createElement('img');
-                 resourceImage.src = resource.imageUrl;
-                 resourceImage.alt = resource.title;
-                 resourceImage.style.width = '20px';
-                 resourceImage.style.borderRadius = '10px';
-                 resourceBox.insertBefore(resourceImage, resourceTitle);
-             }
-     
-             resourceContainer.appendChild(resourceBox);
-         });
-     }
      
      // ... (rest of your existing code)
      
@@ -217,16 +280,73 @@ document.addEventListener('DOMContentLoaded', function() {
             const resourceTitle = document.createElement('h3');
             resourceTitle.textContent = resource.title;
             const resourceLink = document.createElement('a');
-            resourceLink.href = resource.url;
-            resourceLink.textContent = '✔️打开';
-            resourceLink.target = '_blank'; //new 在新标签页中打开
-            const resourceLink2 = document.createElement('a');
+            // 对于123云盘链接，显示'下载'而非'打开'
+            if (resource.url && resource.url.includes('123')) {
+                resourceLink.textContent = '✔️下载';
+            } else {
+                resourceLink.textContent = '✔️打开';
+            }
             
+            // 判断是否为123云盘链接
+            if (resource.url && resource.url.includes('123')) {
+                resourceLink.href = 'javascript:void(0);';
+                resourceLink.onclick = async function() {
+                    try {
+                        console.log('用户在搜索结果中点击了123云盘链接:', resource.title, resource.url);
+                        // 显示加载状态
+                        resourceLink.textContent = '解析中...';
+                        
+                        // 解析123云盘链接
+                        const downloadUrl = await parse123CloudLink(resource.url);
+                        
+                        console.log('准备打开搜索结果链接:', downloadUrl);
+                        // 打开下载链接
+                        const newWindow = window.open(downloadUrl, '_blank');
+                        
+                        // 检查窗口是否成功打开
+                        if (!newWindow) {
+                            console.warn('浏览器可能阻止了新窗口的打开');
+                            alert('浏览器可能阻止了新窗口的打开，请检查浏览器设置');
+                        }
+                        
+                        // 恢复按钮状态
+                        if (resource.url && resource.url.includes('123')) {
+                            resourceLink.textContent = '✔️下载';
+                        } else {
+                            resourceLink.textContent = '✔️打开';
+                        }
+                    } catch (error) {
+                        console.error('打开搜索结果链接时出错:', error);
+                        // 恢复按钮状态
+                        if (resource.url && resource.url.includes('123')) {
+                            resourceLink.textContent = '✔️下载';
+                        } else {
+                            resourceLink.textContent = '✔️打开';
+                        }
+                        // 如果解析失败，尝试直接打开原始链接
+                        console.log('尝试直接打开搜索结果原始链接:', resource.url);
+                        window.open(resource.url, '_blank');
+                    }
+                };
+            } else {
+                resourceLink.href = resource.url || '#';
+                resourceLink.onclick = function() {
+                    console.log('用户在搜索结果中点击了非123云盘链接:', resource.title, resource.url);
+                };
+            }
 
             resourceBox.appendChild(resourceTitle);
             resourceBox.appendChild(resourceLink);
-
-            https://bfnkzy-loawyp-8080.preview.cloudstudio.work/newresource/
+            
+            // 添加图片（如果有）
+            if (resource.imageUrl) {
+                const resourceImage = document.createElement('img');
+                resourceImage.src = resource.imageUrl;
+                resourceImage.alt = resource.title;
+                resourceImage.style.width = '20px';
+                resourceImage.style.borderRadius = '10px';
+                resourceBox.insertBefore(resourceImage, resourceTitle);
+            }
 
             resourceContainer.appendChild(resourceBox);
         });
