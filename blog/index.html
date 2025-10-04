@@ -152,6 +152,117 @@ function htmlEntityToEmoji(str) {
         }
         .tab img { width: 24px; height: 24px; display: block; margin: 0 auto 5px; }
         .active { color: blue; font-weight: bold; }
+
+        /* === 新增样式：平台检测引导 === */
+        #platform-guide {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .guide-content {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .guide-content.ios {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .guide-content.android {
+            background: linear-gradient(135deg, #34e89e 0%, #0f3443 100%);
+            color: white;
+        }
+        
+        .guide-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .guide-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .guide-desc {
+            font-size: 14px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .guide-steps {
+            text-align: left;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .step:last-child {
+            margin-bottom: 0;
+        }
+        
+        .step-number {
+            background: white;
+            color: #333;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .guide-button {
+            background: white;
+            color: #333;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .guide-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .guide-button.ios {
+            background: #007aff;
+            color: white;
+        }
+        
+        .guide-button.android {
+            background: #34e89e;
+            color: #0f3443;
+        }
     </style>
 </head>
 <body>
@@ -224,6 +335,57 @@ function htmlEntityToEmoji(str) {
         </a>
     </div>
 
+    <!-- === 新增：平台检测引导 === -->
+    <div id="platform-guide">
+        <!-- iOS Safari 引导 -->
+        <div class="guide-content ios" id="ios-guide" style="display: none;">
+            <div class="guide-icon">📱</div>
+            <div class="guide-title">添加到主屏幕</div>
+            <div class="guide-desc">获得更好的全屏体验，像原生应用一样使用</div>
+            
+            <div class="guide-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div>点击底部分享按钮</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div>选择"添加到主屏幕"</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div>从主屏幕图标打开应用</div>
+                </div>
+            </div>
+            
+            <button class="guide-button ios" onclick="window.location.reload()">我知道了</button>
+        </div>
+        
+        <!-- Android 引导 -->
+        <div class="guide-content android" id="android-guide" style="display: none;">
+            <div class="guide-icon">🤖</div>
+            <div class="guide-title">下载安卓应用</div>
+            <div class="guide-desc">获得更流畅的体验和更多功能</div>
+            
+            <div class="guide-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div>点击下方下载按钮</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div>安装应用到您的设备</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div>享受更好的使用体验</div>
+                </div>
+            </div>
+            
+            <button class="guide-button android" onclick="downloadAndroidApp()">立即下载</button>
+        </div>
+    </div>
+
     <script>
         function openWeb(url) {
             window.location.href = 'web.html?url=' + encodeURIComponent(url);
@@ -260,67 +422,105 @@ function htmlEntityToEmoji(str) {
                 item.style.display = title.includes(keyword) ? "block" : "none";
             });
         });
-    </script>
 
+        // === 新增：平台检测逻辑 ===
+        function detectPlatformAndShowGuide() {
+            const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+            const isSafari = /safari/i.test(navigator.userAgent) && !/chrome|android/i.test(navigator.userAgent);
+            const isInStandaloneMode = ('standalone' in window.navigator) && window.navigator.standalone;
+            const isAndroid = /android/i.test(navigator.userAgent);
+            
+            console.log('平台检测:', { isIOS, isSafari, isInStandaloneMode, isAndroid });
+            
+            // 如果是PWA模式，不显示任何引导
+            if (isInStandaloneMode) {
+                return;
+            }
+            
+            // 如果是iOS Safari，显示添加到主屏幕引导（不可关闭）
+            if (isIOS && isSafari) {
+                showIOSGuide();
+            }
+            // 如果是Android，显示下载APP引导
+            else if (isAndroid) {
+                showAndroidGuide();
+            }
+        }
+        
+        function showIOSGuide() {
+            const guide = document.getElementById('platform-guide');
+            const iosGuide = document.getElementById('ios-guide');
+            
+            guide.style.display = 'flex';
+            iosGuide.style.display = 'block';
+            
+            // 不可关闭，所以不添加关闭事件
+        }
+        
+        function showAndroidGuide() {
+            const guide = document.getElementById('platform-guide');
+            const androidGuide = document.getElementById('android-guide');
+            
+            guide.style.display = 'flex';
+            androidGuide.style.display = 'block';
+        }
+        
+        function downloadAndroidApp() {
+            window.open('https://qujiaweb.top/Android', '_blank');
+        }
+        
+        // 页面加载完成后检测平台
+        window.addEventListener('DOMContentLoaded', function() {
+            // 延迟显示，让页面先加载完成
+            setTimeout(detectPlatformAndShowGuide, 1000);
+        });
 
-    
-
-
-
-    <script>
-
-
-
-
-var plusReady = function (callback) {  
-    if (window.plus) {  
-        callback();  
-    } else {  
-        document.addEventListener('plusready', callback);  
-    }  
-};  
-
-plusReady(function () {  
-    var firstBack = 0;  
-    var handleBack = function () {  
-        var currentWebview = plus.webview.currentWebview();  
-        var topWebview = plus.webview.getTopWebview();  
-        var now = Date.now || function () {  
-            return new Date().getTime();  
+        var plusReady = function (callback) {  
+            if (window.plus) {  
+                callback();  
+            } else {  
+                document.addEventListener('plusready', callback);  
+            }  
         };  
 
-        currentWebview.canBack(function (evt) {  
-            /**  
-             * 有可后退的历史记录，则后退。  
-             * 否则，关闭当前窗口。  
-             * 如果当前窗口是入口页，那么执行退出的逻辑。  
-             */  
-            if (currentWebview.id === plus.runtime.appid) {  
-                if (!firstBack) {  
-                    firstBack = now();  
-                    plus.nativeUI.toast('再按一次退出应用');  
+        plusReady(function () {  
+            var firstBack = 0;  
+            var handleBack = function () {  
+                var currentWebview = plus.webview.currentWebview();  
+                var topWebview = plus.webview.getTopWebview();  
+                var now = Date.now || function () {  
+                    return new Date().getTime();  
+                };  
 
-                    setTimeout(function () {  
-                        firstBack = 0;  
-                    }, 2000);  
-                } else if (now() - firstBack < 2000) {  
-                    plus.runtime.quit();  
-                }  
-            } else {  
-                if (evt.canBack) {  
-                    history.back();  
-                } else {  
-                    currentWebview.close('auto');  
-                }  
-            }  
-        });  
-    };  
+                currentWebview.canBack(function (evt) {  
+                    /**  
+                     * 有可后退的历史记录，则后退。  
+                     * 否则，关闭当前窗口。  
+                     * 如果当前窗口是入口页，那么执行退出的逻辑。  
+                     */  
+                    if (currentWebview.id === plus.runtime.appid) {  
+                        if (!firstBack) {  
+                            firstBack = now();  
+                            plus.nativeUI.toast('再按一次退出应用');  
 
-    plus.key.addEventListener('backbutton', handleBack);  
-});
-        //返回键处理
+                            setTimeout(function () {  
+                                firstBack = 0;  
+                            }, 2000);  
+                        } else if (now() - firstBack < 2000) {  
+                            plus.runtime.quit();  
+                        }  
+                    } else {  
+                        if (evt.canBack) {  
+                            history.back();  
+                        } else {  
+                            currentWebview.close('auto');  
+                        }  
+                    }  
+                });  
+            };  
+
+            plus.key.addEventListener('backbutton', handleBack);  
+        });
     </script>
-
-
 </body>
 </html>
