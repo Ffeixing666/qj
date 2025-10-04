@@ -354,7 +354,7 @@ function htmlEntityToEmoji(str) {
                 </div>
                 <div class="step">
                     <div class="step-number">3</div>
-                    <div>选择“添加到主屏幕”</div>
+                    <div>选择"添加到主屏幕"</div>
                 </div>
             </div>
             
@@ -378,7 +378,7 @@ function htmlEntityToEmoji(str) {
                 </div>
                 <div class="step">
                     <div class="step-number">3</div>
-                    <div>点击“继续安装”</div>
+                    <div>点击"继续安装"</div>
                 </div>
             </div>
             
@@ -387,6 +387,17 @@ function htmlEntityToEmoji(str) {
     </div>
 
     <script>
+        // 获取URL参数
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // 检查是否为PC模式
+        function isPCMode() {
+            return getQueryParam('ua') === 'pc';
+        }
+
         function openWeb(url) {
             window.location.href = 'web.html?url=' + encodeURIComponent(url);
         }
@@ -425,6 +436,12 @@ function htmlEntityToEmoji(str) {
 
         // === 新增：平台检测逻辑 ===
         function detectPlatformAndShowGuide() {
+            // 如果是PC模式，不显示任何引导
+            if (isPCMode()) {
+                console.log('PC模式，不显示引导弹窗');
+                return;
+            }
+
             const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
             const isSafari = /safari/i.test(navigator.userAgent) && !/chrome|android/i.test(navigator.userAgent);
             const isInStandaloneMode = ('standalone' in window.navigator) && window.navigator.standalone;
