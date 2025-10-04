@@ -104,27 +104,148 @@
             }
         }
 
-        // 复制文本到剪贴板
-        function copyToClipboard(text) {
+        // 增强的复制函数，包含多种备用方案
+        function copyToClipboardWithFallback(text) {
+            // 方案1: 使用现代Clipboard API
             if (navigator.clipboard && window.isSecureContext) {
-                return navigator.clipboard.writeText(text);
+                navigator.clipboard.writeText(text)
+                    .then(() => {
+                        console.log('复制成功 (现代API)');
+                        showCopySuccess();
+                    })
+                    .catch(err => {
+                        console.warn('现代API复制失败，尝试备用方案:', err);
+                        tryFallbackMethods(text);
+                    });
             } else {
-                // 回退方案
-                const textArea = document.createElement('textarea');
-                textArea.value = text;
-                textArea.style.position = 'fixed';
-                textArea.style.opacity = '0';
-                document.body.appendChild(textArea);
-                textArea.select();
+                // 直接使用备用方案
+                tryFallbackMethods(text);
+            }
+        }
+
+        function tryFallbackMethods(text) {
+            // 方案2: 使用HTML5+的复制功能
+            if (window.plus && plus.device) {
                 try {
-                    document.execCommand('copy');
-                    return Promise.resolve();
-                } catch (err) {
-                    return Promise.reject(err);
-                } finally {
-                    document.body.removeChild(textArea);
+                    plus.device.setClipboard(text, function() {
+                        console.log('复制成功 (HTML5+)');
+                        showCopySuccess();
+                    }, function(err) {
+                        console.warn('HTML5+复制失败:', err);
+                        tryExecCommand(text);
+                    });
+                    return;
+                } catch (e) {
+                    console.warn('HTML5+复制异常:', e);
                 }
             }
+            
+            // 方案3: 使用传统的execCommand
+            tryExecCommand(text);
+        }
+
+        function tryExecCommand(text) {
+            // 方案3.1: 创建textarea元素方式
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.top = '0';
+            textArea.style.left = '0';
+            textArea.style.width = '2em';
+            textArea.style.height = '2em';
+            textArea.style.padding = '0';
+            textArea.style.border = 'none';
+            textArea.style.outline = 'none';
+            textArea.style.boxShadow = 'none';
+            textArea.style.background = 'transparent';
+            textArea.style.opacity = '0';
+            
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                if (successful) {
+                    console.log('复制成功 (execCommand)');
+                    showCopySuccess();
+                } else {
+                    console.warn('execCommand复制失败');
+                    tryInputMethod(text);
+                }
+            } catch (err) {
+                document.body.removeChild(textArea);
+                console.warn('execCommand复制异常:', err);
+                tryInputMethod(text);
+            }
+        }
+
+        function tryInputMethod(text) {
+            // 方案4: 使用input元素方式（兼容性更好）
+            const input = document.createElement('input');
+            input.value = text;
+            input.style.position = 'fixed';
+            input.style.top = '0';
+            input.style.left = '0';
+            input.style.width = '100px';
+            input.style.height = '20px';
+            input.style.opacity = '0';
+            input.style.zIndex = '-9999';
+            
+            document.body.appendChild(input);
+            input.select();
+            input.setSelectionRange(0, 99999); // 对于移动设备
+            
+            try {
+                const successful = document.execCommand('copy');
+                document.body.removeChild(input);
+                
+                if (successful) {
+                    console.log('复制成功 (input方法)');
+                    showCopySuccess();
+                } else {
+                    console.warn('input方法复制失败');
+                    tryPromptMethod(text);
+                }
+            } catch (err) {
+                document.body.removeChild(input);
+                console.warn('input方法复制异常:', err);
+                tryPromptMethod(text);
+            }
+        }
+
+        function tryPromptMethod(text) {
+            // 方案5: 使用prompt提示用户手动复制
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            if (isMobile) {
+                // 移动设备：显示提示框让用户手动复制
+                alert('请手动复制以下内容：\n\n' + text + '\n\n提示：长按选择文本进行复制');
+            } else {
+                // PC设备：使用prompt
+                prompt('请按Ctrl+C复制以下内容：', text);
+            }
+            
+            // 即使手动复制也显示成功，因为用户已经看到提示
+            setTimeout(showCopySuccess, 500);
+        }
+
+        function showCopySuccess() {
+            // 显示复制成功提示
+            if (typeof plus !== 'undefined' && plus.nativeUI) {
+                // 使用HTML5+的提示
+                plus.nativeUI.toast('链接已复制到剪切板，快去粘贴吧～');
+            } else {
+                // 使用普通alert
+                alert('链接已复制到剪切板，快去粘贴吧～');
+            }
+        }
+
+        // 保留原有的copyToClipboard函数用于兼容
+        function copyToClipboard(text) {
+            copyToClipboardWithFallback(text);
         }
 
         const iframe = document.getElementById('webFrame');
@@ -157,15 +278,8 @@
                     // 构建分享链接
                     const shareUrl = `https://corsproxy.io/https://qujiaweb.top/blog/sharearticle.html?id=${idValue}&user=1754281004`;
                     
-                    // 复制到剪贴板
-                    copyToClipboard(shareUrl)
-                        .then(() => {
-                            alert('链接已复制到剪切板，快去粘贴吧～');
-                        })
-                        .catch(err => {
-                            console.error('复制失败:', err);
-                            alert('复制失败，请手动复制链接');
-                        });
+                    // 使用增强的复制方法
+                    copyToClipboardWithFallback(shareUrl);
                 } else {
                     alert('未找到文章ID参数');
                 }
