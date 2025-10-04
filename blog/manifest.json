@@ -1,0 +1,19 @@
+{
+  "name": "趣加",
+  "short_name": "趣加",
+  "description": "趣加APP",
+  "start_url": "/blog/",
+  "scope": "/blog/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2196f3",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "https://static.codemao.cn/coco/player/unstable/SkKneVXYR.image/png?hash=Ftv6S3_TwwLgokegSiqV7OMtziE0",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
