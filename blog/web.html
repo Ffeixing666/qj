@@ -77,8 +77,8 @@
     <!-- 顶部导航 -->
     <div class="navbar">
         <img src="https://static.codemao.cn/pickduck/HJX2Jpcjkx.jpeg?hash=FlAzmrOiGSJSKBVSHudLfeU_02s4" alt="返回" id="backBtn">
-     <!--  <img src="https://static.codemao.cn/pickduck/HksR1a5o1l.jpeg?hash=FntcWBPOUsAh7x0MeQ0-RQB39Nnt" alt="分享" id="shareBtn">
-  -->  </div>
+        <img src="https://static.codemao.cn/pickduck/HksR1a5o1l.jpeg?hash=FntcWBPOUsAh7x0MeQ0-RQB39Nnt" alt="分享" id="shareBtn">
+    </div>
 
     <!-- 内嵌网页 -->
     <div class="iframe-container">
@@ -89,6 +89,42 @@
         function getQueryParam(param) {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get(param);
+        }
+
+        // 从URL中提取ID参数的值
+        function extractIdFromUrl(url) {
+            try {
+                const urlObj = new URL(url);
+                const idParam = urlObj.searchParams.get('id');
+                return idParam;
+            } catch (e) {
+                // 如果URL解析失败，尝试使用字符串方法
+                const match = url.match(/[?&]id=([^&]+)/);
+                return match ? match[1] : null;
+            }
+        }
+
+        // 复制文本到剪贴板
+        function copyToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                return navigator.clipboard.writeText(text);
+            } else {
+                // 回退方案
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.opacity = '0';
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    return Promise.resolve();
+                } catch (err) {
+                    return Promise.reject(err);
+                } finally {
+                    document.body.removeChild(textArea);
+                }
+            }
         }
 
         const iframe = document.getElementById('webFrame');
@@ -110,19 +146,34 @@
         });
 
         document.getElementById('shareBtn').addEventListener('click', () => {
-            if (navigator.share) {
-                navigator.share({
-                    title: '趣加网页',
-                    url: window.location.href
-                });
+            // 获取当前页面URL参数中的url值
+            const currentPageUrl = getQueryParam('url');
+            
+            if (currentPageUrl && currentPageUrl.includes('article.html')) {
+                // 提取ID参数的值
+                const idValue = extractIdFromUrl(currentPageUrl);
+                
+                if (idValue) {
+                    // 构建分享链接
+                    const shareUrl = `https://corsproxy.io/https://qujiaweb.top/blog/sharearticle.html?id=${idValue}&user=1754281004`;
+                    
+                    // 复制到剪贴板
+                    copyToClipboard(shareUrl)
+                        .then(() => {
+                            alert('链接已复制到剪切板，快去粘贴吧～');
+                        })
+                        .catch(err => {
+                            console.error('复制失败:', err);
+                            alert('复制失败，请手动复制链接');
+                        });
+                } else {
+                    alert('未找到文章ID参数');
+                }
             } else {
-                alert('暂时不支持分享功能');
+                alert('当前页面暂不支持分享');
             }
         });
     </script>
-
-
-
 
     <script>
         document.addEventListener('webkitfullscreenchange', function() {  
@@ -134,10 +185,5 @@
     }  
 });
     </script>
-
-
-
-
-
  </body>
 </html>
