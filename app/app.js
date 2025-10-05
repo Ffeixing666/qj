@@ -19,7 +19,7 @@ window.onload = function() {
 
     // 解析蓝奏云或123盘的下载链接
     if (downloadLink.includes('lan')) {
-        fetch(`https://api.pearktrue.cn/api/lanzou/api.php?url=${downloadLink}&pwd=${password}&Authorization=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTk1ODY0MTUsImlhdCI6MTc1ODk4MTYxNSwiaWQiOjE4MTQ0MDc2NTAsIm1haWwiOiIiLCJuaWNrbmFtZSI6IjEzODE5NTUzMTUzIiwic3VwcGVyIjpmYWxzZSwidXNlcm5hbWUiOjEzODE5NTUzMTUzLCJ2IjowfQ.e0FhxQHT7UimTWfD1a8ootiebsLnKOcpI6xr1P7N0uQ`)
+        fetch(`https://api.pearktrue.cn/api/lanzou/api.php?url=${downloadLink}&pwd=${password}`)
             .then(response => response.json())
             .then(data => {
                 if (data && data.data && data.data.downloadurl) {
@@ -27,7 +27,7 @@ window.onload = function() {
                 }
             });
     } else if (downloadLink.includes('123')) {
-        fetch(`https://api.pearktrue.cn/api/123panparse/?url=${downloadLink}&pwd=${password}`)
+        fetch(`https://api.pearktrue.cn/api/123panparse/?url=${downloadLink}&pwd=${password}&Authorization=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTk1ODY0MTUsImlhdCI6MTc1ODk4MTYxNSwiaWQiOjE4MTQ0MDc2NTAsIm1haWwiOiIiLCJuaWNrbmFtZSI6IjEzODE5NTUzMTUzIiwic3VwcGVyIjpmYWxzZSwidXNlcm5hbWUiOjEzODE5NTUzMTUzLCJ2IjowfQ.e0FhxQHT7UimTWfD1a8ootiebsLnKOcpI6xr1P7N0uQ`)
             .then(response => response.json())
             .then(data => {
                 if (data && data.data && data.data.downloadurl) {
