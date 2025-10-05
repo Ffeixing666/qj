@@ -236,10 +236,10 @@
             // 显示复制成功提示
             if (typeof plus !== 'undefined' && plus.nativeUI) {
                 // 使用HTML5+的提示
-                plus.nativeUI.toast('文章链接已复制到剪切板，快去粘贴吧～');
+                plus.nativeUI.toast('复制成功');
             } else {
                 // 使用普通alert
-                alert('文章链接已复制到剪切板，快去粘贴吧～');
+                //alert('文章链接已复制到剪切板，快去粘贴吧～');
             }
         }
 
@@ -280,6 +280,7 @@
                     
                     // 使用增强的复制方法
                     copyToClipboardWithFallback(shareUrl);
+                    alert('已复制本文章分享链接，快去粘贴吧');
                 } else {
                     copyToClipboardWithFallback('https://qujiaweb.top/blog');
                     alert('已复制APP分享链接');
