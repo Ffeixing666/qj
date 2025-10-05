@@ -236,10 +236,10 @@
             // 显示复制成功提示
             if (typeof plus !== 'undefined' && plus.nativeUI) {
                 // 使用HTML5+的提示
-                plus.nativeUI.toast('链接已复制到剪切板，快去粘贴吧～');
+                plus.nativeUI.toast('文章链接已复制到剪切板，快去粘贴吧～');
             } else {
                 // 使用普通alert
-                alert('链接已复制到剪切板，快去粘贴吧～');
+                alert('文章链接已复制到剪切板，快去粘贴吧～');
             }
         }
 
@@ -279,12 +279,13 @@
                     const shareUrl = `https://corsproxy.io/https://qujiaweb.top/blog/sharearticle.html?id=${idValue}&user=1754281004`;
                     
                     // 使用增强的复制方法
-                    copyToClipboardWithFallback(shareUrl);
+                    copyToClipboardWithFallback('https://qujiaweb.top/blog');
                 } else {
-                    alert('未找到文章ID参数');
+                    copyToClipboardWithFallback('https://qujiaweb.top/blog');
+                    alert('已复制APP分享链接');
                 }
             } else {
-                alert('当前页面暂不支持分享');
+                alert('已复制APP分享链接');
             }
         });
     </script>
