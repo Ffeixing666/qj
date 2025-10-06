@@ -541,7 +541,7 @@ function deleteComment(createdAt) {
   if (!confirm('确定要删除这条评论吗？')) return;
 alert("删除成功");
 
-  var deleteTable1 = new pgdbs(dbs_56a041f93f025090f8ee06c5f53bf3e77c212ffbb76b1d2434e8b029f91825b0);
+  var deleteTable1 = new pgdbs(dbs_6d4470deee6cee4a19c69524a769bc300690620472b9110ed4f427d285b1ac76);
   
 deleteTable1.setTableDataDelete({
     filter: 'createdAt="' + createdAt + '"',
