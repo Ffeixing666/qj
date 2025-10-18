@@ -14,6 +14,28 @@ window.onload = function() {
     document.getElementById('img1').src = img1;
     document.getElementById('img2').src = img2;
     document.getElementById('description').innerText = description;
+    
+    // 只在有密码时显示密码容器
+    const passwordContainer = document.getElementById('password-container');
+    if (password && password.trim() !== '') {
+        document.getElementById('password-value').innerText = password;
+        
+        // 复制密码功能
+        document.getElementById('copy-button').addEventListener('click', function() {
+            navigator.clipboard.writeText(password).then(function() {
+                const copyMessage = document.getElementById('copy-message');
+                copyMessage.style.display = 'inline';
+                setTimeout(function() {
+                    copyMessage.style.display = 'none';
+                }, 2000);
+            }).catch(function(err) {
+                console.error('无法复制密码: ', err);
+            });
+        });
+    } else {
+        // 如果没有密码，隐藏整个密码容器
+        passwordContainer.style.display = 'none';
+    }
 
     let finalDownloadUrl = downloadLink; // 默认使用传入的下载链接
 
