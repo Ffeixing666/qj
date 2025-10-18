@@ -39,6 +39,47 @@
             margin-top: 20px;
             font-size: 16px;
         }
+        #password-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(145deg, #f0f0f0, #e6e6e6);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: inline-block;
+        }
+        #password-label {
+            font-weight: bold;
+            color: #333;
+            margin-right: 10px;
+        }
+        #password-value {
+            font-family: 'Courier New', monospace;
+            background-color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            color: #5B7BDF;
+            font-weight: bold;
+        }
+        #copy-button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            background-color: #5B7BDF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        #copy-button:hover {
+            background-color: #4362CC;
+        }
+        #copy-message {
+            margin-left: 10px;
+            font-size: 12px;
+            color: #4CAF50;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -101,6 +142,13 @@
     <div style="margin-top: 20px;">
         <img id="img1" src="" alt="Image 1">
         <img id="img2" src="" alt="Image 2">
+    </div>
+
+    <div id="password-container">
+        <span id="password-label">密码：</span>
+        <span id="password-value"></span>
+        <button id="copy-button">复制</button>
+        <span id="copy-message">已复制</span>
     </div>
 
     <div id="description"></div>
