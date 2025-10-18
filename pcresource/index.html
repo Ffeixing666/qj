@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>趣加资源</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#10b981',
+                        accent: '#f59e0b',
+                        dark: '#1f2937',
+                        light: '#f3f4f6'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }   
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-shadow {
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            }
+            .card-hover {
+                transition: all 0.3s ease;
+            }
+            .card-hover:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            }
+        }
+    </style>
+    <style>
+        body {
+            background-color: #f8fafc;
+        }
+        .modal {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .modal-content {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideIn {
+            from { 
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9); 
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0) scale(1); 
+            }
+        }
+        .search-input:focus + .search-icon {
+            color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="font-sans">
+    <!-- 弹出提示框 -->
+    <div id="infoModal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="modal-content bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-xl">
+            <div class="text-center">
+                <div class="bg-blue-100 rounded-full p-3 inline-block mb-4">
+                    <i class="fa fa-info-circle text-primary text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-dark mb-2">重要提示</h3>
+                <p class="text-gray-600 mb-6">出于多重原因，不再提供123云盘直链解析功能，需要按照平台规则下载文件，1G以下文件支持网页端直接下载</p>
+                <button id="closeModal" class="bg-primary hover:bg-primary/90 text-white font-medium py-2 px-6 rounded-full transition-all duration-300 w-full">
+                    我知道了
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页面头部 -->
+    <header class="bg-white shadow-md sticky top-0 z-40">
+        <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center mb-4 md:mb-0">
+                <i class="fa fa-rocket text-primary text-3xl mr-3"></i>
+                <h1 class="text-2xl font-bold text-dark">趣加资源</h1>
+            </div>
+            
+            <!-- 搜索框 -->
+            <div class="relative w-full md:w-1/3">
+                <input type="text" id="searchInput" placeholder="搜索资源..." 
+                       class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all">
+                <i class="fa fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 search-icon"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容 -->
+    <main class="container mx-auto px-4 py-8">
+        <div id="contentContainer" class="space-y-12">
+            <!-- 内容将通过JavaScript动态生成 -->
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p class="mb-2">趣加资源 - 致力于优质资源分享</p>
+            <p class="text-gray-400 text-sm">© 2025 趣味加倍科技</p>
+        </div>
+    </footer>
+
+    <script>
+        // 资源数据
+        const resources = {
+            "Office软件": [
+                { title: "Office2003完美版", url: "https://www.123684.com/s/sBhZVv-5SZ4H", imageUrl: "https://static.codemao.cn/pickduck/SJeg-TP8yx.jpeg?hash=Fvm8HRVhNspI7Bib15eOqhNnhhl1" },
+                { title: "Office2007三合一完美版", url: "https://www.123684.com/s/sBhZVv-iSZ4H", imageUrl: "https://static.codemao.cn/pickduck/SJeg-TP8yx.jpeg?hash=Fvm8HRVhNspI7Bib15eOqhNnhhl1" },
+                { title: "Office2010三合一完美版", url: "https://www.123684.com/s/sBhZVv-LSZ4H", imageUrl: "https://static.codemao.cn/pickduck/B1CAlawIJg.jpeg?hash=FoPCQiA0kGPS6RL3cde4np7ESeer" },
+                { title: "Office2013三合一完美版", url: "https://www.123684.com/s/sBhZVv-tSZ4H", imageUrl: "https://static.codemao.cn/pickduck/Hy93xaDUke.jpeg?hash=FgZL5SaN3JiYVqHPcm2JC4A_May6" },
+                { title: "Office2016三合一完美版", url: "https://www.123684.com/s/sBhZVv-zSZ4H", imageUrl: "https://static.codemao.cn/pickduck/Hy93xaDUke.jpeg?hash=FgZL5SaN3JiYVqHPcm2JC4A_May6" },
+                { title: "Office1997标准版", url: "https://www.123684.com/s/sBhZVv-BcZ4H", imageUrl: "https://static.codemao.cn/pickduck/B1rWMaPIye.jpeg?hash=FtZFcVJiw8bvk5vRIaj0LC1-6j7C" },
+                { title: "Office2000标准版", url: "https://www.123684.com/s/sBhZVv-acZ4H", imageUrl: "https://static.codemao.cn/pickduck/B1rWMaPIye.jpeg?hash=FtZFcVJiw8bvk5vRIaj0LC1-6j7C" },
+                { title: "Office2003标准版", url: "https://www.123684.com/s/sBhZVv-pcZ4H", imageUrl: "https://static.codemao.cn/pickduck/S1OueTv81g.jpeg?hash=Fvm8HRVhNspI7Bib15eOqhNnhhl1" },
+                { title: "Office2007专业增强版", url: "https://www.123684.com/s/sBhZVv-fcZ4H", imageUrl: "https://static.codemao.cn/pickduck/S1OueTv81g.jpeg?hash=Fvm8HRVhNspI7Bib15eOqhNnhhl1" },
+                { title: "Office2010专业增强版", url: "https://www.123684.com/s/sBhZVv-FtZ4H", imageUrl: "https://static.codemao.cn/pickduck/HyrigTvI1g.jpeg?hash=FoPCQiA0kGPS6RL3cde4np7ESeer" },
+                { title: "Office2013专业增强版", url: "https://www.123684.com/s/sBhZVv-JcZ4H", imageUrl: "https://static.codemao.cn/pickduck/r1Rm1TPIJe.jpeg?hash=FgZL5SaN3JiYVqHPcm2JC4A_May6" },
+                { title: "Office2016专业增强版", url: "https://www.123684.com/s/sBhZVv-gtZ4H", imageUrl: "https://static.codemao.cn/pickduck/r1Rm1TPIJe.jpeg?hash=FgZL5SaN3JiYVqHPcm2JC4A_May6" },
+                { title: "Office2019专业增强版", url: "https://www.123684.com/s/sBhZVv-wtZ4H", imageUrl: "https://static.codemao.cn/pickduck/r1Rm1TPIJe.jpeg?hash=FgZL5SaN3JiYVqHPcm2JC4A_May6" },
+                { title: "Office2021专业增强版", url: "https://www.123684.com/s/sBhZVv-ItZ4H", imageUrl: "https://static.codemao.cn/pickduck/BJ2L1TvLye.jpeg?hash=Fs25Q8QcXwcAnR1RF3cYj-WI-5Uu" },
+                { title: "神龙激活工具", url: "https://wwpa.lanzouo.com/iHDsz2iqblih", imageUrl: "https://static.codemao.cn/pickduck/rksnkpDL1x.jpeg?hash=Fgynv-MLXALSvOwL_FMR49Qod4cI" },
+                { title: "WPS2019专业版（教育部专用）", url: "https://www.123684.com/s/sBhZVv-6SZ4H", imageUrl: "https://static.codemao.cn/pickduck/rkZ-lpPUJl.jpeg?hash=FlQ-RlEETrQwPN6SjFRxxsxAG5Pt" },
+                { title: "WPS2016专业版（中国石油）", url: "https://www.123684.com/s/sBhZVv-Z5Z4H", imageUrl: "https://static.codemao.cn/pickduck/B1TA16wIkg.jpeg?hash=FnXTPtP0ZC3HLHiNgoqXkzxiEHV3" },
+            ],
+            "Adoble软件": [
+                { title: "Photoshop 2017", url: "https://www.123684.com/s/sBhZVv-YtZ4H", imageUrl: "https://static.codemao.cn/pickduck/HyTYbavI1x.jpeg?hash=Fj6r0szDlbuKywTbBFZYYqdXYvdd" },
+                { title: "Photoshop 2018", url: "https://www.123684.com/s/sBhZVv-GtZ4H", imageUrl: "https://static.codemao.cn/pickduck/HyTYbavI1x.jpeg?hash=Fj6r0szDlbuKywTbBFZYYqdXYvdd" },
+                { title: "Photoshop 2019", url: "https://www.123684.com/s/sBhZVv-y3c4H", imageUrl: "https://static.codemao.cn/pickduck/HyTYbavI1x.jpeg?hash=Fj6r0szDlbuKywTbBFZYYqdXYvdd" },
+                { title: "Photoshop 2020", url: "https://www.123684.com/s/sBhZVv-PtZ4H", imageUrl: "https://static.codemao.cn/pickduck/HyTYbavI1x.jpeg?hash=Fj6r0szDlbuKywTbBFZYYqdXYvdd" },
+                { title: "Photoshop 2021", url: "https://www.123684.com/s/sBhZVv-XtZ4H", imageUrl: "https://static.codemao.cn/pickduck/HyTYbavI1x.jpeg?hash=Fj6r0szDlbuKywTbBFZYYqdXYvdd" },
+                { title: "Photoshop 2022", url: "https://www.123684.com/s/sBhZVv-Thc4H", imageUrl: "https://static.codemao.cn/pickduck/HyTYbavI1x.jpeg?hash=Fj6r0szDlbuKywTbBFZYYqdXYvdd" },
+                { title: "Photoshop 2023", url: "https://www.123684.com/s/sBhZVv-3hc4H", imageUrl: "https://static.codemao.cn/pickduck/HyTYbavI1x.jpeg?hash=Fj6r0szDlbuKywTbBFZYYqdXYvdd" },
+                { title: "Premiere Pro 2017", url: "https://www.123865.com/s/sBhZVv-dhc4H", imageUrl: "https://static.codemao.cn/pickduck/Hkvw-pwI1x.jpeg?hash=FhWrCkQd7MDI4v02nq6-6g9oWcuo" },
+                { title: "Premiere Pro 2018", url: "https://www.123684.com/s/sBhZVv-63c4H", imageUrl: "https://static.codemao.cn/pickduck/Hkvw-pwI1x.jpeg?hash=FhWrCkQd7MDI4v02nq6-6g9oWcuo" },
+                { title: "Premiere Pro 2019", url: "https://www.123684.com/s/sBhZVv-vhc4H", imageUrl: "https://static.codemao.cn/pickduck/Hkvw-pwI1x.jpeg?hash=FhWrCkQd7MDI4v02nq6-6g9oWcuo" },
+                { title: "Premiere Pro 2020", url: "https://www.123684.com/s/sBhZVv-j3c4H", imageUrl: "https://static.codemao.cn/pickduck/Hkvw-pwI1x.jpeg?hash=FhWrCkQd7MDI4v02nq6-6g9oWcuo" },
+                { title: "Premiere Pro 2021", url: "https://www.123684.com/s/sBhZVv-V3c4H", imageUrl: "https://static.codemao.cn/pickduck/Hkvw-pwI1x.jpeg?hash=FhWrCkQd7MDI4v02nq6-6g9oWcuo" },
+                { title: "Premiere Pro 2022", url: "https://www.123684.com/s/sBhZVv-Hhc4H", imageUrl: "https://static.codemao.cn/pickduck/Hkvw-pwI1x.jpeg?hash=FhWrCkQd7MDI4v02nq6-6g9oWcuo" },
+                { title: "Premiere Pro 2023", url: "", imageUrl: "https://static.codemao.cn/pickduck/Hkvw-pwI1x.jpeg?hash=FhWrCkQd7MDI4v02nq6-6g9oWcuo" },
+                { title: " Adobe After Effects 2022", url: "https://www.123684.com/s/sBhZVv-hhc4H", imageUrl: "https://static.codemao.cn/pickduck/r1msWaPU1e.jpeg?hash=FuzisC8mEcjjzmOuV57EB8aMMG--" },
+                { title: " Adobe After Effects 2023", url: "https://www.123684.com/s/sBhZVv-hhc4H", imageUrl: "https://static.codemao.cn/pickduck/r1msWaPU1e.jpeg?hash=FuzisC8mEcjjzmOuV57EB8aMMG--" },
+            ],
+            "音视频处理工具": [
+                { title: "Tiniwow--免费PDF、视频、图像和其他在线工具", url: "https://tinywow.com", imageUrl: "https://static.codemao.cn/pickduck/ry0L1obllx.jpeg?hash=Fvm1JMDJNalNkWcevNtbsbjndp5x" },
+                { title: "MP4转MP3", url: "https://www.mp4tomp3.org/", imageUrl: "https://via.placeholder.com/150/999999" },
+                { title: "MP3升降调", url: "https://audio.worthsee.com/pitch/format-MP3", imageUrl: "https://via.placeholder.com/150/999999" },
+                { title: "视频转GIF", url: "http://tutieshi.com/video/", imageUrl: "https://via.placeholder.com/150/888888" },
+                { title: "m3u8视频在线提取", url: "http://tutieshi.com/tools/imgToBase64", imageUrl: "https://via.placeholder.com/150/777777" }
+            ],
+            "图片处理工具": [
+                { title: "Tiniwow--免费PDF、视频、图像和其他在线工具", url: "https://tinywow.com", imageUrl: "https://static.codemao.cn/pickduck/ry0L1obllx.jpeg?hash=Fvm1JMDJNalNkWcevNtbsbjndp5x" },
+                { title: "图片压缩", url: "http://tutieshi.com", imageUrl: "https://via.placeholder.com/150/666666" },
+                { title: "视频转GIF", url: "http://tutieshi.com/video/", imageUrl: "https://via.placeholder.com/150/555555" },
+                { title: " GIF合成", url: "http://tutieshi.com/compose/", imageUrl: "https://via.placeholder.com/150/444444" },
+                { title: " GIF裁剪", url: "http://tutieshi.com/cut", imageUrl: "https://via.placeholder.com/150/333333" },
+                { title: " 图片马赛克", url: "http://tutieshi.com/mosaic/", imageUrl: "https://via.placeholder.com/150/222222" },
+                { title: " 朋友圈九宫格", url: "http://tutieshi.com/tools/gongge2", imageUrl: "https://via.placeholder.com/150/111111" },
+                { title: " 图片转Base64", url: "http://tutieshi.com/tools/imgToBase64", imageUrl: "https://via.placeholder.com/150/DDDDDD" },
+                { title: " 一键抠图", url: "http://remove.photos", imageUrl: "https://static.codemao.cn/pickduck/S1_YwIPAyx.jpeg?hash=FonqIoBKgeHorfpf4nwbw64dItkE" },
+                { title: " 一键文字识别", url: "https://remove.photos/zh-cn/image-to-text", imageUrl: "https://static.codemao.cn/pickduck/S1_YwIPAyx.jpeg?hash=FonqIoBKgeHorfpf4nwbw64dItkE" },
+                { title: "在线消除笔", url: "https://remove.photos/zh-cn/remove-unwanted-object", imageUrl: "https://static.codemao.cn/pickduck/S1_YwIPAyx.jpeg?hash=FonqIoBKgeHorfpf4nwbw64dItkE" },
+                { title: " 黑白图片一键上色", url: "https://remove.photos/zh-cn/colorize", imageUrl: "https://static.codemao.cn/pickduck/S1_YwIPAyx.jpeg?hash=FonqIoBKgeHorfpf4nwbw64dItkE" },
+                { title: " 图片格式转换", url: "https://remove.photos/zh-cn/image-converter", imageUrl: "https://static.codemao.cn/pickduck/S1_YwIPAyx.jpeg?hash=FonqIoBKgeHorfpf4nwbw64dItkE" },
+                { title: " 增强色彩", url: "https://remove.photos/zh-cn/enhance-color", imageUrl: "https://static.codemao.cn/pickduck/S1_YwIPAyx.jpeg?hash=FonqIoBKgeHorfpf4nwbw64dItkE" },
+                { title: " AI无损放大", url: "https://remove.photos/zh-cn/super-resolution", imageUrl: "https://static.codemao.cn/pickduck/S1_YwIPAyx.jpeg?hash=FonqIoBKgeHorfpf4nwbw64dItkE" },
+                { title: " 一键替换新天空", url: "https://remove.photos/zh-cn/remove-sky", imageUrl: "https://static.codemao.cn/pickduck/S1_YwIPAyx.jpeg?hash=FonqIoBKgeHorfpf4nwbw64dItkE" },
+                { title: " 一键擦除图片前景", url: "https://remove.photos/zh-cn/remove-foreground", imageUrl: "https://static.codemao.cn/pickduck/S1_YwIPAyx.jpeg?hash=FonqIoBKgeHorfpf4nwbw64dItkE" },
+            ],
+            "文档处理工具": [
+                { title: "Tiniwow--免费PDF、视频、图像和其他在线工具", url: "https://tinywow.com", imageUrl: "https://static.codemao.cn/pickduck/ry0L1obllx.jpeg?hash=Fvm1JMDJNalNkWcevNtbsbjndp5x" },
+                { title: "PDF转PPT", url: "https://www.pdfpai.com/pdf-to-powerpoint", imageUrl: "https://www.pdfpai.com/statics/images/functionToPPTX.png" },
+                { title: "PDF转Word", url: "https://www.pdfpai.com/pdf-to-word", imageUrl: "https://www.pdfpai.com/statics/images/funcation_title_to_word.png" },
+                { title: "PDF转Excel", url: "https://www.pdfpai.com/pdf-to-excel", imageUrl: "https://www.pdfpai.com/statics/images/functionToExcel.png" },
+                { title: "PDF转图片", url: "https://www.pdfpai.com/pdf-to-images", imageUrl: "https://www.pdfpai.com/statics/images/functionToImages.png" },
+                { title: "Word转PDF", url: "https://www.pdfpai.com/word-to-pdf", imageUrl: "https://via.placeholder.com/150/666666" },
+                { title: "Excel转PDF", url: "https://www.pdfpai.com/excel-to-pdf", imageUrl: "https://via.placeholder.com/150/555555" },
+                { title: "PPT转PDF", url: "https://www.pdfpai.com/powerpoint-to-pdf", imageUrl: "https://via.placeholder.com/150/444444" },
+                { title: "图片转PDF", url: "https://www.pdfpai.com/images-to-pdf", imageUrl: "https://via.placeholder.com/150/333333" },
+                { title: "加密PDF", url: "https://www.pdfpai.com/encrypt-pdf", imageUrl: "https://via.placeholder.com/150/222222" },
+                { title: "解密PDF", url: "https://www.pdfpai.com/unlock-pdf", imageUrl: "https://via.placeholder.com/150/111111" },
+                { title: "编辑PDF", url: "https://www.pdfpai.com/combine-pdf", imageUrl: "https://via.placeholder.com/150/DDDDDD" },
+                { title: "文件DM5计算", url: "http://tutieshi.com/tools/getFileMd5", imageUrl: "https://via.placeholder.com/150/BBBBBB" }
+            ],
+            "免费影音": [
+                { title: "可可影视", url: "https://www.kkys01.com/", imageUrl: "https://static.codemao.cn/pickduck/HkW-z2RF1e.jpeg?hash=Fgxfplu8PKe1-ljFHltKGFTJSQ_h" },
+                { title: "Myfreemp3", url: "https://tools.liumingye.cn/music/#/", imageUrl: "https://static.codemao.cn/pickduck/SkmffnAt1l.jpeg?hash=FlWp9tvEd1roi4adi0cYUvThyl8u" },
+                { title: "超算平台-DeepSeek", url: "https://chat.scnet.cn/#/home", imageUrl: "https://static.codemao.cn/pickduck/HkuQWnAYyl.jpeg?hash=Fm7Na6S7zdnYVZrHWfxe8OFjPxeJ" },
+            ],
+            "常见问题": [
+                { title: "检测到病毒无法下载", url: "https://blog.csdn.net/shandongjiushen/article/details/148660610", imageUrl: "" },
+                { title: "「趣加应用APP」致力于优质安卓资源分享", url: "https://qjyy.mysxl.cn", imageUrl: "" }
+            ]
+        };
+
+        // 分类图标映射
+        const categoryIcons = {
+            "Office软件": "fa-file-text-o",
+            "Adoble软件": "fa-paint-brush",
+            "音视频处理工具": "fa-music",
+            "图片处理工具": "fa-picture-o",
+            "文档处理工具": "fa-file-pdf-o",
+            "免费影音": "fa-film",
+            "常见问题": "fa-question-circle"
+        };
+
+        // 渲染所有资源
+        function renderResources(data) {
+            const container = document.getElementById('contentContainer');
+            container.innerHTML = '';
+
+            for (const [category, items] of Object.entries(data)) {
+                // 创建分类区块
+                const categorySection = document.createElement('section');
+                categorySection.className = 'bg-white rounded-xl shadow-md overflow-hidden';
+                
+                // 分类标题栏
+                const categoryHeader = document.createElement('div');
+                categoryHeader.className = 'bg-primary text-white p-4 flex items-center';
+                const icon = document.createElement('i');
+                icon.className = `fa ${categoryIcons[category] || 'fa-folder-open'} mr-3 text-xl`;
+                const title = document.createElement('h2');
+                title.className = 'text-xl font-bold';
+                title.textContent = category;
+                categoryHeader.appendChild(icon);
+                categoryHeader.appendChild(title);
+                
+                // 资源网格
+                const resourcesGrid = document.createElement('div');
+                resourcesGrid.className = 'p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
+                
+                // 添加每个资源项
+                items.forEach(item => {
+                    const card = document.createElement('a');
+                    card.href = item.url || '#';
+                    if (item.url) {
+                        card.target = '_blank';
+                        card.rel = 'noopener noreferrer';
+                    } else {
+                        card.style.pointerEvents = 'none';
+                        card.className = 'opacity-60';
+                    }
+                    card.className += ' bg-light rounded-lg p-3 card-shadow card-hover flex items-center';
+                    
+                    // 资源图标/图片
+                    const imageContainer = document.createElement('div');
+                    imageContainer.className = 'w-12 h-12 rounded-md overflow-hidden bg-white flex items-center justify-center mr-3 flex-shrink-0';
+                    
+                    if (item.imageUrl) {
+                        const img = document.createElement('img');
+                        img.src = item.imageUrl;
+                        img.alt = item.title;
+                        img.className = 'w-full h-full object-cover';
+                        img.onerror = function() {
+                            this.src = 'https://via.placeholder.com/48?text=No+Img';
+                            this.alt = 'No Image';
+                        };
+                        imageContainer.appendChild(img);
+                    } else {
+                        const defaultIcon = document.createElement('i');
+                        defaultIcon.className = 'fa fa-link text-gray-400 text-xl';
+                        imageContainer.appendChild(defaultIcon);
+                    }
+                    
+                    // 资源标题
+                    const titleContainer = document.createElement('div');
+                    titleContainer.className = 'flex-grow min-w-0';
+                    const titleText = document.createElement('p');
+                    titleText.className = 'font-medium text-dark truncate';
+                    titleText.textContent = item.title;
+                    titleContainer.appendChild(titleText);
+                    
+                    // 添加到卡片
+                    card.appendChild(imageContainer);
+                    card.appendChild(titleContainer);
+                    
+                    // 添加到网格
+                    resourcesGrid.appendChild(card);
+                });
+                
+                // 组合分类区块
+                categorySection.appendChild(categoryHeader);
+                categorySection.appendChild(resourcesGrid);
+                
+                // 添加到容器
+                container.appendChild(categorySection);
+            }
+        }
+
+        // 搜索功能
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase().trim();
+                
+                if (searchTerm === '') {
+                    renderResources(resources);
+                    return;
+                }
+                
+                // 过滤资源
+                const filteredResources = {};
+                
+                for (const [category, items] of Object.entries(resources)) {
+                    const matchedItems = items.filter(item => 
+                        item.title.toLowerCase().includes(searchTerm)
+                    );
+                    
+                    if (matchedItems.length > 0) {
+                        filteredResources[category] = matchedItems;
+                    }
+                }
+                
+                // 渲染过滤后的资源
+                renderResources(filteredResources);
+                
+                // 如果没有搜索结果
+                if (Object.keys(filteredResources).length === 0) {
+                    const container = document.getElementById('contentContainer');
+                    container.innerHTML = `
+                        <div class="bg-white rounded-xl p-8 text-center">
+                            <i class="fa fa-search text-4xl text-gray-300 mb-4"></i>
+                            <p class="text-xl text-gray-500">没有找到匹配"${searchTerm}"的资源</p>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        // 关闭弹窗
+        function setupModal() {
+            const modal = document.getElementById('infoModal');
+            const closeModal = document.getElementById('closeModal');
+            
+            closeModal.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+            
+            // 点击模态框外部关闭
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            setupModal();
+            renderResources(resources);
+            setupSearch();
+        });
+    </script>
+</body>
+</html>
