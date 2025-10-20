@@ -1,0 +1,144 @@
+<html><head>
+<meta charset="UTF-8">
+<title>青云对象储存 - 拖拽上传</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --bg:#fff;--text:#212121;--mute:#757575;--accent:#1976d2;
+  --err:#d32f2f;--ok:#388e3c;--line:#e0e0e0;--radius:6px;
+}
+body{margin:0;padding:40px 20px;background:var(--bg);color:var(--text);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+display:flex;justify-content:center;align-items:flex-start;min-height:100vh;}
+.card{width:100%;max-width:520px;border:1px solid var(--line);border-radius:var(--radius);
+padding:32px 28px;box-shadow:0 4px 16px rgba(0,0,0,.08);}
+h1{font-size:1.5rem;margin-bottom:8px;font-weight:600}
+.sub{font-size:.875rem;color:var(--mute);margin-bottom:24px}
+
+/* 拖拽区域 */
+#dropArea{
+  margin-bottom:20px;border:2px dashed var(--line);border-radius:var(--radius);
+  padding:40px 16px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;
+}
+#dropArea.hover{border-color:var(--accent);background:#fafafa}
+#dropArea .hint{color:var(--mute);font-size:.95rem}
+#dropArea .button{display:inline-block;margin-top:10px;padding:8px 16px;border:1px solid var(--accent);
+color:var(--accent);border-radius:4px;font-size:.9rem;transition:all .2s}
+#dropArea .button:hover{background:var(--accent);color:#fff}
+
+input[type=file]{display:none}
+#fileName{margin-left:12px;font-size:.875rem;color:var(--mute)}
+button[type=submit]{margin-top:20px;width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:4px;font-size:1rem;cursor:pointer;transition:background .2s}
+button[type=submit]:disabled{background:#90caf9;cursor:not-allowed}
+#result{margin-top:24px;font-size:.875rem;line-height:1.5}
+#result.ok{color:var(--ok)}
+#result.err{color:var(--err)}
+#result a{word-break:break-all;color:var(--accent)}
+progress{width:100%;margin-top:10px;height:6px}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>青云对象储存 - 拖拽上传</h1>
+  <div class="sub">单文件 ≤ 30 MB，返回永久直链</div>
+
+  <!-- 拖拽区域 -->
+  <div id="dropArea">
+    <div class="hint">将文件拖到此处，或点击选择</div>
+    <div class="button">选择文件</div>
+    <input type="file" id="file" name="file" required="">
+  </div>
+
+  <span id="fileName">未选择文件</span>
+
+  <button type="submit" id="upBtn">上传</button>
+  <progress id="progress" max="100" value="0" hidden=""></progress>
+
+  <div id="result"></div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const dropArea = $('dropArea');
+const fileInput= $('file');
+const fileName = $('fileName');
+const upBtn    = $('upBtn');
+const progress = $('progress');
+const resultBox= $('result');
+
+// 选择文件
+fileInput.addEventListener('change', () => {
+  fileName.textContent = fileInput.files[0]?.name || '未选择文件';
+});
+
+// 点击拖拽区域触发选择
+dropArea.addEventListener('click', () => fileInput.click());
+
+// 拖拽事件
+['dragenter','dragover','dragleave','drop'].forEach(evt => {
+  dropArea.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); }, false);
+});
+['dragenter','dragover'].forEach(evt => {
+  dropArea.addEventListener(evt, () => dropArea.classList.add('hover'), false);
+});
+['dragleave','drop'].forEach(evt => {
+  dropArea.addEventListener(evt, () => dropArea.classList.remove('hover'), false);
+});
+dropArea.addEventListener('drop', e => {
+  const files = e.dataTransfer.files;
+  if (files && files[0]) {
+    fileInput.files = files;          // 填充到 input
+    fileName.textContent = files[0].name;
+  }
+}, false);
+
+// 上传
+upBtn.addEventListener('click', async () => {
+  const file = fileInput.files[0];
+  if (!file) return;
+
+  upBtn.disabled = true;
+  progress.hidden = false;
+  resultBox.className = '';
+  resultBox.textContent = '';
+
+  const fd = new FormData();
+  fd.append('file', file);
+
+  const xhr = new XMLHttpRequest();
+  xhr.upload.addEventListener('progress', e => {
+    if (e.lengthComputable) progress.value = (e.loaded / e.total) * 100;
+  });
+
+  xhr.addEventListener('load', () => {
+    progress.hidden = true;
+    upBtn.disabled  = false;
+    let data;
+    try { data = JSON.parse(xhr.responseText); } catch {
+      resultBox.className = 'err';
+      resultBox.textContent = '返回解析失败：' + xhr.responseText.slice(0, 200);
+      return;
+    }
+    if (xhr.status === 200 && data.url) {
+      resultBox.className = 'ok';
+      resultBox.innerHTML = `上传成功！<br>直链：<a href="${data.url}" target="_blank" rel="noreferrer">${data.url}</a>`;
+    } else {
+      resultBox.className = 'err';
+      resultBox.textContent = '错误：' + (data.error || '未知');
+    }
+  });
+
+  xhr.addEventListener('error', () => {
+    progress.hidden = true;
+    upBtn.disabled  = false;
+    resultBox.className = 'err';
+    resultBox.textContent = '网络错误';
+  });
+
+  xhr.open('POST', 'https://cloud.hopex.top/apiv1/upfile/demo.php');
+  xhr.send(fd);
+});
+</script>
+
+
+</body></html>
