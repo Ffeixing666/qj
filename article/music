@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>趣加音乐</title>
+    <style>
+        body {margin:0;padding:0;}
+        img {width:100%;display:block;}
+    </style>
+</head>
+    
+<body>
+    <a href="https://qujiaweb.top/app/app.html?icon=https%3A%2F%2Fstatic.codemao.cn%2Fbcx%2FSksz1-Cuxe.jpg%3Fhash%3DFnBbtJlsdG5o7sdJ38LUZvFRW1co&name=趣加音乐0.1.0&link=https%3A%2F%2Fwwpa.lanzouo.com%2FiA4JR38s0jxc&pwd=1o0k&简介=【最近更新】%0A1.修复了首页排行榜、随机听功能%0A2.修复了播放页面时长显示、歌词显示问题%0A【应用介绍】%0A趣加音乐-一起免费畅听%0A支持搜索，查看，评论，收藏，下载等&图片一=https%3A%2F%2Fstatic.codemao.cn%2Fbcx%2FByLVgin3ge.jpeg%3Fhash%3DFgg7u6uUjhpkQ-C9fQ4e9NJdZ2VV&图片二=https%3A%2F%2Fstatic.codemao.cn%2Fbcx%2FHyTNeshngx.jpeg%3Fhash%3DFgsqSd7mEcyS-dmzC2h3zB9Kh0UD" target="_blank"><img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_q4FL7uH1u_1761388149830.jpeg" alt="图片1"></a>
+    <!--
+    <img src="https://static.codemao.cn/pickduck/SJ198Stall.png?hash=FqK3B_JpTNOvedFgETBpxuTDMR_Q" alt="图片1">
+    <img src="https://static.codemao.cn/pickduck/rJd1VFD6gx.png?hash=FowZ1jbM8BqMQ3Oi7-HM4zv3rzMm" alt="图片2">
+    <img src="https://static.codemao.cn/pickduck/Hk4e4YDpgg.png?hash=FudYIyxO-xV4_bpmg8xKJA7XAmWr" alt="图片3">
+    <img src="https://static.codemao.cn/pickduck/ryJb4FDaeg.png?hash=Fg3dKViZ6JgZywVoemHwizOheCWW" alt="图片4">
+    -->
+</body>
+</html>
