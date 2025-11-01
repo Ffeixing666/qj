@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件上传转URL工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .upload-area {
+            border: 2px dashed #6a11cb;
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+            background-color: #f8f9ff;
+        }
+        
+        .upload-area.highlight {
+            background-color: #eef2ff;
+            border-color: #2575fc;
+        }
+        
+        .upload-icon {
+            font-size: 48px;
+            color: #6a11cb;
+            margin-bottom: 15px;
+        }
+        
+        .upload-text {
+            margin-bottom: 20px;
+            color: #555;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .file-label {
+            display: inline-block;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(106, 17, 203, 0.3);
+        }
+        
+        .file-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(106, 17, 203, 0.4);
+        }
+        
+        .file-info {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .upload-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(106, 17, 203, 0.3);
+        }
+        
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(106, 17, 203, 0.4);
+        }
+        
+        .upload-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result-area {
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .result-title {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .result-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 8px;
+            border-left: 4px solid #6a11cb;
+        }
+        
+        .result-label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        
+        .result-value {
+            word-break: break-all;
+            color: #333;
+        }
+        
+        .url-link {
+            color: #2575fc;
+            text-decoration: none;
+        }
+        
+        .url-link:hover {
+            text-decoration: underline;
+        }
+        
+        .copy-btn {
+            background: #6a11cb;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 10px;
+            transition: background 0.3s ease;
+        }
+        
+        .copy-btn:hover {
+            background: #5a0db3;
+        }
+        
+        .progress-area {
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            background: #ffeaea;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .success-message {
+            color: #27ae60;
+            background: #eaffea;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .file-preview {
+            max-width: 100%;
+            max-height: 200px;
+            margin-top: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 0;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>文件上传转URL工具</h1>
+            <p>上传文件并获取可分享的URL链接</p>
+        </div>
+        
+        <div class="content">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <p class="upload-text">拖放文件到此处或点击选择文件</p>
+                <label for="fileInput" class="file-label">选择文件</label>
+                <input type="file" id="fileInput" class="file-input">
+                <p class="file-info">支持所有文件类型，单个文件最大100MB</p>
+            </div>
+            
+            <div class="file-preview" id="filePreview"></div>
+            
+            <button id="uploadBtn" class="upload-btn" disabled>上传文件</button>
+            
+            <div class="progress-area" id="progressArea">
+                <div class="progress-bar">
+                    <div class="progress" id="progressBar"></div>
+                </div>
+                <div class="progress-text" id="progressText">正在上传...</div>
+            </div>
+            
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+            
+            <div class="result-area" id="resultArea">
+                <h3 class="result-title">上传结果</h3>
+                <div class="result-item">
+                    <div class="result-label">文件名</div>
+                    <div class="result-value" id="resultFileName"></div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">文件大小</div>
+                    <div class="result-value" id="resultFileSize"></div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">查看链接</div>
+                    <div class="result-value">
+                        <a href="#" id="resultUrl" class="url-link" target="_blank"></a>
+                        <button class="copy-btn" data-clipboard-target="#resultUrl">复制</button>
+                    </div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">下载链接</div>
+                    <div class="result-value">
+                        <a href="#" id="resultDownloadUrl" class="url-link" target="_blank"></a>
+                        <button class="copy-btn" data-clipboard-target="#resultDownloadUrl">复制</button>
+                    </div>
+                </div>
+                <div class="result-item">
+                    <div class="result-label">上传时间</div>
+                    <div class="result-value" id="resultUploadTime"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取DOM元素
+            const fileInput = document.getElementById('fileInput');
+            const uploadArea = document.getElementById('uploadArea');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const progressArea = document.getElementById('progressArea');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const resultArea = document.getElementById('resultArea');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            const filePreview = document.getElementById('filePreview');
+            
+            // 结果元素
+            const resultFileName = document.getElementById('resultFileName');
+            const resultFileSize = document.getElementById('resultFileSize');
+            const resultUrl = document.getElementById('resultUrl');
+            const resultDownloadUrl = document.getElementById('resultDownloadUrl');
+            const resultUploadTime = document.getElementById('resultUploadTime');
+            
+            // 当前选中的文件
+            let selectedFile = null;
+            
+            // 拖放功能
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, unhighlight, false);
+            });
+            
+            function highlight() {
+                uploadArea.classList.add('highlight');
+            }
+            
+            function unhighlight() {
+                uploadArea.classList.remove('highlight');
+            }
+            
+            uploadArea.addEventListener('drop', handleDrop, false);
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFiles(files);
+            }
+            
+            // 文件选择处理
+            fileInput.addEventListener('change', function() {
+                handleFiles(this.files);
+            });
+            
+            function handleFiles(files) {
+                if (files.length === 0) return;
+                
+                const file = files[0];
+                
+                // 检查文件大小 (100MB限制)
+                if (file.size > 100 * 1024 * 1024) {
+                    showError('文件大小超过100MB限制');
+                    return;
+                }
+                
+                selectedFile = file;
+                uploadBtn.disabled = false;
+                
+                // 显示文件信息
+                const fileInfo = document.querySelector('.file-info');
+                fileInfo.textContent = `已选择: ${file.name} (${formatFileSize(file.size)})`;
+                
+                // 预览图片文件
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        filePreview.src = e.target.result;
+                        filePreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    filePreview.style.display = 'none';
+                }
+                
+                // 隐藏之前的结果和消息
+                resultArea.style.display = 'none';
+                errorMessage.style.display = 'none';
+                successMessage.style.display = 'none';
+            }
+            
+            // 上传文件
+            uploadBtn.addEventListener('click', function() {
+                if (!selectedFile) return;
+                
+                uploadFile(selectedFile);
+            });
+            
+            async function uploadFile(file) {
+                // 显示上传进度
+                progressArea.style.display = 'block';
+                progressBar.style.width = '0%';
+                progressText.textContent = '正在读取文件...';
+                uploadBtn.disabled = true;
+                
+                try {
+                    // 读取文件为Base64
+                    const base64Content = await readFileAsBase64(file);
+                    
+                    // 更新进度
+                    progressBar.style.width = '50%';
+                    progressText.textContent = '正在上传文件...';
+                    
+                    // 发送API请求
+                    const response = await fetch('https://wenjianshangchuan.nocode.host/api/upload', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            fileName: file.name,
+                            fileContent: base64Content,
+                            fileType: file.type || 'application/octet-stream'
+                        })
+                    });
+                    
+                    // 更新进度
+                    progressBar.style.width = '100%';
+                    progressText.textContent = '上传完成!';
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // 显示成功消息
+                        showSuccess('文件上传成功!');
+                        
+                        // 显示结果
+                        displayResult(result.data);
+                    } else {
+                        throw new Error(result.message || '上传失败');
+                    }
+                    
+                } catch (error) {
+                    showError('上传失败: ' + error.message);
+                } finally {
+                    // 隐藏进度条
+                    setTimeout(() => {
+                        progressArea.style.display = 'none';
+                    }, 1000);
+                }
+            }
+            
+            function readFileAsBase64(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        // 移除Data URL前缀 (如 "data:image/jpeg;base64,")
+                        const base64 = e.target.result.split(',')[1];
+                        resolve(base64);
+                    };
+                    
+                    reader.onerror = function(error) {
+                        reject(error);
+                    };
+                    
+                    reader.readAsDataURL(file);
+                });
+            }
+            
+            function displayResult(data) {
+                resultFileName.textContent = data.fileName;
+                resultFileSize.textContent = formatFileSize(data.size);
+                resultUrl.href = data.url;
+                resultUrl.textContent = data.url;
+                resultDownloadUrl.href = data.downloadUrl;
+                resultDownloadUrl.textContent = data.downloadUrl;
+                resultUploadTime.textContent = new Date(data.uploadTime).toLocaleString();
+                
+                resultArea.style.display = 'block';
+            }
+            
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+                successMessage.style.display = 'none';
+            }
+            
+            function showSuccess(message) {
+                successMessage.textContent = message;
+                successMessage.style.display = 'block';
+                errorMessage.style.display = 'none';
+            }
+            
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            // 复制功能
+            document.querySelectorAll('.copy-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const target = this.getAttribute('data-clipboard-target');
+                    const text = document.querySelector(target).textContent;
+                    
+                    navigator.clipboard.writeText(text).then(() => {
+                        const originalText = this.textContent;
+                        this.textContent = '已复制!';
+                        
+                        setTimeout(() => {
+                            this.textContent = originalText;
+                        }, 2000);
+                    }).catch(err => {
+                        console.error('复制失败: ', err);
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
