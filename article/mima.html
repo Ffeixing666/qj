@@ -365,9 +365,14 @@
             
             table1.onGetData((json) => {
                 if (json.code === 200 && json.fields.length > 0) {
-                    // 获取邮箱字段（假设第一个字段是邮箱）
-                    userEmail = json.fields[0][Object.keys(json.fields[0])[1]]; // 获取第一个字段的值
-                    $('#email').val(userEmail);
+                    // 获取fields列表第一项的"邮箱"字段值
+                    const firstRecord = json.fields[0];
+                    if (firstRecord.邮箱) {
+                        userEmail = firstRecord.邮箱;
+                        $('#email').val(userEmail);
+                    } else {
+                        showResult('step1', '未找到邮箱字段', 'error');
+                    }
                 } else {
                     showResult('step1', '未找到与当前IP关联的邮箱', 'error');
                 }
