@@ -367,8 +367,8 @@
                 if (json.code === 200 && json.fields.length > 0) {
                     // 获取fields列表第一项的"邮箱"字段值
                     const firstRecord = json.fields[0];
-                    if (firstRecord.邮箱) {
-                        userEmail = firstRecord.邮箱;
+                    if (firstRecord.user) {
+                        userEmail = firstRecord.user;
                         $('#email').val(userEmail);
                     } else {
                         showResult('step1', '未找到邮箱字段', 'error');
