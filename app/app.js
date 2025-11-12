@@ -49,7 +49,7 @@ window.onload = function() {
                 }
             });
     } else if (downloadLink.includes('123')) {
-        fetch(`https://api.pearktrue.cn/api/123panparse/?url=${downloadLink}&pwd=${password}&Authorization=1`)
+        fetch(`https://api.pearktrue.cn/api/123panparse/?url=${downloadLink}&pwd=${password}`)
             .then(response => response.json())
             .then(data => {
                 if (data && data.data && data.data.downloadurl) {
