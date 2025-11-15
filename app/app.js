@@ -18,7 +18,7 @@ window.onload = function() {
     // 只在有密码时显示密码容器
     const passwordContainer = document.getElementById('password-container');
     if (password && password.trim() !== '') {
-        document.getElementById('password-value').innerText = password;
+document.getElementById('password-value').innerText = password.split('?')[0];
         
         // 复制密码功能
         document.getElementById('copy-button').addEventListener('click', function() {
