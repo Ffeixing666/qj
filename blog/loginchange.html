@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录状态更新</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 28px;
+        }
+        
+        .status-message {
+            margin: 20px 0;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            margin: 20px auto;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .success-icon {
+            font-size: 60px;
+            margin: 20px 0;
+            color: #4ade80;
+        }
+        
+        .error-icon {
+            font-size: 60px;
+            margin: 20px 0;
+            color: #f87171;
+        }
+        
+        .userid-display {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 18px;
+            word-break: break-all;
+        }
+        
+        .back-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .footer {
+            margin-top: 30px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>登录状态更新</h1>
+        
+        <div id="statusArea">
+            <div class="loading-spinner"></div>
+            <div class="status-message">正在处理登录信息...</div>
+        </div>
+        
+        <div id="useridArea" style="display: none;">
+            <div class="userid-display">用户ID: <span id="useridValue"></span></div>
+        </div>
+        
+        <button id="backButton" class="back-button" style="display: none;">返回</button>
+        
+        <div class="footer">登录状态已更新，即将自动返回...</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusArea = document.getElementById('statusArea');
+            const useridArea = document.getElementById('useridArea');
+            const useridValue = document.getElementById('useridValue');
+            const backButton = document.getElementById('backButton');
+            
+            // 解析URL参数
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('userid');
+            
+            // 模拟处理延迟
+            setTimeout(function() {
+                if (userId) {
+                    // 存储userid到localStorage
+                    localStorage.setItem('userid', userId);
+                    
+                    // 更新UI显示成功状态
+                    statusArea.innerHTML = `
+                        <div class="success-icon">✓</div>
+                        <div class="status-message">登录状态已成功更新！</div>
+                    `;
+                    
+                    // 显示用户ID
+                    useridValue.textContent = userId;
+                    useridArea.style.display = 'block';
+                    
+                    // 显示返回按钮
+                    backButton.style.display = 'inline-block';
+                    
+                    // 3秒后自动返回
+                    setTimeout(function() {
+                        window.history.back();
+                    }, 3000);
+                } else {
+                    // 处理错误情况
+                    statusArea.innerHTML = `
+                        <div class="error-icon">✗</div>
+                        <div class="status-message">未能获取用户ID，请检查URL参数。</div>
+                    `;
+                    
+                    // 显示返回按钮
+                    backButton.style.display = 'inline-block';
+                }
+            }, 1500);
+            
+            // 手动返回按钮事件
+            backButton.addEventListener('click', function() {
+                window.history.back();
+            });
+        });
+    </script>
+</body>
+</html>
