@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title趣加我的</title>
+    <title>趣加我的</title>
     <style>
         * {
             margin: 0;
@@ -44,10 +44,28 @@
 <body>
     <div class="container">
         <div class="iframe-container">
-            <iframe src="https://creative-space-web.nocode.host" title="趣加app"></iframe>
+            <iframe id="mainFrame" src="" title="趣加app"></iframe>
         </div>
     </div>
     <script>
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const iframe = document.getElementById('mainFrame');
+            const baseUrl = "https://creative-space-web.nocode.host";
+            
+            
+            const userId = localStorage.getItem('userid');
+            
+        
+            let finalUrl = baseUrl;
+            if (userId) {
+                finalUrl += '?userid=' + encodeURIComponent(userId);
+            }
+            
+            
+            iframe.src = finalUrl;
+        });
+
         plusReady(function () {  
             var firstBack = 0;  
             var handleBack = function () {  
@@ -58,11 +76,7 @@
                 };  
 
                 currentWebview.canBack(function (evt) {  
-                    /**  
-                     * 有可后退的历史记录，则后退。  
-                     * 否则，关闭当前窗口。  
-                     * 如果当前窗口是入口页，那么执行退出的逻辑。  
-                     */  
+                    
                     if (currentWebview.id === plus.runtime.appid) {  
                         if (!firstBack) {  
                             firstBack = now();  
@@ -83,6 +97,7 @@
                     }  
                 });  
             };  
+        });
     </script>
 </body>
 </html>
