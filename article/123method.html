@@ -1,22 +1,79 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>配置教程｜123云突破限制攻略</title>
+    <title>趣加应用升级</title>
     <style>
-        body {margin:0;padding:0;}
-        img {width:100%;display:block;}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            height: 100vh;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .fullscreen-link {
+            display: block;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .fullscreen-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .loading-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+        }
     </style>
 </head>
-    
 <body>
-    <img src="https://static.codemao.cn/pickduck/SJFDvFxClg.png?hash=FnPLZVWuxZW-NFmtQbId1N1nGLL-" alt="图片1">
-    <!--
-    <img src="https://static.codemao.cn/pickduck/SJ198Stall.png?hash=FqK3B_JpTNOvedFgETBpxuTDMR_Q" alt="图片1">
-    <img src="https://static.codemao.cn/pickduck/rJd1VFD6gx.png?hash=FowZ1jbM8BqMQ3Oi7-HM4zv3rzMm" alt="图片2">
-    <img src="https://static.codemao.cn/pickduck/Hk4e4YDpgg.png?hash=FudYIyxO-xV4_bpmg8xKJA7XAmWr" alt="图片3">
-    <img src="https://static.codemao.cn/pickduck/ryJb4FDaeg.png?hash=Fg3dKViZ6JgZywVoemHwizOheCWW" alt="图片4">
-    -->
+    <a href="https://qujiaweb.top" class="fullscreen-link" id="imageLink">
+        <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_GwdV0UoiQ_1763871827295.png" 
+             alt="趣加应用升级展示图片" 
+             class="fullscreen-image"
+             id="mainImage">
+        <div class="loading-text" id="loadingText">图片加载中...</div>
+    </a>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageLink = document.getElementById('imageLink');
+            const mainImage = document.getElementById('mainImage');
+            const loadingText = document.getElementById('loadingText');
+            
+            // 图片加载处理
+            mainImage.onload = function() {
+                loadingText.style.display = 'none';
+            };
+            
+            mainImage.onerror = function() {
+                loadingText.textContent = '图片加载失败，点击跳转';
+            };
+            
+            // 添加键盘支持
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    imageLink.click();
+                }
+            });
+        });
+    </script>
 </body>
 </html>
