@@ -329,7 +329,7 @@
         async function parse123PanLink(url) {
             try {
                 // 构造API请求URL
-                const apiUrl = `${API_URL}?url=${encodeURIComponent(url)}`;
+                const apiUrl = `${API_URL}?url=${encodeURIComponent(url)}&Authorization=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjYyNzcyNzQsImlhdCI6MTc2NTY3MjQ3NCwiaWQiOjE4NTQ3NDE5OTcsIm1haWwiOiIiLCJuaWNrbmFtZSI6IjE1NTI5MDEwNDMwIiwic3VwcGVyIjpmYWxzZSwidXNlcm5hbWUiOjE1NTI5MDEwNDMwLCJ2IjowfQ.hEiXJLdIQT8jTO2S0g6Vat5TCLdKpj3l5Ick374ERn4`;
                 
                 const response = await fetch(apiUrl);
                 const data = await response.json();
