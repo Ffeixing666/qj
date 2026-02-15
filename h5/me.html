@@ -234,9 +234,9 @@
     <section id="profileSection" style="display: none;">
         <header>
             <div class="profile-left">
-                <img src="" class="avatar" id="uAvatar" alt="">
+                <img src="" class="avatar" id="uAvatar" alt="" onclick="openUserPage()">
                 <div class="user-meta">
-                    <div class="username" id="uName">加载中...</div>
+                    <div class="username" id="uName" onclick="openUserPage()">加载中...</div>
                     <div class="points-badge" onclick="openMallPage()">
                         <span class="points-star">⭐</span>
                         <span id="uPoints">0</span>
@@ -1107,6 +1107,25 @@
                 ws.show('pop-in', 300);
             } else {
                 window.location.href = 'setting.html';
+            }
+        }
+
+        function openUserPage() {
+            const mail = localStorage.getItem('usermail');
+            if (!mail) {
+                toast('请先登录');
+                return;
+            }
+            // 页面切换前设置为非活动状态
+            setPageInactive();
+            var url = 'page.html?user=' + encodeURIComponent(mail);
+            if (window.plus) {
+                var ws = plus.webview.create(url, url, {
+                    backbuttonMaximize: false
+                });
+                ws.show('pop-in', 300);
+            } else {
+                window.location.href = url;
             }
         }
 
