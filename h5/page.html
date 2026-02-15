@@ -479,6 +479,9 @@
                 `;
             }
 
+            // 添加 1 秒延迟，确保加载动画多显示一秒
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
             try {
                 const response = await fetch(`https://apirank.qujiaweb.top/?mode=get_other_user_apps&mail=${encodeURIComponent(mail)}&user=${encodeURIComponent(user)}`, {
                     method: 'GET'

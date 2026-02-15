@@ -235,6 +235,77 @@
             z-index: 1000;
         }
 
+        /* 下载进度弹窗 */
+        .download-progress-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .progress-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 85%;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .progress-title {
+            font-size: 18px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--text-main);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--ios-gray);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--ios-blue);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            color: var(--text-sec);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .progress-cancel {
+            width: 100%;
+            height: 44px;
+            background: var(--ios-gray);
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+
+        .progress-cancel:active {
+            background: #e0e0e5;
+        }
+
         .btn-icon {
             width: 44px;
             height: 44px;
@@ -498,11 +569,24 @@
         </div>
     </div>
 
+    <!-- 下载进度弹窗 -->
+    <div class="download-progress-modal" id="downloadProgressModal" style="display: none;">
+        <div class="progress-container">
+            <div class="progress-title">下载中</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="progress-text" id="progressText">准备中...</div>
+            <button class="progress-cancel" onclick="cancelDownload()">取消下载</button>
+        </div>
+    </div>
+
     <script>
         // 全局变量存储截图数组
         let screenshotUrls = [];
         let isSaving = false;
         let pageActive = true; // 页面状态标志，用于检测页面是否活跃
+        let currentDownloadTask = null; // 当前下载任务
 
         function handleBack() {
             pageActive = false; // 标记页面为非活跃状态
@@ -835,77 +919,19 @@
                 return;
             }
             
-            const btn = document.getElementById('downloadBtn');
+            const btn = event.target;
             if (!btn) {
                 console.log('下载按钮不存在');
                 return;
             }
             
-            // 显示解析中状态
-            btn.innerText = "解析中";
-            
-            // 模拟解析过程，实际项目中这里会调用接口获取下载链接
-            setTimeout(async () => {
-                if (!isPageActive()) return;
-                
-                // 假设解析成功，获取到下载链接
-                const downloadUrl = 'https://example.com/app.apk';
-                
-                // 开始下载
-                if (window.plus) {
-                    downloadWithPlus(downloadUrl, btn);
-                } else {
-                    // 非5+环境下的处理
-                    if (isPageActive()) {
-                        btn.innerText = "获取";
-                        alert('请在App环境中下载');
-                    }
+            btn.innerText = "处理中...";
+            setTimeout(() => {
+                if (isPageActive()) {
+                    alert('已为您拉起安全下载通道');
+                    btn.innerText = "获取应用";
                 }
             }, 1000);
-        }
-        
-        // 使用5+环境下载文件（带进度显示）
-        function downloadWithPlus(url, btn) {
-            if (!window.plus) {
-                console.error('5+环境不可用');
-                return;
-            }
-
-            // 显示开始下载状态
-            if (isPageActive() && btn) {
-                btn.innerText = "下载中0%";
-            }
-
-            // 显示下载进度
-            const downloadTask = plus.downloader.createDownload(url, {}, function(download, status) {
-                if (isPageActive() && btn) {
-                    if (status === 200) {
-                        btn.innerText = "获取";
-                        showToast('下载完成');
-                        // 打开下载的文件
-                        plus.runtime.openFile(download.filename);
-                    } else {
-                        btn.innerText = "获取";
-                        showToast('下载失败，请重试');
-                        console.error('下载失败:', status);
-                    }
-                }
-            });
-
-            // 监听下载进度
-            downloadTask.addEventListener('statechanged', function(task, status) {
-                if (task.state === 3) { // 下载中
-                    const progress = Math.round((task.downloadedSize / task.totalSize) * 100);
-                    console.log('下载进度:', progress + '%');
-                    // 更新按钮上的进度显示
-                    if (isPageActive() && btn) {
-                        btn.innerText = "下载中" + progress + "%";
-                    }
-                }
-            });
-
-            // 开始下载
-            downloadTask.start();
         }
 
         function getUrlParam(name) {
@@ -1128,7 +1154,103 @@
             }
         }
 
+        // 显示下载进度弹窗
+        function showDownloadProgress() {
+            if (!isPageActive()) return;
+            const modal = document.getElementById('downloadProgressModal');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        }
 
+        // 隐藏下载进度弹窗
+        function hideDownloadProgress() {
+            if (!isPageActive()) return;
+            const modal = document.getElementById('downloadProgressModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // 更新下载进度
+        function updateDownloadProgress(progress, downloadedSize, totalSize) {
+            if (!isPageActive()) return;
+            
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            
+            if (progressFill) {
+                progressFill.style.width = progress + '%';
+            }
+            
+            if (progressText) {
+                const downloaded = formatFileSize(downloadedSize);
+                const total = formatFileSize(totalSize);
+                progressText.textContent = `${downloaded} / ${total} (${progress}%)`;
+            }
+        }
+
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // 取消下载
+        function cancelDownload() {
+            if (currentDownloadTask) {
+                currentDownloadTask.abort();
+                currentDownloadTask = null;
+                hideDownloadProgress();
+                showToast('下载已取消');
+            }
+        }
+
+        // 使用5+环境下载文件
+        function downloadWithPlus(url) {
+            if (!window.plus) {
+                console.error('5+环境不可用');
+                return;
+            }
+
+            // 显示下载进度弹窗
+            showDownloadProgress();
+
+            // 显示下载进度
+            const downloadTask = plus.downloader.createDownload(url, {}, function(download, status) {
+                // 隐藏进度弹窗
+                hideDownloadProgress();
+                currentDownloadTask = null;
+                
+                if (status === 200) {
+                    showToast('下载完成');
+                    // 打开下载的文件
+                    plus.runtime.openFile(download.filename);
+                } else {
+                    showToast('下载失败，请重试');
+                    console.error('下载失败:', status);
+                }
+            });
+
+            // 存储当前下载任务
+            currentDownloadTask = downloadTask;
+
+            // 监听下载进度
+            downloadTask.addEventListener('statechanged', function(task, status) {
+                if (task.state === 3) { // 下载中
+                    const progress = Math.round((task.downloadedSize / task.totalSize) * 100);
+                    console.log('下载进度:', progress + '%');
+                    // 更新UI显示进度
+                    updateDownloadProgress(progress, task.downloadedSize, task.totalSize);
+                }
+            });
+
+            // 开始下载
+            downloadTask.start();
+        }
 
         // =============================================================
 
@@ -1670,7 +1792,7 @@
                     // 没有评论，显示暂无评论
                     const commentContainer = document.querySelector('.comment-container');
                     if (commentContainer) {
-                        commentContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-sec);">暂无评论，快来发表第一条评论吧！</div>';
+                        commentContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-sec);">暂无评论，快来抢沙发</div>';
                     }
                 }
             } catch (error) {
@@ -1678,7 +1800,7 @@
                 // 出错时显示暂无评论
                 const commentContainer = document.querySelector('.comment-container');
                 if (commentContainer) {
-                    commentContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-sec);">暂无评论，快来发表第一条评论吧！</div>';
+                    commentContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-sec);">暂无评论，快来抢沙发</div>';
                 }
             }
         }
@@ -1694,7 +1816,7 @@
             const filteredComments = comments.filter(comment => !comment.rootid || comment.rootid === '');
             
             if (filteredComments.length === 0) {
-                commentContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-sec);">暂无评论，快来发表第一条评论吧！</div>';
+                commentContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-sec);">暂无评论，快来抢沙发</div>';
                 return;
             }
             
