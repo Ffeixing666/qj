@@ -270,6 +270,13 @@
             100% { transform: rotate(360deg); }
         }
 
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
         .hidden { display: none; }
     </style>
 </head>
@@ -396,6 +403,195 @@
             } catch (error) { console.error(error); }
         }
 
+        // 长按事件处理
+        function addLongPressEvent(element, keyword) {
+            let pressTimer = null;
+            let startX = 0;
+            let startY = 0;
+
+            // 禁用系统默认长按弹出菜单
+            element.oncontextmenu = function(e) { e.preventDefault(); return false; };
+
+            element.addEventListener('touchstart', function(e) {
+                // 记录初始触摸位置
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                
+                element.style.transform = 'scale(0.98)';
+                element.style.transition = 'transform 0.2s';
+                
+                pressTimer = setTimeout(function() {
+                    // 触发长按逻辑
+                    showActionMenu(element, keyword);
+                    // 触发后恢复缩放，防止菜单弹出后卡在缩放状态
+                    element.style.transform = 'scale(1)';
+                }, 600); // 略微增加到600ms，避开快速点击
+            });
+
+            element.addEventListener('touchmove', function(e) {
+                // 计算移动距离
+                let moveX = Math.abs(e.touches[0].clientX - startX);
+                let moveY = Math.abs(e.touches[0].clientY - startY);
+                
+                // 只有当手指移动超过10像素时才判定为滚动，从而取消长按
+                if (moveX > 10 || moveY > 10) {
+                    element.style.transform = 'scale(1)';
+                    clearTimeout(pressTimer);
+                }
+            });
+
+            element.addEventListener('touchend', function() {
+                element.style.transform = 'scale(1)';
+                clearTimeout(pressTimer);
+            });
+
+            element.addEventListener('touchcancel', function() {
+                element.style.transform = 'scale(1)';
+                clearTimeout(pressTimer);
+            });
+        }
+
+        // 显示操作菜单
+        function showActionMenu(element, keyword) {
+            // 移除旧菜单
+            const oldMenu = document.querySelector('.action-menu');
+            if (oldMenu) {
+                document.body.removeChild(oldMenu);
+            }
+            
+            // 创建菜单元素
+            const menu = document.createElement('div');
+            menu.className = 'action-menu';
+            menu.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0, 0, 0, 0.9);
+                color: white;
+                border-radius: 12px;
+                padding: 16px 0;
+                z-index: 9999;
+                font-size: 16px;
+                min-width: 180px;
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                pointer-events: auto;
+            `;
+            
+            // 添加菜单项
+            menu.innerHTML = `
+                <div class="menu-item" style="padding: 14px 28px; text-align: center; cursor: pointer; transition: background 0.2s;">删除</div>
+            `;
+            
+            document.body.appendChild(menu);
+            
+            // 显示菜单
+            setTimeout(function() {
+                menu.style.opacity = '1';
+            }, 10);
+            
+            // 添加点击事件
+            menu.querySelector('.menu-item').addEventListener('click', function() {
+                deleteSearchHistory(keyword);
+            });
+            
+            // 点击菜单外部关闭菜单
+            setTimeout(function() {
+                document.addEventListener('click', closeActionMenu);
+            }, 100);
+        }
+
+        // 关闭操作菜单
+        function closeActionMenu() {
+            const menu = document.querySelector('.action-menu');
+            if (menu) {
+                menu.style.opacity = '0';
+                setTimeout(function() {
+                    if (menu.parentNode) {
+                        document.body.removeChild(menu);
+                    }
+                }, 300);
+            }
+            document.removeEventListener('click', closeActionMenu);
+        }
+
+        // 删除单个搜索历史记录
+        function deleteSearchHistory(keyword) {
+            try {
+                // 读取现有搜索历史
+                let history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+                
+                // 过滤掉要删除的记录
+                const newHistory = history.filter(item => item !== keyword);
+                
+                // 保存回本地存储
+                localStorage.setItem('searchHistory', JSON.stringify(newHistory));
+                
+                // 重新加载搜索历史
+                loadSearchHistory();
+                
+                // 关闭操作菜单
+                closeActionMenu();
+                
+                // 显示删除成功提示
+                if (window.plus) {
+                    plus.nativeUI.toast('删除成功');
+                } else {
+                    // 浏览器环境下的简单提示
+                    const toast = document.createElement('div');
+                    toast.style.cssText = `
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        background: rgba(0, 0, 0, 0.7);
+                        color: white;
+                        padding: 10px 20px;
+                        border-radius: 20px;
+                        z-index: 9999;
+                        font-size: 14px;
+                        animation: fadeInOut 2s ease-in-out;
+                    `;
+                    toast.innerText = '删除成功';
+                    document.body.appendChild(toast);
+                    setTimeout(() => {
+                        document.body.removeChild(toast);
+                    }, 2000);
+                }
+            } catch (error) {
+                console.error('删除搜索历史失败:', error);
+                // 关闭操作菜单
+                closeActionMenu();
+                
+                // 显示删除失败提示
+                if (window.plus) {
+                    plus.nativeUI.toast('删除失败');
+                } else {
+                    const toast = document.createElement('div');
+                    toast.style.cssText = `
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        background: rgba(0, 0, 0, 0.7);
+                        color: white;
+                        padding: 10px 20px;
+                        border-radius: 20px;
+                        z-index: 9999;
+                        font-size: 14px;
+                        animation: fadeInOut 2s ease-in-out;
+                    `;
+                    toast.innerText = '删除失败';
+                    document.body.appendChild(toast);
+                    setTimeout(() => {
+                        document.body.removeChild(toast);
+                    }, 2000);
+                }
+            }
+        }
+
         function loadSearchHistory() {
             try {
                 const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
@@ -412,6 +608,8 @@
                             document.getElementById('searchInput').value = keyword;
                             performSearch();
                         };
+                        // 添加长按事件
+                        addLongPressEvent(tag, keyword);
                         historyTags.appendChild(tag);
                     });
                     searchHistory.style.display = 'block';

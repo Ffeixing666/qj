@@ -450,7 +450,7 @@
             getApps(filter);
         }
 
-        async function getApps(filter = '') {
+        async function getApps(filter = '', retryCount = 0) {
             const mail = localStorage.getItem('usermail');
             if (!mail) {
                 showLoginPrompt();
@@ -482,6 +482,15 @@
                 }
             } catch (e) {
                 console.error('Get Apps Error:', e);
+                // 检查是否有用户数据且未超过重试次数
+                if (mail && retryCount < 1) {
+                    console.log('网络请求失败，检查到用户数据，正在重试...');
+                    // 延迟1秒后重试，避免请求过于频繁
+                    setTimeout(() => {
+                        getApps(filter, retryCount + 1);
+                    }, 1000);
+                    return;
+                }
                 // 加载失败时显示错误信息
                 if (appList) {
                     appList.innerHTML = `

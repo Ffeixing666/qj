@@ -438,6 +438,9 @@
             initApp();
         });
 
+        // 页面状态标志，用于跟踪用户是否还在当前页面
+        let isPageActive = true;
+
         function initApp() {
             // 先显示本地存储的数据
             checkLoginStatus();
@@ -449,6 +452,11 @@
                 // 静默刷新获取最新信息
                 handleLogin(false, savedEmail, savedPass);
             }
+        }
+
+        // 页面切换前调用，设置页面为非活动状态
+        function setPageInactive() {
+            isPageActive = false;
         }
 
         function checkLoginStatus() {
@@ -522,20 +530,29 @@
                     localStorage.setItem('userpoints', user["积分"] || '0');
                     localStorage.setItem('usermail_login', email);
                     localStorage.setItem('userpass_login', password);
-                    checkLoginStatus();
-                    if(isManual) toast('登录成功');
-                    // 获取未读消息数量
-                    getUnreadMessageCount();
-                } else {
-                    if(isManual) toast('账号或密码错误');
-                    else {
-                        localStorage.clear();
+                    // 只有当页面仍然活动时才更新UI
+                    if (isPageActive) {
                         checkLoginStatus();
+                        if(isManual) toast('登录成功');
+                        // 获取未读消息数量
+                        getUnreadMessageCount();
+                    }
+                } else {
+                    if(isManual) {
+                        toast('账号或密码错误');
+                    } else {
+                        // 只有当页面仍然活动时才清除localStorage
+                        if (isPageActive) {
+                            localStorage.clear();
+                            checkLoginStatus();
+                        }
                     }
                 }
             } catch(e) { 
                 console.error('Login Error:', e);
-                if(isManual) toast('无法连接后端，请稍后'); 
+                if(isManual && isPageActive) {
+                    toast('无法连接后端，请稍后'); 
+                }
             }
         }
 
@@ -583,6 +600,8 @@
                     const appItem = document.createElement('div');
                     appItem.className = 'app-item';
                     appItem.onclick = function() {
+                    // 页面切换前设置为非活动状态
+                    setPageInactive();
                     var url = 'xiangqing.html?id=' + item.id;
                     if (window.plus) {
                         var ws = plus.webview.create(url, url, {
@@ -709,6 +728,8 @@
                     const appItem = document.createElement('div');
                     appItem.className = 'app-item';
                     appItem.onclick = function() {
+                    // 页面切换前设置为非活动状态
+                    setPageInactive();
                     var url = 'xiangqing.html?id=' + item.id;
                     if (window.plus) {
                         var ws = plus.webview.create(url, url, {
@@ -971,6 +992,8 @@
                     const appItem = document.createElement('div');
                     appItem.className = 'app-item';
                     appItem.onclick = function() {
+                        // 页面切换前设置为非活动状态
+                        setPageInactive();
                         var url = 'xiangqing.html?id=' + app.id;
                         if (window.plus) {
                             var ws = plus.webview.create(url, url, {
@@ -1033,6 +1056,8 @@
         }
 
         function openHomePage() {
+            // 页面切换前设置为非活动状态
+            setPageInactive();
             if (window.plus) {
                 // 直接关闭当前页面，返回上一页
                 plus.webview.currentWebview().close('pop-out', 300);
@@ -1042,6 +1067,8 @@
         }
 
         function openRegisterPage() {
+            // 页面切换前设置为非活动状态
+            setPageInactive();
             if (window.plus) {
                 var ws = plus.webview.create('zhuce.html', 'zhuce.html', {
                     backbuttonMaximize: false
@@ -1053,6 +1080,8 @@
         }
 
         function openMessagePage() {
+            // 页面切换前设置为非活动状态
+            setPageInactive();
             if (window.plus) {
                 var ws = plus.webview.create('xiaoxi.html', 'xiaoxi.html', {
                     backbuttonMaximize: false
@@ -1064,6 +1093,8 @@
         }
 
         function openSettingPage() {
+            // 页面切换前设置为非活动状态
+            setPageInactive();
             if (window.plus) {
                 var ws = plus.webview.create('setting.html', 'setting.html', {
                     backbuttonMaximize: false
@@ -1111,6 +1142,8 @@
         }
 
         function openMallPage() {
+            // 页面切换前设置为非活动状态
+            setPageInactive();
             if (window.plus) {
                 var ws = plus.webview.create('mall.html', 'mall.html', {
                     backbuttonMaximize: false
@@ -1122,6 +1155,8 @@
         }
 
         function openSharePage() {
+            // 页面切换前设置为非活动状态
+            setPageInactive();
             if (window.plus) {
                 var ws = plus.webview.create('share.html', 'share.html', {
                     backbuttonMaximize: false
@@ -1133,6 +1168,8 @@
         }
 
         function openReviewPage() {
+            // 页面切换前设置为非活动状态
+            setPageInactive();
             if (window.plus) {
                 var ws = plus.webview.create('guanli.html', 'guanli.html', {
                     backbuttonMaximize: false

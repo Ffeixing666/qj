@@ -140,7 +140,17 @@
         .result-card { background: var(--ios-card); border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 16px; }
         .app-header { display: flex; align-items: center; gap: 16px; padding-bottom: 16px; border-bottom: 0.5px solid var(--line-color); margin-bottom: 16px; }
         #app-icon { width: 68px; height: 68px; border-radius: 14px; background: #F2F2F7; object-fit: cover; border: 0.5px solid var(--line-color); }
-        .name-area h2 { font-size: 19px; font-weight: 700; margin-bottom: 4px; }
+        .name-area .app-name-input { 
+            font-size: 19px; 
+            font-weight: 700; 
+            margin-bottom: 4px; 
+            border: none; 
+            outline: none; 
+            background: transparent; 
+            font-family: inherit; 
+            color: var(--text-main); 
+            width: 100%; 
+        }
         .name-area code { font-size: 12px; color: var(--ios-blue); opacity: 0.8; word-break: break-all; }
 
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -215,8 +225,8 @@
                 <div class="app-header">
                     <img id="app-icon" src="">
                     <div class="name-area">
-                        <h2 id="app-name">-</h2>
-                        <code id="app-pkg">-</h2>
+                        <input type="text" id="app-name" class="app-name-input" placeholder="应用名称">
+                        <code id="app-pkg">-</code>
                     </div>
                 </div>
                 <div class="info-grid">
@@ -349,7 +359,7 @@
                 // 4. 渲染基本信息
                 const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
                 document.getElementById('app-icon').src = info.icon || '';
-                document.getElementById('app-name').innerText = finalName;
+                document.getElementById('app-name').value = finalName;
                 document.getElementById('app-pkg').innerText = info.package;
                 document.getElementById('v-text').innerText = info.versionName;
                 document.getElementById('s-text').innerText = sizeMB + " MB";
@@ -481,9 +491,16 @@
                 }
             }
 
+            // 获取应用名称（从输入框）
+            const appName = document.getElementById('app-name').value.trim();
+            if (!appName) {
+                showToast('请输入应用名称');
+                return;
+            }
+
             // 构建请求数据
             const requestData = {
-                name: apkInfo.finalName,
+                name: appName,
                 link: appLink,
                 icon: uploadedIconUrl,
                 intro: processIntro(intro),

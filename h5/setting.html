@@ -331,10 +331,28 @@
                 case 'avatar':
                     // 选择图片
                     if (window.plus) {
-                        plus.gallery.pick(function(file) {
-                            // 上传图片
-                            const imgFile = new File([file], file.name, { type: file.type });
-                            uploadAvatar(imgFile);
+                        plus.gallery.pick(function(filePath) {
+                            // 在 uni-app 环境中，filePath 是文件路径字符串
+                            // 需要使用 plus.io 读取文件内容
+                            plus.io.resolveLocalFileSystemURL(filePath, function(entry) {
+                                entry.file(function(file) {
+                                    const reader = new plus.io.FileReader();
+                                    reader.onloadend = function(e) {
+                                        // 创建 Blob 对象
+                                        const blob = new Blob([e.target.result], { type: file.type });
+                                        // 创建 File 对象
+                                        const imgFile = new File([blob], file.name, { type: file.type });
+                                        uploadAvatar(imgFile);
+                                    };
+                                    reader.readAsArrayBuffer(file);
+                                }, function(e) {
+                                    console.error('获取文件失败:', e);
+                                    toast('获取文件失败');
+                                });
+                            }, function(e) {
+                                console.error('解析文件路径失败:', e);
+                                toast('解析文件路径失败');
+                            });
                         }, function(e) {
                             console.error('选择图片失败:', e);
                         }, {
@@ -357,10 +375,28 @@
                 case 'background':
                     // 选择图片
                     if (window.plus) {
-                        plus.gallery.pick(function(file) {
-                            // 上传图片
-                            const imgFile = new File([file], file.name, { type: file.type });
-                            uploadBackground(imgFile);
+                        plus.gallery.pick(function(filePath) {
+                            // 在 uni-app 环境中，filePath 是文件路径字符串
+                            // 需要使用 plus.io 读取文件内容
+                            plus.io.resolveLocalFileSystemURL(filePath, function(entry) {
+                                entry.file(function(file) {
+                                    const reader = new plus.io.FileReader();
+                                    reader.onloadend = function(e) {
+                                        // 创建 Blob 对象
+                                        const blob = new Blob([e.target.result], { type: file.type });
+                                        // 创建 File 对象
+                                        const imgFile = new File([blob], file.name, { type: file.type });
+                                        uploadBackground(imgFile);
+                                    };
+                                    reader.readAsArrayBuffer(file);
+                                }, function(e) {
+                                    console.error('获取文件失败:', e);
+                                    toast('获取文件失败');
+                                });
+                            }, function(e) {
+                                console.error('解析文件路径失败:', e);
+                                toast('解析文件路径失败');
+                            });
                         }, function(e) {
                             console.error('选择图片失败:', e);
                         }, {
