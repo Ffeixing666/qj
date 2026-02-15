@@ -1136,9 +1136,9 @@
         }
 
         // 解析蓝奏云链接
-        async function parseLanzouUrl(url, password) {
+        async function parselanzUrl(url, password) {
             try {
-                const apiUrl = `https://api.pearktrue.cn/api/lanzou/api.php?url=${encodeURIComponent(url)}&pwd=${encodeURIComponent(password || '')}`;
+                const apiUrl = `https://api.pearktrue.cn/api/lanz/api.php?url=${encodeURIComponent(url)}&pwd=${encodeURIComponent(password || '')}`;
                 const response = await fetch(apiUrl);
                 const data = await response.json();
                 
@@ -1523,10 +1523,10 @@
                         const password = app.密码;
                         
                         // 检查是否是蓝奏云链接
-                        if (url.includes('lanzou')) {
+                        if (url.includes('lanz')) {
                             // 解析蓝奏云链接
                             btn.innerText = "解析中...";
-                            const directUrl = await parseLanzouUrl(url, password);
+                            const directUrl = await parselanzUrl(url, password);
                             
                             if (directUrl) {
                                 // 解析成功，使用5+内置下载
@@ -1980,10 +1980,12 @@
                 menu.innerHTML = `
                     <div class="menu-item" style="padding: 14px 28px; text-align: center; cursor: pointer; transition: background 0.2s;">回复</div>
                     <div class="menu-item" style="padding: 14px 28px; text-align: center; cursor: pointer; transition: background 0.2s;">删除</div>
+                    <div class="menu-item" style="padding: 14px 28px; text-align: center; cursor: pointer; transition: background 0.2s;">复制</div>
                 `;
             } else {
                 menu.innerHTML = `
                     <div class="menu-item" style="padding: 14px 28px; text-align: center; cursor: pointer; transition: background 0.2s;">回复</div>
+                    <div class="menu-item" style="padding: 14px 28px; text-align: center; cursor: pointer; transition: background 0.2s;">复制</div>
                 `;
             }
             console.log('Menu HTML:', menu.innerHTML);
@@ -1994,9 +1996,20 @@
                 handleReplyComment();
             });
             if (menuItems[1]) {
-                menuItems[1].addEventListener('click', function() {
-                    handleDeleteComment(comment.时间);
-                });
+                if (isOwnComment) {
+                    menuItems[1].addEventListener('click', function() {
+                        handleDeleteComment(comment.时间);
+                    });
+                    if (menuItems[2]) {
+                        menuItems[2].addEventListener('click', function() {
+                            handleCopyComment(comment);
+                        });
+                    }
+                } else {
+                    menuItems[1].addEventListener('click', function() {
+                        handleCopyComment(comment);
+                    });
+                }
             }
             
             // 添加到页面
@@ -2025,6 +2038,21 @@
                     }
                 });
             }, 100);
+        }
+        
+        // 处理复制评论
+        function handleCopyComment(comment) {
+            // 处理评论内容：HTML实体转emoji
+            let processedContent = comment.内容;
+            processedContent = processedContent.replace(/&#(\d+);/g, function(match, code) {
+                return String.fromCodePoint(parseInt(code));
+            });
+            
+            // 使用与复制密码相同的方式复制评论
+            copyToClipboardWithFallback(processedContent);
+            
+            // 关闭菜单
+            closeActionMenu();
         }
 
         // 处理回复评论
