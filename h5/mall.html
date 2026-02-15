@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>积分商城</title>
+    <style>
+        :root {
+            --ios-bg: #F2F2F7;
+            --ios-card: #FFFFFF;
+            --ios-blue: #007AFF;
+            --ios-green: #34C759;
+            --ios-orange: #FF9500;
+            --text-main: #1C1C1E;
+            --text-second: #8E8E93;
+            --line-color: rgba(0,0,0,0.06);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+            background-color: var(--ios-bg);
+            color: var(--text-main);
+            padding-bottom: 40px;
+        }
+
+        /* 顶部导航 */
+        header {
+            position: sticky; top: 0; z-index: 100;
+            background-color: rgba(242, 242, 247, 0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 0.5px solid var(--line-color);
+        }
+        .nav-bar { height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
+        .back-btn { width: 40px; height: 100%; display: flex; align-items: center; }
+        .back-icon { width: 11px; height: 11px; border-left: 2px solid var(--ios-blue); border-bottom: 2px solid var(--ios-blue); transform: rotate(45deg); }
+        .nav-title { font-size: 17px; font-weight: 600; }
+
+        .container { padding: 16px; max-width: 600px; margin: 0 auto; }
+
+        /* 积分余额卡片 */
+        .points-card {
+            background: linear-gradient(135deg, #007AFF, #5856D6);
+            border-radius: 20px;
+            padding: 24px;
+            color: #fff;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 20px rgba(0,122,255,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        .points-card::after {
+            content: ""; position: absolute; right: -20px; bottom: -20px;
+            width: 100px; height: 100px; background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+        .points-label { font-size: 13px; opacity: 0.8; margin-bottom: 4px; }
+        .points-balance { font-size: 36px; font-weight: 800; letter-spacing: -1px; }
+        
+        /* 任务区域 */
+        .section-header { font-size: 18px; font-weight: 700; margin-bottom: 12px; padding-left: 4px; }
+        
+        .task-list { margin-bottom: 30px; }
+        .task-item {
+            background: var(--ios-card);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: transform 0.2s;
+        }
+        .task-item:active { transform: scale(0.98); }
+        
+        .task-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .bg-orange { background: rgba(255,149,0,0.1); fill: var(--ios-orange); }
+        .bg-blue { background: rgba(0,122,255,0.1); fill: var(--ios-blue); }
+
+        .task-info { flex: 1; }
+        .task-name { font-size: 16px; font-weight: 600; margin-bottom: 2px; }
+        .task-reward { font-size: 12px; color: var(--ios-orange); font-weight: 600; }
+        .task-progress-text { font-size: 12px; color: var(--text-second); margin-top: 4px; }
+
+        .task-btn {
+            padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600;
+            border: none; cursor: pointer;
+        }
+        .btn-go { background: var(--ios-blue); color: #fff; }
+        .btn-done { background: #E5E5EA; color: #8E8E93; }
+
+        /* 积分明细区域 */
+        .detail-card {
+            background: var(--ios-card);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .detail-item {
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+        .detail-item:not(:last-child)::after {
+            content: ""; position: absolute; bottom: 0; left: 16px; right: 0;
+            height: 0.5px; background: var(--line-color);
+        }
+        .detail-info h4 { font-size: 15px; font-weight: 500; margin-bottom: 2px; }
+        .detail-info p { font-size: 12px; color: var(--text-second); }
+        .detail-amount { font-size: 16px; font-weight: 700; }
+        .plus { color: var(--ios-blue); }
+        .minus { color: var(--text-main); }
+
+        /* 进度条 */
+        .progress-bar-wrap { width: 100%; height: 4px; background: #E5E5EA; border-radius: 2px; margin-top: 8px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: var(--ios-blue); transition: width 0.3s; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="nav-bar">
+            <div class="back-btn" onclick="handleBack()"><div class="back-icon"></div></div>
+            <div class="nav-title">积分商城</div>
+            <div style="width:40px"></div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="points-card">
+            <p class="points-label">当前可用积分</p>
+            <div class="points-balance" id="totalPoints">0</div>
+        </div>
+
+        <div class="section-header">我的任务</div>
+        <div class="task-list">
+            <div class="task-item">
+                <div class="task-icon bg-orange">
+                    <svg width="24" height="24" viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM8 15h2v2H8zm0-4h2v2H8zm0-4h2v2H8zm4 8h4v2h-4zm0-4h4v2h-4zm0-4h4v2h-4z"/></svg>
+                </div>
+                <div class="task-info">
+                    <div class="task-name">每日观看广告</div>
+                    <div class="task-reward">+3 积分/次</div>
+                    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width: 0%;"></div></div>
+                    <div class="task-progress-text">今日进度 0/10</div>
+                </div>
+                <button class="task-btn btn-go" onclick="handleAd()">去完成</button>
+            </div>
+
+            <div class="task-item">
+                <div class="task-icon bg-blue">
+                    <svg width="24" height="24" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+                </div>
+                <div class="task-info">
+                    <div class="task-name">每日上传资源</div>
+                    <div class="task-reward">+10 积分/次</div>
+                    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width: 0%;"></div></div>
+                    <div class="task-progress-text">今日进度 0/10</div>
+                </div>
+                <button class="task-btn btn-go" onclick="handleUpload()">去完成</button>
+            </div>
+        </div>
+
+        <div class="section-header">积分明细</div>
+        <div class="detail-card">
+            <div class="detail-item" style="justify-content: center; padding: 32px 16px;">
+                <p style="font-size: 14px; color: var(--text-second);">暂无积分记录</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function handleBack() {
+            if (window.plus) {
+                plus.webview.currentWebview().close('auto');
+            } else {
+                history.back();
+            }
+        }
+
+        function handleAd() {
+            const usermail = localStorage.getItem('usermail');
+            if (!usermail) {
+                showToast('请先登录');
+                return;
+            }
+            // 只允许5+App环境下激励广告
+            if (window.plus && plus.ad && plus.ad.createRewardedVideoAd) {
+                var adReward = null;
+                if (window._adRewardLoading) {
+                    showToast('广告加载中');
+                    return;
+                }
+                window._adRewardLoading = true;
+                adReward = plus.ad.createRewardedVideoAd({adpid:'1358284724'});
+                adReward.onLoad(function(){
+                    adReward.show();
+                });
+                adReward.onError(function(e){
+                    showToast('广告加载失败: ' + JSON.stringify(e));
+                    console.log('广告加载失败: ', e);
+                    adReward.destroy();
+                    adReward = null;
+                    window._adRewardLoading = false;
+                });
+                adReward.onClose(function(e){
+                    if(e.isEnded){
+                        // 广告看完，奖励趣币
+                        addAdRewardCoins();
+                    }else{
+                        showToast('广告未看完无奖励');
+                    }
+                    adReward.destroy();
+                    adReward = null;
+                    window._adRewardLoading = false;
+                });
+                adReward.load();
+            } else {
+                showToast('当前环境暂不支持');
+            }
+        }
+
+        // 广告奖励领取
+        async function addAdRewardCoins() {
+            const usermail = localStorage.getItem('usermail');
+            if (!usermail) {
+                showToast('请先登录');
+                return;
+            }
+            
+            try {
+                showLoading();
+                const response = await fetch(`https://apirank.qujiaweb.top/?mode=ad_reward&mail=${encodeURIComponent(usermail)}`, {
+                    method: 'GET'
+                });
+                
+                if (!response.ok) throw new Error('网络响应不正常');
+                const res = await response.json();
+                
+                if (res.code === 200) {
+                    showToast('广告奖励领取成功');
+                    // 重新获取积分和明细
+                    await init();
+                } else {
+                    showToast(res.msg || '广告奖励领取失败');
+                }
+            } catch(e) {
+                console.error('Add Ad Reward Coins Error:', e);
+                showToast('广告奖励领取失败');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function handleUpload() {
+            // 直接返回上一页
+            handleBack();
+        }
+
+        // 简单的动态数字滚动效果
+        function animateValue(obj, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = Math.floor(progress * (end - start) + start).toLocaleString();
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // 显示加载状态
+        function showLoading() {
+            if (window.plus) {
+                plus.nativeUI.showWaiting('加载中...');
+            }
+        }
+
+        // 隐藏加载状态
+        function hideLoading() {
+            if (window.plus) {
+                plus.nativeUI.closeWaiting();
+            }
+        }
+
+        // 显示提示
+        function showToast(message) {
+            if (window.plus) {
+                plus.nativeUI.toast(message);
+            } else {
+                alert(message);
+            }
+        }
+
+        // 获取最新用户积分
+        async function fetchUserPoints() {
+            const savedEmail = localStorage.getItem('usermail_login');
+            const savedPass = localStorage.getItem('userpass_login');
+            
+            if (savedEmail && savedPass) {
+                try {
+                    showLoading();
+                    const response = await fetch(`https://apirank.qujiaweb.top/?mode=login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: savedEmail, password: savedPass })
+                    });
+                    
+                    if (!response.ok) throw new Error('网络响应不正常');
+                    const res = await response.json();
+                    
+                    if (res.code === 200 && res.fields && res.fields.length > 0) {
+                        const user = res.fields[0];
+                        const points = user["积分"] || '0';
+                        localStorage.setItem('userpoints', points);
+                        return parseInt(points);
+                    }
+                } catch(e) {
+                    console.error('Fetch User Points Error:', e);
+                } finally {
+                    hideLoading();
+                }
+            }
+            return parseInt(localStorage.getItem('userpoints') || '0');
+        }
+
+        // 获取积分明细
+        async function fetchCoinLog() {
+            const userMail = localStorage.getItem('usermail');
+            
+            if (!userMail) {
+                return [];
+            }
+            
+            try {
+                const response = await fetch(`https://apirank.qujiaweb.top/?mode=get_coin_log&mail=${encodeURIComponent(userMail)}`, {
+                    method: 'GET'
+                });
+                
+                if (!response.ok) throw new Error('网络响应不正常');
+                const res = await response.json();
+                
+                if (res.code === 200 && res.fields) {
+                    return res.fields;
+                }
+            } catch(e) {
+                console.error('Fetch Coin Log Error:', e);
+            }
+            return [];
+        }
+
+        // 筛选今天的积分明细
+        function filterTodayLogs(logs) {
+            const today = new Date().toISOString().split('T')[0]; // 格式：2026-02-14
+            return logs.filter(log => {
+                const logDate = (log.时间 || '').split(' ')[0]; // 提取日期部分
+                return logDate === today;
+            });
+        }
+
+        // 统计今天的任务完成情况
+        function countTodayTasks(todayLogs) {
+            const counts = {
+                ad: 0,
+                upload: 0
+            };
+            
+            todayLogs.forEach(log => {
+                if (log.类型 === '观看广告奖励') {
+                    counts.ad++;
+                } else if (log.类型 === '上传资源奖励') {
+                    counts.upload++;
+                }
+            });
+            
+            return counts;
+        }
+
+        // 更新任务进度UI
+        function updateTaskProgressUI(counts) {
+            // 更新观看广告任务
+            const adProgress = document.querySelector('.task-item:nth-child(1) .progress-bar-fill');
+            const adProgressText = document.querySelector('.task-item:nth-child(1) .task-progress-text');
+            
+            if (adProgress && adProgressText) {
+                const adCount = counts.ad;
+                const adMax = 10;
+                const adPercentage = Math.min((adCount / adMax) * 100, 100);
+                
+                adProgress.style.width = `${adPercentage}%`;
+                adProgressText.textContent = `今日进度 ${adCount}/${adMax}`;
+            }
+            
+            // 更新上传资源任务
+            const uploadProgress = document.querySelector('.task-item:nth-child(2) .progress-bar-fill');
+            const uploadProgressText = document.querySelector('.task-item:nth-child(2) .task-progress-text');
+            
+            if (uploadProgress && uploadProgressText) {
+                const uploadCount = counts.upload;
+                const uploadMax = 10;
+                const uploadPercentage = Math.min((uploadCount / uploadMax) * 100, 100);
+                
+                uploadProgress.style.width = `${uploadPercentage}%`;
+                uploadProgressText.textContent = `今日进度 ${uploadCount}/${uploadMax}`;
+            }
+        }
+
+        // 更新积分明细UI
+        function updateCoinLogUI(logs) {
+            const detailCard = document.querySelector('.detail-card');
+            if (!detailCard) return;
+            
+            // 清空现有内容
+            detailCard.innerHTML = '';
+            
+            if (logs.length === 0) {
+                // 显示空状态
+                const emptyItem = document.createElement('div');
+                emptyItem.className = 'detail-item';
+                emptyItem.style.justifyContent = 'center';
+                emptyItem.style.padding = '32px 16px';
+                emptyItem.innerHTML = '<p style="font-size: 14px; color: var(--text-second);">暂无积分记录</p>';
+                detailCard.appendChild(emptyItem);
+            } else {
+                // 添加积分明细项
+                logs.forEach(log => {
+                    const detailItem = document.createElement('div');
+                    detailItem.className = 'detail-item';
+                    
+                    const detailInfo = document.createElement('div');
+                    detailInfo.className = 'detail-info';
+                    
+                    const title = document.createElement('h4');
+                    title.textContent = log.类型 || '未知类型';
+                    
+                    const time = document.createElement('p');
+                    time.textContent = log.时间 || '';
+                    
+                    detailInfo.appendChild(title);
+                    detailInfo.appendChild(time);
+                    
+                    const amount = document.createElement('div');
+                    amount.className = 'detail-amount';
+                    let change = String(log["积分变动"] || '0');
+                    // 确保正数显示加号
+                    if (!change.startsWith('+') && !change.startsWith('-') && parseInt(change) > 0) {
+                        change = '+' + change;
+                    }
+                    amount.className += change.startsWith('+') ? ' plus' : ' minus';
+                    amount.textContent = change;
+                    
+                    detailItem.appendChild(detailInfo);
+                    detailItem.appendChild(amount);
+                    detailCard.appendChild(detailItem);
+                });
+                
+                // 添加提示信息
+                const tipItem = document.createElement('div');
+                tipItem.className = 'detail-item';
+                tipItem.style.justifyContent = 'center';
+                tipItem.style.padding = '16px';
+                tipItem.innerHTML = '<p style="font-size: 13px; color: var(--text-second);">仅展示最近 30 天记录</p>';
+                detailCard.appendChild(tipItem);
+            }
+        }
+
+        // 初始化函数
+        async function init() {
+            // 获取最新积分
+            const points = await fetchUserPoints();
+            
+            // 显示积分
+            const pointsEl = document.getElementById('totalPoints');
+            animateValue(pointsEl, 0, points, 1000);
+            
+            // 获取并显示积分明细
+            const coinLogs = await fetchCoinLog();
+            updateCoinLogUI(coinLogs);
+            
+            // 筛选今天的记录并更新任务进度
+            const todayLogs = filterTodayLogs(coinLogs);
+            const taskCounts = countTodayTasks(todayLogs);
+            updateTaskProgressUI(taskCounts);
+        }
+
+        // 页面加载完成后执行初始化
+        window.onload = init;
+
+        // 万能返回键逻辑
+        document.addEventListener('plusready', function() {
+            var webview = plus.webview.currentWebview();
+            plus.key.addEventListener('backbutton', function() {
+                if (plus.webview.all().length > 1) {
+                    webview.close('auto');
+                } else {
+                    history.back();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
