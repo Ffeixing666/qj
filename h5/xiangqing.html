@@ -835,19 +835,77 @@
                 return;
             }
             
-            const btn = event.target;
+            const btn = document.getElementById('downloadBtn');
             if (!btn) {
                 console.log('下载按钮不存在');
                 return;
             }
             
-            btn.innerText = "处理中...";
-            setTimeout(() => {
-                if (isPageActive()) {
-                    alert('已为您拉起安全下载通道');
-                    btn.innerText = "获取应用";
+            // 显示解析中状态
+            btn.innerText = "解析中";
+            
+            // 模拟解析过程，实际项目中这里会调用接口获取下载链接
+            setTimeout(async () => {
+                if (!isPageActive()) return;
+                
+                // 假设解析成功，获取到下载链接
+                const downloadUrl = 'https://example.com/app.apk';
+                
+                // 开始下载
+                if (window.plus) {
+                    downloadWithPlus(downloadUrl, btn);
+                } else {
+                    // 非5+环境下的处理
+                    if (isPageActive()) {
+                        btn.innerText = "获取";
+                        alert('请在App环境中下载');
+                    }
                 }
             }, 1000);
+        }
+        
+        // 使用5+环境下载文件（带进度显示）
+        function downloadWithPlus(url, btn) {
+            if (!window.plus) {
+                console.error('5+环境不可用');
+                return;
+            }
+
+            // 显示开始下载状态
+            if (isPageActive() && btn) {
+                btn.innerText = "下载中0%";
+            }
+
+            // 显示下载进度
+            const downloadTask = plus.downloader.createDownload(url, {}, function(download, status) {
+                if (isPageActive() && btn) {
+                    if (status === 200) {
+                        btn.innerText = "获取";
+                        showToast('下载完成');
+                        // 打开下载的文件
+                        plus.runtime.openFile(download.filename);
+                    } else {
+                        btn.innerText = "获取";
+                        showToast('下载失败，请重试');
+                        console.error('下载失败:', status);
+                    }
+                }
+            });
+
+            // 监听下载进度
+            downloadTask.addEventListener('statechanged', function(task, status) {
+                if (task.state === 3) { // 下载中
+                    const progress = Math.round((task.downloadedSize / task.totalSize) * 100);
+                    console.log('下载进度:', progress + '%');
+                    // 更新按钮上的进度显示
+                    if (isPageActive() && btn) {
+                        btn.innerText = "下载中" + progress + "%";
+                    }
+                }
+            });
+
+            // 开始下载
+            downloadTask.start();
         }
 
         function getUrlParam(name) {
@@ -1070,37 +1128,7 @@
             }
         }
 
-        // 使用5+环境下载文件
-        function downloadWithPlus(url) {
-            if (!window.plus) {
-                console.error('5+环境不可用');
-                return;
-            }
 
-            // 显示下载进度
-            const downloadTask = plus.downloader.createDownload(url, {}, function(download, status) {
-                if (status === 200) {
-                    showToast('下载完成');
-                    // 打开下载的文件
-                    plus.runtime.openFile(download.filename);
-                } else {
-                    showToast('下载失败，请重试');
-                    console.error('下载失败:', status);
-                }
-            });
-
-            // 监听下载进度
-            downloadTask.addEventListener('statechanged', function(task, status) {
-                if (task.state === 3) { // 下载中
-                    const progress = Math.round((task.downloadedSize / task.totalSize) * 100);
-                    console.log('下载进度:', progress + '%');
-                    // 可以在这里更新UI显示进度
-                }
-            });
-
-            // 开始下载
-            downloadTask.start();
-        }
 
         // =============================================================
 
