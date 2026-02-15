@@ -332,6 +332,23 @@
             apps.forEach(app => {
                 const appItem = document.createElement('div');
                 appItem.className = 'app-item';
+                
+                // 添加点击事件处理，跳转到应用详情页面
+                appItem.onclick = function(e) {
+                    // 避免点击按钮时触发应用项的点击事件
+                    if (e.target.closest('.action-btn')) {
+                        return;
+                    }
+                    var url = 'xiangqing.html?id=' + app.id;
+                    if (window.plus) {
+                        var ws = plus.webview.create(url, url, {
+                            backbuttonMaximize: false
+                        });
+                        ws.show('pop-in', 300);
+                    } else {
+                        window.location.href = url;
+                    }
+                };
 
                 const appIcon = document.createElement('div');
                 appIcon.className = 'app-icon';

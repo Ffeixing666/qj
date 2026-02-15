@@ -286,6 +286,124 @@
             }
         }
 
+        // 在5+环境中使用plus.uploader上传文件
+        function uploadFileWithPlus(filePath, type) {
+            const mail = localStorage.getItem('usermail');
+            if (!mail) {
+                toast('请先登录');
+                return;
+            }
+
+            if (window.plus) {
+                plus.nativeUI.showWaiting('上传中...');
+
+                // 使用plus.uploader上传文件
+                const task = plus.uploader.createUpload('https://apirank.qujiaweb.top/?mode=upload_meituan', {
+                    method: 'POST',
+                    blocksize: 204800,
+                    priority: 1
+                }, function(t, status) {
+                    plus.nativeUI.closeWaiting();
+                    if (status === 200) {
+                        try {
+                            const result = JSON.parse(t.responseText);
+                            if (result.full_url) {
+                                // 上传成功，更新用户信息
+                                if (type === 'avatar') {
+                                    updateAvatarUrl(result.full_url);
+                                } else if (type === 'background') {
+                                    updateBackgroundUrl(result.full_url);
+                                }
+                            } else {
+                                console.error('上传失败', result);
+                                toast('上传失败');
+                            }
+                        } catch (e) {
+                            console.error('解析上传结果失败:', e);
+                            toast('上传失败');
+                        }
+                    } else {
+                        console.error('上传失败，状态码:', status);
+                        toast('上传失败');
+                    }
+                });
+
+                // 添加文件
+                task.addFile(filePath, {
+                    key: 'file'
+                });
+
+                // 开始上传
+                task.start();
+            }
+        }
+
+        // 更新头像URL
+        async function updateAvatarUrl(avatarUrl) {
+            const mail = localStorage.getItem('usermail');
+            if (!mail) {
+                toast('请先登录');
+                return;
+            }
+
+            try {
+                // 调用后端API更新头像
+                const response = await fetch('https://apirank.qujiaweb.top/?mode=update_avatar&mail=' + encodeURIComponent(mail), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ mail: mail, avatar: avatarUrl })
+                });
+
+                const res = await response.json();
+
+                if (res.code === 200) {
+                    toast('头像修改成功');
+                    // 刷新用户信息
+                    refreshUserInfo();
+                } else {
+                    toast('头像修改失败: ' + (res.msg || '未知错误'));
+                }
+            } catch (error) {
+                console.error('更新头像失败:', error);
+                toast('更新失败，请重试');
+            }
+        }
+
+        // 更新背景图片URL
+        async function updateBackgroundUrl(backgroundUrl) {
+            const mail = localStorage.getItem('usermail');
+            if (!mail) {
+                toast('请先登录');
+                return;
+            }
+
+            try {
+                // 调用后端API更新背景图片
+                const response = await fetch('https://apirank.qujiaweb.top/?mode=update_background&mail=' + encodeURIComponent(mail), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ mail: mail, background: backgroundUrl })
+                });
+
+                const res = await response.json();
+
+                if (res.code === 200) {
+                    toast('背景图片修改成功');
+                    // 刷新用户信息
+                    refreshUserInfo();
+                } else {
+                    toast('背景图片修改失败: ' + (res.msg || '未知错误'));
+                }
+            } catch (error) {
+                console.error('更新背景图片失败:', error);
+                toast('更新失败，请重试');
+            }
+        }
+
         // 转义emoji字符
         function escapeEmoji(text) {
             return text.replace(/'/g, "~PGDBSD~");
@@ -332,27 +450,8 @@
                     // 选择图片
                     if (window.plus) {
                         plus.gallery.pick(function(filePath) {
-                            // 在 uni-app 环境中，filePath 是文件路径字符串
-                            // 需要使用 plus.io 读取文件内容
-                            plus.io.resolveLocalFileSystemURL(filePath, function(entry) {
-                                entry.file(function(file) {
-                                    const reader = new plus.io.FileReader();
-                                    reader.onloadend = function(e) {
-                                        // 创建 Blob 对象
-                                        const blob = new Blob([e.target.result], { type: file.type });
-                                        // 创建 File 对象
-                                        const imgFile = new File([blob], file.name, { type: file.type });
-                                        uploadAvatar(imgFile);
-                                    };
-                                    reader.readAsArrayBuffer(file);
-                                }, function(e) {
-                                    console.error('获取文件失败:', e);
-                                    toast('获取文件失败');
-                                });
-                            }, function(e) {
-                                console.error('解析文件路径失败:', e);
-                                toast('解析文件路径失败');
-                            });
+                            // 在 5+ 环境中，直接使用 plus.uploader 上传文件
+                            uploadFileWithPlus(filePath, 'avatar');
                         }, function(e) {
                             console.error('选择图片失败:', e);
                         }, {
@@ -376,27 +475,8 @@
                     // 选择图片
                     if (window.plus) {
                         plus.gallery.pick(function(filePath) {
-                            // 在 uni-app 环境中，filePath 是文件路径字符串
-                            // 需要使用 plus.io 读取文件内容
-                            plus.io.resolveLocalFileSystemURL(filePath, function(entry) {
-                                entry.file(function(file) {
-                                    const reader = new plus.io.FileReader();
-                                    reader.onloadend = function(e) {
-                                        // 创建 Blob 对象
-                                        const blob = new Blob([e.target.result], { type: file.type });
-                                        // 创建 File 对象
-                                        const imgFile = new File([blob], file.name, { type: file.type });
-                                        uploadBackground(imgFile);
-                                    };
-                                    reader.readAsArrayBuffer(file);
-                                }, function(e) {
-                                    console.error('获取文件失败:', e);
-                                    toast('获取文件失败');
-                                });
-                            }, function(e) {
-                                console.error('解析文件路径失败:', e);
-                                toast('解析文件路径失败');
-                            });
+                            // 在 5+ 环境中，直接使用 plus.uploader 上传文件
+                            uploadFileWithPlus(filePath, 'background');
                         }, function(e) {
                             console.error('选择图片失败:', e);
                         }, {

@@ -979,6 +979,129 @@
             }
         }
 
+        // 增强的复制函数，包含多种备用方案
+        function copyToClipboardWithFallback(text) {
+            // 方案1: 使用现代Clipboard API
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text)
+                    .then(() => {
+                        console.log('复制成功 (现代API)');
+                        showCopySuccess();
+                    })
+                    .catch(err => {
+                        console.warn('现代API复制失败，尝试备用方案:', err);
+                        tryFallbackMethods(text);
+                    });
+            } else {
+                // 直接使用备用方案
+                tryFallbackMethods(text);
+            }
+        }
+
+        function tryFallbackMethods(text) {
+            // 方案2: 使用HTML5+的复制功能
+            if (window.plus && plus.device) {
+                try {
+                    plus.device.setClipboard(text, function() {
+                        console.log('复制成功 (HTML5+)');
+                        showCopySuccess();
+                    }, function(err) {
+                        console.warn('HTML5+复制失败:', err);
+                        tryExecCommand(text);
+                    });
+                    return;
+                } catch (e) {
+                    console.warn('HTML5+复制异常:', e);
+                }
+            }
+            
+            // 方案3: 使用传统的execCommand
+            tryExecCommand(text);
+        }
+
+        function tryExecCommand(text) {
+            // 创建临时文本区域
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    console.log('复制成功 (execCommand)');
+                    showCopySuccess();
+                } else {
+                    console.warn('execCommand复制失败');
+                    showToast('复制失败，请手动复制');
+                }
+            } catch (err) {
+                console.error('execCommand执行失败:', err);
+                showToast('复制失败，请手动复制');
+            } finally {
+                document.body.removeChild(textArea);
+            }
+        }
+
+        function showCopySuccess() {
+            showToast('密码已复制');
+        }
+
+        // 解析蓝奏云链接
+        async function parseLanzouUrl(url, password) {
+            try {
+                const apiUrl = `https://api.pearktrue.cn/api/lanzou/api.php?url=${encodeURIComponent(url)}&pwd=${encodeURIComponent(password || '')}`;
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                
+                if (data.code === 200 && data.data && data.data.downloadurl) {
+                    return data.data.downloadurl;
+                } else {
+                    console.error('蓝奏云解析失败:', data);
+                    return null;
+                }
+            } catch (error) {
+                console.error('蓝奏云解析请求失败:', error);
+                return null;
+            }
+        }
+
+        // 使用5+环境下载文件
+        function downloadWithPlus(url) {
+            if (!window.plus) {
+                console.error('5+环境不可用');
+                return;
+            }
+
+            // 显示下载进度
+            const downloadTask = plus.downloader.createDownload(url, {}, function(download, status) {
+                if (status === 200) {
+                    showToast('下载完成');
+                    // 打开下载的文件
+                    plus.runtime.openFile(download.filename);
+                } else {
+                    showToast('下载失败，请重试');
+                    console.error('下载失败:', status);
+                }
+            });
+
+            // 监听下载进度
+            downloadTask.addEventListener('statechanged', function(task, status) {
+                if (task.state === 3) { // 下载中
+                    const progress = Math.round((task.downloadedSize / task.totalSize) * 100);
+                    console.log('下载进度:', progress + '%');
+                    // 可以在这里更新UI显示进度
+                }
+            });
+
+            // 开始下载
+            downloadTask.start();
+        }
+
         // =============================================================
 
         async function getAppDetail() {
@@ -1240,20 +1363,69 @@
 
             const downloadBtn = document.getElementById('downloadBtn');
             if (downloadBtn && app.链接) {
-                downloadBtn.onclick = function(e) {
+                downloadBtn.onclick = async function(e) {
                     if (!isPageActive()) return;
                     const btn = e.target;
                     btn.innerText = "处理中...";
-                    setTimeout(() => {
-                        if (isPageActive()) {
-                            if (window.plus) {
-                                plus.runtime.openURL(app.链接);
+                    
+                    try {
+                        const url = app.链接;
+                        const password = app.密码;
+                        
+                        // 检查是否是蓝奏云链接
+                        if (url.includes('lanzou')) {
+                            // 解析蓝奏云链接
+                            btn.innerText = "解析中...";
+                            const directUrl = await parseLanzouUrl(url, password);
+                            
+                            if (directUrl) {
+                                // 解析成功，使用5+内置下载
+                                if (window.plus) {
+                                    downloadWithPlus(directUrl);
+                                } else {
+                                    window.open(directUrl, '_blank');
+                                }
                             } else {
-                                window.open(app.链接, '_blank');
+                                // 解析失败，使用原链接
+                                if (window.plus) {
+                                    plus.runtime.openURL(url);
+                                } else {
+                                    window.open(url, '_blank');
+                                }
                             }
+                        } 
+                        // 检查是否是直链（包含.apk）
+                        else if (url.includes('.apk')) {
+                            // 使用5+内置下载
+                            if (window.plus) {
+                                downloadWithPlus(url);
+                            } else {
+                                window.open(url, '_blank');
+                            }
+                        } 
+                        // 其他情况，跳转浏览器
+                        else {
+                            // 检查是否有密码
+                            if (password && password !== null && password !== '') {
+                                // 复制密码到剪贴板
+                                copyToClipboardWithFallback(password);
+                            }
+                            
+                            // 跳转浏览器
+                            if (window.plus) {
+                                plus.runtime.openURL(url);
+                            } else {
+                                window.open(url, '_blank');
+                            }
+                        }
+                    } catch (error) {
+                        console.error('下载处理失败:', error);
+                        showToast('处理失败，请重试');
+                    } finally {
+                        if (isPageActive()) {
                             btn.innerText = "获取";
                         }
-                    }, 1000);
+                    }
                 };
             }
         }
@@ -1514,13 +1686,20 @@
                     avatarStyle = `background-image: url(${comment.头像}); background-size: cover; background-position: center;`;
                 }
                 
-                // 处理评论内容：HTML实体转emoji，支持换行
+                // 处理评论内容：HTML实体转emoji，支持换行，禁止显示HTML
                 let processedContent = comment.内容;
-                // 先将HTML实体转回emoji
+                // 1. 先将HTML实体转回emoji
                 processedContent = processedContent.replace(/&#(\d+);/g, function(match, code) {
                     return String.fromCodePoint(parseInt(code));
                 });
-                // 将换行符转换为HTML的br标签
+                // 2. HTML转义，防止HTML标签被解析
+                processedContent = processedContent
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+                // 3. 将换行符转换为HTML的br标签
                 processedContent = processedContent.replace(/\n/g, '<br>');
                 
                 // 处理图片
