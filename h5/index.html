@@ -44,7 +44,7 @@
     <script>
         const API = 'https://apirank.qujiaweb.top/';
 
-
+        // 静默登录函数
         async function silentLogin() {
             const savedEmail = localStorage.getItem('usermail_login');
             const savedPass = localStorage.getItem('userpass_login');
@@ -75,11 +75,12 @@
             return false;
         }
 
+        // 初始化函数
         async function init() {
-
+            // 尝试静默登录
             await silentLogin();
             
-
+            // 立即跳转到首页
             if (window.plus) {
                 plus.webview.open('home.html', 'home.html', {
                     backbuttonMaximize: false
@@ -89,9 +90,10 @@
             }
         }
 
+        // 页面加载完成后执行初始化
         window.onload = init;
 
-
+        // 万能返回键逻辑
         document.addEventListener('plusready', function() {
             var webview = plus.webview.currentWebview();
             plus.key.addEventListener('backbutton', function() {

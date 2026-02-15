@@ -388,8 +388,8 @@
         <div class="app-icon"></div>
         <div class="app-title-group">
             <div class="app-name">加载中...</div>
-            <div class="app-package-container">
-                <div class="app-package">加载中...</div>
+            <div class="app-package-container" onclick="handlePackageClick()">
+                <div class="app-package" id="appPackage">加载中...</div>
                 <div class="app-package-arrow">›</div>
             </div>
         </div>
@@ -520,6 +520,34 @@
                 }, 100);
             } else {
                 window.history.back();
+            }
+        }
+
+        function handlePackageClick() {
+            if (!isPageActive()) {
+                console.log('页面已销毁，取消包名点击操作');
+                return;
+            }
+            
+            const packageElement = document.getElementById('appPackage');
+            if (!packageElement) {
+                console.log('包名元素不存在');
+                return;
+            }
+            
+            const packageName = packageElement.textContent.trim();
+            if (!packageName || packageName === '加载中...') {
+                return;
+            }
+            
+            var url = 'moreapp.html?baoming=' + encodeURIComponent(packageName);
+            if (window.plus) {
+                var ws = plus.webview.create(url, url, {
+                    backbuttonMaximize: false
+                });
+                ws.show('pop-in', 300);
+            } else {
+                window.location.href = url;
             }
         }
 
@@ -1139,7 +1167,7 @@
                 appNameElement.textContent = handleNullValue(app.名称);
             }
 
-            const appPackageElement = document.querySelector('.app-package');
+            const appPackageElement = document.getElementById('appPackage');
             if (appPackageElement) {
                 appPackageElement.textContent = handleNullValue(app.包名);
             }

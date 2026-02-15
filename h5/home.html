@@ -104,11 +104,30 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
         }
 
         .msg-icon-img {
             width: 20px;
             height: 20px;
+        }
+
+        .unread-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            min-width: 18px;
+            height: 18px;
+            background: #FF3B30;
+            color: white;
+            border-radius: 9px;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+            box-shadow: 0 2px 4px rgba(255, 59, 48, 0.3);
         }
 
         /* 主体内容 */
@@ -309,6 +328,7 @@
                 </div>
                 <div class="msg-box" onclick="openMessagePage()">
                     <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_N7XqHo5QC_1766889837434.png" class="msg-icon-img" alt="">
+                    <div class="unread-badge" id="unreadBadge" style="display: none;">0</div>
                 </div>
             </div>
         </div>
@@ -473,19 +493,41 @@
                         </div>
                     `;
                 }
+            } finally {
+                // 应用处理完成后，获取未读消息数量
+                getUnreadMessageCount();
             }
         }
 
         function showLoginPrompt() {
             const appList = document.querySelector('.app-list');
             if (!appList) return;
-            appList.innerHTML = `
-                <div class="app-item" style="justify-content: center; cursor: pointer;" onclick="location.href='me.html'">
-                    <div class="app-info" style="text-align: center;">
-                        <div class="app-name">请先登录</div>
-                        <div class="app-desc">登录一下连接更广阔的世界</div>
-                    </div>
-                </div>`;
+            
+            const loginItem = document.createElement('div');
+            loginItem.className = 'app-item';
+            loginItem.style.justifyContent = 'center';
+            loginItem.style.cursor = 'pointer';
+            
+            loginItem.innerHTML = `
+                <div class="app-info" style="text-align: center;">
+                    <div class="app-name">请先登录</div>
+                    <div class="app-desc">登录一下连接更广阔的世界</div>
+                </div>
+            `;
+            
+            loginItem.onclick = function() {
+                if (window.plus) {
+                    var ws = plus.webview.create('me.html', 'me.html', {
+                        backbuttonMaximize: false
+                    });
+                    ws.show('pop-in', 300);
+                } else {
+                    window.location.href = 'me.html';
+                }
+            };
+            
+            appList.innerHTML = '';
+            appList.appendChild(loginItem);
         }
 
         function showErrorPrompt(message) {
@@ -566,8 +608,45 @@
             }
         }
 
+        // 获取未读消息数量
+        async function getUnreadMessageCount() {
+            const mail = localStorage.getItem('usermail');
+            if (!mail) return;
+
+            try {
+                const response = await fetch(`https://apirank.qujiaweb.top/?mode=get_messages&mail=${encodeURIComponent(mail)}`, {
+                    method: 'GET'
+                });
+                const res = await response.json();
+                if (res.code === 200 && res.fields) {
+                    // 过滤出未读且未删除的消息
+                    const unreadMessages = res.fields.filter(msg => 
+                        msg['是否已读'] === '否' && msg['是否删除'] === '否'
+                    );
+                    // 更新未读消息数量显示
+                    updateUnreadBadge(unreadMessages.length);
+                }
+            } catch (e) {
+                console.error('Get Unread Messages Error:', e);
+            }
+        }
+
+        // 更新未读消息数量显示
+        function updateUnreadBadge(count) {
+            const badge = document.getElementById('unreadBadge');
+            if (!badge) return;
+
+            if (count > 0) {
+                badge.style.display = 'flex';
+                badge.textContent = count > 99 ? '99+' : count;
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
         window.onload = function() {
             getApps();
+            getUnreadMessageCount();
         };
     </script>
 </body>

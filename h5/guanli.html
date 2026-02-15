@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>应用审核 - 趣加应用</title>
+    <style>
+        :root {
+            --bg-color: #F2F2F7;
+            --card-bg: #FFFFFF;
+            --text-main: #1C1C1E;
+            --text-secondary: #8E8E93;
+            --accent-blue: #007AFF;
+            --control-bg: #E3E3E6;
+            --header-item-height: 34px;
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, "SF Pro Display", "PingFang SC", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* 顶部导航 */
+        header {
+            position: sticky; top: 0; background: rgba(242, 242, 247, 0.85);
+            backdrop-filter: blur(25px); z-index: 100; padding: 15px 16px;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 0.5px solid rgba(0,0,0,0.1);
+        }
+        .header-left {
+            display: flex; align-items: center; gap: 12px;
+        }
+        .back-btn {
+            width: 34px; height: 34px; background: var(--control-bg);
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
+        .header-title {
+            font-size: 18px; font-weight: 700;
+        }
+
+        /* 应用列表 */
+        .app-list {
+            padding: 10px 16px 20px 16px;
+        }
+        .app-item {
+            display: flex; align-items: center; background: var(--card-bg);
+            padding: 12px; border-radius: 16px; margin-bottom: 12px;
+            overflow: hidden;
+        }
+        .app-icon {
+            width: 60px; height: 60px; background: #f0f0f2; border-radius: 14px;
+            margin-right: 14px; flex-shrink: 0;
+        }
+        .app-info {
+            flex: 1; min-width: 0;
+        }
+        .app-name {
+            font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px;
+        }
+        .app-desc {
+            font-size: 12px; color: var(--text-secondary); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; overflow: hidden; word-break: break-all;
+        }
+        .app-meta {
+            font-size: 11px; color: var(--text-secondary); margin-top: 4px;
+        }
+
+        /* 审核操作按钮 */
+        .review-actions {
+            display: flex; flex-direction: column; gap: 6px; margin-left: 12px;
+        }
+        .action-btn {
+            padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;
+            border: none; cursor: pointer;
+            min-width: 60px;
+        }
+        .approve-btn {
+            background: #EAF9EE; color: #34C759;
+        }
+        .reject-btn {
+            background: #FFF0EF; color: #FF3B30;
+        }
+
+        /* 加载动画样式 */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 0;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .loading-spinner::before, .loading-spinner::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: var(--accent-blue);
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-spinner::after {
+            animation-delay: -0.5s;
+            border-top-color: var(--text-secondary);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        .empty-icon {
+            font-size: 48px; margin-bottom: 16px;
+        }
+        .empty-title {
+            font-size: 16px; font-weight: 600; margin-bottom: 8px;
+        }
+        .empty-desc {
+            font-size: 14px; color: var(--text-secondary);
+        }
+
+        /* 轻提示 */
+        #toast {
+            position: fixed; top: 40px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); color: #fff; padding: 10px 20px;
+            border-radius: 20px; font-size: 14px; display: none; z-index: 999;
+        }
+
+        /* 下架理由输入框 */
+        .reason-dialog {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 9999; display: none; align-items: center; justify-content: center;
+        }
+        .reason-content {
+            background: white; border-radius: 16px; padding: 24px; margin: 20px;
+            min-width: 280px;
+        }
+        .reason-title {
+            font-size: 16px; font-weight: 700; margin-bottom: 16px;
+        }
+        .reason-input {
+            width: 100%; padding: 12px; border: 1px solid #ddd;
+            border-radius: 8px; font-size: 14px; resize: none;
+            height: 120px;
+        }
+        .reason-buttons {
+            display: flex; gap: 12px; margin-top: 20px;
+        }
+        .reason-btn {
+            flex: 1; padding: 12px; border-radius: 8px;
+            font-size: 14px; font-weight: 600; border: none;
+            cursor: pointer;
+        }
+        .cancel-btn {
+            background: var(--control-bg); color: var(--text-main);
+        }
+        .confirm-btn {
+            background: var(--accent-blue); color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="toast"></div>
+
+    <!-- 下架理由对话框 -->
+    <div class="reason-dialog" id="reasonDialog">
+        <div class="reason-content">
+            <div class="reason-title">请填写下架理由</div>
+            <textarea class="reason-input" id="reasonInput" placeholder="请详细说明下架原因..."></textarea>
+            <div class="reason-buttons">
+                <button class="reason-btn cancel-btn" onclick="closeReasonDialog()">取消</button>
+                <button class="reason-btn confirm-btn" onclick="confirmReject()">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <div class="header-left">
+            <div class="back-btn" onclick="goBack()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"></path>
+                </svg>
+            </div>
+            <div class="header-title">应用审核</div>
+        </div>
+    </header>
+
+    <main class="app-list" id="appList">
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">加载中...</div>
+        </div>
+    </main>
+
+    <script src="https://static2.pgaot.com/Assets/js/jquery-2.2.4.min.js"></script>
+    
+    <script>
+        // 万能返回键逻辑
+        document.addEventListener('plusready', function() {
+            var webview = plus.webview.currentWebview();
+            plus.key.addEventListener('backbutton', function() {
+                webview.canBack(function(e) {
+                    if (e.canBack) {
+                        webview.back();
+                    } else {
+                        if (plus.webview.all().length > 1) {
+                            webview.close('auto'); 
+                        } else {
+                            history.back();
+                        }
+                    }
+                });
+            });
+        });
+
+        const API = 'https://apirank.qujiaweb.top/';
+        let currentAppId = '';
+
+        function toast(m) {
+            $('#toast').text(m).stop(true, true).fadeIn().delay(1500).fadeOut();
+        }
+
+        $(function() {
+            initApp();
+        });
+
+        function initApp() {
+            checkAdminPermission();
+        }
+
+        // 检查管理员权限
+        async function checkAdminPermission() {
+            const mail = localStorage.getItem('usermail');
+            if (!mail) {
+                showEmptyState('请先登录', '登录后才能访问审核页面');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API}?mode=check_admin&mail=${encodeURIComponent(mail)}`, {
+                    method: 'GET'
+                });
+                const res = await response.json();
+                
+                if (res.code === 200 && res.fields && res.fields.length > 0) {
+                    // 是管理员，获取待审核应用列表
+                    getPendingApps();
+                } else {
+                    // 不是管理员
+                    showEmptyState('无权限访问', '您不是管理员，无法访问审核页面');
+                }
+            } catch (e) {
+                console.error('Check Admin Error:', e);
+                showEmptyState('网络错误', '请稍后重试');
+            }
+        }
+
+        // 获取待审核应用列表
+        async function getPendingApps() {
+            const mail = localStorage.getItem('usermail');
+            if (!mail) {
+                showEmptyState('请先登录', '登录后才能访问审核页面');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API}?mode=get_pending_apps&mail=${encodeURIComponent(mail)}`, {
+                    method: 'GET'
+                });
+                const res = await response.json();
+                
+                if (res.code === 200 && res.fields) {
+                    updateAppList(res.fields);
+                } else {
+                    showEmptyState('暂无待审核应用', '所有应用均已审核');
+                }
+            } catch (e) {
+                console.error('Get Pending Apps Error:', e);
+                showEmptyState('网络错误', '请稍后重试');
+            }
+        }
+
+        // 更新应用列表
+        function updateAppList(apps) {
+            const appList = document.getElementById('appList');
+            if (!appList) return;
+
+            if (apps.length === 0) {
+                showEmptyState('暂无待审核应用', '所有应用均已审核');
+                return;
+            }
+
+            // 清空现有列表
+            appList.innerHTML = '';
+
+            // 添加应用
+            apps.forEach(app => {
+                const appItem = document.createElement('div');
+                appItem.className = 'app-item';
+
+                const appIcon = document.createElement('div');
+                appIcon.className = 'app-icon';
+                if (app.图标) {
+                    appIcon.style.background = `url('${app.图标}') center/cover`;
+                }
+
+                const appInfo = document.createElement('div');
+                appInfo.className = 'app-info';
+
+                const appName = document.createElement('div');
+                appName.className = 'app-name';
+                appName.textContent = app.名称 || '未知应用';
+
+                const appDesc = document.createElement('div');
+                appDesc.className = 'app-desc';
+                appDesc.textContent = app.简介 || '暂无简介';
+
+                const appMeta = document.createElement('div');
+                appMeta.className = 'app-meta';
+                appMeta.textContent = `上传者: ${app.用户 || '未知'}`;
+
+                appInfo.appendChild(appName);
+                appInfo.appendChild(appDesc);
+                appInfo.appendChild(appMeta);
+
+                // 审核操作按钮
+                const reviewActions = document.createElement('div');
+                reviewActions.className = 'review-actions';
+
+                const approveBtn = document.createElement('button');
+                approveBtn.className = 'action-btn approve-btn';
+                approveBtn.textContent = '通过';
+                approveBtn.onclick = function() {
+                    approveApp(app.id);
+                };
+
+                const rejectBtn = document.createElement('button');
+                rejectBtn.className = 'action-btn reject-btn';
+                rejectBtn.textContent = '下架';
+                rejectBtn.onclick = function() {
+                    openReasonDialog(app.id);
+                };
+
+                reviewActions.appendChild(approveBtn);
+                reviewActions.appendChild(rejectBtn);
+
+                appItem.appendChild(appIcon);
+                appItem.appendChild(appInfo);
+                appItem.appendChild(reviewActions);
+                appList.appendChild(appItem);
+            });
+        }
+
+        // 审核通过应用
+        async function approveApp(appId) {
+            const mail = localStorage.getItem('usermail');
+            if (!mail) {
+                toast('请先登录');
+                return;
+            }
+
+            try {
+                if (window.plus) {
+                    plus.nativeUI.showWaiting('处理中...');
+                }
+
+                const response = await fetch(`${API}?mode=approve_app&mail=${encodeURIComponent(mail)}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ appid: appId, mail: mail })
+                });
+
+                if (!response.ok) throw new Error('网络响应不正常');
+                const res = await response.json();
+
+                if (window.plus) {
+                    plus.nativeUI.closeWaiting();
+                }
+
+                if (res.code === 200) {
+                    toast('审核通过');
+                    // 重新加载列表
+                    getPendingApps();
+                } else {
+                    toast('审核失败：' + (res.msg || '未知错误'));
+                }
+            } catch (error) {
+                console.error('Approve App Error:', error);
+                if (window.plus) {
+                    plus.nativeUI.closeWaiting();
+                }
+                toast('审核失败，请稍后重试');
+            }
+        }
+
+        // 打开下架理由对话框
+        function openReasonDialog(appId) {
+            currentAppId = appId;
+            document.getElementById('reasonInput').value = '';
+            document.getElementById('reasonDialog').style.display = 'flex';
+        }
+
+        // 关闭下架理由对话框
+        function closeReasonDialog() {
+            currentAppId = '';
+            document.getElementById('reasonDialog').style.display = 'none';
+        }
+
+        // 确认下架
+        async function confirmReject() {
+            const mail = localStorage.getItem('usermail');
+            if (!mail || !currentAppId) {
+                toast('参数错误');
+                return;
+            }
+
+            const reason = document.getElementById('reasonInput').value.trim();
+            if (!reason) {
+                toast('请填写下架理由');
+                return;
+            }
+
+            try {
+                if (window.plus) {
+                    plus.nativeUI.showWaiting('处理中...');
+                }
+
+                const response = await fetch(`${API}?mode=reject_app&mail=${encodeURIComponent(mail)}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ appid: currentAppId, mail: mail, reason: reason })
+                });
+
+                if (!response.ok) throw new Error('网络响应不正常');
+                const res = await response.json();
+
+                if (window.plus) {
+                    plus.nativeUI.closeWaiting();
+                }
+
+                if (res.code === 200) {
+                    toast('已下架');
+                    closeReasonDialog();
+                    // 重新加载列表
+                    getPendingApps();
+                } else {
+                    toast('下架失败：' + (res.msg || '未知错误'));
+                }
+            } catch (error) {
+                console.error('Reject App Error:', error);
+                if (window.plus) {
+                    plus.nativeUI.closeWaiting();
+                }
+                toast('下架失败，请稍后重试');
+            }
+        }
+
+        // 显示空状态
+        function showEmptyState(title, desc) {
+            const appList = document.getElementById('appList');
+            if (!appList) return;
+
+            appList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">📋</div>
+                    <div class="empty-title">${title}</div>
+                    <div class="empty-desc">${desc}</div>
+                </div>
+            `;
+        }
+
+        // 返回上一页
+        function goBack() {
+            if (window.plus) {
+                plus.webview.currentWebview().close('pop-out', 300);
+            } else {
+                window.history.back();
+            }
+        }
+    </script>
+</body>
+</html>

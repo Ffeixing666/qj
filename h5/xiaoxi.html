@@ -367,6 +367,7 @@
         function renderMessages(messages, type = '全部') {
             const list = document.getElementById('msgList');
             const hint = document.getElementById('emptyHint');
+            const currentUserMail = localStorage.getItem('usermail');
             
             // 清空现有内容
             list.innerHTML = '';
@@ -377,12 +378,19 @@
                 filteredMessages = messages.filter(msg => msg.类型 === '评论');
             } else if (type === '投币') {
                 filteredMessages = messages.filter(msg => msg.类型 === '投币');
+            } else if (type === '通知') {
+                filteredMessages = messages.filter(msg => msg.类型 === '通知');
             } else if (type !== '全部') {
                 // 其他类型暂时显示"敬请期待"
                 list.style.display = 'none';
                 hint.style.display = 'block';
                 hint.innerHTML = '敬请期待';
                 return;
+            }
+            
+            // 过滤掉自己发送的消息
+            if (currentUserMail) {
+                filteredMessages = filteredMessages.filter(msg => msg['发起人邮箱'] !== currentUserMail);
             }
             
             // 显示消息

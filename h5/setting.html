@@ -201,7 +201,7 @@
     </header>
 
     <main class="settings-container">
-        <div class="section-header">用户资料(目前维护中，晚点开放）</div>
+        <div class="section-header">用户资料</div>
         <div class="section-group">
             <div class="item" onclick="navigate('nickname')">
                 <div class="icon-box bg-blue">
@@ -266,9 +266,397 @@
             }
         }
 
+        // 上传文件到对象存储
+        async function uploadToMyApi(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('https://apirank.qujiaweb.top/?mode=upload_meituan', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            if (result.full_url) {
+                console.log('上传成功，文件链接：', result.full_url);
+                return result.full_url;
+            } else {
+                console.error('上传失败', result);
+                throw new Error('上传失败');
+            }
+        }
+
+        // 转义emoji字符
+        function escapeEmoji(text) {
+            return text.replace(/'/g, "~PGDBSD~");
+        }
+
+        // 显示轻提示
+        function toast(message, duration = 2000) {
+            if (window.plus) {
+                plus.nativeUI.toast(message, {
+                    duration: 'short',
+                    position: 'center'
+                });
+            } else {
+                // 浏览器环境下的简单实现
+                const toastEl = document.createElement('div');
+                toastEl.style.position = 'fixed';
+                toastEl.style.top = '50%';
+                toastEl.style.left = '50%';
+                toastEl.style.transform = 'translate(-50%, -50%)';
+                toastEl.style.background = 'rgba(0, 0, 0, 0.7)';
+                toastEl.style.color = 'white';
+                toastEl.style.padding = '10px 20px';
+                toastEl.style.borderRadius = '20px';
+                toastEl.style.zIndex = '9999';
+                toastEl.style.fontSize = '14px';
+                toastEl.textContent = message;
+                document.body.appendChild(toastEl);
+                setTimeout(() => {
+                    document.body.removeChild(toastEl);
+                }, duration);
+            }
+        }
+
+        // 头像修改
         function navigate(page) {
-            console.log("跳转至: " + page);
-            // 此处可编写实际跳转逻辑
+            const mail = localStorage.getItem('usermail');
+            if (!mail) {
+                toast('请先登录');
+                return;
+            }
+
+            switch (page) {
+                case 'avatar':
+                    // 选择图片
+                    if (window.plus) {
+                        plus.gallery.pick(function(file) {
+                            // 上传图片
+                            const imgFile = new File([file], file.name, { type: file.type });
+                            uploadAvatar(imgFile);
+                        }, function(e) {
+                            console.error('选择图片失败:', e);
+                        }, {
+                            filter: 'image',
+                            multiple: false
+                        });
+                    } else {
+                        // 浏览器环境
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = 'image/*';
+                        input.onchange = function(e) {
+                            if (e.target.files && e.target.files[0]) {
+                                uploadAvatar(e.target.files[0]);
+                            }
+                        };
+                        input.click();
+                    }
+                    break;
+                case 'background':
+                    // 选择图片
+                    if (window.plus) {
+                        plus.gallery.pick(function(file) {
+                            // 上传图片
+                            const imgFile = new File([file], file.name, { type: file.type });
+                            uploadBackground(imgFile);
+                        }, function(e) {
+                            console.error('选择图片失败:', e);
+                        }, {
+                            filter: 'image',
+                            multiple: false
+                        });
+                    } else {
+                        // 浏览器环境
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = 'image/*';
+                        input.onchange = function(e) {
+                            if (e.target.files && e.target.files[0]) {
+                                uploadBackground(e.target.files[0]);
+                            }
+                        };
+                        input.click();
+                    }
+                    break;
+                case 'nickname':
+                    // 修改昵称
+                    if (window.plus) {
+                        plus.nativeUI.prompt('请输入新昵称', function(e) {
+                            if (e.index === 0 && e.value) {
+                                updateNickname(e.value.trim());
+                            }
+                        }, '修改昵称', ['确定', '取消'], '');
+                    } else {
+                        const nickname = prompt('请输入新昵称');
+                        if (nickname) {
+                            updateNickname(nickname.trim());
+                        }
+                    }
+                    break;
+                case 'bio':
+                    // 修改个性签名
+                    if (window.plus) {
+                        plus.nativeUI.prompt('请输入新的个性签名', function(e) {
+                            if (e.index === 0) {
+                                updateBio(e.value ? e.value.trim() : '');
+                            }
+                        }, '修改个性签名', ['确定', '取消'], '');
+                    } else {
+                        const bio = prompt('请输入新的个性签名');
+                        updateBio(bio ? bio.trim() : '');
+                    }
+                    break;
+                case 'password':
+                    // 修改密码
+                    if (window.plus) {
+                        plus.nativeUI.prompt('请输入新密码', function(e) {
+                            if (e.index === 0 && e.value) {
+                                updatePassword(e.value);
+                            }
+                        }, '修改密码', ['确定', '取消'], '');
+                    } else {
+                        const password = prompt('请输入新密码');
+                        if (password) {
+                            updatePassword(password);
+                        }
+                    }
+                    break;
+                default:
+                    console.log("未知页面: " + page);
+            }
+        }
+
+        // 上传头像
+        async function uploadAvatar(file) {
+            const mail = localStorage.getItem('usermail');
+            if (!mail) {
+                toast('请先登录');
+                return;
+            }
+
+            try {
+                if (window.plus) {
+                    plus.nativeUI.showWaiting('上传中...');
+                }
+
+                // 上传图片
+                const avatarUrl = await uploadToMyApi(file);
+
+                // 调用后端API更新头像
+                const response = await fetch('https://apirank.qujiaweb.top/?mode=update_avatar&mail=' + encodeURIComponent(mail), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ mail: mail, avatar: avatarUrl })
+                });
+
+                const res = await response.json();
+
+                if (window.plus) {
+                    plus.nativeUI.closeWaiting();
+                }
+
+                if (res.code === 200) {
+                    toast('头像修改成功');
+                    // 刷新用户信息
+                    refreshUserInfo();
+                } else {
+                    toast('头像修改失败: ' + (res.msg || '未知错误'));
+                }
+            } catch (error) {
+                console.error('上传头像失败:', error);
+                if (window.plus) {
+                    plus.nativeUI.closeWaiting();
+                }
+                toast('上传失败，请重试');
+            }
+        }
+
+        // 上传背景图片
+        async function uploadBackground(file) {
+            const mail = localStorage.getItem('usermail');
+            if (!mail) {
+                toast('请先登录');
+                return;
+            }
+
+            try {
+                if (window.plus) {
+                    plus.nativeUI.showWaiting('上传中...');
+                }
+
+                // 上传图片
+                const backgroundUrl = await uploadToMyApi(file);
+
+                // 调用后端API更新背景图片
+                const response = await fetch('https://apirank.qujiaweb.top/?mode=update_background&mail=' + encodeURIComponent(mail), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ mail: mail, background: backgroundUrl })
+                });
+
+                const res = await response.json();
+
+                if (window.plus) {
+                    plus.nativeUI.closeWaiting();
+                }
+
+                if (res.code === 200) {
+                    toast('背景图片修改成功');
+                    // 刷新用户信息
+                    refreshUserInfo();
+                } else {
+                    toast('背景图片修改失败: ' + (res.msg || '未知错误'));
+                }
+            } catch (error) {
+                console.error('上传背景图片失败:', error);
+                if (window.plus) {
+                    plus.nativeUI.closeWaiting();
+                }
+                toast('上传失败，请重试');
+            }
+        }
+
+        // 更新昵称
+        async function updateNickname(nickname) {
+            const mail = localStorage.getItem('usermail');
+            if (!mail) {
+                toast('请先登录');
+                return;
+            }
+
+            try {
+                if (window.plus) {
+                    plus.nativeUI.showWaiting('修改中...');
+                }
+
+                // 调用后端API更新昵称
+                const response = await fetch('https://apirank.qujiaweb.top/?mode=update_nickname&mail=' + encodeURIComponent(mail), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ mail: mail, nickname: nickname })
+                });
+
+                const res = await response.json();
+
+                if (window.plus) {
+                    plus.nativeUI.closeWaiting();
+                }
+
+                if (res.code === 200) {
+                    toast('昵称修改成功');
+                    // 刷新用户信息
+                    refreshUserInfo();
+                } else {
+                    toast('昵称修改失败: ' + (res.msg || '未知错误'));
+                }
+            } catch (error) {
+                console.error('修改昵称失败:', error);
+                if (window.plus) {
+                    plus.nativeUI.closeWaiting();
+                }
+                toast('修改失败，请重试');
+            }
+        }
+
+        // 更新个性签名
+        async function updateBio(bio) {
+            const mail = localStorage.getItem('usermail');
+            if (!mail) {
+                toast('请先登录');
+                return;
+            }
+
+            try {
+                if (window.plus) {
+                    plus.nativeUI.showWaiting('修改中...');
+                }
+
+                // 调用后端API更新个性签名
+                const response = await fetch('https://apirank.qujiaweb.top/?mode=update_bio&mail=' + encodeURIComponent(mail), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ mail: mail, bio: bio })
+                });
+
+                const res = await response.json();
+
+                if (window.plus) {
+                    plus.nativeUI.closeWaiting();
+                }
+
+                if (res.code === 200) {
+                    toast('个性签名修改成功');
+                    // 刷新用户信息
+                    refreshUserInfo();
+                } else {
+                    toast('个性签名修改失败: ' + (res.msg || '未知错误'));
+                }
+            } catch (error) {
+                console.error('修改个性签名失败:', error);
+                if (window.plus) {
+                    plus.nativeUI.closeWaiting();
+                }
+                toast('修改失败，请重试');
+            }
+        }
+
+        // 更新密码
+        async function updatePassword(password) {
+            const mail = localStorage.getItem('usermail');
+            if (!mail) {
+                toast('请先登录');
+                return;
+            }
+
+            try {
+                if (window.plus) {
+                    plus.nativeUI.showWaiting('修改中...');
+                }
+
+                // 调用后端API更新密码
+                const response = await fetch('https://apirank.qujiaweb.top/?mode=update_password&mail=' + encodeURIComponent(mail), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ mail: mail, password: password })
+                });
+
+                const res = await response.json();
+
+                if (window.plus) {
+                    plus.nativeUI.closeWaiting();
+                }
+
+                if (res.code === 200) {
+                    toast('密码修改成功');
+                } else {
+                    toast('密码修改失败: ' + (res.msg || '未知错误'));
+                }
+            } catch (error) {
+                console.error('修改密码失败:', error);
+                if (window.plus) {
+                    plus.nativeUI.closeWaiting();
+                }
+                toast('修改失败，请重试');
+            }
+        }
+
+        // 刷新用户信息
+        function refreshUserInfo() {
+            // 这里可以添加刷新用户信息的逻辑
+            // 例如重新获取用户信息并更新UI
+            console.log('刷新用户信息');
         }
 
         function handleLogout() {
