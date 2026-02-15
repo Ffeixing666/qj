@@ -659,8 +659,10 @@
         }
 
         window.onload = function() {
-            getApps();
-            getUnreadMessageCount();
+            // 添加0.5秒延迟再请求应用数据
+            setTimeout(function() {
+                getApps();
+            }, 500);
         };
     </script>
 </body>

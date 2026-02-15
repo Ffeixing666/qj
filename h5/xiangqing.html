@@ -469,27 +469,27 @@
     <div class="info-grid">
         <div class="info-item">
             <div class="info-label">应用大小</div>
-            <div class="info-value">加载中...</div>
+            <div class="info-value"></div>
         </div>
         <div class="info-item">
             <div class="info-label">应用版本</div>
-            <div class="info-value">加载中...</div>
+            <div class="info-value"></div>
         </div>
         <div class="info-item">
             <div class="info-label">安卓版本</div>
-            <div class="info-value">加载中...</div>
+            <div class="info-value"></div>
         </div>
         <div class="info-item">
             <div class="info-label">系统位数</div>
-            <div class="info-value">加载中...</div>
+            <div class="info-value"></div>
         </div>
         <div class="info-item">
             <div class="info-label">分享时间</div>
-            <div class="info-value">加载中...</div>
+            <div class="info-value"></div>
         </div>
         <div class="info-item">
             <div class="info-label">分享用户</div>
-            <div class="info-value">加载中...</div>
+            <div class="info-value"></div>
         </div>
     </div>
 
@@ -1345,11 +1345,11 @@
                     }
                 } else if (data.code === 404) {
                     if (isPageActive()) {
-                        alert('用户身份失效，请重新登录');
+                        alert(data.msg || '该应用已被删除');
                     }
                 } else {
                     if (isPageActive()) {
-                        alert('未找到应用信息');
+                        alert('应用已删除');
                     }
                 }
             } catch (error) {
@@ -1442,7 +1442,7 @@
 
             const appPackageElement = document.getElementById('appPackage');
             if (appPackageElement) {
-                appPackageElement.textContent = handleNullValue(app.包名);
+                appPackageElement.textContent = app.包名 === null || app.包名 === undefined || app.包名 === '' ? '暂无包名' : app.包名;
             }
 
             // 渲染截图并绑定点击预览

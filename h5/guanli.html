@@ -272,6 +272,9 @@
             }
 
             try {
+                // 添加0.5秒延迟
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
                 const response = await fetch(`${API}?mode=check_admin&mail=${encodeURIComponent(mail)}`, {
                     method: 'GET'
                 });
@@ -299,6 +302,9 @@
             }
 
             try {
+                // 添加0.5秒延迟
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
                 const response = await fetch(`${API}?mode=get_pending_apps&mail=${encodeURIComponent(mail)}`, {
                     method: 'GET'
                 });
