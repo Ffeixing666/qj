@@ -280,10 +280,10 @@
             <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_v4UVIMr2qe_1766889744125.png" class="nav-icon-img" alt="首页">
             <span>首页</span>
         </div>
-        <div onclick="location.replace('me.html')" class="bottom-item active">
-            <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_C7AQMwmQxj_1766889744280.png" class="nav-icon-img" alt="我的">
-            <span>我的</span>
-        </div>
+        <div class="bottom-item active">
+                    <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_C7AQMwmQxj_1766889744280.png" class="nav-icon-img" alt="我的">
+                    <span>我的</span>
+                </div>
     </nav>
 
     <script src="https://static2.pgaot.com/Assets/js/jquery-2.2.4.min.js"></script>
@@ -1080,6 +1080,11 @@
         }
 
         function openMessagePage() {
+            // 立即隐藏未读消息徽章
+            const badge = document.getElementById('unreadBadge');
+            if (badge) {
+                badge.style.display = 'none';
+            }
             // 页面切换前设置为非活动状态
             setPageInactive();
             if (window.plus) {

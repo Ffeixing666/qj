@@ -371,7 +371,7 @@
     <div class="fab" onclick="openSharePage()">+</div>
 
     <nav class="bottom-nav">
-        <div onclick="location.replace('home.html')" class="bottom-item active">
+        <div class="bottom-item active">
             <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_W4dgFlZKZZ_1766889744282.png" class="nav-icon-img" alt="首页">
             <span>首页</span>
         </div>
@@ -607,6 +607,11 @@
         }
 
         function openMessagePage() {
+            // 立即隐藏未读消息徽章
+            const badge = document.getElementById('unreadBadge');
+            if (badge) {
+                badge.style.display = 'none';
+            }
             if (window.plus) {
                 var ws = plus.webview.create('xiaoxi.html', 'xiaoxi.html', {
                     backbuttonMaximize: false
