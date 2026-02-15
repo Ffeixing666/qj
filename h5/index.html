@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>趣加应用 - 开屏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background: white;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, sans-serif;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f0f0f0;
+            border-top: 3px solid #007AFF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-spinner"></div>
+
+    <script>
+        const API = 'https://apirank.qujiaweb.top/';
+
+
+        async function silentLogin() {
+            const savedEmail = localStorage.getItem('usermail_login');
+            const savedPass = localStorage.getItem('userpass_login');
+            
+            if (savedEmail && savedPass) {
+                try {
+                    const response = await fetch(`${API}?mode=login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: savedEmail, password: savedPass })
+                    });
+                    
+                    if (!response.ok) throw new Error('网络响应不正常');
+                    const res = await response.json();
+                    
+                    if (res.code === 200 && res.fields && res.fields.length > 0) {
+                        const user = res.fields[0];
+                        localStorage.setItem('usermail', user["邮箱"]);
+                        localStorage.setItem('username', user["昵称"]);
+                        localStorage.setItem('userpicture', user["头像"]);
+                        localStorage.setItem('userpoints', user["积分"] || '0');
+                        return true;
+                    }
+                } catch(e) {
+                    console.error('Silent Login Error:', e);
+                }
+            }
+            return false;
+        }
+
+        async function init() {
+
+            await silentLogin();
+            
+
+            if (window.plus) {
+                plus.webview.open('home.html', 'home.html', {
+                    backbuttonMaximize: false
+                });
+            } else {
+                window.location.href = 'home.html';
+            }
+        }
+
+        window.onload = init;
+
+
+        document.addEventListener('plusready', function() {
+            var webview = plus.webview.currentWebview();
+            plus.key.addEventListener('backbutton', function() {
+                webview.canBack(function(e) {
+                    if (e.canBack) {
+                        webview.back();
+                    } else {
+                        var path = window.location.pathname;
+                        var isHomePage = path.indexOf('home.html') !== -1 || path === '/' || path.indexOf('index.html') !== -1;
+                        if (isHomePage) {
+                            plus.nativeUI.confirm("确定退出应用吗？", function(res) {
+                                if (res.index === 0) plus.runtime.quit();
+                            }, "提示", ["确定", "取消"]);
+                        } else {
+                            if (plus.webview.all().length > 1) {
+                                webview.close('auto'); 
+                            } else {
+                                history.back();
+                            }
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
