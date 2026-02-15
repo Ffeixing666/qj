@@ -1136,9 +1136,9 @@
         }
 
         // 解析蓝奏云链接
-        async function parselanzUrl(url, password) {
+        async function parselanzouUrl(url, password) {
             try {
-                const apiUrl = `https://api.pearktrue.cn/api/lanz/api.php?url=${encodeURIComponent(url)}&pwd=${encodeURIComponent(password || '')}`;
+                const apiUrl = `https://api.pearktrue.cn/api/lanzou/api.php?url=${encodeURIComponent(url)}&pwd=${encodeURIComponent(password || '')}`;
                 const response = await fetch(apiUrl);
                 const data = await response.json();
                 
@@ -1526,7 +1526,7 @@
                         if (url.includes('lanz')) {
                             // 解析蓝奏云链接
                             btn.innerText = "解析中...";
-                            const directUrl = await parselanzUrl(url, password);
+                            const directUrl = await parselanzouUrl(url, password);
                             
                             if (directUrl) {
                                 // 解析成功，使用5+内置下载
