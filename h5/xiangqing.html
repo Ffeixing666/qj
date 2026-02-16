@@ -1064,34 +1064,34 @@
         }
 
         // 增强的复制函数，包含多种备用方案
-        function copyToClipboardWithFallback(text) {
+        function copyToClipboardWithFallback(text, copyType = 'password') {
             // 方案1: 使用现代Clipboard API
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(text)
                     .then(() => {
                         console.log('复制成功 (现代API)');
-                        showCopySuccess();
+                        showCopySuccess(copyType);
                     })
                     .catch(err => {
                         console.warn('现代API复制失败，尝试备用方案:', err);
-                        tryFallbackMethods(text);
+                        tryFallbackMethods(text, copyType);
                     });
             } else {
                 // 直接使用备用方案
-                tryFallbackMethods(text);
+                tryFallbackMethods(text, copyType);
             }
         }
 
-        function tryFallbackMethods(text) {
+        function tryFallbackMethods(text, copyType = 'password') {
             // 方案2: 使用HTML5+的复制功能
             if (window.plus && plus.device) {
                 try {
                     plus.device.setClipboard(text, function() {
                         console.log('复制成功 (HTML5+)');
-                        showCopySuccess();
+                        showCopySuccess(copyType);
                     }, function(err) {
                         console.warn('HTML5+复制失败:', err);
-                        tryExecCommand(text);
+                        tryExecCommand(text, copyType);
                     });
                     return;
                 } catch (e) {
@@ -1100,10 +1100,10 @@
             }
             
             // 方案3: 使用传统的execCommand
-            tryExecCommand(text);
+            tryExecCommand(text, copyType);
         }
 
-        function tryExecCommand(text) {
+        function tryExecCommand(text, copyType = 'password') {
             // 创建临时文本区域
             const textArea = document.createElement('textarea');
             textArea.value = text;
@@ -1118,7 +1118,7 @@
                 const successful = document.execCommand('copy');
                 if (successful) {
                     console.log('复制成功 (execCommand)');
-                    showCopySuccess();
+                    showCopySuccess(copyType);
                 } else {
                     console.warn('execCommand复制失败');
                     showToast('复制失败，请手动复制');
@@ -1131,8 +1131,12 @@
             }
         }
 
-        function showCopySuccess() {
-            showToast('密码已复制');
+        function showCopySuccess(copyType = 'password') {
+            if (copyType === 'comment') {
+                showToast('评论已复制');
+            } else {
+                showToast('密码已复制');
+            }
         }
 
         // 解析蓝奏云链接
@@ -2048,8 +2052,8 @@
                 return String.fromCodePoint(parseInt(code));
             });
             
-            // 使用与复制密码相同的方式复制评论
-            copyToClipboardWithFallback(processedContent);
+            // 使用与复制密码相同的方式复制评论，但传入comment类型
+            copyToClipboardWithFallback(processedContent, 'comment');
             
             // 关闭菜单
             closeActionMenu();
