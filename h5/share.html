@@ -678,29 +678,21 @@
                 return;
             }
 
-            // 使用 5+ SDK 的文件选择器（支持选择任意文件）
-            // 直接调用系统文件选择器
-            plus.io.requestFileSystem(plus.io.PUBLIC_DOCUMENTS, function(fs) {
-                // 使用 5+ SDK 的文件选择器
-                plus.nativeUI.pickFile({
-                    title: '选择APK文件',
-                    filter: 'application/vnd.android.package-archive',
-                    multiple: false
-                }, function(e) {
-                    // 成功选择文件
-                    var file = e.files[0];
-                    
+            // 检查是否支持 plus.gallery.pick 方法
+            if (typeof plus.gallery.pick === 'function') {
+                // 使用 5+ SDK 的相册选择器，但配置为选择所有文件
+                plus.gallery.pick(function(path) {
                     // 检查文件扩展名是否为 APK
-                    if (!file.url.toLowerCase().endsWith('.apk')) {
+                    if (!path.toLowerCase().endsWith('.apk')) {
                         showToast('请选择 APK 文件');
                         return;
                     }
 
                     // 读取文件
-                    plus.io.resolveLocalFileSystemURL(file.url, function(entry) {
-                        entry.file(function(fileObj) {
+                    plus.io.resolveLocalFileSystemURL(path, function(entry) {
+                        entry.file(function(file) {
                             // 处理选择的文件，与现有的上传逻辑保持一致
-                            handleApkFile(fileObj);
+                            handleApkFile(file);
                         }, function(e) {
                             showToast('读取文件失败: ' + e.message);
                         });
@@ -708,12 +700,20 @@
                         showToast('解析文件路径失败: ' + e.message);
                     });
                 }, function(e) {
-                    // 用户取消选择或选择失败
+                    // 用户取消选择
                     console.log('选择文件失败:', e.message);
+                }, {
+                    filter: 'all', // 选择所有类型的文件
+                    multiple: false,
+                    system: true, // 使用系统文件选择器
+                    onmaxed: function() {
+                        showToast('最多只能选择一个文件');
+                    }
                 });
-            }, function(e) {
-                showToast('获取文件系统失败: ' + e.message);
-            });
+            } else {
+                // 如果不支持 plus.gallery.pick，尝试使用其他方法
+                showToast('当前版本不支持文件选择功能');
+            }
         }
 
         // 统一处理 APK 文件的函数
