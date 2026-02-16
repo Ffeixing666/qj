@@ -271,10 +271,22 @@
 
                 // 4. 渲染基本信息
                 const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                let versionName = info.versionName;
+                // 处理中文版本号
+                if (!versionName || versionName === '') {
+                    // 尝试从其他可能的位置获取版本信息
+                    if (info.manifest && info.manifest['@android:versionName']) {
+                        versionName = info.manifest['@android:versionName'];
+                    } else if (info.manifest && info.manifest.versionName) {
+                        versionName = info.manifest.versionName;
+                    } else if (info.manifest && info.manifest['android:versionName']) {
+                        versionName = info.manifest['android:versionName'];
+                    }
+                }
                 document.getElementById('app-icon').src = info.icon || '';
                 document.getElementById('app-name').value = finalName;
                 document.getElementById('app-pkg').innerText = info.package;
-                document.getElementById('v-text').innerText = info.versionName;
+                document.getElementById('v-text').innerText = versionName || '-';
                 document.getElementById('s-text').innerText = sizeMB + " MB";
                 document.getElementById('sdk-text').innerText = "Android " + androidVer + "+";
                 document.getElementById('arch-text').innerText = bitDisplay;
@@ -302,7 +314,7 @@
                     finalName, 
                     sizeMB, 
                     package: info.package, 
-                    versionName: info.versionName, 
+                    versionName: versionName, 
                     androidVer, 
                     bitDisplay, 
                     appLink 
@@ -394,8 +406,11 @@
             // 处理应用链接
             let appLink = apkInfo.appLink;
             let password = '';
-            if (parseFloat(apkInfo.sizeMB) > 100) {
-                // 大于100MB，使用网盘链接
+            // 检查是否需要使用网盘链接：
+            // 1. 文件大小大于100MB，或者
+            // 2. 用户取消了上传（appLink为空）
+            if (parseFloat(apkInfo.sizeMB) > 100 || !appLink) {
+                // 使用网盘链接
                 appLink = document.getElementById('pan-url').value;
                 password = document.getElementById('pan-pwd').value;
                 if (!appLink) {
@@ -645,29 +660,41 @@
                         if (!finalName || String(finalName).startsWith('@')) finalName = info.package;
 
                         // 处理 SDK
-                        const rawSdk = findMinSdk(info);
-                        const androidVer = SDK_MAP[rawSdk] || "未知";
+                            const rawSdk = findMinSdk(info);
+                            const androidVer = SDK_MAP[rawSdk] || "未知";
 
-                        // 处理架构
-                        JSZip.loadAsync(file).then(zip => {
-                            const archs = new Set();
-                            Object.keys(zip.files).forEach(p => { if (p.startsWith('lib/')) { const parts = p.split('/'); if (parts.length > 2) archs.add(parts[1]); } });
-                            const archArray = Array.from(archs);
-                            let bitDisplay = "全架构兼容";
-                            if (archArray.length > 0) {
-                                const is64 = archArray.some(a => a.includes('64'));
-                                const is32 = archArray.some(a => a.includes('v7a') || a === 'armeabi');
-                                bitDisplay = (is64 && is32) ? "32/64位兼容" : (is64 ? "纯64位" : "纯32位");
-                            }
+                            // 处理架构
+                            JSZip.loadAsync(file).then(zip => {
+                                const archs = new Set();
+                                Object.keys(zip.files).forEach(p => { if (p.startsWith('lib/')) { const parts = p.split('/'); if (parts.length > 2) archs.add(parts[1]); } });
+                                const archArray = Array.from(archs);
+                                let bitDisplay = "全架构兼容";
+                                if (archArray.length > 0) {
+                                    const is64 = archArray.some(a => a.includes('64'));
+                                    const is32 = archArray.some(a => a.includes('v7a') || a === 'armeabi');
+                                    bitDisplay = (is64 && is32) ? "32/64位兼容" : (is64 ? "纯64位" : "纯32位");
+                                }
 
-                            // 渲染基本信息
-                            const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-                            document.getElementById('app-name').value = finalName;
-                            document.getElementById('app-pkg').innerText = info.package;
-                            document.getElementById('v-text').innerText = info.versionName;
-                            document.getElementById('s-text').innerText = sizeMB + " MB";
-                            document.getElementById('sdk-text').innerText = "Android " + androidVer + "+";
-                            document.getElementById('arch-text').innerText = bitDisplay;
+                                // 处理中文版本号
+                                let versionName = info.versionName;
+                                if (!versionName || versionName === '') {
+                                    if (info.manifest && info.manifest['@android:versionName']) {
+                                        versionName = info.manifest['@android:versionName'];
+                                    } else if (info.manifest && info.manifest.versionName) {
+                                        versionName = info.manifest.versionName;
+                                    } else if (info.manifest && info.manifest['android:versionName']) {
+                                        versionName = info.manifest['android:versionName'];
+                                    }
+                                }
+
+                                // 渲染基本信息
+                                const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                                document.getElementById('app-name').value = finalName;
+                                document.getElementById('app-pkg').innerText = info.package;
+                                document.getElementById('v-text').innerText = versionName || '-';
+                                document.getElementById('s-text').innerText = sizeMB + " MB";
+                                document.getElementById('sdk-text').innerText = "Android " + androidVer + "+";
+                                document.getElementById('arch-text').innerText = bitDisplay;
 
                             // 上传图标到对象存储
                             if (info.icon) {
@@ -682,7 +709,7 @@
                                 finalName, 
                                 sizeMB, 
                                 package: info.package, 
-                                versionName: info.versionName, 
+                                versionName: versionName, 
                                 androidVer, 
                                 bitDisplay, 
                                 appLink: ''
