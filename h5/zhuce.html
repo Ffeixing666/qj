@@ -22,7 +22,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #e5e5ea; border-radius: 12px; background: #f9f9fb; outline: none; box-sizing: border-box; font-size: 16px; -webkit-user-select: text; user-select: text; }
         .btn { width: 100%; padding: 14px; background: var(--primary); color: #fff; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        #toast { position: fixed; top: 20px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 20px; border-radius: 20px; display: none; font-size: 14px; }
+        #toast { position: fixed; top: 20px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 20px; border-radius: 20px; display: none; font-size: 14px; z-index: 9999; }
     </style>
 </head>
 <body>
@@ -57,51 +57,45 @@
 
     function showStep(n) { $('.step').removeClass('active'); $(`#s${n}`).addClass('active'); }
 
-    // 步骤 1: 查重并发送
+    // 步骤 1: 直接发送验证码（跳过查重）
     async function goStep1() {
         const email = $('#email').val().trim();
         if(!email.includes('@')) return toast('请输入有效邮箱');
         
-        toast('正在检查并发送...');
+        toast('正在发送验证码...');
+        
+        // 生成验证码并缓存
+        cache.code = Math.floor(1000 + Math.random() * 9000).toString();
+        cache.email = email;
+
         try {
-            const check = await fetch(`${API}?mode=check_email`, {
-                method: 'POST', 
-                body: JSON.stringify({ email })
-            }).then(r => r.json());
-
-            // 修正判断：如果 data 数组不为空，说明邮箱已存在
-            if(check.data && check.data.length > 0) {
-                return toast('该邮箱已被注册');
-            }
-
-            cache.code = Math.floor(1000 + Math.random() * 9000).toString();
-            cache.email = email;
-
             const mail = await fetch(`${API}?mode=send_mail`, {
-                method: 'POST', 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ to: email, code: cache.code })
             }).then(r => r.json());
 
-            console.log('邮件发送结果:', mail);
+            console.log('发送反馈:', mail);
+
             if(mail.code === 200) { 
                 showStep(2); 
                 toast('验证码已发送'); 
             } else { 
-                toast('邮件发送失败：' + (mail.msg || '未知错误'));
-                if(mail.error) {
-                    console.error('邮件发送错误详情:', mail.error);
-                }
+                toast('发送失败：' + (mail.msg || '未知错误'));
             }
-        } catch(e) { toast('服务器繁忙'); }
+        } catch(e) { 
+            console.error(e);
+            toast('网络繁忙，请稍后再试'); 
+        }
     }
 
-    // 步骤 2: 验证码
+    // 步骤 2: 校验本地生成的验证码
     function goStep2() {
         if($('#vcode').val() === cache.code) showStep(3);
         else toast('验证码错误');
     }
 
-    // 步骤 3: 最终提交
+    // 步骤 3: 最终注册提交
     async function goStep3() {
         const nick = $('#nick').val().trim();
         const p1 = $('#p1').val();
@@ -111,51 +105,52 @@
         if(p1.length < 6) return toast('密码至少6位');
         if(p1 !== p2) return toast('两次输入的密码不一致');
 
-        toast('正在提交...');
+        toast('正在完成注册...');
         try {
             const res = await fetch(`${API}?mode=register`, {
                 method: 'POST',
-                body: JSON.stringify({ email: cache.email, password: p1, nickname: nick })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    email: cache.email, 
+                    password: p1, 
+                    nickname: nick 
+                })
             }).then(r => r.json());
 
-            console.log('注册结果:', res);
-            if(res.code === 200 || res.code === 1) {
+            // Pgaot 插入成功通常返回 code 200
+            if(res.code === 200) {
                 toast('注册成功！');
                 setTimeout(() => {
-                    location.href = 'index.html';
+                    location.href = 'index.html'; 
                 }, 1500);
             } else {
                 toast('提交失败：' + (res.msg || '未知错误'));
             }
-        } catch(e) { toast('网络错误'); }
+        } catch(e) { 
+            toast('提交出错，请稍后重试'); 
+        }
     }
 
-        // 万能返回键
-        document.addEventListener('plusready', function() {
-            var webview = plus.webview.currentWebview();
-            plus.key.addEventListener('backbutton', function() {
-                webview.canBack(function(e) {
-                    if (e.canBack) {
-                        webview.back();
+    // 万能返回键处理 (H5+)
+    document.addEventListener('plusready', function() {
+        var webview = plus.webview.currentWebview();
+        plus.key.addEventListener('backbutton', function() {
+            webview.canBack(function(e) {
+                if (e.canBack) {
+                    webview.back();
+                } else {
+                    var path = window.location.pathname;
+                    if (path.indexOf('index.html') !== -1) {
+                        plus.nativeUI.confirm("确定退出应用吗？", function(res) {
+                            if (res.index === 0) plus.runtime.quit();
+                        }, "提示", ["确定", "取消"]);
                     } else {
-                        var path = window.location.pathname;
-                        var isHomePage = path.indexOf('index.html') !== -1 && path.indexOf('app/') === -1;
-
-                        if (isHomePage) {
-                            plus.nativeUI.confirm("确定退出应用吗？", function(res) {
-                                if (res.index === 0) plus.runtime.quit();
-                            }, "提示", ["确定", "取消"]);
-                        } else {
-                            if (plus.webview.all().length > 1) {
-                                webview.close('pop-out', 300); 
-                            } else {
-                                history.back();
-                            }
-                        }
+                        webview.close('pop-out', 300);
                     }
-                });
+                }
             });
         });
-    </script>
+    });
+</script>
 </body>
 </html>
