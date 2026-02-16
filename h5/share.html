@@ -678,41 +678,76 @@
                 return;
             }
 
-            // 检查是否支持 plus.gallery.pick 方法
-            if (typeof plus.gallery.pick === 'function') {
-                // 使用 5+ SDK 的相册选择器，但配置为选择所有文件
-                plus.gallery.pick(function(path) {
-                    // 检查文件扩展名是否为 APK
-                    if (!path.toLowerCase().endsWith('.apk')) {
-                        showToast('请选择 APK 文件');
-                        return;
+            // 尝试使用 5+ SDK 的文件选择功能
+            try {
+                // 使用 plus.io 的文件系统 API 来打开系统文件选择器
+                // 直接调用系统的文件选择器
+                var Intent = plus.android.importClass('android.content.Intent');
+                var intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType('application/vnd.android.package-archive');
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                
+                var Activity = plus.android.importClass('android.app.Activity');
+                var main = plus.android.runtimeMainActivity();
+                
+                // 保存当前上下文
+                var that = this;
+                
+                // 重写 onActivityResult 方法
+                main.onActivityResult = function(requestCode, resultCode, data) {
+                    if (requestCode === 1001 && resultCode === Activity.RESULT_OK && data) {
+                        var uri = data.getData();
+                        if (uri) {
+                            // 获取文件路径
+                            var path = getPathFromUri(uri, main);
+                            if (path) {
+                                // 检查文件扩展名是否为 APK
+                                if (!path.toLowerCase().endsWith('.apk')) {
+                                    showToast('请选择 APK 文件');
+                                    return;
+                                }
+                                
+                                // 读取文件
+                                plus.io.resolveLocalFileSystemURL(path, function(entry) {
+                                    entry.file(function(file) {
+                                        // 处理选择的文件，与现有的上传逻辑保持一致
+                                        handleApkFile(file);
+                                    }, function(e) {
+                                        showToast('读取文件失败: ' + e.message);
+                                    });
+                                }, function(e) {
+                                    showToast('解析文件路径失败: ' + e.message);
+                                });
+                            } else {
+                                showToast('获取文件路径失败');
+                            }
+                        }
                     }
+                };
+                
+                // 启动文件选择器
+                main.startActivityForResult(intent, 1001);
+            } catch (e) {
+                console.error('文件选择失败:', e);
+                showToast('文件选择功能暂不可用');
+            }
+        }
 
-                    // 读取文件
-                    plus.io.resolveLocalFileSystemURL(path, function(entry) {
-                        entry.file(function(file) {
-                            // 处理选择的文件，与现有的上传逻辑保持一致
-                            handleApkFile(file);
-                        }, function(e) {
-                            showToast('读取文件失败: ' + e.message);
-                        });
-                    }, function(e) {
-                        showToast('解析文件路径失败: ' + e.message);
-                    });
-                }, function(e) {
-                    // 用户取消选择
-                    console.log('选择文件失败:', e.message);
-                }, {
-                    filter: 'all', // 选择所有类型的文件
-                    multiple: false,
-                    system: true, // 使用系统文件选择器
-                    onmaxed: function() {
-                        showToast('最多只能选择一个文件');
-                    }
-                });
-            } else {
-                // 如果不支持 plus.gallery.pick，尝试使用其他方法
-                showToast('当前版本不支持文件选择功能');
+        // 从 Uri 获取文件路径
+        function getPathFromUri(uri, context) {
+            try {
+                var contentResolver = context.getContentResolver();
+                var cursor = contentResolver.query(uri, null, null, null, null);
+                if (cursor != null && cursor.moveToFirst()) {
+                    var columnIndex = cursor.getColumnIndex('_data');
+                    var path = cursor.getString(columnIndex);
+                    cursor.close();
+                    return path;
+                }
+                return null;
+            } catch (e) {
+                console.error('获取文件路径失败:', e);
+                return null;
             }
         }
 
