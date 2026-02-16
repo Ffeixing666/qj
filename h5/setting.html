@@ -406,7 +406,27 @@
 
         // 转义emoji字符
         function escapeEmoji(text) {
-            return text.replace(/'/g, "~PGDBSD~");
+            return [...text].map(char => {
+                const code = char.codePointAt(0);
+                if (
+                    (code >= 0x1F300 && code <= 0x1F6FF) ||
+                    (code >= 0x1F900 && code <= 0x1F9FF) ||
+                    (code >= 0x1FA70 && code <= 0x1FAFF) ||
+                    (code >= 0x2600 && code <= 0x26FF) ||
+                    (code >= 0x2700 && code <= 0x27BF) ||
+                    (code >= 0x1F1E6 && code <= 0x1F1FF)
+                ) {
+                    return `&#${code};`;
+                } else {
+                    return char;
+                }
+            }).join('').replace(/'/g, "~PGDBSD~");
+        }
+
+        // 检查密码是否包含特殊字符
+        function hasSpecialChars(password) {
+            // 只允许字母、数字和下划线
+            return !/^[a-zA-Z0-9_]+$/.test(password);
         }
 
         // 显示轻提示
@@ -653,13 +673,16 @@
                     plus.nativeUI.showWaiting('修改中...');
                 }
 
+                // 转义emoji字符
+                const escapedNickname = escapeEmoji(nickname);
+
                 // 调用后端API更新昵称
                 const response = await fetch('https://apirank.qujiaweb.top/?mode=update_nickname&mail=' + encodeURIComponent(mail), {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ mail: mail, nickname: nickname })
+                    body: JSON.stringify({ mail: mail, nickname: escapedNickname })
                 });
 
                 const res = await response.json();
@@ -697,13 +720,16 @@
                     plus.nativeUI.showWaiting('修改中...');
                 }
 
+                // 转义emoji字符
+                const escapedBio = escapeEmoji(bio);
+
                 // 调用后端API更新个性签名
                 const response = await fetch('https://apirank.qujiaweb.top/?mode=update_bio&mail=' + encodeURIComponent(mail), {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ mail: mail, bio: bio })
+                    body: JSON.stringify({ mail: mail, bio: escapedBio })
                 });
 
                 const res = await response.json();
@@ -733,6 +759,12 @@
             const mail = localStorage.getItem('usermail');
             if (!mail) {
                 toast('请先登录');
+                return;
+            }
+
+            // 检查密码是否包含特殊字符
+            if (hasSpecialChars(password)) {
+                toast('密码请勿包含特殊字符');
                 return;
             }
 

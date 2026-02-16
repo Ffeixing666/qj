@@ -105,6 +105,31 @@
         }
     }
 
+    // 检查密码是否包含特殊字符
+    function hasSpecialChars(password) {
+        // 只允许字母、数字和下划线
+        return !/^[a-zA-Z0-9_]+$/.test(password);
+    }
+
+    // 转义emoji字符
+    function escapeEmoji(text) {
+        return [...text].map(char => {
+            const code = char.codePointAt(0);
+            if (
+                (code >= 0x1F300 && code <= 0x1F6FF) ||
+                (code >= 0x1F900 && code <= 0x1F9FF) ||
+                (code >= 0x1FA70 && code <= 0x1FAFF) ||
+                (code >= 0x2600 && code <= 0x26FF) ||
+                (code >= 0x2700 && code <= 0x27BF) ||
+                (code >= 0x1F1E6 && code <= 0x1F1FF)
+            ) {
+                return `&#${code};`;
+            } else {
+                return char;
+            }
+        }).join('').replace(/'/g, "~PGDBSD~");
+    }
+
     // 步骤 3: 注册提交
     async function goStep3() {
         const nick = $('#nick').val().trim();
@@ -114,6 +139,10 @@
         if(!nick) return toast('请输入昵称');
         if(p1.length < 6) return toast('密码至少6位');
         if(p1 !== p2) return toast('两次输入的密码不一致');
+        if(hasSpecialChars(p1)) return toast('密码请勿包含特殊字符');
+
+        // 转义emoji字符
+        const escapedNick = escapeEmoji(nick);
 
         toast('正在完成注册...');
         try {
@@ -123,7 +152,7 @@
                 body: JSON.stringify({ 
                     email: cache.email, 
                     password: p1, 
-                    nickname: nick 
+                    nickname: escapedNick 
                 })
             }).then(r => r.json());
 

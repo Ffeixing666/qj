@@ -321,6 +321,13 @@
             }
         }
 
+        // 文字转emoji函数
+        function htmlEntityToEmoji(str) {
+            return str.replace(/&#(\d+);/g, function(match, code) {
+                return String.fromCodePoint(parseInt(code));
+            });
+        }
+
         // 更新应用列表
         function updateAppList(apps) {
             const appList = document.getElementById('appList');
@@ -367,11 +374,11 @@
 
                 const appName = document.createElement('div');
                 appName.className = 'app-name';
-                appName.textContent = app.名称 || '未知应用';
+                appName.textContent = htmlEntityToEmoji(app.名称 || '未知应用');
 
                 const appDesc = document.createElement('div');
                 appDesc.className = 'app-desc';
-                appDesc.textContent = app.简介 || '暂无简介';
+                appDesc.textContent = htmlEntityToEmoji(app.简介 || '暂无简介');
 
                 const appMeta = document.createElement('div');
                 appMeta.className = 'app-meta';

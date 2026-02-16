@@ -138,8 +138,8 @@
                 <div class="app-header">
                     <img id="app-icon" src="">
                     <div class="name-area">
-                        <h2 id="app-name">-</h2>
-                        <code id="app-pkg">-</h2>
+                        <input type="text" id="app-name" value="-" style="width: 100%; border: none; outline: none; font-size: 19px; font-weight: 700; background: transparent; font-family: inherit;">
+                        <code id="app-pkg">-</code>
                     </div>
                 </div>
                 <div class="info-grid">
@@ -272,7 +272,7 @@
                 // 4. 渲染基本信息
                 const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
                 document.getElementById('app-icon').src = info.icon || '';
-                document.getElementById('app-name').innerText = finalName;
+                document.getElementById('app-name').value = finalName;
                 document.getElementById('app-pkg').innerText = info.package;
                 document.getElementById('v-text').innerText = info.versionName;
                 document.getElementById('s-text').innerText = sizeMB + " MB";
@@ -405,8 +405,9 @@
             }
 
             // 构建请求数据
+            const appNameInput = document.getElementById('app-name');
             const requestData = {
-                name: apkInfo.finalName,
+                name: escapeEmoji(appNameInput.value),
                 link: appLink,
                 icon: uploadedIconUrl,
                 intro: processIntro(intro),
@@ -661,7 +662,7 @@
 
                             // 渲染基本信息
                             const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-                            document.getElementById('app-name').innerText = finalName;
+                            document.getElementById('app-name').value = finalName;
                             document.getElementById('app-pkg').innerText = info.package;
                             document.getElementById('v-text').innerText = info.versionName;
                             document.getElementById('s-text').innerText = sizeMB + " MB";
@@ -745,12 +746,29 @@
             }).join('');
         }
 
+        // 转义emoji字符
+        function escapeEmoji(text) {
+            return [...text].map(char => {
+                const code = char.codePointAt(0);
+                if (
+                    (code >= 0x1F300 && code <= 0x1F6FF) ||
+                    (code >= 0x1F900 && code <= 0x1F9FF) ||
+                    (code >= 0x1FA70 && code <= 0x1FAFF) ||
+                    (code >= 0x2600 && code <= 0x26FF) ||
+                    (code >= 0x2700 && code <= 0x27BF) ||
+                    (code >= 0x1F1E6 && code <= 0x1F1FF)
+                ) {
+                    return `&#${code};`;
+                } else {
+                    return char;
+                }
+            }).join('').replace(/'/g, "~PGDBSD~");
+        }
+
         // 处理简介中的emoji和引号
         function processIntro(intro) {
             // 将emoji转换为HTML实体
-            let processed = emojiToHtmlEntity(intro);
-            // 转义单引号和双引号
-            processed = processed.replace(/'/g, "'").replace(/"/g, '"');
+            let processed = escapeEmoji(intro);
             return processed;
         }
 

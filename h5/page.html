@@ -511,13 +511,13 @@
             // 更新昵称
             const userName = document.querySelector('.user-name');
             if (userName) {
-                userName.textContent = userInfo.昵称 || '用户';
+                userName.textContent = htmlEntityToEmoji(userInfo.昵称 || '用户');
             }
 
             // 更新个性签名
             const userTagline = document.querySelector('.user-tagline');
             if (userTagline) {
-                userTagline.textContent = userInfo.个性签名 || '这个人很懒，什么都没写';
+                userTagline.textContent = htmlEntityToEmoji(userInfo.个性签名 || '这个人很懒，什么都没写');
             }
 
             // 更新积分
@@ -531,6 +531,13 @@
             if (profileHeader && userInfo.背景图片) {
                 profileHeader.style.background = `url('${userInfo.背景图片}') center center / cover no-repeat`;
             }
+        }
+
+        // 文字转emoji函数
+        function htmlEntityToEmoji(str) {
+            return str.replace(/&#(\d+);/g, function(match, code) {
+                return String.fromCodePoint(parseInt(code));
+            });
         }
 
         function updateAppList(apps) {
@@ -572,11 +579,11 @@
 
                 const appName = document.createElement('div');
                 appName.className = 'item-title';
-                appName.textContent = app.名称 || '未知应用';
+                appName.textContent = htmlEntityToEmoji(app.名称 || '未知应用');
 
                 const appDesc = document.createElement('div');
                 appDesc.className = 'item-desc';
-                appDesc.textContent = app.简介 || '暂无简介';
+                appDesc.textContent = htmlEntityToEmoji(app.简介 || '暂无简介');
 
                 const statusBadge = document.createElement('div');
                 statusBadge.className = 'status-badge status-shared';

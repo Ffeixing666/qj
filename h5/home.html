@@ -551,6 +551,13 @@
                 </div>`;
         }
 
+        // 文字转emoji函数
+        function htmlEntityToEmoji(str) {
+            return str.replace(/&#(\d+);/g, function(match, code) {
+                return String.fromCodePoint(parseInt(code));
+            });
+        }
+
         function updateAppList(apps) {
             const appList = document.querySelector('.app-list');
             if (!appList) return;
@@ -572,12 +579,14 @@
                 };
 
                 const iconStyle = app.图标 ? `style="background: url('${app.图标}') center/cover"` : "";
+                const appName = htmlEntityToEmoji(app.名称 || '未知应用');
+                const appDesc = htmlEntityToEmoji(app.简介 || '暂无简介');
                 
                 appItem.innerHTML = `
                     <div class="app-icon" ${iconStyle}></div>
                     <div class="app-info">
-                        <div class="app-name">${app.名称 || '未知应用'}</div>
-                        <div class="app-desc">${app.简介 || '暂无简介'}</div>
+                        <div class="app-name">${appName}</div>
+                        <div class="app-desc">${appDesc}</div>
                     </div>
                 `;
                 appList.appendChild(appItem);

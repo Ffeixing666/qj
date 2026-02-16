@@ -288,6 +288,13 @@
             }
         }
 
+        // HTML实体转emoji函数
+        function htmlEntityToEmoji(str) {
+            return str.replace(/&#(\d+);/g, function(match, code) {
+                return String.fromCodePoint(parseInt(code));
+            });
+        }
+
         // 获取消息列表
         async function fetchMessages(type = '') {
             const usermail = localStorage.getItem('usermail');
@@ -412,11 +419,15 @@
                     
                     const userName = document.createElement('div');
                     userName.className = 'u-name';
-                    userName.textContent = msg['发起人昵称'] || '未知用户';
+                    userName.textContent = htmlEntityToEmoji(msg['发起人昵称'] || '未知用户');
                     
                     const action = document.createElement('div');
                     action.className = 'u-action';
-                    action.textContent = msg['发起人内容'] || '';
+                    action.textContent = htmlEntityToEmoji(msg['发起人内容'] || '');
+                    
+                    // 为发起人内容添加换行支持
+                    action.style.whiteSpace = 'pre-wrap';
+                    action.style.wordBreak = 'break-all';
                     
                     const time = document.createElement('div');
                     time.className = 'u-time';
