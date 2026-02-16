@@ -737,12 +737,43 @@
         function getPathFromUri(uri, context) {
             try {
                 var contentResolver = context.getContentResolver();
-                var cursor = contentResolver.query(uri, null, null, null, null);
-                if (cursor != null && cursor.moveToFirst()) {
-                    var columnIndex = cursor.getColumnIndex('_data');
-                    var path = cursor.getString(columnIndex);
-                    cursor.close();
-                    return path;
+                
+                // 检查 Uri 格式
+                var uriString = uri.toString();
+                if (uriString.startsWith('file://')) {
+                    // 直接是文件路径
+                    return uriString.substring(7);
+                } else if (uriString.startsWith('content://')) {
+                    // 处理 content:// 格式的 Uri
+                    var cursor = contentResolver.query(uri, null, null, null, null);
+                    if (cursor != null && cursor.moveToFirst()) {
+                        var columnIndex = cursor.getColumnIndex('_data');
+                        if (columnIndex > -1) {
+                            var path = cursor.getString(columnIndex);
+                            cursor.close();
+                            return path;
+                        }
+                        cursor.close();
+                    }
+                    
+                    // 如果无法通过 cursor 获取路径，尝试复制文件到临时位置
+                    var fileName = 'temp_' + Date.now() + '.apk';
+                    var cacheDir = context.getCacheDir();
+                    var tempFile = plus.android.newObject('java.io.File', cacheDir, fileName);
+                    
+                    var inputStream = contentResolver.openInputStream(uri);
+                    var fileOutputStream = plus.android.newObject('java.io.FileOutputStream', tempFile);
+                    
+                    var buffer = plus.android.newObject('byte[]', 1024);
+                    var len;
+                    while ((len = inputStream.read(buffer)) > 0) {
+                        fileOutputStream.write(buffer, 0, len);
+                    }
+                    
+                    inputStream.close();
+                    fileOutputStream.close();
+                    
+                    return tempFile.getAbsolutePath();
                 }
                 return null;
             } catch (e) {
