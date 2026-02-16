@@ -204,7 +204,7 @@
 
     <header>
         <div class="nav-bar">
-            <div class="back-btn" onclick="handleBack()"><div class="back-icon"></div></div>
+            <div class="back-btn" onclick="closeSelf()"><div class="back-icon"></div></div>
             <div class="nav-title">应用分享</div>
             <div style="width:40px"></div>
         </div>
@@ -545,7 +545,7 @@
                     showToast('应用分享成功！');
                     // 延迟返回
                     setTimeout(() => {
-                        handleBack();
+                        closeSelf();
                     }, 1500);
                 } else {
                     showToast('提交失败：' + (result.msg || '未知错误'));
@@ -753,7 +753,7 @@
             return processed;
         }
 
-        function handleBack() {
+        function closeSelf() {
             if (window.plus) {
                 plus.webview.currentWebview().close('auto');
             } else {
