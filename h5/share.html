@@ -701,28 +701,93 @@
                         var uri = data.getData();
                         if (uri) {
                             try {
+                                console.log('开始处理文件...');
+                                
+                                // 检查 main 对象
+                                console.log('main 对象:', main);
+                                console.log('main 是否有 getContentResolver 方法:', typeof main.getContentResolver === 'function');
+                                
                                 // 获取 ContentResolver
-                                var contentResolver = main.getContentResolver();
+                                var contentResolver;
+                                try {
+                                    contentResolver = main.getContentResolver();
+                                    console.log('成功获取 ContentResolver:', contentResolver);
+                                } catch (e) {
+                                    console.error('获取 ContentResolver 失败:', e);
+                                    showToast('获取文件系统失败: ' + e.message);
+                                    return;
+                                }
+                                
+                                // 检查 openInputStream 方法
+                                console.log('contentResolver 是否有 openInputStream 方法:', typeof contentResolver.openInputStream === 'function');
                                 
                                 // 打开输入流
-                                var inputStream = contentResolver.openInputStream(uri);
+                                var inputStream;
+                                try {
+                                    inputStream = contentResolver.openInputStream(uri);
+                                    console.log('成功打开输入流:', inputStream);
+                                } catch (e) {
+                                    console.error('打开输入流失败:', e);
+                                    showToast('打开文件失败: ' + e.message);
+                                    return;
+                                }
                                 
                                 // 获取缓存目录
-                                var cacheDir = main.getCacheDir();
+                                var cacheDir;
+                                try {
+                                    cacheDir = main.getCacheDir();
+                                    console.log('成功获取缓存目录:', cacheDir);
+                                } catch (e) {
+                                    console.error('获取缓存目录失败:', e);
+                                    showToast('获取缓存目录失败: ' + e.message);
+                                    inputStream.close();
+                                    return;
+                                }
+                                
                                 var cachePath = cacheDir.getAbsolutePath();
+                                console.log('缓存目录路径:', cachePath);
                                 
                                 // 创建临时文件
                                 var fileName = 'temp_' + Date.now() + '.apk';
                                 var tempFile = new File(cachePath, fileName);
+                                console.log('临时文件对象:', tempFile);
                                 
                                 // 创建输出流
-                                var fileOutputStream = new FileOutputStream(tempFile);
+                                var fileOutputStream;
+                                try {
+                                    fileOutputStream = new FileOutputStream(tempFile);
+                                    console.log('成功创建输出流:', fileOutputStream);
+                                } catch (e) {
+                                    console.error('创建输出流失败:', e);
+                                    showToast('创建临时文件失败: ' + e.message);
+                                    inputStream.close();
+                                    return;
+                                }
                                 
                                 // 复制文件内容
-                                var buffer = plus.android.invoke('java.lang.reflect.Array', 'newInstance', plus.android.getClass('byte'), 4096);
+                                var buffer = new ArrayBuffer(4096);
+                                var bytes = new Uint8Array(buffer);
                                 var len;
-                                while ((len = inputStream.read(buffer)) > 0) {
-                                    fileOutputStream.write(buffer, 0, len);
+                                
+                                try {
+                                    // 使用更简单的方法复制文件
+                                    var fileContent = '';
+                                    var chunk;
+                                    while ((chunk = inputStream.read()) != -1) {
+                                        fileContent += String.fromCharCode(chunk);
+                                    }
+                                    
+                                    // 将文件内容写入临时文件
+                                    var textBytes = new TextEncoder().encode(fileContent);
+                                    fileOutputStream.write(textBytes);
+                                    
+                                    console.log('文件复制完成');
+                                } catch (e) {
+                                    console.error('复制文件失败:', e);
+                                    showToast('复制文件失败: ' + e.message);
+                                    inputStream.close();
+                                    fileOutputStream.close();
+                                    return;
                                 }
                                 
                                 // 关闭流
@@ -735,12 +800,16 @@
                                 
                                 // 检查文件是否存在
                                 if (!tempFile.exists() || tempFile.length() === 0) {
+                                    console.error('文件复制失败，文件不存在或为空');
                                     showToast('文件复制失败');
                                     return;
                                 }
                                 
+                                console.log('临时文件大小:', tempFile.length());
+                                
                                 // 读取文件
                                 plus.io.resolveLocalFileSystemURL('file://' + tempPath, function(entry) {
+                                    console.log('成功解析文件路径:', entry);
                                     entry.file(function(file) {
                                         console.log('成功读取文件:', file.name, file.size);
                                         // 处理选择的文件，与现有的上传逻辑保持一致
