@@ -224,7 +224,6 @@
             <div class="tab-item active">全部</div>
             <div class="tab-item">评论</div>
             <div class="tab-item">回复</div>
-            <div class="tab-item">点赞</div>
             <div class="tab-item">投币</div>
             <div class="tab-item">通知</div>
         </div>
@@ -290,7 +289,7 @@
         }
 
         // 获取消息列表
-        async function fetchMessages() {
+        async function fetchMessages(type = '') {
             const usermail = localStorage.getItem('usermail');
             if (!usermail) {
                 showToast('请先登录');
@@ -299,7 +298,12 @@
             
             try {
                 showLoading();
-                const response = await fetch(`https://apirank.qujiaweb.top/?mode=get_messages&mail=${encodeURIComponent(usermail)}`, {
+                let url = `https://apirank.qujiaweb.top/?mode=get_messages&mail=${encodeURIComponent(usermail)}`;
+                if (type && type !== '全部') {
+                    url += `&type=${encodeURIComponent(type)}`;
+                }
+                
+                const response = await fetch(url, {
                     method: 'GET'
                 });
                 
@@ -372,25 +376,10 @@
             // 清空现有内容
             list.innerHTML = '';
             
-            // 筛选消息
-            let filteredMessages = messages;
-            if (type === '评论') {
-                filteredMessages = messages.filter(msg => msg.类型 === '评论');
-            } else if (type === '投币') {
-                filteredMessages = messages.filter(msg => msg.类型 === '投币');
-            } else if (type === '通知') {
-                filteredMessages = messages.filter(msg => msg.类型 === '通知');
-            } else if (type !== '全部') {
-                // 其他类型暂时显示"敬请期待"
-                list.style.display = 'none';
-                hint.style.display = 'block';
-                hint.innerHTML = '敬请期待';
-                return;
-            }
-            
             // 过滤掉自己发送的消息
+            let filteredMessages = messages;
             if (currentUserMail) {
-                filteredMessages = filteredMessages.filter(msg => msg['发起人邮箱'] !== currentUserMail);
+                filteredMessages = messages.filter(msg => msg['发起人邮箱'] !== currentUserMail);
             }
             
             // 显示消息
@@ -485,7 +474,6 @@
 
         // --- UI 交互：Tab 切换 ---
         const tabs = document.querySelectorAll('.tab-item');
-        let allMessages = [];
         
         tabs.forEach(tab => {
             tab.addEventListener('click', async function() {
@@ -493,10 +481,9 @@
                 this.classList.add('active');
                 
                 const type = this.innerText;
-                if (allMessages.length === 0) {
-                    allMessages = await fetchMessages();
-                }
-                renderMessages(allMessages, type);
+                // 直接通过后端API获取对应类型的消息
+                const messages = await fetchMessages(type);
+                renderMessages(messages, type);
             });
         });
 
