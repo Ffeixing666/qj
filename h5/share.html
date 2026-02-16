@@ -309,7 +309,7 @@
                 };
 
             } catch (err) {
-                tip.innerText = "解析失败，请检查文件是否损坏";
+                tip.innerHTML = "解析失败，请检查文件是否损坏<br><span style='color: var(--ios-blue); font-size: 13px; cursor: pointer;' onclick='copyWebUrl()'>若多次尝试失败，可能是当前系统不支持，请点击前往网页版上传（网页版稳定性较差，推荐使用APP）</span>";
                 console.error('解析错误:', err);
             }
         };
@@ -664,6 +664,73 @@
                 plus.webview.currentWebview().close('auto');
             } else {
                 window.history.back();
+            }
+        }
+
+        // 复制网页版网址到剪切板
+        function copyWebUrl() {
+            const webUrl = 'https://qujiaweb.top/h5';
+            
+            // 使用现代Clipboard API
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(webUrl)
+                    .then(() => {
+                        showToast('网页版地址已复制到剪贴板');
+                    })
+                    .catch(err => {
+                        console.warn('现代API复制失败，尝试备用方案:', err);
+                        tryFallbackCopy(webUrl);
+                    });
+            } else {
+                // 直接使用备用方案
+                tryFallbackCopy(webUrl);
+            }
+        }
+
+        function tryFallbackCopy(text) {
+            // 使用HTML5+的复制功能
+            if (window.plus && plus.device) {
+                try {
+                    plus.device.setClipboard(text, function() {
+                        showToast('网页版地址已复制到剪贴板');
+                    }, function(err) {
+                        console.warn('HTML5+复制失败:', err);
+                        tryExecCommandCopy(text);
+                    });
+                    return;
+                } catch (e) {
+                    console.warn('HTML5+复制异常:', e);
+                }
+            }
+            
+            // 使用传统的execCommand
+            tryExecCommandCopy(text);
+        }
+
+        function tryExecCommandCopy(text) {
+            // 创建临时文本区域
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showToast('网页版地址已复制到剪贴板');
+                } else {
+                    console.warn('execCommand复制失败');
+                    showToast('复制失败，请手动复制');
+                }
+            } catch (err) {
+                console.error('execCommand执行失败:', err);
+                showToast('复制失败，请手动复制');
+            } finally {
+                document.body.removeChild(textArea);
             }
         }
 
