@@ -675,10 +675,13 @@
                 const result = await response.json();
                 if (result.code === 200) {
                     showToast('删除成功');
-                    // 重新加载消息列表
-                    await init();
-                    // 更新allMessages变量
-                    allMessages = await fetchMessages();
+                    // 等待0.5秒后重新加载消息列表
+                    setTimeout(async () => {
+                        // 重新加载消息列表
+                        await init();
+                        // 更新allMessages变量
+                        allMessages = await fetchMessages();
+                    }, 500);
                 } else {
                     showToast('删除失败：' + (result.msg || '未知错误'));
                 }

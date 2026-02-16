@@ -521,7 +521,9 @@
                         }, '修改个性签名', ['确定', '取消'], '');
                     } else {
                         const bio = prompt('请输入新的个性签名');
-                        updateBio(bio ? bio.trim() : '');
+                        if (bio !== null) {
+                            updateBio(bio ? bio.trim() : '');
+                        }
                     }
                     break;
                 case 'password':

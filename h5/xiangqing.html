@@ -1358,8 +1358,12 @@
                         saveToHistory(appId, app);
                         // 更新收藏按钮状态
                         updateCollectButton();
-                        // 获取应用评论
-                        getAppComments(appId);
+                        // 等待0.5秒后获取应用评论，确保应用数据处理完成
+                        setTimeout(() => {
+                            if (isPageActive()) {
+                                getAppComments(appId);
+                            }
+                        }, 500);
                     }
                 } else if (data.code === 403) {
                     if (isPageActive()) {
@@ -1901,7 +1905,7 @@
                 // 初始化评论卡片HTML
                 let commentCardHtml = `
                     <div class="comment-header">
-                        <div class="user-avatar" style="${avatarStyle}">${comment.用户.charAt(0)}</div>
+                        <div class="user-avatar" style="${avatarStyle}">${comment.头像 ? '' : comment.用户.charAt(0)}</div>
                         <div class="user-meta">
                             <div class="user-name">${comment.用户}</div>
                             <div class="comment-time">${formatTimestamp(comment.时间)}</div>
@@ -2039,7 +2043,7 @@
                     
                     replyCard.innerHTML = `
                         <div class="comment-header" style="margin-bottom: 6px;">
-                            <div class="user-avatar" style="width: 28px; height: 28px; ${replyAvatarStyle}">${reply.用户.charAt(0)}</div>
+                            <div class="user-avatar" style="width: 28px; height: 28px; ${replyAvatarStyle}">${reply.头像 ? '' : reply.用户.charAt(0)}</div>
                             <div class="user-meta">
                                 <div class="user-name" style="font-size: 13px;">${reply.用户}</div>
                                 <div class="comment-time" style="font-size: 10px;">${formatTimestamp(reply.时间)}</div>
@@ -2052,6 +2056,7 @@
                     `;
                     
                     // 添加长按事件
+                    console.log('Adding long press event to reply:', reply);
                     addLongPressEvent(replyCard, reply);
                     
                     // 添加头像和昵称的点击事件，跳转到个人主页
@@ -2161,10 +2166,23 @@
         // 显示操作菜单
         function showActionMenu(element, comment) {
             console.log('showActionMenu called');
+            // 检查comment参数是否存在
+            if (!comment) {
+                console.error('Comment parameter is undefined or null');
+                return;
+            }
+            // 检查comment是否包含时间属性
+            if (!comment.时间) {
+                console.error('Comment object does not have time property');
+                return;
+            }
             const userMail = localStorage.getItem('usermail');
-            console.log('User mail:', userMail);
-            console.log('Comment mail:', comment.邮箱);
-            const isOwnComment = comment.邮箱 === userMail;
+            console.log('User mail:', userMail, 'Type:', typeof userMail);
+            console.log('Comment object:', comment);
+            console.log('Comment mail:', comment.邮箱, 'Type:', typeof comment.邮箱);
+            console.log('Comment time:', comment.时间, 'Type:', typeof comment.时间);
+            // 确保使用字符串类型比较
+            const isOwnComment = String(comment.邮箱) === String(userMail);
             console.log('Is own comment:', isOwnComment);
             
             // 移除旧菜单

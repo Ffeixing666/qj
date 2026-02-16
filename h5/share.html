@@ -153,7 +153,7 @@
             <div id="pan-section">
                 <div class="pan-header">
                     <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
-                    <span>应用超过100M，仅支持网盘分享</span>
+                    <span>用户选择网盘分享</span>
                 </div>
                 <div class="ios-input-group">
                     <div class="ios-item"><input type="text" id="pan-url" placeholder="网盘链接 (必填)"></div>
@@ -518,7 +518,7 @@
             selectedCategory = category;
         }
 
-        // APK上传到对象存储（带进度条）
+        // APK上传到对象存储（带进度条和取消选项）
         function uploadApk(file) {
             return new Promise((resolve, reject) => {
                 const tip = document.getElementById('status-tip');
@@ -548,6 +548,18 @@
                 progressBar.appendChild(progressFill);
                 tip.parentNode.insertBefore(progressBar, tip.nextSibling);
 
+                // 创建取消按钮
+                const cancelButton = document.createElement('div');
+                cancelButton.style.cssText = `
+                    text-align: center;
+                    margin-top: 8px;
+                    font-size: 13px;
+                    color: var(--ios-blue);
+                    cursor: pointer;
+                `;
+                cancelButton.innerText = '上传慢？取消直接上传改为网盘分享方式';
+                tip.parentNode.insertBefore(cancelButton, progressBar.nextSibling);
+
                 // 使用XMLHttpRequest以支持上传进度
                 const xhr = new XMLHttpRequest();
                 const formData = new FormData();
@@ -565,8 +577,9 @@
 
                 // 处理响应
                 xhr.onload = function() {
-                    // 移除进度条
+                    // 移除进度条和取消按钮
                     progressBar.remove();
+                    cancelButton.remove();
                     
                     if (xhr.status === 200) {
                         try {
@@ -591,10 +604,92 @@
 
                 // 处理错误
                 xhr.onerror = function() {
-                    // 移除进度条
+                    // 移除进度条和取消按钮
                     progressBar.remove();
+                    cancelButton.remove();
                     tip.innerText = '应用上传失败，请重试';
                     reject(new Error('网络错误'));
+                };
+
+                // 取消上传
+                cancelButton.onclick = function() {
+                    xhr.abort();
+                    progressBar.remove();
+                    cancelButton.remove();
+                    tip.innerText = '已取消上传，切换到网盘分享方式';
+                    
+                    // 显示网盘链接输入
+                    document.getElementById('pan-section').style.display = 'block';
+                    
+                    // 解析应用信息
+                    const parser = new AppInfoParser(file);
+                    parser.parse().then(info => {
+                        // 处理名称
+                        let finalName = info.name;
+                        if (info.application && info.application.label) {
+                            if (Array.isArray(info.application.label)) {
+                                for (let label of info.application.label) {
+                                    if (/[\u4e00-\u9fa5]/.test(label)) {
+                                        finalName = label;
+                                        break;
+                                    }
+                                }
+                                if (!finalName) {
+                                    finalName = info.application.label[0];
+                                }
+                            } else {
+                                finalName = info.application.label;
+                            }
+                        }
+                        if (!finalName || String(finalName).startsWith('@')) finalName = info.package;
+
+                        // 处理 SDK
+                        const rawSdk = findMinSdk(info);
+                        const androidVer = SDK_MAP[rawSdk] || "未知";
+
+                        // 处理架构
+                        JSZip.loadAsync(file).then(zip => {
+                            const archs = new Set();
+                            Object.keys(zip.files).forEach(p => { if (p.startsWith('lib/')) { const parts = p.split('/'); if (parts.length > 2) archs.add(parts[1]); } });
+                            const archArray = Array.from(archs);
+                            let bitDisplay = "全架构兼容";
+                            if (archArray.length > 0) {
+                                const is64 = archArray.some(a => a.includes('64'));
+                                const is32 = archArray.some(a => a.includes('v7a') || a === 'armeabi');
+                                bitDisplay = (is64 && is32) ? "32/64位兼容" : (is64 ? "纯64位" : "纯32位");
+                            }
+
+                            // 渲染基本信息
+                            const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                            document.getElementById('app-name').innerText = finalName;
+                            document.getElementById('app-pkg').innerText = info.package;
+                            document.getElementById('v-text').innerText = info.versionName;
+                            document.getElementById('s-text').innerText = sizeMB + " MB";
+                            document.getElementById('sdk-text').innerText = "Android " + androidVer + "+";
+                            document.getElementById('arch-text').innerText = bitDisplay;
+
+                            // 上传图标到对象存储
+                            if (info.icon) {
+                                uploadIcon(info.icon);
+                            }
+
+                            // 隐藏上传框，显示表单
+                            document.getElementById('upload-zone').style.display = 'none';
+                            tip.style.display = 'none';
+                            document.getElementById('content-step').style.display = 'block';
+                            apkInfo = { 
+                                finalName, 
+                                sizeMB, 
+                                package: info.package, 
+                                versionName: info.versionName, 
+                                androidVer, 
+                                bitDisplay, 
+                                appLink: ''
+                            };
+                        });
+                    });
+
+                    reject(new Error('用户取消上传'));
                 };
 
                 // 发送请求

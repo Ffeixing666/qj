@@ -362,6 +362,26 @@
             });
         }
 
+        // 检查用户是否是管理员
+        function isAdmin() {
+            // 从localStorage中获取用户的管理员状态
+            const isAdmin = localStorage.getItem('isAdmin') === 'true';
+            return isAdmin;
+        }
+
+        // 检查今天是否已经星标过应用
+        function hasStarredToday() {
+            const today = new Date().toDateString();
+            const lastStarredDate = localStorage.getItem('lastStarredDate');
+            return lastStarredDate === today;
+        }
+
+        // 标记今天已经星标过应用
+        function markStarredToday() {
+            const today = new Date().toDateString();
+            localStorage.setItem('lastStarredDate', today);
+        }
+
         // 显示操作菜单
         function showActionMenu(element, item, type) {
             // 移除旧菜单
@@ -391,10 +411,15 @@
                 pointer-events: auto;
             `;
             
-            // 添加菜单项
-            menu.innerHTML = `
-                <div class="menu-item" style="padding: 14px 28px; text-align: center; cursor: pointer; transition: background 0.2s;">删除</div>
-            `;
+            // 构建菜单项
+            let menuItems = '<div class="menu-item" style="padding: 14px 28px; text-align: center; cursor: pointer; transition: background 0.2s;">删除</div>';
+            
+            // 为管理员用户在历史或收藏页面添加星标选项
+            if (isAdmin() && (type === 'history' || type === 'collection')) {
+                menuItems += '<div class="menu-item" style="padding: 14px 28px; text-align: center; cursor: pointer; transition: background 0.2s; border-top: 1px solid rgba(255, 255, 255, 0.2);">星标</div>';
+            }
+            
+            menu.innerHTML = menuItems;
             
             document.body.appendChild(menu);
             
@@ -404,20 +429,111 @@
             }, 10);
             
             // 添加点击事件
-            menu.querySelector('.menu-item').addEventListener('click', function() {
+            const menuItemElements = menu.querySelectorAll('.menu-item');
+            menuItemElements[0].addEventListener('click', function() {
                 if (type === 'history') {
                     deleteHistory(item.id);
                 } else if (type === 'collection') {
                     removeFromCollection(item.id);
                 } else if (type === 'app') {
-                    deleteUserApp(item.id);
+                    confirmDeleteUserApp(item.id);
                 }
             });
+            
+            // 为星标选项添加点击事件
+            if (menuItemElements.length > 1) {
+                menuItemElements[1].addEventListener('click', function() {
+                    if (type === 'history' || type === 'collection') {
+                        handleStarApp(item.id);
+                    }
+                });
+            }
             
             // 点击菜单外部关闭菜单
             setTimeout(function() {
                 document.addEventListener('click', closeActionMenu);
             }, 100);
+        }
+
+        // 处理应用星标操作
+        async function handleStarApp(appId) {
+            // 检查今天是否已经星标过应用
+            if (hasStarredToday()) {
+                if (window.plus) {
+                    plus.nativeUI.toast('今天已星标过了，明天再来吧');
+                } else {
+                    toast('今天已星标过了，明天再来吧');
+                }
+                closeActionMenu();
+                return;
+            }
+            
+            try {
+                // 显示加载动画
+                if (window.plus) {
+                    plus.nativeUI.showWaiting('星标中...');
+                }
+                
+                const mail = localStorage.getItem('usermail');
+                if (!mail) {
+                    toast('请先登录');
+                    closeActionMenu();
+                    return;
+                }
+                
+                // 调用后端接口更新应用星标
+                const response = await fetch(`https://apirank.qujiaweb.top/?mode=star_app&mail=${encodeURIComponent(mail)}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id: appId, mail: mail })
+                });
+                
+                if (!response.ok) throw new Error('网络响应不正常');
+                const res = await response.json();
+                
+                // 隐藏加载动画
+                if (window.plus) {
+                    plus.nativeUI.closeWaiting();
+                }
+                
+                if (res.code === 200) {
+                    // 标记今天已经星标过应用
+                    markStarredToday();
+                    
+                    // 显示星标成功提示
+                    if (window.plus) {
+                        plus.nativeUI.toast('星标成功');
+                    } else {
+                        toast('星标成功');
+                    }
+                } else {
+                    // 显示星标失败提示
+                    if (window.plus) {
+                        plus.nativeUI.toast('星标失败');
+                    } else {
+                        toast('星标失败');
+                    }
+                }
+            } catch (error) {
+                console.error('星标应用失败:', error);
+                
+                // 隐藏加载动画
+                if (window.plus) {
+                    plus.nativeUI.closeWaiting();
+                }
+                
+                // 显示错误提示
+                if (window.plus) {
+                    plus.nativeUI.toast('星标失败，请稍后重试');
+                } else {
+                    toast('星标失败，请稍后重试');
+                }
+            } finally {
+                // 关闭操作菜单
+                closeActionMenu();
+            }
         }
 
         // 关闭操作菜单
@@ -464,6 +580,8 @@
             if (!mail) {
                 $('#loginSection').show();
                 $('#profileSection').hide();
+                // 确保未登录用户的管理员状态为false
+                localStorage.removeItem('isAdmin');
             } else {
                 $('#loginSection').hide();
                 $('#profileSection').show();
@@ -496,7 +614,10 @@
                 
                 if (res.code === 200 && res.fields && res.fields.length > 0) {
                     const user = res.fields[0];
-                    if (user['是否管理'] === '是') {
+                    const isAdmin = user['是否管理'] === '是';
+                    // 将管理员状态保存到localStorage
+                    localStorage.setItem('isAdmin', isAdmin.toString());
+                    if (isAdmin) {
                         // 是管理员，显示审核选项
                         document.getElementById('reviewTab').style.display = 'inline-block';
                     }
@@ -528,6 +649,7 @@
                     localStorage.setItem('username', user["昵称"]);
                     localStorage.setItem('userpicture', user["头像"]);
                     localStorage.setItem('userpoints', user["积分"] || '0');
+                    localStorage.setItem('isAdmin', user["是否管理"] === '是' ? 'true' : 'false');
                     localStorage.setItem('usermail_login', email);
                     localStorage.setItem('userpass_login', password);
                     // 只有当页面仍然活动时才更新UI
@@ -833,6 +955,26 @@
         }
 
         /**
+         * 确认删除用户分享的应用
+         * @param {string} appId 应用ID
+         */
+        function confirmDeleteUserApp(appId) {
+            if (window.plus) {
+                // 使用5+ SDK的确认对话框
+                plus.nativeUI.confirm('确定删除这个应用吗？', function(res) {
+                    if (res.index === 0) {
+                        deleteUserApp(appId);
+                    }
+                }, '提示', ['确定', '取消']);
+            } else {
+                // 使用浏览器的确认对话框
+                if (confirm('确定删除这个应用吗？')) {
+                    deleteUserApp(appId);
+                }
+            }
+        }
+
+        /**
          * 删除用户分享的应用
          * @param {string} appId 应用ID
          */
@@ -875,8 +1017,10 @@
                         toast('删除成功');
                     }
                     
-                    // 重新加载应用列表
-                    getUserApps();
+                    // 等待0.5秒后重新加载应用列表
+                    setTimeout(function() {
+                        getUserApps();
+                    }, 500);
                 } else {
                     // 显示删除失败提示
                     if (window.plus) {
