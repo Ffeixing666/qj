@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>分享应用</title>
-    <!-- 放在 head 或 body 开头位置，替换原有的两个 script 标签 -->
+    <!-- 脚本加载器：多 CDN 备选方案 -->
     <script>
     (function() {
         // 定义需要加载的脚本列表（按优先级排序）
@@ -140,17 +140,7 @@
         .result-card { background: var(--ios-card); border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 16px; }
         .app-header { display: flex; align-items: center; gap: 16px; padding-bottom: 16px; border-bottom: 0.5px solid var(--line-color); margin-bottom: 16px; }
         #app-icon { width: 68px; height: 68px; border-radius: 14px; background: #F2F2F7; object-fit: cover; border: 0.5px solid var(--line-color); }
-        .name-area .app-name-input { 
-            font-size: 19px; 
-            font-weight: 700; 
-            margin-bottom: 4px; 
-            border: none; 
-            outline: none; 
-            background: transparent; 
-            font-family: inherit; 
-            color: var(--text-main); 
-            width: 100%; 
-        }
+        .name-area h2 { font-size: 19px; font-weight: 700; margin-bottom: 4px; }
         .name-area code { font-size: 12px; color: var(--ios-blue); opacity: 0.8; word-break: break-all; }
 
         .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -204,7 +194,7 @@
 
     <header>
         <div class="nav-bar">
-            <div class="back-btn" onclick="closeSelf()"><div class="back-icon"></div></div>
+            <div class="back-btn" onclick="handleBack()"><div class="back-icon"></div></div>
             <div class="nav-title">应用分享</div>
             <div style="width:40px"></div>
         </div>
@@ -225,8 +215,8 @@
                 <div class="app-header">
                     <img id="app-icon" src="">
                     <div class="name-area">
-                        <input type="text" id="app-name" class="app-name-input" placeholder="应用名称">
-                        <code id="app-pkg">-</code>
+                        <h2 id="app-name">-</h2>
+                        <code id="app-pkg">-</h2>
                     </div>
                 </div>
                 <div class="info-grid">
@@ -359,7 +349,7 @@
                 // 4. 渲染基本信息
                 const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
                 document.getElementById('app-icon').src = info.icon || '';
-                document.getElementById('app-name').value = finalName;
+                document.getElementById('app-name').innerText = finalName;
                 document.getElementById('app-pkg').innerText = info.package;
                 document.getElementById('v-text').innerText = info.versionName;
                 document.getElementById('s-text').innerText = sizeMB + " MB";
@@ -491,16 +481,9 @@
                 }
             }
 
-            // 获取应用名称（从输入框）
-            const appName = document.getElementById('app-name').value.trim();
-            if (!appName) {
-                showToast('请输入应用名称');
-                return;
-            }
-
             // 构建请求数据
             const requestData = {
-                name: appName,
+                name: apkInfo.finalName,
                 link: appLink,
                 icon: uploadedIconUrl,
                 intro: processIntro(intro),
@@ -545,7 +528,7 @@
                     showToast('应用分享成功！');
                     // 延迟返回
                     setTimeout(() => {
-                        closeSelf();
+                        handleBack();
                     }, 1500);
                 } else {
                     showToast('提交失败：' + (result.msg || '未知错误'));
@@ -753,7 +736,7 @@
             return processed;
         }
 
-        function closeSelf() {
+        function handleBack() {
             if (window.plus) {
                 plus.webview.currentWebview().close('auto');
             } else {
