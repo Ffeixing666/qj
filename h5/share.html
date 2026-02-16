@@ -680,46 +680,86 @@
 
             // 尝试使用 5+ SDK 的文件选择功能
             try {
-                // 使用 plus.io 的文件系统 API 来打开系统文件选择器
-                // 直接调用系统的文件选择器
+                // 导入必要的类
                 var Intent = plus.android.importClass('android.content.Intent');
+                var Activity = plus.android.importClass('android.app.Activity');
+                var File = plus.android.importClass('java.io.File');
+                var FileOutputStream = plus.android.importClass('java.io.FileOutputStream');
+                var InputStream = plus.android.importClass('java.io.InputStream');
+                
+                // 创建 Intent
                 var intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType('application/vnd.android.package-archive');
+                intent.setType('application/vnd.android.package-archive'); // 只选择 APK 文件
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
                 
-                var Activity = plus.android.importClass('android.app.Activity');
+                // 获取主 Activity
                 var main = plus.android.runtimeMainActivity();
-                
-                // 保存当前上下文
-                var that = this;
                 
                 // 重写 onActivityResult 方法
                 main.onActivityResult = function(requestCode, resultCode, data) {
                     if (requestCode === 1001 && resultCode === Activity.RESULT_OK && data) {
                         var uri = data.getData();
                         if (uri) {
-                            // 获取文件路径
-                            var path = getPathFromUri(uri, main);
-                            if (path) {
-                                // 检查文件扩展名是否为 APK
-                                if (!path.toLowerCase().endsWith('.apk')) {
-                                    showToast('请选择 APK 文件');
+                            try {
+                                // 获取 ContentResolver
+                                var contentResolver = main.getContentResolver();
+                                
+                                // 打开输入流
+                                var inputStream = contentResolver.openInputStream(uri);
+                                
+                                // 获取缓存目录
+                                var cacheDir = main.getCacheDir();
+                                var cachePath = cacheDir.getAbsolutePath();
+                                
+                                // 创建临时文件
+                                var fileName = 'temp_' + Date.now() + '.apk';
+                                var tempFile = new File(cachePath, fileName);
+                                
+                                // 创建输出流
+                                var fileOutputStream = new FileOutputStream(tempFile);
+                                
+                                // 复制文件内容
+                                var buffer = plus.android.invoke('java.lang.reflect.Array', 'newInstance', plus.android.getClass('byte'), 4096);
+                                var len;
+                                while ((len = inputStream.read(buffer)) > 0) {
+                                    fileOutputStream.write(buffer, 0, len);
+                                }
+                                
+                                // 关闭流
+                                inputStream.close();
+                                fileOutputStream.close();
+                                
+                                // 获取临时文件路径
+                                var tempPath = tempFile.getAbsolutePath();
+                                console.log('临时文件路径:', tempPath);
+                                
+                                // 检查文件是否存在
+                                if (!tempFile.exists() || tempFile.length() === 0) {
+                                    showToast('文件复制失败');
                                     return;
                                 }
                                 
                                 // 读取文件
-                                plus.io.resolveLocalFileSystemURL(path, function(entry) {
+                                plus.io.resolveLocalFileSystemURL('file://' + tempPath, function(entry) {
                                     entry.file(function(file) {
+                                        console.log('成功读取文件:', file.name, file.size);
                                         // 处理选择的文件，与现有的上传逻辑保持一致
                                         handleApkFile(file);
                                     }, function(e) {
+                                        console.error('读取文件失败:', e);
                                         showToast('读取文件失败: ' + e.message);
+                                        // 清理临时文件
+                                        tempFile.delete();
                                     });
                                 }, function(e) {
+                                    console.error('解析文件路径失败:', e);
                                     showToast('解析文件路径失败: ' + e.message);
+                                    // 清理临时文件
+                                    tempFile.delete();
                                 });
-                            } else {
-                                showToast('获取文件路径失败');
+                            } catch (e) {
+                                console.error('处理文件失败:', e);
+                                showToast('处理文件失败: ' + e.message);
                             }
                         }
                     }
@@ -730,55 +770,6 @@
             } catch (e) {
                 console.error('文件选择失败:', e);
                 showToast('文件选择功能暂不可用');
-            }
-        }
-
-        // 从 Uri 获取文件路径
-        function getPathFromUri(uri, context) {
-            try {
-                var contentResolver = context.getContentResolver();
-                
-                // 检查 Uri 格式
-                var uriString = uri.toString();
-                if (uriString.startsWith('file://')) {
-                    // 直接是文件路径
-                    return uriString.substring(7);
-                } else if (uriString.startsWith('content://')) {
-                    // 处理 content:// 格式的 Uri
-                    var cursor = contentResolver.query(uri, null, null, null, null);
-                    if (cursor != null && cursor.moveToFirst()) {
-                        var columnIndex = cursor.getColumnIndex('_data');
-                        if (columnIndex > -1) {
-                            var path = cursor.getString(columnIndex);
-                            cursor.close();
-                            return path;
-                        }
-                        cursor.close();
-                    }
-                    
-                    // 如果无法通过 cursor 获取路径，尝试复制文件到临时位置
-                    var fileName = 'temp_' + Date.now() + '.apk';
-                    var cacheDir = context.getCacheDir();
-                    var tempFile = plus.android.newObject('java.io.File', cacheDir, fileName);
-                    
-                    var inputStream = contentResolver.openInputStream(uri);
-                    var fileOutputStream = plus.android.newObject('java.io.FileOutputStream', tempFile);
-                    
-                    var buffer = plus.android.newObject('byte[]', 1024);
-                    var len;
-                    while ((len = inputStream.read(buffer)) > 0) {
-                        fileOutputStream.write(buffer, 0, len);
-                    }
-                    
-                    inputStream.close();
-                    fileOutputStream.close();
-                    
-                    return tempFile.getAbsolutePath();
-                }
-                return null;
-            } catch (e) {
-                console.error('获取文件路径失败:', e);
-                return null;
             }
         }
 
