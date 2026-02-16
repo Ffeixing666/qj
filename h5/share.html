@@ -678,35 +678,42 @@
                 return;
             }
 
-            // 使用 5+ SDK 的文件选择器
-            plus.io.requestFileSystem(plus.io.PRIVATE_DOC, function(fs) {
-                // 打开系统文件选择器
-                plus.gallery.pick(function(path) {
-                    // 检查文件扩展名是否为 APK
-                    if (!path.toLowerCase().endsWith('.apk')) {
-                        showToast('请选择 APK 文件');
-                        return;
-                    }
-
-                    // 读取文件
-                    plus.io.resolveLocalFileSystemURL(path, function(entry) {
-                        entry.file(function(file) {
-                            // 处理选择的文件，与现有的上传逻辑保持一致
-                            handleApkFile(file);
-                        }, function(e) {
-                            showToast('读取文件失败: ' + e.message);
-                        });
-                    }, function(e) {
-                        showToast('解析文件路径失败: ' + e.message);
-                    });
+            // 使用 5+ SDK 的文件选择器（支持选择任意文件）
+            plus.io.requestFileSystem(plus.io.PUBLIC_DOCUMENTS, function(fs) {
+                // 使用系统文件选择器
+                plus.nativeUI.actionSheet({
+                    title: '选择APK文件',
+                    cancel: '取消',
+                    buttons: [
+                        {title: '从文件管理器选择'}
+                    ]
                 }, function(e) {
-                    // 用户取消选择
-                }, {
-                    filter: 'all',
-                    multiple: false,
-                    system: true, // 使用系统文件选择器
-                    onmaxed: function() {
-                        showToast('最多只能选择一个文件');
+                    if (e.index === 1) {
+                        // 调用系统文件选择器
+                        plus.runtime.openFile('', {
+                            mimeType: 'application/vnd.android.package-archive',
+                            chooserTitle: '选择APK文件'
+                        }, function(file) {
+                            // 检查文件扩展名是否为 APK
+                            if (!file.url.toLowerCase().endsWith('.apk')) {
+                                showToast('请选择 APK 文件');
+                                return;
+                            }
+
+                            // 读取文件
+                            plus.io.resolveLocalFileSystemURL(file.url, function(entry) {
+                                entry.file(function(fileObj) {
+                                    // 处理选择的文件，与现有的上传逻辑保持一致
+                                    handleApkFile(fileObj);
+                                }, function(e) {
+                                    showToast('读取文件失败: ' + e.message);
+                                });
+                            }, function(e) {
+                                showToast('解析文件路径失败: ' + e.message);
+                            });
+                        }, function(e) {
+                            showToast('选择文件失败: ' + e.message);
+                        });
                     }
                 });
             }, function(e) {
