@@ -218,13 +218,6 @@
             <input type="file" id="apkInput" style="display:none">
         </div>
 
-        <!-- 备用上传选项 -->
-        <div id="backup-upload" onclick="pickFileWithSDK()" style="margin-top: 16px; background: var(--ios-card); border: 1.5px dashed #C7C7CC; border-radius: 16px; padding: 30px 16px; text-align: center; transition: all 0.2s; cursor: pointer;">
-            <svg viewBox="0 0 24 24" style="width: 40px; height: 40px; fill: var(--ios-orange); margin-bottom: 10px;"><path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4.86 8.86l-3 3.87L9 13.14 6 17h12l-3.86-5.14z"/></svg>
-            <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">备用上传</h4>
-            <p style="font-size: 12px; color: var(--text-second);">使用系统文件选择器</p>
-        </div>
-
         <div id="status-tip">加载中…</div>
 
         <div id="content-step">
@@ -312,11 +305,100 @@
         }
 
         // --- APK 上传与解析 ---
-        document.getElementById('apkInput').onchange = (e) => {
+        document.getElementById('apkInput').onchange = async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            // 调用统一的文件处理函数
-            handleApkFile(file);
+
+            const tip = document.getElementById('status-tip');
+            tip.style.display = 'block';
+
+            try {
+                const parser = new AppInfoParser(file);
+                const info = await parser.parse();
+                
+                // 1. 处理名称
+                let finalName = info.name;
+                
+                // 优先寻找中文名称
+                if (info.application && info.application.label) {
+                    if (Array.isArray(info.application.label)) {
+                        // 遍历数组，寻找包含中文字符的名称
+                        for (let label of info.application.label) {
+                            if (/[\u4e00-\u9fa5]/.test(label)) {
+                                finalName = label;
+                                break;
+                            }
+                        }
+                        // 如果没有找到中文名称，使用第一个名称
+                        if (!finalName) {
+                            finalName = info.application.label[0];
+                        }
+                    } else {
+                        finalName = info.application.label;
+                    }
+                }
+                
+                if (!finalName || String(finalName).startsWith('@')) finalName = info.package;
+
+                // 2. 处理 SDK
+                const rawSdk = findMinSdk(info);
+                const androidVer = SDK_MAP[rawSdk] || "未知";
+
+                // 3. 处理架构
+                const zip = await JSZip.loadAsync(file);
+                const archs = new Set();
+                Object.keys(zip.files).forEach(p => { if (p.startsWith('lib/')) { const parts = p.split('/'); if (parts.length > 2) archs.add(parts[1]); } });
+                const archArray = Array.from(archs);
+                let bitDisplay = "全架构兼容";
+                if (archArray.length > 0) {
+                    const is64 = archArray.some(a => a.includes('64'));
+                    const is32 = archArray.some(a => a.includes('v7a') || a === 'armeabi');
+                    bitDisplay = (is64 && is32) ? "32/64位兼容" : (is64 ? "纯64位" : "纯32位");
+                }
+
+                // 4. 渲染基本信息
+                const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                document.getElementById('app-icon').src = info.icon || '';
+                document.getElementById('app-name').value = finalName;
+                document.getElementById('app-pkg').innerText = info.package;
+                document.getElementById('v-text').innerText = info.versionName;
+                document.getElementById('s-text').innerText = sizeMB + " MB";
+                document.getElementById('sdk-text').innerText = "Android " + androidVer + "+";
+                document.getElementById('arch-text').innerText = bitDisplay;
+
+                // 5. 处理APK上传（小于100MB）
+                let appLink = '';
+                if (parseFloat(sizeMB) <= 100) {
+                    // 上传APK到对象存储
+                    appLink = await uploadApk(file);
+                } else {
+                    // 大于100MB，显示网盘链接输入
+                    document.getElementById('pan-section').style.display = 'block';
+                }
+
+                // 6. 上传图标到对象存储
+                if (info.icon) {
+                    await uploadIcon(info.icon);
+                }
+
+                // 核心逻辑：隐藏上传框，显示表单
+                document.getElementById('upload-zone').style.display = 'none';
+                tip.style.display = 'none';
+                document.getElementById('content-step').style.display = 'block';
+                apkInfo = { 
+                    finalName, 
+                    sizeMB, 
+                    package: info.package, 
+                    versionName: info.versionName, 
+                    androidVer, 
+                    bitDisplay, 
+                    appLink 
+                };
+
+            } catch (err) {
+                tip.innerText = "解析失败，请检查文件是否损坏";
+                console.error('解析错误:', err);
+            }
         };
 
         // --- 图片上传逻辑 ---
@@ -669,216 +751,6 @@
             // 转义单引号和双引号
             processed = processed.replace(/'/g, "'").replace(/"/g, '"');
             return processed;
-        }
-
-        // 备用上传函数 - 使用 5+ SDK 原生文件选择器
-        function pickFileWithSDK() {
-            if (!window.plus) {
-                showToast('请在应用内使用此功能');
-                return;
-            }
-
-            // 尝试使用 5+ SDK 的文件选择功能
-            try {
-                // 使用 plus.io 的文件系统 API 来打开系统文件选择器
-                // 直接调用系统的文件选择器
-                var Intent = plus.android.importClass('android.content.Intent');
-                var intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType('*/*'); // 允许选择所有文件类型
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                
-                var Activity = plus.android.importClass('android.app.Activity');
-                var main = plus.android.runtimeMainActivity();
-                
-                // 重写 onActivityResult 方法
-                main.onActivityResult = function(requestCode, resultCode, data) {
-                    if (requestCode === 1001 && resultCode === Activity.RESULT_OK && data) {
-                        var uri = data.getData();
-                        if (uri) {
-                            try {
-                                // 直接使用 ContentResolver 读取文件内容
-                                var contentResolver = main.getContentResolver();
-                                var inputStream = contentResolver.openInputStream(uri);
-                                
-                                // 创建临时文件
-                                var fileName = 'temp_' + Date.now() + '.apk';
-                                var cacheDir = main.getCacheDir();
-                                var tempFile = plus.android.newObject('java.io.File', cacheDir, fileName);
-                                var fileOutputStream = plus.android.newObject('java.io.FileOutputStream', tempFile);
-                                
-                                // 复制文件内容
-                                var buffer = plus.android.newObject('byte[]', 4096);
-                                var len;
-                                while ((len = inputStream.read(buffer)) > 0) {
-                                    fileOutputStream.write(buffer, 0, len);
-                                }
-                                
-                                // 关闭流
-                                inputStream.close();
-                                fileOutputStream.close();
-                                
-                                // 获取临时文件路径
-                                var tempPath = tempFile.getAbsolutePath();
-                                
-                                // 检查文件扩展名是否为 APK
-                                if (!tempPath.toLowerCase().endsWith('.apk')) {
-                                    // 删除临时文件
-                                    tempFile.delete();
-                                    showToast('请选择 APK 文件');
-                                    return;
-                                }
-                                
-                                // 读取文件
-                                plus.io.resolveLocalFileSystemURL('file://' + tempPath, function(entry) {
-                                    entry.file(function(file) {
-                                        // 处理选择的文件，与现有的上传逻辑保持一致
-                                        handleApkFile(file);
-                                    }, function(e) {
-                                        showToast('读取文件失败: ' + e.message);
-                                        // 清理临时文件
-                                        tempFile.delete();
-                                    });
-                                }, function(e) {
-                                    showToast('解析文件路径失败: ' + e.message);
-                                    // 清理临时文件
-                                    tempFile.delete();
-                                });
-                            } catch (e) {
-                                console.error('处理文件失败:', e);
-                                showToast('处理文件失败: ' + e.message);
-                            }
-                        }
-                    }
-                };
-                
-                // 启动文件选择器
-                main.startActivityForResult(intent, 1001);
-            } catch (e) {
-                console.error('文件选择失败:', e);
-                showToast('文件选择功能暂不可用');
-            }
-        }
-
-        // 统一处理 APK 文件的函数
-        function handleApkFile(file) {
-            const tip = document.getElementById('status-tip');
-            tip.style.display = 'block';
-            tip.innerText = '解析中...';
-
-            try {
-                const parser = new AppInfoParser(file);
-                parser.parse().then(async (info) => {
-                    // 1. 处理名称
-                    let finalName = info.name;
-                    
-                    // 优先寻找中文名称
-                    if (info.application && info.application.label) {
-                        if (Array.isArray(info.application.label)) {
-                            // 遍历数组，寻找包含中文字符的名称
-                            for (let label of info.application.label) {
-                                if (/[\u4e00-\u9fa5]/.test(label)) {
-                                    finalName = label;
-                                    break;
-                                }
-                            }
-                            // 如果没有找到中文名称，使用第一个名称
-                            if (!finalName) {
-                                finalName = info.application.label[0];
-                            }
-                        } else {
-                            finalName = info.application.label;
-                        }
-                    }
-                    
-                    if (!finalName || String(finalName).startsWith('@')) finalName = info.package;
-
-                    // 2. 处理 SDK
-                    const rawSdk = findMinSdk(info);
-                    const androidVer = SDK_MAP[rawSdk] || "未知";
-
-                    // 3. 处理架构
-                    const zip = await JSZip.loadAsync(file);
-                    const archs = new Set();
-                    Object.keys(zip.files).forEach(p => { if (p.startsWith('lib/')) { const parts = p.split('/'); if (parts.length > 2) archs.add(parts[1]); } });
-                    const archArray = Array.from(archs);
-                    let bitDisplay = "全架构兼容";
-                    if (archArray.length > 0) {
-                        const is64 = archArray.some(a => a.includes('64'));
-                        const is32 = archArray.some(a => a.includes('v7a') || a === 'armeabi');
-                        bitDisplay = (is64 && is32) ? "32/64位兼容" : (is64 ? "纯64位" : "纯32位");
-                    }
-
-                    // 4. 渲染基本信息
-                    const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-                    document.getElementById('app-icon').src = info.icon || '';
-                    document.getElementById('app-name').value = finalName;
-                    document.getElementById('app-pkg').innerText = info.package;
-                    document.getElementById('v-text').innerText = info.versionName;
-                    document.getElementById('s-text').innerText = sizeMB + " MB";
-                    document.getElementById('sdk-text').innerText = "Android " + androidVer + "+";
-                    document.getElementById('arch-text').innerText = bitDisplay;
-
-                    // 5. 处理APK上传（小于100MB）
-                    let appLink = '';
-                    if (parseFloat(sizeMB) <= 100) {
-                        // 上传APK到对象存储
-                        uploadApk(file).then((url) => {
-                            appLink = url;
-                            // 6. 上传图标到对象存储
-                            if (info.icon) {
-                                uploadIcon(info.icon);
-                            }
-
-                            // 核心逻辑：隐藏上传框，显示表单
-                            document.getElementById('upload-zone').style.display = 'none';
-                            document.getElementById('backup-upload').style.display = 'none';
-                            tip.style.display = 'none';
-                            document.getElementById('content-step').style.display = 'block';
-                            apkInfo = { 
-                                finalName, 
-                                sizeMB, 
-                                package: info.package, 
-                                versionName: info.versionName, 
-                                androidVer, 
-                                bitDisplay, 
-                                appLink 
-                            };
-                        }).catch((error) => {
-                            tip.innerText = '上传失败，请重试';
-                            console.error('上传错误:', error);
-                        });
-                    } else {
-                        // 大于100MB，显示网盘链接输入
-                        document.getElementById('pan-section').style.display = 'block';
-
-                        // 6. 上传图标到对象存储
-                        if (info.icon) {
-                            uploadIcon(info.icon);
-                        }
-
-                        // 核心逻辑：隐藏上传框，显示表单
-                        document.getElementById('upload-zone').style.display = 'none';
-                        document.getElementById('backup-upload').style.display = 'none';
-                        tip.style.display = 'none';
-                        document.getElementById('content-step').style.display = 'block';
-                        apkInfo = { 
-                            finalName, 
-                            sizeMB, 
-                            package: info.package, 
-                            versionName: info.versionName, 
-                            androidVer, 
-                            bitDisplay, 
-                            appLink 
-                        };
-                    }
-                }).catch((err) => {
-                    tip.innerText = "解析失败，请检查文件是否损坏";
-                    console.error('解析错误:', err);
-                });
-            } catch (err) {
-                tip.innerText = "解析失败，请检查文件是否损坏";
-                console.error('解析错误:', err);
-            }
         }
 
         function closeSelf() {
