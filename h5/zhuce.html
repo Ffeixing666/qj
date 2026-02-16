@@ -37,7 +37,7 @@
 
     <div id="s2" class="step">
         <p style="font-size:13px; color:#888;">验证码已发送至邮箱</p>
-        <input type="number" id="vcode" placeholder="4位验证码">
+        <input type="number" id="vcode" placeholder="4位验证码" pattern="\d*">
         <button class="btn" onclick="goStep2()">校验验证码</button>
     </div>
 
@@ -51,28 +51,30 @@
 
 <script>
     const API = 'https://apirank.qujiaweb.top/';
+    // 初始化 cache 确保 code 为空字符串
     let cache = { email: '', code: '' };
 
-    function toast(m) { $('#toast').text(m).fadeIn().delay(2000).fadeOut(); }
+    function toast(m) { $('#toast').text(m).stop(true, true).fadeIn().delay(2000).fadeOut(); }
 
     function showStep(n) { $('.step').removeClass('active'); $(`#s${n}`).addClass('active'); }
 
-    // 步骤 1: 直接发送验证码（跳过查重）
+    // 步骤 1: 发送验证码
     async function goStep1() {
         const email = $('#email').val().trim();
         if(!email.includes('@')) return toast('请输入有效邮箱');
         
-        toast('正在发送验证码...');
-        
-        // 生成验证码并缓存
-        cache.code = Math.floor(1000 + Math.random() * 9000).toString();
+        // 1. 先生成验证码并存入 cache
+        const generatedCode = Math.floor(1000 + Math.random() * 9000).toString();
+        cache.code = generatedCode;
         cache.email = email;
 
+        toast('正在发送验证码...');
+        
         try {
             const mail = await fetch(`${API}?mode=send_mail`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ to: email, code: cache.code })
+                body: JSON.stringify({ to: email, code: generatedCode })
             }).then(r => r.json());
 
             console.log('发送反馈:', mail);
@@ -81,7 +83,7 @@
                 showStep(2); 
                 toast('验证码已发送'); 
             } else { 
-                toast('发送失败：' + (mail.msg || '未知错误'));
+                toast('发送失败：' + (mail.msg || '服务商拦截'));
             }
         } catch(e) { 
             console.error(e);
@@ -89,13 +91,21 @@
         }
     }
 
-    // 步骤 2: 校验本地生成的验证码
+    // 步骤 2: 校验验证码 (修复对比逻辑)
     function goStep2() {
-        if($('#vcode').val() === cache.code) showStep(3);
-        else toast('验证码错误');
+        const inputCode = $('#vcode').val().trim();
+        
+        console.log('用户输入:', inputCode, '缓存验证码:', cache.code);
+        
+        // 使用双等号或强制转字符串对比，防止类型不匹配
+        if(inputCode && inputCode.toString() === cache.code.toString()) {
+            showStep(3);
+        } else {
+            toast('验证码错误');
+        }
     }
 
-    // 步骤 3: 最终注册提交
+    // 步骤 3: 注册提交
     async function goStep3() {
         const nick = $('#nick').val().trim();
         const p1 = $('#p1').val();
@@ -117,21 +127,20 @@
                 })
             }).then(r => r.json());
 
-            // Pgaot 插入成功通常返回 code 200
             if(res.code === 200) {
                 toast('注册成功！');
                 setTimeout(() => {
                     location.href = 'index.html'; 
                 }, 1500);
             } else {
-                toast('提交失败：' + (res.msg || '未知错误'));
+                toast('提交失败：' + (res.msg || '接口错误'));
             }
         } catch(e) { 
             toast('提交出错，请稍后重试'); 
         }
     }
 
-    // 万能返回键处理 (H5+)
+    // 返回键处理
     document.addEventListener('plusready', function() {
         var webview = plus.webview.currentWebview();
         plus.key.addEventListener('backbutton', function() {
