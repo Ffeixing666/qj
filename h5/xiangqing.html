@@ -606,25 +606,6 @@
         let pageActive = true; // 页面状态标志，用于检测页面是否活跃
         let currentDownloadTask = null; // 当前下载任务
 
-        // 转义emoji字符
-        function escapeEmoji(text) {
-            return [...text].map(char => {
-                const code = char.codePointAt(0);
-                if (
-                    (code >= 0x1F300 && code <= 0x1F6FF) ||
-                    (code >= 0x1F900 && code <= 0x1F9FF) ||
-                    (code >= 0x1FA70 && code <= 0x1FAFF) ||
-                    (code >= 0x2600 && code <= 0x26FF) ||
-                    (code >= 0x2700 && code <= 0x27BF) ||
-                    (code >= 0x1F1E6 && code <= 0x1F1FF)
-                ) {
-                    return `&#${code};`;
-                } else {
-                    return char;
-                }
-            }).join('').replace(/'/g, "~PGDBSD~");
-        }
-
         function handleBack() {
             pageActive = false; // 标记页面为非活跃状态
             if (window.plus) {
@@ -1482,7 +1463,7 @@
 
             const appNameElement = document.querySelector('.app-name');
             if (appNameElement) {
-                appNameElement.textContent = htmlEntityToEmoji(handleNullValue(app.名称));
+                appNameElement.textContent = handleNullValue(app.名称);
             }
 
             const appPackageElement = document.getElementById('appPackage');
@@ -1518,7 +1499,7 @@
             if (infoItems[4]) infoItems[4].querySelector('.info-value').textContent = formatTimestamp(app.时间);
             if (infoItems[5]) {
                 const shareUserElement = infoItems[5].querySelector('.info-value');
-                shareUserElement.textContent = htmlEntityToEmoji(handleNullValue(app.用户));
+                shareUserElement.textContent = handleNullValue(app.用户);
                 // 添加点击事件，跳转到分享用户的个人页面
                 shareUserElement.style.cursor = 'pointer';
                 shareUserElement.onclick = function() {
@@ -1764,7 +1745,7 @@
             }
 
             // 处理评论内容：emoji转HTML实体
-            const processedContent = escapeEmoji(content);
+            const processedContent = emojiToHtmlEntity(content);
 
             if (window.plus) {
                 plus.nativeUI.showWaiting('提交中...');
@@ -1924,13 +1905,13 @@
                 // 初始化评论卡片HTML
                 let commentCardHtml = `
                     <div class="comment-header">
-                            <div class="user-avatar" style="${avatarStyle}">${comment.头像 ? '' : htmlEntityToEmoji(comment.用户).charAt(0)}</div>
-                            <div class="user-meta">
-                                <div class="user-name">${htmlEntityToEmoji(comment.用户)}</div>
-                                <div class="comment-time">${formatTimestamp(comment.时间)}</div>
-                            </div>
-                            <div style="color: #FF9500; font-size: 12px;">${ratingStars}</div>
+                        <div class="user-avatar" style="${avatarStyle}">${comment.头像 ? '' : comment.用户.charAt(0)}</div>
+                        <div class="user-meta">
+                            <div class="user-name">${comment.用户}</div>
+                            <div class="comment-time">${formatTimestamp(comment.时间)}</div>
                         </div>
+                        <div style="color: #FF9500; font-size: 12px;">${ratingStars}</div>
+                    </div>
                     <div class="comment-body">
                         ${processedContent}
                     </div>
@@ -1998,7 +1979,7 @@
                     if (reply.parentid !== reply.rootid) {
                         const parentReply = comments.find(c => c.createdAt === reply.parentid);
                         if (parentReply) {
-                            parentUserName = htmlEntityToEmoji(parentReply.用户);
+                            parentUserName = parentReply.用户;
                         }
                     }
                     
@@ -2062,9 +2043,9 @@
                     
                     replyCard.innerHTML = `
                         <div class="comment-header" style="margin-bottom: 6px;">
-                            <div class="user-avatar" style="width: 28px; height: 28px; ${replyAvatarStyle}">${reply.头像 ? '' : htmlEntityToEmoji(reply.用户).charAt(0)}</div>
+                            <div class="user-avatar" style="width: 28px; height: 28px; ${replyAvatarStyle}">${reply.头像 ? '' : reply.用户.charAt(0)}</div>
                             <div class="user-meta">
-                                <div class="user-name" style="font-size: 13px;">${htmlEntityToEmoji(reply.用户)}</div>
+                                <div class="user-name" style="font-size: 13px;">${reply.用户}</div>
                                 <div class="comment-time" style="font-size: 10px;">${formatTimestamp(reply.时间)}</div>
                             </div>
                         </div>
@@ -2571,7 +2552,7 @@
             }
 
             // 处理回复内容：emoji转HTML实体
-            const processedContent = escapeEmoji(content);
+            const processedContent = emojiToHtmlEntity(content);
 
             if (window.plus) {
                 plus.nativeUI.showWaiting('提交中...');
