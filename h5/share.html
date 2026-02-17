@@ -283,7 +283,15 @@
                 let appLink = '';
                 if (parseFloat(sizeMB) <= 100) {
                     // 上传APK到对象存储
-                    appLink = await uploadApk(file);
+                    try {
+                        appLink = await uploadApk(file);
+                    } catch (uploadErr) {
+                        // 检查是否是用户取消上传
+                        if (uploadErr.message !== '用户取消上传') {
+                            throw uploadErr;
+                        }
+                        // 用户取消上传，appLink保持为空
+                    }
                 } else {
                     // 大于100MB，显示网盘链接输入
                     document.getElementById('pan-section').style.display = 'block';
@@ -309,8 +317,14 @@
                 };
 
             } catch (err) {
-                tip.innerHTML = "解析失败，请检查文件是否损坏<br><span style='color: var(--ios-blue); font-size: 13px; cursor: pointer;' onclick='copyWebUrl()'>若多次尝试失败，可能是当前系统不支持，请点击前往网页版上传（网页版稳定性较差，推荐使用APP）</span>";
-                console.error('解析错误:', err);
+                // 检查是否是用户取消上传
+                if (err.message !== '用户取消上传') {
+                    tip.innerHTML = "解析失败，请检查文件是否损坏<br><span style='color: var(--ios-blue); font-size: 13px; cursor: pointer;' onclick='copyWebUrl()'>若多次尝试失败，可能是当前系统不支持，请点击前往网页版上传（网页版稳定性较差，推荐使用APP）</span>";
+                    console.error('解析错误:', err);
+                } else {
+                    // 用户取消上传，隐藏提示
+                    tip.style.display = 'none';
+                }
             }
         };
 
