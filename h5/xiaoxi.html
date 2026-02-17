@@ -414,12 +414,46 @@
                         avatar.innerHTML = `<img src="${msg['发起人头像']}" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=='">`;
                     }
                     
+                    // 为头像添加点击事件，跳转到用户页面
+                    avatar.addEventListener('click', function(e) {
+                        e.stopPropagation(); // 阻止事件冒泡
+                        const userEmail = msg['发起人邮箱'];
+                        if (userEmail) {
+                            const url = `page.html?user=${encodeURIComponent(userEmail)}`;
+                            if (window.plus) {
+                                plus.webview.open(url, url, {
+                                    backbuttonMaximize: false,
+                                    scrollIndicator: 'none'
+                                }, 'pop-in', 250);
+                            } else {
+                                window.location.href = url;
+                            }
+                        }
+                    });
+                    
                     const msgContent = document.createElement('div');
                     msgContent.className = 'msg-content';
                     
                     const userName = document.createElement('div');
                     userName.className = 'u-name';
                     userName.textContent = htmlEntityToEmoji(msg['发起人昵称'] || '未知用户');
+                    
+                    // 为昵称添加点击事件，跳转到用户页面
+                    userName.addEventListener('click', function(e) {
+                        e.stopPropagation(); // 阻止事件冒泡
+                        const userEmail = msg['发起人邮箱'];
+                        if (userEmail) {
+                            const url = `page.html?user=${encodeURIComponent(userEmail)}`;
+                            if (window.plus) {
+                                plus.webview.open(url, url, {
+                                    backbuttonMaximize: false,
+                                    scrollIndicator: 'none'
+                                }, 'pop-in', 250);
+                            } else {
+                                window.location.href = url;
+                            }
+                        }
+                    });
                     
                     const action = document.createElement('div');
                     action.className = 'u-action';
