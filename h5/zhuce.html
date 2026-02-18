@@ -22,6 +22,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #e5e5ea; border-radius: 12px; background: #f9f9fb; outline: none; box-sizing: border-box; font-size: 16px; -webkit-user-select: text; user-select: text; }
         .btn { width: 100%; padding: 14px; background: var(--primary); color: #fff; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
         #toast { position: fixed; top: 20px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 20px; border-radius: 20px; display: none; font-size: 14px; z-index: 9999; }
     </style>
 </head>
@@ -45,7 +46,7 @@
         <input type="text" id="nick" placeholder="用户昵称">
         <input type="password" id="p1" placeholder="设置密码">
         <input type="password" id="p2" placeholder="确认密码">
-        <button class="btn" onclick="goStep3()">完成注册</button>
+        <button id="regBtn" class="btn" onclick="goStep3()">完成注册</button>
     </div>
 </div>
 
@@ -144,6 +145,11 @@
         // 转义emoji字符
         const escapedNick = escapeEmoji(nick);
 
+        // --- 修改部分：禁用按钮防止重复点击 ---
+        const $btn = $('#regBtn');
+        $btn.prop('disabled', true).text('提交中...');
+        // ------------------------------------
+
         toast('正在完成注册...');
         try {
             const res = await fetch(`${API}?mode=register`, {
@@ -163,9 +169,13 @@
                 }, 1500);
             } else {
                 toast('提交失败：' + (res.msg || '接口错误'));
+                // 失败时恢复按钮
+                $btn.prop('disabled', false).text('完成注册');
             }
         } catch(e) { 
             toast('提交出错，请稍后重试'); 
+            // 异常时恢复按钮
+            $btn.prop('disabled', false).text('完成注册');
         }
     }
 
