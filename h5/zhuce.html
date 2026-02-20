@@ -33,7 +33,7 @@
     
     <div id="s1" class="step active">
         <input type="email" id="email" placeholder="输入邮箱地址">
-        <button class="btn" onclick="goStep1()">发送验证码</button>
+        <button id="sendBtn" class="btn" onclick="goStep1()">发送验证码</button>
     </div>
 
     <div id="s2" class="step">
@@ -54,15 +54,55 @@
     const API = 'https://apirank.qujiaweb.top/';
     // 初始化 cache 确保 code 为空字符串
     let cache = { email: '', code: '' };
+    let countdownTimer = null;
 
     function toast(m) { $('#toast').text(m).stop(true, true).fadeIn().delay(2000).fadeOut(); }
 
     function showStep(n) { $('.step').removeClass('active'); $(`#s${n}`).addClass('active'); }
 
+    // --- 新增：处理倒计时逻辑 ---
+    function initSendBtn() {
+        const lastTime = localStorage.getItem('last_vcode_time');
+        if (lastTime) {
+            const diff = Math.floor((Date.now() - lastTime) / 1000);
+            if (diff < 300) {
+                startCountdown(300 - diff);
+            }
+        }
+    }
+
+    function startCountdown(seconds) {
+        const $btn = $('#sendBtn');
+        $btn.prop('disabled', true);
+        
+        if (countdownTimer) clearInterval(countdownTimer);
+        
+        countdownTimer = setInterval(() => {
+            seconds--;
+            if (seconds <= 0) {
+                clearInterval(countdownTimer);
+                $btn.prop('disabled', false).text('发送验证码');
+                localStorage.removeItem('last_vcode_time');
+            } else {
+                $btn.text(`重新发送 (${seconds}s)`);
+            }
+        }, 1000);
+    }
+    // 页面加载完成后检查锁定状态
+    $(document).ready(initSendBtn);
+    // -------------------------
+
     // 步骤 1: 发送验证码
     async function goStep1() {
         const email = $('#email').val().trim();
         if(!email.includes('@')) return toast('请输入有效邮箱');
+
+        // --- 修改点：立即锁定按钮防止重复点击并记录时间 ---
+        const $btn = $('#sendBtn');
+        $btn.prop('disabled', true).text('正在发送...');
+        localStorage.setItem('last_vcode_time', Date.now());
+        startCountdown(300);
+        // --------------------------------------------
         
         // 1. 先生成验证码并存入 cache
         const generatedCode = Math.floor(1000 + Math.random() * 9000).toString();
@@ -85,6 +125,8 @@
                 toast('验证码已发送'); 
             } else { 
                 toast('发送失败：' + (mail.msg || '服务商拦截'));
+                // 如果接口明确返回失败，根据需求决定是否清除锁定。
+                // 此处按你要求“5分钟内不得再发送”保留锁定。
             }
         } catch(e) { 
             console.error(e);
