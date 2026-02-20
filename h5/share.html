@@ -136,7 +136,13 @@
         <div id="content-step">
             <div class="result-card">
                 <div class="app-header">
-                    <img id="app-icon" src="">
+                    <div style="position: relative;">
+                        <img id="app-icon" src="">
+                        <div id="icon-upload-btn" style="position: absolute; bottom: 0; right: 0; width: 24px; height: 24px; background: var(--ios-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; cursor: pointer;">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="white"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                        </div>
+                        <input type="file" id="icon-upload-input" accept="image/*" style="display: none">
+                    </div>
                     <div class="name-area">
                         <input type="text" id="app-name" value="-" style="width: 100%; border: none; outline: none; font-size: 19px; font-weight: 700; background: transparent; font-family: inherit;">
                         <code id="app-pkg">-</code>
@@ -190,25 +196,46 @@
     </main>
 
     <script>
-        const SDK_MAP = { 19: "4.4", 21: "5.0", 22: "5.1", 23: "6.0", 24: "7.0", 25: "7.1", 26: "8.0", 27: "8.1", 28: "9.0", 29: "10", 30: "11", 31: "12", 32: "12L", 33: "13", 34: "14", 35: "15" };
+        const SDK_MAP = { 18: "4.3", 19: "4.4", 21: "5.0", 22: "5.1", 23: "6.0", 24: "7.0", 25: "7.1", 26: "8.0", 27: "8.1", 28: "9.0", 29: "10", 30: "11", 31: "12", 32: "12L", 33: "13", 34: "14", 35: "15" };
         let screenshots = [];
         let apkInfo = null;
         let selectedCategory = null;
         let uploadedApkUrl = null;
         let uploadedIconUrl = null;
 
-        // --- 保险的 SDK 搜索逻辑 ---
+        // --- 增强的 SDK 搜索逻辑 ---
         function findMinSdk(obj) {
             if (!obj) return null;
+            
+            // 直接查找顶层 minSdkVersion
             if (obj.minSdkVersion) return obj.minSdkVersion;
+            
+            // 查找 manifest 中的 uses-sdk
             const manifest = obj.manifest || obj;
             if (manifest['uses-sdk']) {
                 const sdkInfo = Array.isArray(manifest['uses-sdk']) ? manifest['uses-sdk'][0] : manifest['uses-sdk'];
-                return sdkInfo['@android:minSdkVersion'] || sdkInfo['minSdkVersion'] || sdkInfo['android:minSdkVersion'];
+                // 尝试多种可能的键名
+                const sdkVersion = sdkInfo['@android:minSdkVersion'] || 
+                                  sdkInfo['minSdkVersion'] || 
+                                  sdkInfo['android:minSdkVersion'] ||
+                                  sdkInfo['@minSdkVersion'] ||
+                                  sdkInfo['android\:minSdkVersion']; // 处理转义的冒号
+                if (sdkVersion) return sdkVersion;
             }
+            
+            // 直接在 manifest 中搜索 minSdkVersion 相关属性
+            if (manifest) {
+                const sdkVersion = manifest['@android:minSdkVersion'] || 
+                                  manifest['minSdkVersion'] || 
+                                  manifest['android:minSdkVersion'] ||
+                                  manifest['@minSdkVersion'] ||
+                                  manifest['android\:minSdkVersion'];
+                if (sdkVersion) return sdkVersion;
+            }
+            
+            // 递归搜索所有对象属性
             let found = null;
             for (let key in obj) {
-                if (key.toLowerCase().includes('minsdkversion')) return obj[key];
                 if (typeof obj[key] === 'object' && obj[key] !== null) {
                     found = findMinSdk(obj[key]);
                     if (found) return found;
@@ -216,6 +243,51 @@
             }
             return null;
         }
+
+        // --- 手动上传图标处理 ---
+        document.getElementById('icon-upload-btn').onclick = function() {
+            document.getElementById('icon-upload-input').click();
+        };
+
+        document.getElementById('icon-upload-input').onchange = async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            try {
+                // 显示加载状态
+                const appIcon = document.getElementById('app-icon');
+                const originalSrc = appIcon.src;
+                appIcon.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 24 24" fill="%23CCCCCC"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>';
+
+                // 预览图片
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    appIcon.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+
+                // 上传图标到对象存储
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const uploadResponse = await fetch('https://apirank.qujiaweb.top/?mode=upload_meituan', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await uploadResponse.json();
+                if (result.full_url) {
+                    uploadedIconUrl = result.full_url;
+                    showToast('图标上传成功');
+                } else {
+                    showToast('图标上传失败，请重试');
+                    appIcon.src = originalSrc;
+                }
+            } catch (error) {
+                console.error('图标上传失败:', error);
+                showToast('图标上传失败，请重试');
+            }
+        };
 
         // --- APK 上传与解析 ---
         document.getElementById('apkInput').onchange = async (e) => {
@@ -254,8 +326,12 @@
                 if (!finalName || String(finalName).startsWith('@')) finalName = info.package;
 
                 // 2. 处理 SDK
-                const rawSdk = findMinSdk(info);
-                const androidVer = SDK_MAP[rawSdk] || "未知";
+                let rawSdk = findMinSdk(info);
+                // 确保 rawSdk 是数字类型
+                rawSdk = typeof rawSdk === 'string' ? parseInt(rawSdk) : rawSdk;
+                // 确保 rawSdk 是有效数字
+                rawSdk = isNaN(rawSdk) ? null : rawSdk;
+                const androidVer = SDK_MAP[rawSdk] || "4.4";
 
                 // 3. 处理架构
                 const zip = await JSZip.loadAsync(file);
@@ -264,14 +340,32 @@
                 const archArray = Array.from(archs);
                 let bitDisplay = "全架构兼容";
                 if (archArray.length > 0) {
-                    const is64 = archArray.some(a => a.includes('64'));
-                    const is32 = archArray.some(a => a.includes('v7a') || a === 'armeabi');
+                    // 检查是否包含64位架构
+                    const is64 = archArray.some(a => a.includes('64') || a === 'arm64-v8a' || a === 'x86_64');
+                    // 检查是否包含32位架构
+                    const is32 = archArray.some(a => 
+                        a.includes('v7a') || 
+                        a === 'armeabi' || 
+                        a === 'armeabi-v7a' || 
+                        a === 'x86'
+                    );
                     bitDisplay = (is64 && is32) ? "32/64位兼容" : (is64 ? "纯64位" : "纯32位");
                 }
 
                 // 4. 渲染基本信息
                 const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-                document.getElementById('app-icon').src = info.icon || '';
+                // 处理应用图标，添加默认图标
+                const appIcon = document.getElementById('app-icon');
+                // 添加图标加载失败的处理
+                appIcon.onerror = function() {
+                    this.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 24 24" fill="%23CCCCCC"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14h-2v-4H8v-2h4V7h2v4h4v2h-4v4z"/></svg>';
+                };
+                if (info.icon && typeof info.icon === 'string' && info.icon.startsWith('data:image/')) {
+                    appIcon.src = info.icon;
+                } else {
+                    // 设置默认图标
+                    appIcon.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 24 24" fill="%23CCCCCC"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14h-2v-4H8v-2h4V7h2v4h4v2h-4v4z"/></svg>';
+                }
                 document.getElementById('app-name').value = finalName;
                 document.getElementById('app-pkg').innerText = info.package || 'unknown';
                 document.getElementById('v-text').innerText = info.versionName || '1.0.0';
@@ -674,8 +768,12 @@
                         if (!finalName || String(finalName).startsWith('@')) finalName = info.package;
 
                         // 处理 SDK
-                        const rawSdk = findMinSdk(info);
-                        const androidVer = SDK_MAP[rawSdk] || "未知";
+                        let rawSdk = findMinSdk(info);
+                        // 确保 rawSdk 是数字类型
+                        rawSdk = typeof rawSdk === 'string' ? parseInt(rawSdk) : rawSdk;
+                        // 确保 rawSdk 是有效数字
+                        rawSdk = isNaN(rawSdk) ? null : rawSdk;
+                        const androidVer = SDK_MAP[rawSdk] || "4.4";
 
                         // 处理架构
                         JSZip.loadAsync(file).then(zip => {
@@ -684,8 +782,15 @@
                             const archArray = Array.from(archs);
                             let bitDisplay = "全架构兼容";
                             if (archArray.length > 0) {
-                                const is64 = archArray.some(a => a.includes('64'));
-                                const is32 = archArray.some(a => a.includes('v7a') || a === 'armeabi');
+                                // 检查是否包含64位架构
+                                const is64 = archArray.some(a => a.includes('64') || a === 'arm64-v8a' || a === 'x86_64');
+                                // 检查是否包含32位架构
+                                const is32 = archArray.some(a => 
+                                    a.includes('v7a') || 
+                                    a === 'armeabi' || 
+                                    a === 'armeabi-v7a' || 
+                                    a === 'x86'
+                                );
                                 bitDisplay = (is64 && is32) ? "32/64位兼容" : (is64 ? "纯64位" : "纯32位");
                             }
 
@@ -730,6 +835,12 @@
         // 图标上传到对象存储
         async function uploadIcon(iconData) {
             try {
+                // 验证图标数据
+                if (!iconData || typeof iconData !== 'string' || !iconData.startsWith('data:image/')) {
+                    console.warn('无效的图标数据，跳过上传');
+                    return null;
+                }
+                
                 // 将base64图标转换为Blob
                 const response = await fetch(iconData);
                 const blob = await response.blob();
@@ -748,11 +859,13 @@
                     uploadedIconUrl = result.full_url;
                     return result.full_url;
                 } else {
-                    throw new Error('图标上传失败');
+                    console.warn('图标上传失败，返回空');
+                    return null;
                 }
             } catch (error) {
                 console.error('图标上传失败:', error);
-                throw error;
+                // 图标上传失败不影响整个流程
+                return null;
             }
         }
 
