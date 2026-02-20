@@ -946,8 +946,8 @@
             btn.innerText = "处理中...";
             setTimeout(() => {
                 if (isPageActive()) {
-                    alert('已为您拉起安全下载通道');
-                    btn.innerText = "获取应用";
+                    // alert('已为您拉起安全下载通道');
+                    btn.innerText = "获取";
                 }
             }, 1000);
         }
@@ -1563,6 +1563,11 @@
                                 }
                             } else {
                                 // 解析失败，使用原链接
+                                // 检查是否有密码
+                                if (password && password !== null && password !== '') {
+                                    // 复制密码到剪贴板
+                                    copyToClipboardWithFallback(password);
+                                }
                                 if (window.plus) {
                                     plus.runtime.openURL(url);
                                 } else {
