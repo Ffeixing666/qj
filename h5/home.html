@@ -138,7 +138,7 @@
         .featured-card {
     width: 100%;
     height: 170px;
-    background: url('https://creation.bcmcdn.com/716/appcraft/IMAGE_X7MYzrDXx_1771169472865.jpeg') center/cover no-repeat;
+    background: url('https://creation.bcmcdn.com/716/appcraft/IMAGE__2anY_mk7_1771559520857.png') center/cover no-repeat;
     border-radius: 20px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.04);
     display: flex;
@@ -336,9 +336,9 @@
 
     <main id="app-content">
         <section class="featured-section">
-            <div class="featured-card">
-                <p style="font-weight: 500; letter-spacing: 1px;"></p>
-            </div>
+            <div class="featured-card" id="banner-link">
+    <p style="font-weight: 500; letter-spacing: 1px;"></p>
+</div>
         </section>
 
         <nav class="nav-scroll">
@@ -672,9 +672,25 @@
             setTimeout(function() {
                 getApps();
             }, 500);
+            // 轮播图点击打开QQ群链接
+var banner = document.getElementById('banner-link');
+if (banner) {
+    banner.addEventListener('click', function() {
+        var url = "http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=gBER7PtiZVD0cimKXXCGu87ub4okQ8uY&authKey=JqXVtNhWXAcqEXIDqLrxdKu0%2BSQYS5j0l9Rq7dZeZzl7VMD7SFOb%2FEtEqSA0aFg1&noverify=0&group_code=480414235";
+        // 判断是否在5+ App环境
+        if (window.plus) {
+            // 使用plus.runtime.openURL打开外部链接（可唤起QQ）
+            plus.runtime.openURL(url);
+        } else {
+            // 在浏览器中测试时，用新窗口打开
+            window.open(url, '_blank');
+        }
+    });
+}
         };
     </script>
 </body>
 
 </html>
+
 
