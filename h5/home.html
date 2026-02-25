@@ -478,17 +478,17 @@
                 } else if (res.code === 400 || res.code === 404) {
                     showLoginPrompt();
                 } else if (res.code === 403) {
-                    showErrorPrompt(res.msg || '账号环境异常，请勿多端登录');
+                    showErrorPrompt(res.msg || '账号环境异常，请重启APP');
                 }
             } catch (e) {
                 console.error('Get Apps Error:', e);
                 // 检查是否有用户数据且未超过重试次数
                 if (mail && retryCount < 1) {
                     console.log('网络请求失败，检查到用户数据，正在重试...');
-                    // 延迟1秒后重试，避免请求过于频繁
+                    // 延迟0.5秒后重试，避免请求过于频繁
                     setTimeout(() => {
                         getApps(filter, retryCount + 1);
-                    }, 1000);
+                    }, 500);
                     return;
                 }
                 // 加载失败时显示错误信息
@@ -668,10 +668,10 @@
         }
 
         window.onload = function() {
-            // 添加0.5秒延迟再请求应用数据
+            // 添加0.2秒延迟再请求应用数据
             setTimeout(function() {
                 getApps();
-            }, 500);
+            }, 200);
             // 轮播图点击打开QQ群链接
 var banner = document.getElementById('banner-link');
 if (banner) {
@@ -692,5 +692,6 @@ if (banner) {
 </body>
 
 </html>
+
 
 
