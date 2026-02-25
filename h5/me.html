@@ -209,11 +209,43 @@
         .status-shared { background: #EAF9EE; color: #34C759; }
         .status-failed { background: #FFF0EF; color: #FF3B30; }
         .status-pending { background: #E3F2FD; color: #2196F3; }
+
+        /* 封禁弹窗样式 */
+#ban-modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(5px);
+    z-index: 2000; display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.ban-content {
+    background: white; width: 90%; max-width: 320px; border-radius: 28px;
+    padding: 30px 24px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+.ban-title { color: #ff7675; font-size: 18px; font-weight: bold; margin-bottom: 15px; }
+.ban-body {
+    color: #636e72; font-size: 13px; line-height: 1.6; text-align: left;
+    margin-bottom: 20px; background: #fdf2f2; padding: 15px; border-radius: 16px;
+}
+.ban-footer { color: #b2bec3; font-size: 12px; border-top: 1px dashed #dfe6e9; padding-top: 15px; }
+
     </style>
 </head>
 <body>
 
     <div id="toast"></div>
+    <div id="ban-modal">
+    <div class="ban-content">
+        <div class="ban-title">⚠️ 当前账号已封禁</div>
+        <div class="ban-body">
+            可能存在的原因：<br>
+            1.上传病毒、低俗等不良内容。<br>
+            2.刷评论、引战等违规行为。<br>
+            3.抓包、外挂等篡改数据行为。<br><br>
+            <strong>账号相关资产已冻结。</strong>
+        </div>
+        <div class="ban-footer">如有疑问请咨询：110045310@qq.com</div>
+    </div>
+</div>
+
 
     <section id="loginSection" style="display: none;">
         <div class="login-container">
@@ -643,33 +675,42 @@
                 });
                 if (!response.ok) throw new Error('网络响应不正常');
                 const res = await response.json();
-                if (res.code === 200 && res.fields && res.fields.length > 0) {
-                    const user = res.fields[0];
-                    localStorage.setItem('usermail', user["邮箱"]);
-                    localStorage.setItem('username', user["昵称"]);
-                    localStorage.setItem('userpicture', user["头像"]);
-                    localStorage.setItem('userpoints', user["积分"] || '0');
-                    localStorage.setItem('isAdmin', user["是否管理"] === '是' ? 'true' : 'false');
-                    localStorage.setItem('usermail_login', email);
-                    localStorage.setItem('userpass_login', password);
-                    // 只有当页面仍然活动时才更新UI
-                    if (isPageActive) {
-                        checkLoginStatus();
-                        if(isManual) toast('登录成功');
-                        // 获取未读消息数量
-                        getUnreadMessageCount();
-                    }
-                } else {
-                    if(isManual) {
-                        toast('账号或密码错误');
-                    } else {
-                        // 只有当页面仍然活动时才清除localStorage
-                        if (isPageActive) {
-                            localStorage.clear();
-                            checkLoginStatus();
-                        }
-                    }
-                }
+// 修改 handleLogin 中的判断部分
+if (res.code === 200 && res.fields && res.fields.length > 0) {
+    // ... 原有的保存 localStorage 逻辑保持不变 ...
+    const user = res.fields[0];
+    localStorage.setItem('usermail', user["邮箱"]);
+    localStorage.setItem('username', user["昵称"]);
+    localStorage.setItem('userpicture', user["头像"]);
+    localStorage.setItem('userpoints', user["积分"] || '0');
+    localStorage.setItem('isAdmin', user["是否管理"] === '是' ? 'true' : 'false');
+    localStorage.setItem('usermail_login', email);
+    localStorage.setItem('userpass_login', password);
+    if (isPageActive) {
+        checkLoginStatus();
+        if(isManual) toast('登录成功');
+        getUnreadMessageCount();
+    }
+} else if (res.code === 403) {
+    // 关键点：处理封禁
+    if (isPageActive) {
+        $('#ban-modal').css('display', 'flex'); 
+        // 封禁时不清除本地缓存，以便用户知道是哪个号被封，但不允许进入 profileSection
+        $('#loginSection').show();
+        $('#profileSection').hide();
+    }
+} else {
+    // 原有的报错逻辑
+    if(isManual) {
+        toast('账号或密码错误');
+    } else {
+        if (isPageActive) {
+            localStorage.clear();
+            checkLoginStatus();
+        }
+    }
+}
+
             } catch(e) { 
                 console.error('Login Error:', e);
                 if(isManual && isPageActive) {
@@ -1356,4 +1397,5 @@
         }
     </script>
 </body>
+
 </html>
