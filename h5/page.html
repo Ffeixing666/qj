@@ -479,8 +479,8 @@
                 `;
             }
 
-            // 添加 1 秒延迟，确保加载动画多显示一秒
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // 添加 0.5 秒延迟，确保加载动画多显示一秒
+            await new Promise(resolve => setTimeout(resolve, 500));
 
             try {
                 const response = await fetch(`https://apirank.qujiaweb.top/?mode=get_other_user_apps&mail=${encodeURIComponent(mail)}&user=${encodeURIComponent(user)}`, {
@@ -505,7 +505,7 @@
             // 更新头像
             const avatar = document.querySelector('.avatar-wrap img');
             if (avatar) {
-                avatar.src = userInfo.头像 || 'https://pics3.baidu.com/feed/962bd40735fae6cd4f84a12d6c5a023443a70f46.jpeg@f_auto?token=6b875220d3d3ca87cb60284c20a74a16';
+                avatar.src = userInfo.头像 || 'https://creation.bcmcdn.com/716/appcraft/IMAGE_k7lDKB-Wr_1772007264168.jpeg';
             }
 
             // 更新昵称
