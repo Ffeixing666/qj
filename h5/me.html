@@ -618,8 +618,13 @@
                 $('#loginSection').hide();
                 $('#profileSection').show();
                 $('#uName').text(htmlEntityToEmoji(localStorage.getItem('username') || '用户'));
-                const avatar = localStorage.getItem('userpicture') || 'https://static.codemao.cn/pickduck/S13lipxCge.png';
-                $('#uAvatar').attr('src', avatar);
+// 找到这两行：
+// const avatar = localStorage.getItem('userpicture') || 'https://static.codemao.cn/pickduck/S13lipxCge.png';
+// $('#uAvatar').attr('src', avatar);
+
+// 替换为这一行：
+$('#uAvatar').attr('src', localStorage.getItem('userpicture') || 'https://pics3.baidu.com/feed/962bd40735fae6cd4f84a12d6c5a023443a70f46.jpeg@f_auto?token=6b875220d3d3ca87cb60284c20a74a16').on('error', function(){ this.src='https://pics3.baidu.com/feed/962bd40735fae6cd4f84a12d6c5a023443a70f46.jpeg@f_auto?token=6b875220d3d3ca87cb60284c20a74a16'; });
+
                 $('#uPoints').text(localStorage.getItem('userpoints') || '0');
                 
                 // 检查是否为管理员
@@ -1065,10 +1070,10 @@ if (res.code === 200 && res.fields && res.fields.length > 0) {
                         toast('删除成功');
                     }
                     
-                    // 等待0.5秒后重新加载应用列表
+                    // 等待0.2秒后重新加载应用列表
                     setTimeout(function() {
                         getUserApps();
-                    }, 500);
+                    }, 200);
                 } else {
                     // 显示删除失败提示
                     if (window.plus) {
@@ -1399,3 +1404,4 @@ if (res.code === 200 && res.fields && res.fields.length > 0) {
 </body>
 
 </html>
+
