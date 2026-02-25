@@ -485,10 +485,10 @@
                 // 检查是否有用户数据且未超过重试次数
                 if (mail && retryCount < 1) {
                     console.log('网络请求失败，检查到用户数据，正在重试...');
-                    // 延迟0.5秒后重试，避免请求过于频繁
+                    // 延迟1秒后重试，避免请求过于频繁
                     setTimeout(() => {
                         getApps(filter, retryCount + 1);
-                    }, 500);
+                    }, 1500);
                     return;
                 }
                 // 加载失败时显示错误信息
@@ -692,6 +692,7 @@ if (banner) {
 </body>
 
 </html>
+
 
 
 
