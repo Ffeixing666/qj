@@ -3,46 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>趣加应用 - 开屏</title>
+    <title>趣加应用 - 欢迎回来</title>
     <style>
+        :root {
+            --primary-color: #4facfe;
+            --accent-color: #00f2fe;
+            --text-color: #2d3436;
+            --bg-color: #f7f9fc;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
             -webkit-user-select: none;
-            user-select: none;
         }
 
         body {
-            background: white;
+            background: var(--bg-color);
             height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            overflow: hidden;
+        }
+
+        /* 卡通风格容器 */
+        .welcome-container {
+            text-align: center;
+            animation: bounceIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* 跳动的卡通图标 */
+        .app-icon-wrapper {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: -apple-system, sans-serif;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+            margin: 0 auto 25px;
+            border: 4px solid #fff;
+            animation: iconFloat 2s ease-in-out infinite;
         }
 
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #f0f0f0;
-            border-top: 3px solid #007AFF;
+        .app-icon-inner {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .app-icon-inner::after {
+            content: '＋';
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        /* 欢迎文字动画 */
+        .welcome-text {
+            font-size: 22px;
+            color: var(--text-color);
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+
+        .sub-text {
+            font-size: 14px;
+            color: #b2bec3;
+            margin-top: 8px;
+            opacity: 0;
+            animation: fadeIn 0.5s ease forwards 0.5s;
+        }
+
+        /* 装饰背景圆圈 */
+        .decoration {
+            position: absolute;
+            z-index: -1;
+            background: rgba(79, 172, 254, 0.1);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        /* 动画关键帧 */
+        @keyframes bounceIn {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0) rotate(0); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        /* 简单的 Toast 提示 */
+        .toast {
+            position: fixed;
+            bottom: 50px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 14px;
+            z-index: 999;
+            display: none;
         }
     </style>
 </head>
 <body>
-    <div class="loading-spinner"></div>
+    <div class="decoration" style="width: 300px; height: 300px; top: -100px; right: -50px;"></div>
+    <div class="decoration" style="width: 150px; height: 150px; bottom: 50px; left: -30px;"></div>
+
+    <div class="welcome-container">
+        <div class="app-icon-wrapper">
+            <div class="app-icon-inner"></div>
+        </div>
+        <div class="welcome-text">欢迎回来</div>
+        <div class="sub-text">探索发现，让生活更有趣</div>
+    </div>
+
+    <div id="toast" class="toast"></div>
 
     <script>
         const API = 'https://apirank.qujiaweb.top/';
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
+        }
 
         // 静默登录函数
         async function silentLogin() {
@@ -57,8 +161,16 @@
                         body: JSON.stringify({ email: savedEmail, password: savedPass })
                     });
                     
-                    if (!response.ok) throw new Error('网络响应不正常');
                     const res = await response.json();
+                    
+                    // 核心修改：判断封禁状态
+                    if (res.code === 403) {
+                        showToast(res.msg || "账号已被封禁");
+                        // 被封禁后清除本地登录缓存，防止一直尝试登录
+                        localStorage.removeItem('usermail_login');
+                        localStorage.removeItem('userpass_login');
+                        return 'banned';
+                    }
                     
                     if (res.code === 200 && res.fields && res.fields.length > 0) {
                         const user = res.fields[0];
@@ -77,23 +189,40 @@
 
         // 初始化函数
         async function init() {
-            // 尝试静默登录
-            await silentLogin();
+            const startTime = Date.now();
             
-            // 立即跳转到首页
-            if (window.plus) {
-                plus.webview.open('home.html', 'home.html', {
-                    backbuttonMaximize: false
-                });
-            } else {
-                window.location.href = 'home.html';
+            // 执行静默登录
+            const loginStatus = await silentLogin();
+            
+            // 如果被封禁，停留页面不跳转（或跳转到登录页）
+            if (loginStatus === 'banned') {
+                setTimeout(() => {
+                    window.location.href = 'login.html'; // 引导去登录页查看详情
+                }, 2500);
+                return;
             }
+
+            // 计算还需要等待多久（保证开屏动画至少展示 2.5 秒）
+            const elapsedTime = Date.now() - startTime;
+            const waitTime = Math.max(0, 2500 - elapsedTime);
+
+            setTimeout(() => {
+                if (window.plus) {
+                    plus.webview.open('home.html', 'home.html', {
+                        backbuttonMaximize: false,
+                        transition: { type: 'fade-in', duration: 300 }
+                    });
+                    // 关闭当前启动页
+                    setTimeout(() => { plus.webview.currentWebview().close('none'); }, 500);
+                } else {
+                    window.location.href = 'home.html';
+                }
+            }, waitTime);
         }
 
-        // 页面加载完成后执行初始化
         window.onload = init;
 
-        // 万能返回键逻辑
+        // 原有 plus 逻辑保持不变
         document.addEventListener('plusready', function() {
             var webview = plus.webview.currentWebview();
             plus.key.addEventListener('backbutton', function() {
