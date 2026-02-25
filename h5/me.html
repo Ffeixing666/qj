@@ -623,7 +623,7 @@
 // $('#uAvatar').attr('src', avatar);
 
 // 替换为这一行：
-$('#uAvatar').attr('src', localStorage.getItem('userpicture') || 'https://pics3.baidu.com/feed/962bd40735fae6cd4f84a12d6c5a023443a70f46.jpeg@f_auto?token=6b875220d3d3ca87cb60284c20a74a16').on('error', function(){ this.src='https://pics3.baidu.com/feed/962bd40735fae6cd4f84a12d6c5a023443a70f46.jpeg@f_auto?token=6b875220d3d3ca87cb60284c20a74a16'; });
+$('#uAvatar').attr('src', localStorage.getItem('userpicture') || 'https://creation.bcmcdn.com/716/appcraft/IMAGE_k7lDKB-Wr_1772007264168.jpeg').on('error', function(){ this.src='https://pics3.baidu.com/feed/962bd40735fae6cd4f84a12d6c5a023443a70f46.jpeg@f_auto?token=6b875220d3d3ca87cb60284c20a74a16'; });
 
                 $('#uPoints').text(localStorage.getItem('userpoints') || '0');
                 
@@ -1404,4 +1404,5 @@ if (res.code === 200 && res.fields && res.fields.length > 0) {
 </body>
 
 </html>
+
 
