@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>趣加应用 - 欢迎回来</title>
+    <title>趣加应用</title>
     <style>
         :root {
             --primary-color: #4facfe;
             --accent-color: #00f2fe;
             --text-color: #2d3436;
             --bg-color: #f7f9fc;
+            --danger-color: #ff7675;
         }
 
         * {
@@ -31,13 +32,20 @@
             overflow: hidden;
         }
 
-        /* 卡通风格容器 */
+        /* 装饰背景圆圈 */
+        .decoration {
+            position: absolute;
+            z-index: -1;
+            background: rgba(79, 172, 254, 0.1);
+            border-radius: 50%;
+        }
+
+        /* --- 启动动画区 --- */
         .welcome-container {
             text-align: center;
             animation: bounceIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* 跳动的卡通图标 */
         .app-icon-wrapper {
             position: relative;
             width: 100px;
@@ -70,7 +78,6 @@
             font-weight: bold;
         }
 
-        /* 欢迎文字动画 */
         .welcome-text {
             font-size: 22px;
             color: var(--text-color);
@@ -79,20 +86,66 @@
             margin-top: 10px;
         }
 
-        .sub-text {
-            font-size: 14px;
-            color: #b2bec3;
-            margin-top: 8px;
-            opacity: 0;
-            animation: fadeIn 0.5s ease forwards 0.5s;
+        /* --- 封禁弹窗区 --- */
+        #ban-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: none; /* 初始隐藏 */
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
 
-        /* 装饰背景圆圈 */
-        .decoration {
-            position: absolute;
-            z-index: -1;
-            background: rgba(79, 172, 254, 0.1);
-            border-radius: 50%;
+        .ban-content {
+            background: white;
+            width: 90%;
+            max-width: 320px;
+            border-radius: 28px;
+            padding: 30px 24px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .ban-title {
+            color: var(--danger-color);
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .ban-body {
+            color: #636e72;
+            font-size: 13px;
+            line-height: 1.6;
+            text-align: left;
+            margin-bottom: 20px;
+            background: #fdf2f2;
+            padding: 15px;
+            border-radius: 16px;
+        }
+
+        .ban-footer {
+            color: #b2bec3;
+            font-size: 12px;
+            border-top: 1px dashed #dfe6e9;
+            padding-top: 15px;
+        }
+
+        .ban-mail {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: bold;
         }
 
         /* 动画关键帧 */
@@ -100,27 +153,13 @@
             from { opacity: 0; transform: scale(0.5); }
             to { opacity: 1; transform: scale(1); }
         }
-
         @keyframes iconFloat {
             0%, 100% { transform: translateY(0) rotate(0); }
             50% { transform: translateY(-15px) rotate(5deg); }
         }
-
-        @keyframes fadeIn {
-            to { opacity: 1; }
-        }
-
-        /* 简单的 Toast 提示 */
-        .toast {
-            position: fixed;
-            bottom: 50px;
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 50px;
-            font-size: 14px;
-            z-index: 999;
-            display: none;
+        @keyframes modalPop {
+            from { opacity: 0; transform: translateY(30px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
     </style>
 </head>
@@ -128,27 +167,35 @@
     <div class="decoration" style="width: 300px; height: 300px; top: -100px; right: -50px;"></div>
     <div class="decoration" style="width: 150px; height: 150px; bottom: 50px; left: -30px;"></div>
 
-    <div class="welcome-container">
+    <div class="welcome-container" id="init-view">
         <div class="app-icon-wrapper">
             <div class="app-icon-inner"></div>
         </div>
         <div class="welcome-text">欢迎回来</div>
-        <div class="sub-text">探索发现，让生活更有趣</div>
     </div>
 
-    <div id="toast" class="toast"></div>
+    <div id="ban-modal">
+        <div class="ban-content">
+            <div class="ban-title">
+                <span>⚠️</span> 当前账号已封禁
+            </div>
+            <div class="ban-body">
+                可能存在的原因：<br>
+                1.上传包括但不限于病毒软件，低俗资源等不良内容。<br>
+                2.未遵守社区互动规则，刷评论，引战等。<br>
+                3.使用非趣加应用官方客户端尝试修改相关数据的（如抓包、外挂等）。<br><br>
+                <strong>账号相关资产已冻结，无法登录。</strong>
+            </div>
+            <div class="ban-footer">
+                如有疑问请咨询：<br>
+                <a href="mailto:110045310@qq.com" class="ban-mail">110045310@qq.com</a>
+            </div>
+        </div>
+    </div>
 
     <script>
         const API = 'https://apirank.qujiaweb.top/';
 
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.innerText = msg;
-            t.style.display = 'block';
-            setTimeout(() => t.style.display = 'none', 3000);
-        }
-
-        // 静默登录函数
         async function silentLogin() {
             const savedEmail = localStorage.getItem('usermail_login');
             const savedPass = localStorage.getItem('userpass_login');
@@ -163,12 +210,8 @@
                     
                     const res = await response.json();
                     
-                    // 核心修改：判断封禁状态
+                    // 核心修改：检测到封禁 (403)，返回特殊标识
                     if (res.code === 403) {
-                        showToast(res.msg || "账号已被封禁");
-                        // 被封禁后清除本地登录缓存，防止一直尝试登录
-                        localStorage.removeItem('usermail_login');
-                        localStorage.removeItem('userpass_login');
                         return 'banned';
                     }
                     
@@ -187,62 +230,54 @@
             return false;
         }
 
-        // 初始化函数
         async function init() {
             const startTime = Date.now();
-            
-            // 执行静默登录
             const loginStatus = await silentLogin();
             
-            // 如果被封禁，停留页面不跳转（或跳转到登录页）
-            if (loginStatus === 'banned') {
-                setTimeout(() => {
-                    window.location.href = 'login.html'; // 引导去登录页查看详情
-                }, 2500);
-                return;
-            }
-
-            // 计算还需要等待多久（保证开屏动画至少展示 2.5 秒）
             const elapsedTime = Date.now() - startTime;
             const waitTime = Math.max(0, 2500 - elapsedTime);
 
+            // 延迟执行跳转或弹窗，确保开屏动画展示完整
             setTimeout(() => {
-                if (window.plus) {
-                    plus.webview.open('home.html', 'home.html', {
-                        backbuttonMaximize: false,
-                        transition: { type: 'fade-in', duration: 300 }
-                    });
-                    // 关闭当前启动页
-                    setTimeout(() => { plus.webview.currentWebview().close('none'); }, 500);
+                if (loginStatus === 'banned') {
+                    // 显示封禁窗口，不跳转，不改存储
+                    document.getElementById('ban-modal').style.display = 'flex';
                 } else {
-                    window.location.href = 'home.html';
+                    // 正常进入首页
+                    if (window.plus) {
+                        plus.webview.open('home.html', 'home.html', {
+                            backbuttonMaximize: false,
+                            transition: { type: 'fade-in', duration: 300 }
+                        });
+                        setTimeout(() => { plus.webview.currentWebview().close('none'); }, 500);
+                    } else {
+                        window.location.href = 'home.html';
+                    }
                 }
             }, waitTime);
         }
 
         window.onload = init;
 
-        // 原有 plus 逻辑保持不变
+        // 5+ 返回键逻辑
         document.addEventListener('plusready', function() {
             var webview = plus.webview.currentWebview();
             plus.key.addEventListener('backbutton', function() {
+                // 如果封禁弹窗已打开，点击返回键直接提示退出应用
+                if (document.getElementById('ban-modal').style.display === 'flex') {
+                    plus.nativeUI.confirm("确定退出应用吗？", function(res) {
+                        if (res.index === 0) plus.runtime.quit();
+                    }, "提示", ["确定", "取消"]);
+                    return;
+                }
+
                 webview.canBack(function(e) {
                     if (e.canBack) {
                         webview.back();
                     } else {
-                        var path = window.location.pathname;
-                        var isHomePage = path.indexOf('home.html') !== -1 || path === '/' || path.indexOf('index.html') !== -1;
-                        if (isHomePage) {
-                            plus.nativeUI.confirm("确定退出应用吗？", function(res) {
-                                if (res.index === 0) plus.runtime.quit();
-                            }, "提示", ["确定", "取消"]);
-                        } else {
-                            if (plus.webview.all().length > 1) {
-                                webview.close('auto'); 
-                            } else {
-                                history.back();
-                            }
-                        }
+                        plus.nativeUI.confirm("确定退出应用吗？", function(res) {
+                            if (res.index === 0) plus.runtime.quit();
+                        }, "提示", ["确定", "取消"]);
                     }
                 });
             });
