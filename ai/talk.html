@@ -1,0 +1,196 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+<title>Spark AI Pro</title>
+<style type="text/css">
+    /* iOS 26 极简未来风 */
+    body, html { margin: 0; padding: 0; background: #000; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: #fff; height: 100%; overflow: hidden; }
+    #app-container { position: relative; width: 100%; height: 100%; background: #000; }
+
+    /* 磨砂质感顶部 */
+    #header { height: 50px; line-height: 50px; text-align: center; background: #111; border-bottom: 1px solid #222; font-weight: bold; font-size: 17px; letter-spacing: 1px; }
+
+    /* 消息区 */
+    #chat-list { position: absolute; top: 51px; bottom: 70px; left: 0; right: 0; overflow-y: auto; padding: 12px; -webkit-overflow-scrolling: touch; }
+
+    /* 气泡样式 */
+    .row { margin-bottom: 15px; clear: both; overflow: hidden; width: 100%; }
+    .bubble { padding: 12px 16px; max-width: 80%; word-wrap: break-word; font-size: 15px; line-height: 1.5; -webkit-border-radius: 22px; border-radius: 22px; }
+    
+    .user { float: right; background: #007aff; color: #fff; -webkit-border-bottom-right-radius: 4px; border-bottom-right-radius: 4px; }
+    .ai { float: left; background: #1c1c1e; color: #eee; border: 1px solid #2c2c2e; -webkit-border-bottom-left-radius: 4px; border-bottom-left-radius: 4px; }
+
+    /* 代码块：iOS 26 荧光绿 */
+    pre { background: #000; border: 1px solid #333; padding: 10px; -webkit-border-radius: 12px; border-radius: 12px; overflow-x: auto; font-family: Menlo, Monaco, Courier, monospace; font-size: 12px; color: #32ff7e; margin: 10px 0; white-space: pre-wrap; }
+    
+    .del { font-size: 10px; color: #555; text-decoration: none; display: block; margin-top: 5px; cursor: pointer; }
+    .user .del { text-align: right; color: #99c9ff; }
+
+    /* 底部对齐：使用 Table 布局确保 100% 对齐 */
+    #footer { position: absolute; bottom: 0; width: 100%; height: 65px; background: #111; border-top: 1px solid #222; }
+    #input-table { width: 100%; height: 100%; border-collapse: collapse; }
+    #input-table td { padding: 0 8px; vertical-align: middle; }
+    
+    #msg-input { 
+        width: 100%; height: 36px; background: #222; border: 1px solid #333; color: #fff; 
+        padding: 0 12px; -webkit-border-radius: 18px; border-radius: 18px; outline: none; font-size: 16px;
+        box-sizing: border-box; -webkit-appearance: none;
+    }
+    
+    #send-btn { 
+        width: 70px; height: 36px; background: #007aff; border: none; color: #fff; 
+        font-weight: bold; -webkit-border-radius: 18px; border-radius: 18px; cursor: pointer; font-size: 14px;
+    }
+
+    .thinking { color: #888; font-style: italic; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div id="app-container">
+    <div id="header">SPARK PRO</div>
+    <div id="chat-list"></div>
+    <div id="footer">
+        <table id="input-table">
+            <tr>
+                <td><input type="text" id="msg-input" placeholder="输入消息..." /></td>
+                <td style="width:80px;"><button id="send-btn" onclick="handleSend()">发送</button></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var box = document.getElementById('chat-list');
+    var ipt = document.getElementById('msg-input');
+    var KEY = 'ai_cache_v4';
+    var loading = false;
+
+    // 格式化文本
+    function fmt(t) {
+        var h = t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        var p = h.split('```');
+        var r = '';
+        for (var i = 0; i < p.length; i++) {
+            if (i % 2 === 1) r += '<pre>' + p[i] + '</pre>';
+            else r += '<span style="white-space:pre-wrap;">' + p[i] + '</span>';
+        }
+        return r;
+    }
+
+    // 存储管理：带容错处理
+    function getStore() {
+        try {
+            var d = localStorage.getItem(KEY);
+            return d ? JSON.parse(d) : [];
+        } catch(e) { return []; }
+    }
+
+    function setStore(arr) {
+        try { localStorage.setItem(KEY, JSON.stringify(arr)); } catch(e) {}
+    }
+
+    // 渲染单条
+    function addMsg(role, text, id, isTemp) {
+        var r = document.createElement('div');
+        r.className = 'row';
+        if(isTemp) r.id = 'loading-row';
+        
+        var inner = '<div class="bubble ' + (role === 'user' ? 'user' : 'ai') + '">' +
+                    '<div>' + (isTemp ? '<span class="thinking">思考中...</span>' : fmt(text)) + '</div>';
+        
+        if(!isTemp) {
+            inner += '<a class="del" onclick="delMsg(' + id + ')">删除</a>';
+        }
+        
+        inner += '</div>';
+        r.innerHTML = inner;
+        box.appendChild(r);
+        box.scrollTop = box.scrollHeight;
+    }
+
+    // 全量刷新
+    function refresh() {
+        box.innerHTML = '';
+        var s = getStore();
+        for(var i=0; i<s.length; i++) {
+            addMsg(s[i].role, s[i].text, i, false);
+        }
+    }
+
+    function delMsg(idx) {
+        var s = getStore();
+        s.splice(idx, 1);
+        setStore(s);
+        refresh();
+    }
+
+    function handleSend() {
+        var v = ipt.value;
+        if(!v || loading) return;
+
+        loading = true;
+        // 1. 保存并显示用户消息
+        var s = getStore();
+        s.push({role:'user', text:v});
+        setStore(s);
+        addMsg('user', v, s.length-1, false);
+        ipt.value = '';
+
+        // 2. 显示思考中
+        addMsg('ai', '', null, true);
+
+        // 3. XHR 请求
+        var xhr = new XMLHttpRequest();
+        // 修正：确保 URL 参数被正确编码
+        var url = '[https://api.pearktrue.cn/api/xfai/?message=](https://api.pearktrue.cn/api/xfai/?message=)' + encodeURIComponent(v);
+        
+        xhr.open('GET', url, true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                loading = false;
+                var lRow = document.getElementById('loading-row');
+                if(lRow) lRow.parentNode.removeChild(lRow);
+
+                if (xhr.status === 200) {
+                    try {
+                        var res = JSON.parse(xhr.responseText);
+                        if(res.code === 200) {
+                            var ans = res.data.answer;
+                            var s2 = getStore();
+                            s2.push({role:'ai', text:ans});
+                            setStore(s2);
+                            addMsg('ai', ans, s2.length-1, false);
+                        } else {
+                            alert('接口错误：' + res.msg);
+                        }
+                    } catch(e) {
+                        alert('数据解析失败');
+                    }
+                } else {
+                    alert('网络请求失败，状态码：' + xhr.status);
+                }
+            }
+        };
+        
+        // 处理立刻失败的情况
+        xhr.onerror = function() {
+            loading = false;
+            var lRow = document.getElementById('loading-row');
+            if(lRow) lRow.parentNode.removeChild(lRow);
+            alert('请求被拦截或网络断开。请检查是否在无痕模式或 HTTPS 证书是否信任。');
+        };
+
+        xhr.send();
+    }
+
+    ipt.onkeydown = function(e) {
+        if((e.keyCode || e.which) === 13) handleSend();
+    };
+
+    window.onload = refresh;
+</script>
+</body>
+</html>
