@@ -106,12 +106,8 @@
 
         /* 动画效果 */
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .animate-fade-in {
@@ -120,23 +116,12 @@
 
         /* 响应式调整 */
         @media (max-width: 480px) {
-            .modal-content {
-                padding: 20px 15px;
-            }
-
-            .modal-title {
-                font-size: 18px;
-            }
-
-            .modal-message {
-                font-size: 14px;
-            }
-
-            .modal-button {
-                padding: 10px 20px;
-                font-size: 14px;
-            }
+            .modal-content { padding: 20px 15px; }
+            .modal-title { font-size: 18px; }
+            .modal-message { font-size: 14px; }
+            .modal-button { padding: 10px 20px; font-size: 14px; }
         }
+
         :root {
             --primary-color: #4a90e2;
             --primary-dark: #357ABD;
@@ -222,25 +207,13 @@
         }
 
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-                opacity: 0.1;
-            }
-            50% {
-                transform: scale(1.2);
-                opacity: 0.2;
-            }
+            0%, 100% { transform: scale(1); opacity: 0.1; }
+            50% { transform: scale(1.2); opacity: 0.2; }
         }
 
         /* 标题区域 */
@@ -336,7 +309,6 @@
             color: var(--text-color);
             position: relative;
             transform-origin: center;
-            overflow: hidden;
         }
 
         .tool-card:hover {
@@ -368,51 +340,25 @@
 
         /* 响应式调整 */
         @media (max-width: 768px) {
-            .greeting {
-                font-size: 18px;
-                padding: 20px 15px;
-            }
-
-            .section-title {
-                font-size: 18px;
-            }
-
-            .ai-section-header {
-                font-size: 16px;
-                padding: 15px;
-            }
-
-            .tools-collection {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-                gap: 12px;
-            }
-
-            .tool-image {
-                height: 100px;
-            }
-
-            .tool-name {
-                font-size: 14px;
-                padding: 10px;
-            }
+            .greeting { font-size: 18px; padding: 20px 15px; }
+            .section-title { font-size: 18px; }
+            .ai-section-header { font-size: 16px; padding: 15px; }
+            .tools-collection { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
+            .tool-image { height: 100px; }
+            .tool-name { font-size: 14px; padding: 10px; }
         }
-
-
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- 问候语区域 -->
         <div class="greeting">
-                <div class="greeting-decoration"></div>
-                <div class="greeting-text" id="greetingText">Hi，早上好</div>
-                <div class="greeting-subtext">趣加AI</div>
-            </div>
+            <div class="greeting-decoration"></div>
+            <div class="greeting-text" id="greetingText">Hi，早上好</div>
+            <div class="greeting-subtext">趣加AI</div>
+        </div>
 
-        <!-- AI聚合区域 -->
         <h2 class="section-title">AI聚合</h2>
 
-        <!-- AI功能专区 -->
         <div class="ai-section" onclick="toggleSection(this)">
             <div class="ai-section-header">
                 AI功能专区 <span>▼</span>
@@ -421,7 +367,6 @@
                 <div class="tool-list">
                     <a href="https://xiaoyi.huawei.com/chat/" class="tool-item">小艺AI</a>
                     <a href="https://metaso.cn" class="tool-item">秘塔AI</a>
-
                     <a href="web.html?url=https://zaiwen.xueban.org.cn/chat/working-edition" class="tool-item">再问AI</a>
                     <a href="https://www.wenxiaobai.com" class="tool-item">Deepseek AI</a>
                     <a href="https://claude3.free2gpt.xyz/" class="tool-item">Gemini AI</a>
@@ -429,15 +374,10 @@
                     <a href="https://www.doubao.com" class="tool-item">豆包AI</a>
                     <a href="web.html?url=https://kimi.moonshot.cn/" class="tool-item">Kimi AI</a>
                     <a href="https://chatforai.store/" class="tool-item">GPT-4 Mini AI</a>
-
-<!--                     <a href="https://chatgpt.com" class="tool-item">ChatGPT</a>
-                    <a href="https://gemini.google.com" class="tool-item">Gemini Advanced AI</a>
-                    <a href="https://claude.ai" class="tool-item">Claude AI</a> -->
                 </div>
             </div>
         </div>
 
-        <!-- 工具合集区域 -->
         <h2 class="section-title">工具合集</h2>
         <div class="tools-collection">
             <a href="https://poki.com/zh#utm_source=china" class="tool-card">
@@ -448,8 +388,6 @@
                 <img src="https://static.codemao.cn/pickduck/ByNpW5wwgl.png?hash=FvcEccGJJb_D265vBSj1Nag2n0hx" alt="工具7" class="tool-image">
                 <div class="tool-name">静谧之声</div>
             </a>            
-
-            
             <a href="web.html?url=https://mu-jie.cc/musicBoxAPP" class="tool-card">
                 <img src="https://static.codemao.cn/pickduck/BJx4x9wDle.png?hash=Fp-QDYeF7lOj8BpreVCu8wLKdiYh" alt="工具3" class="tool-image">
                 <div class="tool-name">来点音乐</div>
@@ -458,44 +396,68 @@
                 <img src="https://static.codemao.cn/pickduck/rJTixqvPeg.png?hash=FhHmqsUoLmEjnG7pp3BzdVL1-4cx" alt="工具4" class="tool-image">
                 <div class="tool-name">备忘笔记</div>
             </a>
-
             <a href="web.html?url=工具箱.html" class="tool-card">
                 <img src="https://static.codemao.cn/pickduck/rJq-bqPwle.png?hash=FupkJDuyR8MKEe350UirveUQ-0sI" alt="工具2" class="tool-image">
                 <div class="tool-name">工具合集</div>
-
             </a>
         </div>
     </div>
 
     <script>
+        /** * 浏览器兼容性检测与跳转逻辑 
+         * 放在最前面执行，防止旧设备因语法错误白屏或渲染过多资源
+         */
+        (function() {
+            var ua = navigator.userAgent;
+            var isOld = false;
+
+            // 1. 检测 IE 浏览器
+            if (/MSIE|Trident/.test(ua)) {
+                isOld = true;
+            }
+            // 2. 检测 iOS 版本 (低于 12)
+            else if (/iPhone|iPad|iPod/.test(ua)) {
+                var iosVersion = ua.match(/OS (\d+)_/);
+                if (iosVersion && parseInt(iosVersion[1], 10) < 12) {
+                    isOld = true;
+                }
+            }
+            // 3. 检测 Android WebView/Chrome 版本 (低于 80)
+            else if (/Android/.test(ua)) {
+                var chromeVersion = ua.match(/Chrome\/(\d+)/);
+                if (chromeVersion && parseInt(chromeVersion[1], 10) < 80) {
+                    isOld = true;
+                }
+            }
+
+            if (isOld) {
+                window.location.href = "https://qujiaweb.top/ai/old.html";
+            }
+        })();
+
         // 首次访问提示框逻辑
         document.addEventListener('DOMContentLoaded', function() {
             const modal = document.getElementById('welcomeModal');
             const closeButton = document.getElementById('closeModal');
 
-            // 检查是否是首次访问
             if (!localStorage.getItem('hasVisited')) {
-                // 延迟显示，让页面先加载
                 setTimeout(() => {
                     modal.classList.add('show');
                 }, 800);
-
-                // 标记为已访问
                 localStorage.setItem('hasVisited', 'true');
             }
 
-            // 关闭按钮点击事件
             closeButton.addEventListener('click', function() {
                 modal.classList.remove('show');
             });
 
-            // 点击模态框外部关闭
             modal.addEventListener('click', function(e) {
                 if (e.target === modal) {
                     modal.classList.remove('show');
                 }
             });
         });
+
         // 根据时间显示不同的问候语
         function updateGreeting() {
             const now = new Date();
@@ -517,35 +479,27 @@
             section.classList.toggle('open');
         }
 
-        // 页面加载时默认展开AI功能专区
+        // 页面加载初始化
         document.addEventListener('DOMContentLoaded', function() {
-            // 更新问候语
             updateGreeting();
             
             const aiSection = document.querySelector('.ai-section');
             aiSection.classList.add('open');
 
-            // 阻止工具项的点击事件冒泡
-            document.querySelectorAll('.tool-item').forEach(item => {
+            // 阻止点击冒泡
+            document.querySelectorAll('.tool-item, .tool-card').forEach(item => {
                 item.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                });
-            });
-
-            // 阻止工具卡片的点击事件冒泡（如果需要）
-            document.querySelectorAll('.tool-card').forEach(card => {
-                card.addEventListener('click', function(e) {
                     e.stopPropagation();
                 });
             });
         });
 
-        // 检测webapp对象是否存在并调用相关方法
+        // 原生交互接口
         if (window.webapp && typeof window.webapp.erect === 'function') {
-            webapp.erect(true); // 开启竖屏模式
+            webapp.erect(true);
         }
     </script>
-<!-- 欢迎提示框 -->
+
     <div class="welcome-modal" id="welcomeModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -560,6 +514,5 @@
             </div>
         </div>
     </div>
-
 </body>
 </html>
