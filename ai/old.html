@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+<title>Spark AI Pro</title>
+<style type="text/css">
+    body, html { margin: 0; padding: 0; background-color: #000; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: #fff; height: 100%; overflow: hidden; }
+    #app-container { position: relative; width: 100%; height: 100%; background: #121214; }
+    #header { height: 50px; line-height: 50px; text-align: center; background: #1c1c1e; border-bottom: 1px solid #2c2c2e; font-weight: bold; font-size: 18px; color: #007aff; }
+    #chat-list { position: absolute; top: 51px; bottom: 70px; left: 0; right: 0; overflow-y: auto; padding: 15px; -webkit-overflow-scrolling: touch; }
+
+    .message-row { margin-bottom: 15px; width: 100%; clear: both; overflow: hidden; }
+    .bubble { padding: 12px 16px; max-width: 80%; word-wrap: break-word; font-size: 15px; line-height: 1.5; -webkit-border-radius: 20px; border-radius: 20px; }
+    .user-bubble { float: right; background: #007aff; color: #fff; -webkit-border-bottom-right-radius: 5px; border-bottom-right-radius: 5px; }
+    .ai-bubble { float: left; background: #2c2c2e; color: #e5e5ea; -webkit-border-bottom-left-radius: 5px; border-bottom-left-radius: 5px; }
+
+    /* 代码块渲染 */
+    .code-view { background: #000; border: 1px solid #444; padding: 10px; margin: 8px 0; -webkit-border-radius: 8px; border-radius: 8px; font-family: Courier, monospace; font-size: 13px; color: #32ff7e; white-space: pre-wrap; }
+    
+    .del-btn { display: block; font-size: 10px; color: #666; text-decoration: none; margin-top: 5px; cursor: pointer; }
+    .user-bubble .del-btn { text-align: right; color: #add3ff; }
+
+    /* 底部布局对齐 */
+    #input-area { position: absolute; bottom: 0; width: 100%; height: 60px; background: #1c1c1e; border-top: 1px solid #2c2c2e; }
+    #message-input { 
+        float: left; width: 68%; height: 36px; line-height: 36px;
+        margin: 12px 0 0 10px; background: #2c2c2e; border: 1px solid #3a3a3c; 
+        color: #fff; padding: 0 10px; -webkit-border-radius: 18px; border-radius: 18px; 
+        outline: none; font-size: 16px;
+    }
+    #send-btn { 
+        float: right; width: 20%; height: 38px; line-height: 38px;
+        margin: 11px 10px 0 0; background: #007aff; border: none; 
+        color: #fff; font-weight: bold; -webkit-border-radius: 19px; border-radius: 19px; 
+        cursor: pointer; font-size: 14px;
+    }
+    .loading-txt { color: #888; font-style: italic; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div id="app-container">
+    <div id="header">SPARK AI PRO</div>
+    <div id="chat-list"></div>
+    <div id="input-area">
+        <input type="text" id="message-input" placeholder="输入消息..." />
+        <button id="send-btn" onclick="sendMessage()">发送</button>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var chatList = document.getElementById('chat-list');
+    var messageInput = document.getElementById('message-input');
+    var STORAGE_KEY = 'ai_history_v1';
+
+    function loadHistory() {
+        var data = localStorage.getItem(STORAGE_KEY);
+        if (data) {
+            var history = JSON.parse(data);
+            for (var i = 0; i < history.length; i++) {
+                appendBubble(history[i].role, history[i].text, i);
+            }
+            scrollToBottom();
+        }
+    }
+
+    function saveToHistory(role, text) {
+        var data = localStorage.getItem(STORAGE_KEY);
+        var history = data ? JSON.parse(data) : [];
+        history.push({role: role, text: text});
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+        return history.length - 1;
+    }
+
+    function deleteItem(index) {
+        var data = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        data.splice(index, 1);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        renderAll();
+    }
+
+    function renderAll() {
+        chatList.innerHTML = '';
+        loadHistory();
+    }
+
+    function appendBubble(role, text, index) {
+        var row = document.createElement('div');
+        row.className = 'message-row';
+        
+        var displayBody = escapeHTML(text);
+        if (displayBody.indexOf('```') !== -1) {
+            var parts = displayBody.split('```');
+            displayBody = "";
+            for (var i = 0; i < parts.length; i++) {
+                if (i % 2 === 1) {
+                    displayBody += '<div class="code-view">' + parts[i] + '</div>';
+                } else {
+                    displayBody += parts[i];
+                }
+            }
+        }
+        
+        var bubbleClass = (role === 'user') ? 'user-bubble' : 'ai-bubble';
+        var html = '<div class="bubble ' + bubbleClass + '">' +
+                   '<div style="white-space:pre-wrap;">' + displayBody + '</div>' +
+                   '<a class="del-btn" onclick="deleteItem(' + index + ')">删除记录</a>' +
+                   '</div>';
+        
+        row.innerHTML = html;
+        chatList.appendChild(row);
+        scrollToBottom();
+    }
+
+    function escapeHTML(str) {
+        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function scrollToBottom() {
+        chatList.scrollTop = chatList.scrollHeight;
+    }
+
+    // 伪装上下文逻辑
+    function getContextText() {
+        var data = localStorage.getItem(STORAGE_KEY);
+        if (!data) return "";
+        var history = JSON.parse(data);
+        if (history.length === 0) return "";
+        
+        var context = "\n\n本次请求的提示词到此结束，用户前几个问题问过：";
+        var historyText = "";
+        // 从后往前取最近的 6 条对话，防止请求过长
+        var start = Math.max(0, history.length - 6);
+        for (var i = start; i < history.length; i++) {
+            var roleName = (history[i].role === 'user') ? "问" : "答";
+            historyText += "[" + roleName + ":" + history[i].text + "]";
+        }
+        
+        // 限制长度在 500 字以内，避免 URL 超长导致 414 错误
+        if (historyText.length > 500) {
+            historyText = "..." + historyText.substring(historyText.length - 500);
+        }
+        return context + historyText;
+    }
+
+    function sendMessage() {
+        var text = messageInput.value;
+        if (!text) return;
+
+        // 1. 保存原始问题并显示
+        var idx = saveToHistory('user', text);
+        appendBubble('user', text, idx);
+        messageInput.value = '';
+
+        // 2. 插入加载占位
+        var loadingRow = document.createElement('div');
+        loadingRow.className = 'message-row';
+        loadingRow.id = 'temp-loading';
+        loadingRow.innerHTML = '<div class="bubble ai-bubble"><div class="loading-txt">思考中...</div></div>';
+        chatList.appendChild(loadingRow);
+        scrollToBottom();
+
+        // 3. 构造带上下文的请求内容
+        var fullPrompt = text + getContextText();
+
+        // 4. API 请求
+        var xhr = new XMLHttpRequest();
+        var url = 'https://api.pearktrue.cn/api/xfai/?message=' + encodeURIComponent(fullPrompt);
+        
+        xhr.open('GET', url, true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                var ld = document.getElementById('temp-loading');
+                if (ld) { ld.parentNode.removeChild(ld); }
+
+                if (xhr.status === 200) {
+                    var res = JSON.parse(xhr.responseText);
+                    if (res.code === 200) {
+                        var answer = res.data.answer;
+                        var aIdx = saveToHistory('ai', answer);
+                        appendBubble('ai', answer, aIdx);
+                    } else {
+                        alert('接口返回错误');
+                    }
+                } else {
+                    alert('网络请求失败');
+                }
+            }
+        };
+        xhr.send();
+    }
+
+    messageInput.onkeydown = function(e) {
+        if ((e.keyCode || e.which) === 13) sendMessage();
+    };
+
+    window.onload = loadHistory;
+</script>
+</body>
+</html>
