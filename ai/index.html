@@ -4,6 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>AI工具聚合平台</title>
+    <script>
+        (function() {
+            var ua = navigator.userAgent;
+            var isOld = false;
+            var targetUrl = "https://qujiaweb.top/ai/old.html";
+
+            // 1. IE 浏览器检测 (MSIE 或 Trident 内核)
+            if (ua.indexOf('MSIE ') > -1 || ua.indexOf('Trident/') > -1) {
+                isOld = true;
+            } 
+            // 2. iOS 设备检测 (低于 12 版本)
+            else if (ua.indexOf('iPhone') > -1 || ua.indexOf('iPad') > -1 || ua.indexOf('iPod') > -1) {
+                var iosMatch = ua.match(/OS (\d+)_/);
+                if (iosMatch && iosMatch[1]) {
+                    if (parseInt(iosMatch[1], 10) < 12) {
+                        isOld = true;
+                    }
+                }
+            } 
+            // 3. Android 检测 (内核版本低于 80)
+            else if (ua.indexOf('Android') > -1) {
+                var chromeMatch = ua.match(/Chrome\/(\d+)/);
+                if (chromeMatch && chromeMatch[1]) {
+                    if (parseInt(chromeMatch[1], 10) < 80) {
+                        isOld = true;
+                    }
+                } else {
+                    // 如果是极老的安卓内置浏览器且没找到 Chrome 版本号，通常也视为过时
+                    isOld = true;
+                }
+            }
+
+            if (isOld) {
+                window.location.replace(targetUrl);
+            }
+        })();
+    </script>
     <style>
         /* 提示框样式 */
         .welcome-modal {
@@ -404,66 +441,37 @@
     </div>
 
     <script>
-        /** * 浏览器兼容性检测与跳转逻辑 
-         * 放在最前面执行，防止旧设备因语法错误白屏或渲染过多资源
-         */
-        (function() {
-            var ua = navigator.userAgent;
-            var isOld = false;
-
-            // 1. 检测 IE 浏览器
-            if (/MSIE|Trident/.test(ua)) {
-                isOld = true;
-            }
-            // 2. 检测 iOS 版本 (低于 12)
-            else if (/iPhone|iPad|iPod/.test(ua)) {
-                var iosVersion = ua.match(/OS (\d+)_/);
-                if (iosVersion && parseInt(iosVersion[1], 10) < 12) {
-                    isOld = true;
-                }
-            }
-            // 3. 检测 Android WebView/Chrome 版本 (低于 80)
-            else if (/Android/.test(ua)) {
-                var chromeVersion = ua.match(/Chrome\/(\d+)/);
-                if (chromeVersion && parseInt(chromeVersion[1], 10) < 80) {
-                    isOld = true;
-                }
-            }
-
-            if (isOld) {
-                window.location.href = "https://qujiaweb.top/ai/old.html";
-            }
-        })();
-
+        // 脚本部分也全部调整为 ES5 语法，确保在旧设备上即使没跳转成功也不会白屏报错
+        
         // 首次访问提示框逻辑
         document.addEventListener('DOMContentLoaded', function() {
-            const modal = document.getElementById('welcomeModal');
-            const closeButton = document.getElementById('closeModal');
+            var modal = document.getElementById('welcomeModal');
+            var closeButton = document.getElementById('closeModal');
 
             if (!localStorage.getItem('hasVisited')) {
-                setTimeout(() => {
-                    modal.classList.add('show');
+                setTimeout(function() {
+                    modal.className += ' show';
                 }, 800);
                 localStorage.setItem('hasVisited', 'true');
             }
 
             closeButton.addEventListener('click', function() {
-                modal.classList.remove('show');
+                modal.className = modal.className.replace(' show', '');
             });
 
             modal.addEventListener('click', function(e) {
                 if (e.target === modal) {
-                    modal.classList.remove('show');
+                    modal.className = modal.className.replace(' show', '');
                 }
             });
         });
 
         // 根据时间显示不同的问候语
         function updateGreeting() {
-            const now = new Date();
-            const hour = now.getHours();
-            const greetingText = document.getElementById('greetingText');
-            let greeting = '早上好';
+            var now = new Date();
+            var hour = now.getHours();
+            var greetingText = document.getElementById('greetingText');
+            var greeting = '早上好';
 
             if (hour >= 12 && hour < 18) {
                 greeting = '下午好';
@@ -471,32 +479,39 @@
                 greeting = '晚上好';
             }
 
-            greetingText.textContent = `Hi，${greeting}`;
+            greetingText.innerHTML = 'Hi，' + greeting;
         }
 
         // 切换AI功能专区的展开/折叠状态
         function toggleSection(section) {
-            section.classList.toggle('open');
+            if (section.className.indexOf('open') > -1) {
+                section.className = section.className.replace(' open', '');
+            } else {
+                section.className += ' open';
+            }
         }
 
         // 页面加载初始化
         document.addEventListener('DOMContentLoaded', function() {
             updateGreeting();
             
-            const aiSection = document.querySelector('.ai-section');
-            aiSection.classList.add('open');
+            var aiSection = document.querySelector('.ai-section');
+            if (aiSection) {
+                aiSection.className += ' open';
+            }
 
             // 阻止点击冒泡
-            document.querySelectorAll('.tool-item, .tool-card').forEach(item => {
-                item.addEventListener('click', function(e) {
+            var items = document.querySelectorAll('.tool-item, .tool-card');
+            for (var i = 0; i < items.length; i++) {
+                items[i].addEventListener('click', function(e) {
                     e.stopPropagation();
                 });
-            });
+            }
         });
 
         // 原生交互接口
         if (window.webapp && typeof window.webapp.erect === 'function') {
-            webapp.erect(true);
+            window.webapp.erect(true);
         }
     </script>
 
