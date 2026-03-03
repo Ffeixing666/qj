@@ -5,192 +5,210 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
 <title>Spark AI Pro</title>
 <style type="text/css">
-    /* iOS 26 极简未来风 */
-    body, html { margin: 0; padding: 0; background: #000; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; color: #fff; height: 100%; overflow: hidden; }
-    #app-container { position: relative; width: 100%; height: 100%; background: #000; }
-
-    /* 磨砂质感顶部 */
-    #header { height: 50px; line-height: 50px; text-align: center; background: #111; border-bottom: 1px solid #222; font-weight: bold; font-size: 17px; letter-spacing: 1px; }
-
-    /* 消息区 */
-    #chat-list { position: absolute; top: 51px; bottom: 70px; left: 0; right: 0; overflow-y: auto; padding: 12px; -webkit-overflow-scrolling: touch; }
-
-    /* 气泡样式 */
-    .row { margin-bottom: 15px; clear: both; overflow: hidden; width: 100%; }
-    .bubble { padding: 12px 16px; max-width: 80%; word-wrap: break-word; font-size: 15px; line-height: 1.5; -webkit-border-radius: 22px; border-radius: 22px; }
+    /* 全球通用的 CSS2 语法，确保 iOS 6 甚至更早版本都能解析 */
+    body, html { margin: 0; padding: 0; background-color: #000; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; height: 100%; overflow: hidden; color: #fff; }
     
-    .user { float: right; background: #007aff; color: #fff; -webkit-border-bottom-right-radius: 4px; border-bottom-right-radius: 4px; }
-    .ai { float: left; background: #1c1c1e; color: #eee; border: 1px solid #2c2c2e; -webkit-border-bottom-left-radius: 4px; border-bottom-left-radius: 4px; }
-
-    /* 代码块：iOS 26 荧光绿 */
-    pre { background: #000; border: 1px solid #333; padding: 10px; -webkit-border-radius: 12px; border-radius: 12px; overflow-x: auto; font-family: Menlo, Monaco, Courier, monospace; font-size: 12px; color: #32ff7e; margin: 10px 0; white-space: pre-wrap; }
+    /* iOS 26 UI: 极黑、悬浮感、极致圆角 */
+    #container { position: relative; width: 100%; height: 100%; background: #000; }
     
-    .del { font-size: 10px; color: #555; text-decoration: none; display: block; margin-top: 5px; cursor: pointer; }
-    .user .del { text-align: right; color: #99c9ff; }
+    #top-bar { height: 50px; line-height: 50px; text-align: center; background: #0a0a0a; border-bottom: 1px solid #1c1c1e; font-size: 17px; font-weight: bold; letter-spacing: 2px; color: #007aff; }
 
-    /* 底部对齐：使用 Table 布局确保 100% 对齐 */
-    #footer { position: absolute; bottom: 0; width: 100%; height: 65px; background: #111; border-top: 1px solid #222; }
-    #input-table { width: 100%; height: 100%; border-collapse: collapse; }
-    #input-table td { padding: 0 8px; vertical-align: middle; }
+    #chat-window { position: absolute; top: 51px; bottom: 80px; left: 0; right: 0; overflow-y: auto; padding: 15px; -webkit-overflow-scrolling: touch; }
+
+    /* 气泡样式：未来主义超大圆角 */
+    .msg-group { margin-bottom: 20px; clear: both; overflow: hidden; width: 100%; }
+    .bubble { padding: 14px 18px; max-width: 80%; word-wrap: break-word; font-size: 15px; line-height: 1.6; -webkit-border-radius: 25px; border-radius: 25px; position: relative; }
+    
+    .u-bubble { float: right; background: #007aff; color: #fff; -webkit-border-bottom-right-radius: 5px; border-bottom-right-radius: 5px; }
+    .a-bubble { float: left; background: #1c1c1e; color: #f2f2f7; border: 1px solid #2c2c2e; -webkit-border-bottom-left-radius: 5px; border-bottom-left-radius: 5px; }
+
+    /* 代码块显示：iOS 26 荧光风格 */
+    .code-block { background: #000; border: 1px solid #333; padding: 12px; -webkit-border-radius: 12px; border-radius: 12px; font-family: "Courier New", Courier, monospace; font-size: 13px; color: #30d158; margin: 10px 0; white-space: pre-wrap; display: block; overflow-x: auto; }
+    
+    .del-action { display: block; font-size: 11px; color: #48484a; text-decoration: none; margin-top: 8px; cursor: pointer; }
+    .u-bubble .del-action { text-align: right; color: #add3ff; }
+
+    /* 底部 Table 布局：彻底解决对齐问题 */
+    #bottom-dock { position: absolute; bottom: 0; width: 100%; height: 80px; background: #0a0a0a; border-top: 1px solid #1c1c1e; }
+    .input-table { width: 100%; height: 100%; border-collapse: collapse; }
+    .input-table td { padding: 0 10px; vertical-align: middle; }
     
     #msg-input { 
-        width: 100%; height: 36px; background: #222; border: 1px solid #333; color: #fff; 
-        padding: 0 12px; -webkit-border-radius: 18px; border-radius: 18px; outline: none; font-size: 16px;
+        width: 100%; height: 44px; background: #1c1c1e; border: 1px solid #3a3a3c; color: #fff; 
+        padding: 0 15px; -webkit-border-radius: 22px; border-radius: 22px; outline: none; font-size: 16px;
         box-sizing: border-box; -webkit-appearance: none;
     }
     
     #send-btn { 
-        width: 70px; height: 36px; background: #007aff; border: none; color: #fff; 
-        font-weight: bold; -webkit-border-radius: 18px; border-radius: 18px; cursor: pointer; font-size: 14px;
+        width: 70px; height: 44px; background: #007aff; border: none; color: #fff; 
+        font-weight: bold; -webkit-border-radius: 22px; border-radius: 22px; cursor: pointer; font-size: 15px;
     }
 
-    .thinking { color: #888; font-style: italic; font-size: 13px; }
+    .thinking-tag { color: #8e8e93; font-size: 13px; font-style: italic; }
 </style>
 </head>
 <body>
 
-<div id="app-container">
-    <div id="header">SPARK PRO</div>
-    <div id="chat-list"></div>
-    <div id="footer">
-        <table id="input-table">
+<div id="container">
+    <div id="top-bar">SPARK PRO</div>
+    
+    <div id="chat-window">
+        </div>
+
+    <div id="bottom-dock">
+        <table class="input-table" cellpadding="0" cellspacing="0">
             <tr>
                 <td><input type="text" id="msg-input" placeholder="输入消息..." /></td>
-                <td style="width:80px;"><button id="send-btn" onclick="handleSend()">发送</button></td>
+                <td style="width:80px;"><button id="send-btn" onclick="doSend()">发送</button></td>
             </tr>
         </table>
     </div>
 </div>
 
 <script type="text/javascript">
-    var box = document.getElementById('chat-list');
-    var ipt = document.getElementById('msg-input');
-    var KEY = 'ai_cache_v4';
-    var loading = false;
+    var win = document.getElementById('chat-window');
+    var inp = document.getElementById('msg-input');
+    var DB_KEY = 'spark_v5_data';
+    var isAjaxing = false;
 
-    // 格式化文本
-    function fmt(t) {
-        var h = t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        var p = h.split('```');
-        var r = '';
-        for (var i = 0; i < p.length; i++) {
-            if (i % 2 === 1) r += '<pre>' + p[i] + '</pre>';
-            else r += '<span style="white-space:pre-wrap;">' + p[i] + '</span>';
+    // 1. 格式化解析（代码块、换行、Emoji）
+    function format(str) {
+        var safe = str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        var parts = safe.split('```');
+        var out = '';
+        for (var i = 0; i < parts.length; i++) {
+            if (i % 2 === 1) {
+                out += '<div class="code-block">' + parts[i] + '</div>';
+            } else {
+                out += '<span style="white-space:pre-wrap;">' + parts[i] + '</span>';
+            }
         }
-        return r;
+        return out;
     }
 
-    // 存储管理：带容错处理
-    function getStore() {
+    // 2. 存储管理
+    function getHistory() {
         try {
-            var d = localStorage.getItem(KEY);
-            return d ? JSON.parse(d) : [];
+            var h = localStorage.getItem(DB_KEY);
+            return h ? JSON.parse(h) : [];
         } catch(e) { return []; }
     }
 
-    function setStore(arr) {
-        try { localStorage.setItem(KEY, JSON.stringify(arr)); } catch(e) {}
+    function saveHistory(arr) {
+        try { localStorage.setItem(DB_KEY, JSON.stringify(arr)); } catch(e) {}
     }
 
-    // 渲染单条
-    function addMsg(role, text, id, isTemp) {
-        var r = document.createElement('div');
-        r.className = 'row';
-        if(isTemp) r.id = 'loading-row';
+    // 3. 渲染单条气泡
+    function drawBubble(role, text, id, isLoading) {
+        var group = document.createElement('div');
+        group.className = 'msg-group';
+        if (isLoading) group.id = 'loading-node';
+
+        var cls = (role === 'user') ? 'u-bubble' : 'a-bubble';
+        var html = '<div class="bubble ' + cls + '"><div>';
         
-        var inner = '<div class="bubble ' + (role === 'user' ? 'user' : 'ai') + '">' +
-                    '<div>' + (isTemp ? '<span class="thinking">思考中...</span>' : fmt(text)) + '</div>';
-        
-        if(!isTemp) {
-            inner += '<a class="del" onclick="delMsg(' + id + ')">删除</a>';
+        if (isLoading) {
+            html += '<span class="thinking-tag">正在调取星火大脑...</span>';
+        } else {
+            html += format(text);
         }
         
-        inner += '</div>';
-        r.innerHTML = inner;
-        box.appendChild(r);
-        box.scrollTop = box.scrollHeight;
+        html += '</div>';
+        if (!isLoading) {
+            html += '<a class="del-action" onclick="killMsg(' + id + ')">× 移除</a>';
+        }
+        html += '</div>';
+        
+        group.innerHTML = html;
+        win.appendChild(group);
+        win.scrollTop = win.scrollHeight;
     }
 
-    // 全量刷新
-    function refresh() {
-        box.innerHTML = '';
-        var s = getStore();
-        for(var i=0; i<s.length; i++) {
-            addMsg(s[i].role, s[i].text, i, false);
+    // 4. 全局刷新
+    function reload() {
+        win.innerHTML = '';
+        var h = getHistory();
+        for (var i = 0; i < h.length; i++) {
+            drawBubble(h[i].role, h[i].text, i, false);
         }
     }
 
-    function delMsg(idx) {
-        var s = getStore();
-        s.splice(idx, 1);
-        setStore(s);
-        refresh();
-    }
+    // 5. 核心发送逻辑
+    function doSend() {
+        var val = inp.value;
+        if (!val || isAjaxing) return;
 
-    function handleSend() {
-        var v = ipt.value;
-        if(!v || loading) return;
+        isAjaxing = true;
+        
+        // 保存并展示用户消息
+        var h = getHistory();
+        h.push({role: 'user', text: val});
+        saveHistory(h);
+        drawBubble('user', val, h.length - 1, false);
+        
+        inp.value = '';
 
-        loading = true;
-        // 1. 保存并显示用户消息
-        var s = getStore();
-        s.push({role:'user', text:v});
-        setStore(s);
-        addMsg('user', v, s.length-1, false);
-        ipt.value = '';
+        // 显示“加载中”气泡
+        drawBubble('ai', '', null, true);
 
-        // 2. 显示思考中
-        addMsg('ai', '', null, true);
-
-        // 3. XHR 请求
+        // API 请求 - 修正 404 问题：去掉结尾斜杠，直接拼接查询字符串
         var xhr = new XMLHttpRequest();
-        // 修正：确保 URL 参数被正确编码
-        var url = '[https://api.pearktrue.cn/api/xfai/?message=](https://api.pearktrue.cn/api/xfai/?message=)' + encodeURIComponent(v);
-        
-        xhr.open('GET', url, true);
+        var apiBase = '[https://api.pearktrue.cn/api/xfai/](https://api.pearktrue.cn/api/xfai/)'; // 保持官方地址
+        var fullUrl = apiBase + '?message=' + encodeURIComponent(val);
+
+        xhr.open('GET', fullUrl, true);
         xhr.onreadystatechange = function() {
             if (xhr.readyState === 4) {
-                loading = false;
-                var lRow = document.getElementById('loading-row');
-                if(lRow) lRow.parentNode.removeChild(lRow);
+                isAjaxing = false;
+                
+                // 移除加载气泡
+                var ld = document.getElementById('loading-node');
+                if (ld) ld.parentNode.removeChild(ld);
 
                 if (xhr.status === 200) {
                     try {
-                        var res = JSON.parse(xhr.responseText);
-                        if(res.code === 200) {
-                            var ans = res.data.answer;
-                            var s2 = getStore();
-                            s2.push({role:'ai', text:ans});
-                            setStore(s2);
-                            addMsg('ai', ans, s2.length-1, false);
+                        var json = JSON.parse(xhr.responseText);
+                        if (json.code === 200) {
+                            var ans = json.data.answer;
+                            var h2 = getHistory();
+                            h2.push({role: 'ai', text: ans});
+                            saveHistory(h2);
+                            drawBubble('ai', ans, h2.length - 1, false);
                         } else {
-                            alert('接口错误：' + res.msg);
+                            alert('Spark: ' + json.msg);
                         }
                     } catch(e) {
-                        alert('数据解析失败');
+                        alert('数据解析异常');
                     }
                 } else {
-                    alert('网络请求失败，状态码：' + xhr.status);
+                    alert('网络连接失败 (状态码:' + xhr.status + ')');
                 }
             }
         };
-        
-        // 处理立刻失败的情况
+
         xhr.onerror = function() {
-            loading = false;
-            var lRow = document.getElementById('loading-row');
-            if(lRow) lRow.parentNode.removeChild(lRow);
-            alert('请求被拦截或网络断开。请检查是否在无痕模式或 HTTPS 证书是否信任。');
+            isAjaxing = false;
+            var ld = document.getElementById('loading-node');
+            if (ld) ld.parentNode.removeChild(ld);
+            alert('请求拦截：请检查网络或 HTTPS 证书是否正常。');
         };
 
         xhr.send();
     }
 
-    ipt.onkeydown = function(e) {
-        if((e.keyCode || e.which) === 13) handleSend();
+    function killMsg(index) {
+        var h = getHistory();
+        h.splice(index, 1);
+        saveHistory(h);
+        reload();
+    }
+
+    inp.onkeydown = function(e) {
+        var key = e.keyCode || e.which;
+        if (key === 13) doSend();
     };
 
-    window.onload = refresh;
+    window.onload = reload;
 </script>
 </body>
 </html>
