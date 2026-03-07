@@ -20,7 +20,6 @@
             padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
-            /* 禁用选中文本复制 */
             -webkit-user-select: none;
             user-select: none;
         }
@@ -32,7 +31,6 @@
             overflow-x: hidden;
         }
 
-        /* 顶部导航 */
         header {
             position: sticky;
             top: 0;
@@ -130,23 +128,38 @@
             box-shadow: 0 2px 4px rgba(255, 59, 48, 0.3);
         }
 
-        /* 主体内容 */
-        #app-content { display: block; }
-        #web-content { display: none; }
+        /* --- 轮播图样式 --- */
+        .featured-section {
+            padding: 10px 16px;
+            overflow: hidden;
+        }
 
-        .featured-section { padding: 10px 16px; }
-        .featured-card {
-    width: 100%;
-    height: 170px;
-    background: url('https://creation.bcmcdn.com/716/appcraft/IMAGE__2anY_mk7_1771559520857.png') center/cover no-repeat;
-    border-radius: 20px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.04);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-secondary);
-    border: 0.5px solid rgba(255,255,255,0.8);
-}
+        .carousel-container {
+            width: 100%;
+            height: 170px;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+            background-color: #e0e0e2;
+            touch-action: pan-y;
+        }
+
+        .carousel-track {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .carousel-slide {
+            flex: 0 0 100%;
+            width: 100%;
+            height: 100%;
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
 
         .nav-scroll {
             display: flex;
@@ -168,10 +181,10 @@
             border-radius: 16px;
             margin-bottom: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-            overflow: hidden; /* 防止溢出 */
+            overflow: hidden;
         }
         .app-icon {
-            flex-shrink: 0; /* 确保图标不被压缩 */
+            flex-shrink: 0;
             width: 60px;
             height: 60px;
             background: #f0f0f2;
@@ -180,7 +193,7 @@
         }
         .app-info { 
             flex: 1; 
-            min-width: 0; /* 关键：允许内容在Flex容器内正常截断 */
+            min-width: 0;
         }
         .app-name { 
             font-size: 16px; 
@@ -191,18 +204,16 @@
             text-overflow: ellipsis;
         }
         
-        /* 简介限制一行并显示省略号 */
         .app-desc { 
             font-size: 12px; 
             color: var(--text-secondary);
             display: -webkit-box;
             -webkit-box-orient: vertical;
-            -webkit-line-clamp: 1; /* 限制显示1行 */
+            -webkit-line-clamp: 1;
             overflow: hidden;
             word-break: break-all;
         }
 
-        /* --- 底部导航栏 --- */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -215,7 +226,6 @@
             justify-content: space-around;
             align-items: center;
             z-index: 100;
-            padding: 0;
         }
 
         .bottom-item {
@@ -228,7 +238,6 @@
             text-decoration: none;
             flex: 1;
             height: 100%;
-            cursor: pointer;
         }
 
         .bottom-item.active { color: var(--accent-blue); }
@@ -266,7 +275,6 @@
             display: none;
         }
 
-        /* 加载动画样式 */
         .loading-container {
             display: flex;
             flex-direction: column;
@@ -310,6 +318,14 @@
             color: var(--text-secondary);
             font-weight: 500;
         }
+
+        /* 加载更多提示样式 */
+        .load-more-tip {
+            text-align: center;
+            padding: 20px 0 100px 0;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -336,31 +352,26 @@
 
     <main id="app-content">
         <section class="featured-section">
-            <div class="featured-card" id="banner-link">
-    <p style="font-weight: 500; letter-spacing: 1px;"></p>
-</div>
-        </section>
-
-        <nav class="nav-scroll">
-            <span class="nav-item active" onclick="switchCategory('')">推荐</span>
-            <span class="nav-item" onclick="switchCategory('latest')">最新</span>
-            <span class="nav-item" onclick="switchCategory('rank')">排行</span>
-            <span class="nav-item" onclick="switchCategory('影视音乐')">影视音乐</span>
-            <span class="nav-item" onclick="switchCategory('实用工具')">实用工具</span>
-            <span class="nav-item" onclick="switchCategory('娱乐游戏')">娱乐游戏</span>
-            <span class="nav-item" onclick="switchCategory('学习必备')">学习必备</span>
-            <span class="nav-item" onclick="switchCategory('社交生活')">社交生活</span>
-        </nav>
-
-        <section class="app-list">
-            <div class="app-item">
-                <div class="app-icon"></div>
-                <div class="app-info">
-                    <div class="app-name">加载中...</div>
-                    <div class="app-desc">请稍候</div>
+            <div class="carousel-container" id="carousel">
+                <div class="carousel-track" id="track">
                 </div>
             </div>
         </section>
+
+        <nav class="nav-scroll">
+            <span class="nav-item active" onclick="switchCategory('', this)">推荐</span>
+            <span class="nav-item" onclick="switchCategory('latest', this)">最新</span>
+            <span class="nav-item" onclick="switchCategory('rank', this)">排行</span>
+            <span class="nav-item" onclick="switchCategory('影视音乐', this)">影视音乐</span>
+            <span class="nav-item" onclick="switchCategory('实用工具', this)">实用工具</span>
+            <span class="nav-item" onclick="switchCategory('娱乐游戏', this)">娱乐游戏</span>
+            <span class="nav-item" onclick="switchCategory('学习必备', this)">学习必备</span>
+            <span class="nav-item" onclick="switchCategory('社交生活', this)">社交生活</span>
+        </nav>
+
+        <section class="app-list">
+            </section>
+        <div id="loadMoreTip" class="load-more-tip" style="display: none;">正在加载更多...</div>
     </main>
 
     <div id="web-content" class="empty-state">
@@ -382,37 +393,250 @@
     </nav>
 
     <script>
-        // 万能返回键逻辑
-        document.addEventListener('plusready', function() {
-            var webview = plus.webview.currentWebview();
-            plus.key.addEventListener('backbutton', function() {
-                webview.canBack(function(e) {
-                    if (e.canBack) {
-                        webview.back();
-                    } else {
-                        var path = window.location.pathname;
-                        var isHomePage = path.indexOf('home.html') !== -1 || path === '/' || path.indexOf('index.html') !== -1;
-                        if (isHomePage) {
-                            plus.nativeUI.confirm("确定退出应用吗？", function(res) {
-                                if (res.index === 0) plus.runtime.quit();
-                            }, "提示", ["确定", "取消"]);
-                        } else {
-                            if (plus.webview.all().length > 1) {
-                                webview.close('auto'); 
-                            } else {
-                                history.back();
-                            }
-                        }
-                    }
-                });
+        // --- 全页状态管理 ---
+        let currentFilter = '';
+        let currentPage = 1;
+        let isLoading = false;
+        let hasMore = true;
+        const pagedCategories = ['影视音乐', '实用工具', '娱乐游戏', '学习必备', '社交生活'];
+
+        // --- 轮播图逻辑 (保持不变) ---
+        const bannerData = [
+            {
+                img: 'https://creation.bcmcdn.com/716/appcraft/IMAGE__2anY_mk7_1771559520857.png',
+                action: function() {
+                    var url = "http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=gBER7PtiZVD0cimKXXCGu87ub4okQ8uY&authKey=JqXVtNhWXAcqEXIDqLrxdKu0%2BSQYS5j0l9Rq7dZeZzl7VMD7SFOb%2FEtEqSA0aFg1&noverify=0&group_code=480414235";
+                    if (window.plus) { plus.runtime.openURL(url); } else { window.open(url, '_blank'); }
+                }
+            },
+            {
+                img: 'https://creation.bcmcdn.com/716/appcraft/IMAGE_N2kJ1Zg64_1772885279386.jpeg',
+                action: function() {
+                    var url = 'activity.html';
+                    if (window.plus) {
+                        var ws = plus.webview.create(url, url, { backbuttonMaximize: false });
+                        ws.show('pop-in', 300);
+                    } else { window.location.href = url; }
+                }
+            }
+        ];
+
+        function initCarousel() {
+            const track = document.getElementById('track');
+            const container = document.getElementById('carousel');
+            const slides = [bannerData[1], ...bannerData, bannerData[0]];
+            
+            track.innerHTML = slides.map((item, index) => 
+                `<div class="carousel-slide" style="background-image: url('${item.img}')" data-index="${index}"></div>`
+            ).join('');
+
+            let currentIndex = 1;
+            let startX = 0;
+            let currentTranslate = 0;
+            let prevTranslate = 0;
+            let isDragging = false;
+            let autoTimer = null;
+
+            function updatePosition() {
+                track.style.transition = 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
+                track.style.transform = `translateX(-${currentIndex * 100}%)`;
+            }
+
+            function jumpTo(index) {
+                track.style.transition = 'none';
+                currentIndex = index;
+                track.style.transform = `translateX(-${currentIndex * 100}%)`;
+            }
+
+            function moveNext() {
+                currentIndex++;
+                updatePosition();
+                if (currentIndex === slides.length - 1) {
+                    setTimeout(() => jumpTo(1), 400);
+                }
+            }
+
+            function startAuto() {
+                stopAuto();
+                autoTimer = setInterval(moveNext, 2000);
+            }
+
+            function stopAuto() {
+                if (autoTimer) clearInterval(autoTimer);
+            }
+
+            container.addEventListener('touchstart', (e) => {
+                stopAuto();
+                startX = e.touches[0].clientX;
+                isDragging = true;
+                track.style.transition = 'none';
+                prevTranslate = -currentIndex * container.offsetWidth;
             });
-        });
+
+            container.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                const currentX = e.touches[0].clientX;
+                const diff = currentX - startX;
+                currentTranslate = prevTranslate + diff;
+                track.style.transform = `translateX(${currentTranslate}px) translateZ(0)`;
+            });
+
+            container.addEventListener('touchend', (e) => {
+                isDragging = false;
+                const endX = e.changedTouches[0].clientX;
+                const diff = endX - startX;
+                const threshold = container.offsetWidth / 4;
+
+                if (Math.abs(diff) > threshold) {
+                    if (diff > 0) currentIndex--;
+                    else currentIndex++;
+                }
+
+                updatePosition();
+
+                setTimeout(() => {
+                    if (currentIndex === 0) jumpTo(slides.length - 2);
+                    if (currentIndex === slides.length - 1) jumpTo(1);
+                }, 400);
+
+                if (Math.abs(diff) < 5) {
+                    const realData = bannerData[currentIndex === 0 ? 1 : (currentIndex === 3 ? 0 : currentIndex - 1)];
+                    realData.action();
+                }
+
+                startAuto();
+            });
+
+            jumpTo(1);
+            startAuto();
+        }
+
+        // --- 核心业务逻辑 (已集成下滑刷出更多数据) ---
+
+        function switchCategory(filter, element) {
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+            element.classList.add('active');
+            
+            // 重置分页状态
+            currentFilter = filter;
+            currentPage = 1;
+            hasMore = true;
+            isLoading = false;
+            
+            getApps(filter, true); // true 表示清空列表重新加载
+        }
+
+        async function getApps(filter = '', isRefresh = false, retryCount = 0) {
+            if (isLoading) return;
+            const mail = localStorage.getItem('usermail');
+            if (!mail) { showLoginPrompt(); return; }
+
+            const appList = document.querySelector('.app-list');
+            const loadMoreTip = document.getElementById('loadMoreTip');
+
+            if (isRefresh) {
+                appList.innerHTML = `
+                    <div class="loading-container">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-text">加载中...</div>
+                    </div>`;
+                loadMoreTip.style.display = 'none';
+            } else {
+                loadMoreTip.style.display = 'block';
+            }
+
+            isLoading = true;
+
+            try {
+                // 构建 URL，增加 page 参数
+                const url = `https://apirank.qujiaweb.top/?mode=get_app_list&mail=${encodeURIComponent(mail)}&filter=${encodeURIComponent(filter)}&page=${currentPage}`;
+                const response = await fetch(url, { method: 'GET' });
+                const res = await response.json();
+                
+                if (res.code === 200 && res.fields) {
+                    if (isRefresh) appList.innerHTML = '';
+                    
+                    updateAppList(res.fields, isRefresh);
+                    
+                    // 如果返回的数据少于 20 条（后端单页上限），说明没有更多了
+                    if (res.fields.length < 20) {
+                        hasMore = false;
+                        loadMoreTip.textContent = "已经到底啦";
+                    } else {
+                        hasMore = true;
+                        loadMoreTip.textContent = "继续向下滑动加载更多";
+                    }
+                } else if (res.code === 400 || res.code === 404) {
+                    showLoginPrompt();
+                } else if (res.code === 403) {
+                    showErrorPrompt(res.msg || '账号环境异常，请重启APP');
+                }
+            } catch (e) {
+                if (mail && retryCount < 1) {
+                    setTimeout(() => getApps(filter, isRefresh, retryCount + 1), 1500);
+                    return;
+                }
+                if (isRefresh) {
+                    appList.innerHTML = '<div class="app-item" style="justify-content: center;"><div class="app-info" style="text-align: center;"><div class="app-name">加载失败</div><div class="app-desc">网络连接异常</div></div></div>';
+                }
+            } finally {
+                isLoading = false;
+                getUnreadMessageCount();
+            }
+        }
+
+        function updateAppList(apps, isRefresh) {
+            const appList = document.querySelector('.app-list');
+            if (!appList) return;
+            
+            apps.forEach(app => {
+                const appItem = document.createElement('div');
+                appItem.className = 'app-item';
+                appItem.onclick = function() {
+                    var url = 'xiangqing.html?id=' + app.id;
+                    if (window.plus) {
+                        var ws = plus.webview.create(url, url, { backbuttonMaximize: false });
+                        ws.show('pop-in', 300);
+                    } else { window.location.href = url; }
+                };
+                const iconStyle = app.图标 ? `style="background: url('${app.图标}') center/cover"` : "";
+                const appName = htmlEntityToEmoji(app.名称 || '未知应用');
+                const appDesc = htmlEntityToEmoji(app.简介 || '暂无简介');
+                appItem.innerHTML = `
+                    <div class="app-icon" ${iconStyle}></div>
+                    <div class="app-info">
+                        <div class="app-name">${appName}</div>
+                        <div class="app-desc">${appDesc}</div>
+                    </div>`;
+                appList.appendChild(appItem);
+            });
+        }
+
+        // 监听滚动实现继续下滑刷出更多
+        window.onscroll = function() {
+            // 只在指定的 5 个分区启用分页
+            if (!pagedCategories.includes(currentFilter)) return;
+            
+            if (isLoading || !hasMore) return;
+
+            // 距离底部 100px 时加载下一页
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100) {
+                currentPage++;
+                getApps(currentFilter, false);
+            }
+        };
+
+        // --- 其他工具函数 (保持不变) ---
+
+        function htmlEntityToEmoji(str) {
+            return str.replace(/&#(\d+);/g, (match, code) => String.fromCodePoint(parseInt(code)));
+        }
 
         function switchTab(type) {
             const tabs = document.querySelectorAll('.tab-item');
             const app = document.getElementById('app-content');
             const web = document.getElementById('web-content');
-
             if (type === 'app') {
                 tabs[0].classList.add('active');
                 tabs[1].classList.remove('active');
@@ -427,238 +651,67 @@
         }
 
         function openSearchPage() {
+            const url = 'search.html';
             if (window.plus) {
-                var ws = plus.webview.create('search.html', 'search.html', {
-                    backbuttonMaximize: false
-                });
+                var ws = plus.webview.create(url, url, { backbuttonMaximize: false });
                 ws.show('pop-in', 300);
-            } else {
-                window.location.href = 'search.html';
-            }
-        }
-
-        // 切换分类
-        function switchCategory(filter) {
-            // 更新标签状态
-            const navItems = document.querySelectorAll('.nav-item');
-            navItems.forEach(item => {
-                item.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            // 获取应用列表
-            getApps(filter);
-        }
-
-        async function getApps(filter = '', retryCount = 0) {
-            const mail = localStorage.getItem('usermail');
-            if (!mail) {
-                showLoginPrompt();
-                return;
-            }
-
-            // 显示加载动画
-            const appList = document.querySelector('.app-list');
-            if (appList) {
-                appList.innerHTML = `
-                    <div class="loading-container">
-                        <div class="loading-spinner"></div>
-                        <div class="loading-text">加载中...</div>
-                    </div>
-                `;
-            }
-
-            try {
-                const response = await fetch(`https://apirank.qujiaweb.top/?mode=get_app_list&mail=${encodeURIComponent(mail)}&filter=${encodeURIComponent(filter)}`, {
-                    method: 'GET'
-                });
-                const res = await response.json();
-                if (res.code === 200 && res.fields) {
-                    updateAppList(res.fields);
-                } else if (res.code === 400 || res.code === 404) {
-                    showLoginPrompt();
-                } else if (res.code === 403) {
-                    showErrorPrompt(res.msg || '账号环境异常，请重启APP');
-                }
-            } catch (e) {
-                console.error('Get Apps Error:', e);
-                // 检查是否有用户数据且未超过重试次数
-                if (mail && retryCount < 1) {
-                    console.log('网络请求失败，检查到用户数据，正在重试...');
-                    // 延迟1秒后重试，避免请求过于频繁
-                    setTimeout(() => {
-                        getApps(filter, retryCount + 1);
-                    }, 1500);
-                    return;
-                }
-                // 加载失败时显示错误信息
-                if (appList) {
-                    appList.innerHTML = `
-                        <div class="app-item" style="justify-content: center;">
-                            <div class="app-info" style="text-align: center;">
-                                <div class="app-name">加载失败</div>
-                                <div class="app-desc">网络连接异常，请稍后重试</div>
-                            </div>
-                        </div>
-                    `;
-                }
-            } finally {
-                // 应用处理完成后，获取未读消息数量
-                getUnreadMessageCount();
-            }
+            } else { window.location.href = url; }
         }
 
         function showLoginPrompt() {
             const appList = document.querySelector('.app-list');
             if (!appList) return;
-            
-            const loginItem = document.createElement('div');
-            loginItem.className = 'app-item';
-            loginItem.style.justifyContent = 'center';
-            loginItem.style.cursor = 'pointer';
-            
-            loginItem.innerHTML = `
-                <div class="app-info" style="text-align: center;">
-                    <div class="app-name">请先登录</div>
-                    <div class="app-desc">登录一下连接更广阔的世界</div>
-                </div>
-            `;
-            
-            loginItem.onclick = function() {
-                if (window.plus) {
-                    var ws = plus.webview.create('me.html', 'me.html', {
-                        backbuttonMaximize: false
-                    });
-                    ws.show('pop-in', 300);
-                } else {
-                    window.location.href = 'me.html';
-                }
-            };
-            
-            appList.innerHTML = '';
-            appList.appendChild(loginItem);
+            appList.innerHTML = `<div class="app-item" style="justify-content: center; cursor: pointer;" onclick="openMePage()"><div class="app-info" style="text-align: center;"><div class="app-name">请先登录</div><div class="app-desc">登录一下连接更广阔的世界</div></div></div>`;
         }
 
         function showErrorPrompt(message) {
             const appList = document.querySelector('.app-list');
             if (!appList) return;
-            appList.innerHTML = `
-                <div class="app-item" style="justify-content: center;">
-                    <div class="app-info" style="text-align: center;">
-                        <div class="app-name">访问受限</div>
-                        <div class="app-desc">${message}</div>
-                    </div>
-                </div>`;
-        }
-
-        // 文字转emoji函数
-        function htmlEntityToEmoji(str) {
-            return str.replace(/&#(\d+);/g, function(match, code) {
-                return String.fromCodePoint(parseInt(code));
-            });
-        }
-
-        function updateAppList(apps) {
-            const appList = document.querySelector('.app-list');
-            if (!appList) return;
-            appList.innerHTML = '';
-
-            apps.forEach(app => {
-                const appItem = document.createElement('div');
-                appItem.className = 'app-item';
-                appItem.onclick = function() {
-                    var url = 'xiangqing.html?id=' + app.id;
-                    if (window.plus) {
-                        var ws = plus.webview.create(url, url, {
-                            backbuttonMaximize: false
-                        });
-                        ws.show('pop-in', 300);
-                    } else {
-                        window.location.href = url;
-                    }
-                };
-
-                const iconStyle = app.图标 ? `style="background: url('${app.图标}') center/cover"` : "";
-                const appName = htmlEntityToEmoji(app.名称 || '未知应用');
-                const appDesc = htmlEntityToEmoji(app.简介 || '暂无简介');
-                
-                appItem.innerHTML = `
-                    <div class="app-icon" ${iconStyle}></div>
-                    <div class="app-info">
-                        <div class="app-name">${appName}</div>
-                        <div class="app-desc">${appDesc}</div>
-                    </div>
-                `;
-                appList.appendChild(appItem);
-            });
+            appList.innerHTML = `<div class="app-item" style="justify-content: center;"><div class="app-info" style="text-align: center;"><div class="app-name">访问受限</div><div class="app-desc">${message}</div></div></div>`;
         }
 
         function openMePage() {
+            const url = 'me.html';
             if (window.plus) {
-                var ws = plus.webview.create('me.html', 'me.html', {
-                    backbuttonMaximize: false
-                });
+                var ws = plus.webview.create(url, url, { backbuttonMaximize: false });
                 ws.show('pop-in', 300);
-            } else {
-                window.location.href = 'me.html';
-            }
+            } else { window.location.href = url; }
         }
 
         function openSharePage() {
+            const url = 'share.html';
             if (window.plus) {
-                var ws = plus.webview.create('share.html', 'share.html', {
-                    backbuttonMaximize: false
-                });
+                var ws = plus.webview.create(url, url, { backbuttonMaximize: false });
                 ws.show('pop-in', 300);
-            } else {
-                window.location.href = 'share.html';
-            }
+            } else { window.location.href = url; }
         }
 
         function openMessagePage() {
-            // 立即隐藏未读消息徽章
             const badge = document.getElementById('unreadBadge');
-            if (badge) {
-                badge.style.display = 'none';
-            }
+            if (badge) badge.style.display = 'none';
+            const url = 'xiaoxi.html';
             if (window.plus) {
-                var ws = plus.webview.create('xiaoxi.html', 'xiaoxi.html', {
-                    backbuttonMaximize: false
-                });
+                var ws = plus.webview.create(url, url, { backbuttonMaximize: false });
                 ws.show('pop-in', 300);
-            } else {
-                window.location.href = 'xiaoxi.html';
-            }
+            } else { window.location.href = url; }
         }
 
-        // 获取未读消息数量
         async function getUnreadMessageCount() {
             const mail = localStorage.getItem('usermail');
             if (!mail) return;
-
             try {
-                const response = await fetch(`https://apirank.qujiaweb.top/?mode=get_messages&mail=${encodeURIComponent(mail)}`, {
-                    method: 'GET'
-                });
+                const response = await fetch(`https://apirank.qujiaweb.top/?mode=get_messages&mail=${encodeURIComponent(mail)}`, { method: 'GET' });
                 const res = await response.json();
                 if (res.code === 200 && res.fields) {
-                    // 过滤出未读且未删除的消息
-                    const unreadMessages = res.fields.filter(msg => 
-                        msg['是否已读'] === '否' && msg['是否删除'] === '否'
-                    );
-                    // 更新未读消息数量显示
+                    const unreadMessages = res.fields.filter(msg => msg['是否已读'] === '否' && msg['是否删除'] === '否');
                     updateUnreadBadge(unreadMessages.length);
                 }
-            } catch (e) {
-                console.error('Get Unread Messages Error:', e);
-            }
+            } catch (e) { console.error(e); }
         }
 
-        // 更新未读消息数量显示
         function updateUnreadBadge(count) {
             const badge = document.getElementById('unreadBadge');
             if (!badge) return;
-
             if (count > 0) {
                 badge.style.display = 'flex';
                 badge.textContent = count > 99 ? '99+' : count;
@@ -667,32 +720,31 @@
             }
         }
 
+        document.addEventListener('plusready', function() {
+            var webview = plus.webview.currentWebview();
+            plus.key.addEventListener('backbutton', function() {
+                webview.canBack(function(e) {
+                    if (e.canBack) {
+                        webview.back();
+                    } else {
+                        var path = window.location.pathname;
+                        var isHomePage = path.indexOf('home.html') !== -1 || path === '/' || path.indexOf('index.html') !== -1;
+                        if (isHomePage) {
+                            plus.nativeUI.confirm("确定退出应用吗？", function(res) {
+                                if (res.index === 0) plus.runtime.quit();
+                            }, "提示", ["确定", "取消"]);
+                        } else {
+                            if (plus.webview.all().length > 1) { webview.close('auto'); } else { history.back(); }
+                        }
+                    }
+                });
+            });
+        });
+
         window.onload = function() {
-            // 添加0.2秒延迟再请求应用数据
-            setTimeout(function() {
-                getApps();
-            }, 200);
-            // 轮播图点击打开QQ群链接
-var banner = document.getElementById('banner-link');
-if (banner) {
-    banner.addEventListener('click', function() {
-        var url = "http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=gBER7PtiZVD0cimKXXCGu87ub4okQ8uY&authKey=JqXVtNhWXAcqEXIDqLrxdKu0%2BSQYS5j0l9Rq7dZeZzl7VMD7SFOb%2FEtEqSA0aFg1&noverify=0&group_code=480414235";
-        // 判断是否在5+ App环境
-        if (window.plus) {
-            // 使用plus.runtime.openURL打开外部链接（可唤起QQ）
-            plus.runtime.openURL(url);
-        } else {
-            // 在浏览器中测试时，用新窗口打开
-            window.open(url, '_blank');
-        }
-    });
-}
+            initCarousel();
+            setTimeout(() => getApps('', true), 200);
         };
     </script>
 </body>
-
 </html>
-
-
-
-
