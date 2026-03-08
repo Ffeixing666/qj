@@ -45,16 +45,24 @@
         .panel.active { display: block; animation: slideUp 0.4s ease-out; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 领奖台区域 */
-        .podium { display: flex; align-items: flex-end; justify-content: center; height: 180px; margin: 30px 0 25px; gap: 10px; }
+        /* 领奖台区域修复：底部对齐且高度优化 */
+        .podium { 
+            display: flex; 
+            align-items: flex-end; 
+            justify-content: center; 
+            height: 160px; /* 微调高度，确保文字空间 */
+            margin: 35px 0 25px; 
+            gap: 10px; 
+        }
         .podium-card { flex: 1; display: flex; flex-direction: column; align-items: center; border-radius: 16px 16px 12px 12px; position: relative; padding-bottom: 12px; }
-        .podium-card img { width: 52px; height: 52px; border-radius: 12px; border: 2px solid #fff; background: #eee; margin-top: -26px; margin-bottom: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .podium-card .name { font-size: 12px; font-weight: 600; color: #fff; width: 85%; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .podium-card .num { font-size: 26px; font-weight: 900; color: rgba(255,255,255,0.7); }
+        .podium-card img { width: 52px; height: 52px; border-radius: 12px; border: 2px solid #fff; background: #eee; margin-top: -26px; margin-bottom: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); flex-shrink: 0; }
+        .podium-card .name { font-size: 12px; font-weight: 600; color: #fff; width: 85%; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px; }
+        .podium-card .num { font-size: 24px; font-weight: 900; color: rgba(255,255,255,0.7); line-height: 1; }
         
-        .p-2 { height: 75%; background: linear-gradient(180deg, #A1A1A1, #757575); order: 1; }
-        .p-1 { height: 100%; background: linear-gradient(180deg, #FFD700, #F39C12); order: 2; scale: 1.05; z-index: 2; }
-        .p-3 { height: 60%; background: linear-gradient(180deg, #CD7F32, #8B4513); order: 3; }
+        /* 优化三个领奖台的高度比例，确保三号位文字也能完全展示 */
+        .p-2 { height: 78%; background: linear-gradient(180deg, #A1A1A1, #757575); order: 1; }
+        .p-1 { height: 100%; background: linear-gradient(180deg, #FFD700, #F39C12); order: 2; z-index: 2; }
+        .p-3 { height: 65%; background: linear-gradient(180deg, #CD7F32, #8B4513); order: 3; }
 
         .update-tip { color: var(--text-secondary); font-size: 12px; margin-bottom: 12px; border-left: 3px solid var(--accent-blue); padding-left: 8px; }
 
@@ -72,7 +80,6 @@
         .item-desc { font-size: 12px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .item-val { font-size: 13px; font-weight: 700; color: #FF9500; background: rgba(255,149,0,0.1); padding: 4px 10px; border-radius: 8px; white-space: nowrap; margin-left: 10px; }
 
-        /* 加载更多提示 */
         .load-more-tip { text-align: center; padding: 20px 0; color: var(--text-secondary); font-size: 13px; }
 
         .toast {
@@ -118,12 +125,10 @@
 <script>
     const API = "https://apirank.qujiaweb.top";
     let isRequesting = false;
-    
-    // 随心看看的分页参数
     let allRandomData = []; 
     let currentRandomCount = 0;
     const PAGE_SIZE = 20;
-    let isTab1 = false; // 是否在随心看看页面
+    let isTab1 = false;
 
     function showMsg(text) {
         const t = document.getElementById('toast');
@@ -136,28 +141,23 @@
         isTab1 = (idx === 1);
         document.querySelectorAll('.tab-item').forEach((el, i) => el.classList.toggle('active', i === idx));
         document.querySelectorAll('.panel').forEach((el, i) => el.classList.toggle('active', i === idx));
-        // 切换回 Tab1 时如果还有数据，尝试显示加载提示
         if(isTab1) checkScroll();
     }
 
     async function fetchData() {
         if(isRequesting) return;
         isRequesting = true;
-
         const mail = localStorage.getItem('usermail'); 
         if(!mail) {
             showMsg("未检测到登录信息");
             isRequesting = false;
             return;
         }
-
         try {
             const res = await fetch(`${API}/?mode=get_ranking_data&mail=${encodeURIComponent(mail)}`);
             const data = await res.json();
-            
             if (data.code === 200) {
                 renderHot(data.hotList);
-                // 存储并处理随心看看的数据
                 allRandomData = data.randomList ? [...data.randomList].sort(() => Math.random() - 0.5) : [];
                 initRandom(); 
                 document.getElementById('loading-view').style.display = 'none';
@@ -171,7 +171,6 @@
         }
     }
 
-    // --- 好评如潮：完全不显示积分 ---
     function renderHot(list) {
         const wrap = document.getElementById('podium-wrap');
         const listWrap = document.getElementById('hot-list');
@@ -199,7 +198,6 @@
             const card = document.createElement('div');
             card.className = `podium-card p-${i+1}`;
             card.onclick = () => openApp(item.id);
-            // 这里移除了积分显示
             card.innerHTML = `<img src="${item.图标}"><div class="name">${item.名称}</div><div class="num">${i+1}</div>`;
             wrap.appendChild(card);
         });
@@ -209,7 +207,6 @@
         });
     }
 
-    // --- 随心看看：初始化与滚动加载 ---
     function initRandom() {
         const wrap = document.getElementById('random-list');
         wrap.innerHTML = "";
@@ -222,30 +219,21 @@
             document.getElementById('load-more').innerText = "到底啦，没有更多了";
             return;
         }
-        
         const wrap = document.getElementById('random-list');
         const nextBatch = allRandomData.slice(currentRandomCount, currentRandomCount + PAGE_SIZE);
-        
         nextBatch.forEach(item => {
             wrap.appendChild(createRow(item, 0, false));
         });
-        
         currentRandomCount += nextBatch.length;
         document.getElementById('load-more').style.display = 'block';
     }
 
-    // 核心行渲染逻辑
     function createRow(item, rank, isHot) {
         const div = document.createElement('div');
         div.className = 'item-card';
         div.onclick = () => openApp(item.id);
-        
-        // 1. 处理排名：随心看看不显示排名，好评如潮显示
         const rankHtml = (isHot && rank > 0) ? `<div class="item-rank">${rank}</div>` : '';
-        
-        // 2. 处理分数值：好评如潮不显示积分，随心看看显示积分
         const valHtml = !isHot ? `<div class="item-val">${item.积分 || 0}积分</div>` : '';
-        
         div.innerHTML = `
             ${rankHtml}
             <img class="item-icon" src="${item.图标}">
@@ -258,24 +246,24 @@
         return div;
     }
 
-    // --- 公用跳转逻辑 ---
     function openApp(id) {
-        // 修改为根目录下的 xiangqing.html
         const url = 'xiangqing.html?id=' + id;
         if(window.plus) {
-            plus.webview.open(url, url, {backbuttonMaximize:false, aniShow:'pop-in'});
+            plus.webview.open(url, url, {
+                backbuttonMaximize: false,
+                aniShow: 'pop-in', 
+                duration: 300
+            });
         } else {
             window.location.href = url;
         }
     }
 
-    // 监听滚动到底部
     function checkScroll() {
         if (!isTab1) return;
         const scrollHeight = document.documentElement.scrollHeight;
         const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
         const clientHeight = document.documentElement.clientHeight;
-
         if (scrollTop + clientHeight >= scrollHeight - 100) {
             loadMoreRandom();
         }
