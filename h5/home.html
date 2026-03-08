@@ -514,6 +514,19 @@
         // --- 核心业务逻辑 (已集成下滑刷出更多数据) ---
 
         function switchCategory(filter, element) {
+            // --- 新增：点击排行跳转 rank.html ---
+            if (filter === 'rank') {
+                const url = 'rank.html';
+                if (window.plus) {
+                    var ws = plus.webview.create(url, url, { backbuttonMaximize: false });
+                    ws.show('pop-in', 300);
+                } else {
+                    window.location.href = url;
+                }
+                return; // 拦截后续逻辑，不切换分类标签
+            }
+            // ----------------------------------
+
             const navItems = document.querySelectorAll('.nav-item');
             navItems.forEach(item => item.classList.remove('active'));
             element.classList.add('active');

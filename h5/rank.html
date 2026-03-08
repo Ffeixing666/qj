@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>排行榜</title>
+    <style>
+        :root {
+            --bg-color: #F2F2F7;
+            --card-bg: #FFFFFF;
+            --text-main: #1C1C1E;
+            --text-secondary: #8E8E93;
+            --accent-blue: #007AFF;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, "SF Pro Display", "PingFang SC", sans-serif; background: var(--bg-color); color: var(--text-main); overflow-x: hidden; }
+
+        header {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(242, 242, 247, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            padding: 10px 16px; height: 60px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .header-title { font-size: 19px; font-weight: 700; }
+        .back-btn { width: 34px; height: 34px; background: #E3E3E6; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+
+        .tab-box { display: flex; padding: 10px 16px; gap: 24px; background: var(--bg-color); }
+        .tab-item { font-size: 16px; color: var(--text-secondary); font-weight: 500; position: relative; padding-bottom: 6px; }
+        .tab-item.active { color: var(--text-main); font-weight: 700; font-size: 18px; }
+        .tab-item.active::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: var(--accent-blue); border-radius: 2px; }
+
+        #loading-view {
+            position: fixed; top: 120px; left: 0; width: 100%; bottom: 0;
+            background: var(--bg-color); z-index: 90;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .ios-loader {
+            width: 30px; height: 30px; border: 3px solid #E3E3E6; border-top: 3px solid var(--accent-blue);
+            border-radius: 50%; animation: load-spin 0.8s linear infinite;
+        }
+        @keyframes load-spin { to { transform: rotate(360deg); } }
+
+        .panel { padding: 0 16px 100px; display: none; }
+        .panel.active { display: block; animation: slideUp 0.4s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 领奖台区域 */
+        .podium { display: flex; align-items: flex-end; justify-content: center; height: 180px; margin: 30px 0 25px; gap: 10px; }
+        .podium-card { flex: 1; display: flex; flex-direction: column; align-items: center; border-radius: 16px 16px 12px 12px; position: relative; padding-bottom: 12px; }
+        .podium-card img { width: 52px; height: 52px; border-radius: 12px; border: 2px solid #fff; background: #eee; margin-top: -26px; margin-bottom: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .podium-card .name { font-size: 12px; font-weight: 600; color: #fff; width: 85%; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .podium-card .num { font-size: 26px; font-weight: 900; color: rgba(255,255,255,0.7); }
+        
+        .p-2 { height: 75%; background: linear-gradient(180deg, #A1A1A1, #757575); order: 1; }
+        .p-1 { height: 100%; background: linear-gradient(180deg, #FFD700, #F39C12); order: 2; scale: 1.05; z-index: 2; }
+        .p-3 { height: 60%; background: linear-gradient(180deg, #CD7F32, #8B4513); order: 3; }
+
+        .update-tip { color: var(--text-secondary); font-size: 12px; margin-bottom: 12px; border-left: 3px solid var(--accent-blue); padding-left: 8px; }
+
+        /* 列表卡片 */
+        .item-card {
+            display: flex; align-items: center; background: var(--card-bg);
+            padding: 12px; border-radius: 18px; margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+        .item-rank { width: 30px; font-size: 16px; font-weight: 700; color: var(--text-secondary); text-align: center; margin-right: 8px; flex-shrink: 0; }
+        .item-icon { width: 48px; height: 48px; border-radius: 11px; background: #f9f9f9; object-fit: cover; flex-shrink: 0; margin-right: 12px; }
+        
+        .item-body { flex: 1; min-width: 0; }
+        .item-name { font-size: 15px; font-weight: 600; margin-bottom: 2px; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .item-desc { font-size: 12px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .item-val { font-size: 13px; font-weight: 700; color: #FF9500; background: rgba(255,149,0,0.1); padding: 4px 10px; border-radius: 8px; white-space: nowrap; margin-left: 10px; }
+
+        /* 加载更多提示 */
+        .load-more-tip { text-align: center; padding: 20px 0; color: var(--text-secondary); font-size: 13px; }
+
+        .toast {
+            position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); color: #fff; padding: 10px 20px;
+            border-radius: 20px; font-size: 14px; display: none; z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="back-btn" onclick="plus.webview.currentWebview().close('auto')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </div>
+    <div class="header-title">排行榜</div>
+    <div style="width:34px"></div>
+</header>
+
+<div class="tab-box">
+    <div class="tab-item active" id="btn-0" onclick="changeTab(0)">好评如潮</div>
+    <div class="tab-item" id="btn-1" onclick="changeTab(1)">随心看看</div>
+</div>
+
+<div id="loading-view">
+    <div class="ios-loader"></div>
+    <p style="margin-top:12px; color:#8E8E93; font-size:13px;">别着急颁奖台马上就来</p>
+</div>
+
+<div id="panel-0" class="panel active">
+    <div class="podium" id="podium-wrap"></div>
+    <div class="update-tip">近期投币榜单，每周更新</div>
+    <div id="hot-list"></div>
+</div>
+
+<div id="panel-1" class="panel">
+    <div id="random-list" style="margin-top:15px;"></div>
+    <div id="load-more" class="load-more-tip" style="display:none;">正在发现更多...</div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+    const API = "https://apirank.qujiaweb.top";
+    let isRequesting = false;
+    
+    // 随心看看的分页参数
+    let allRandomData = []; 
+    let currentRandomCount = 0;
+    const PAGE_SIZE = 20;
+    let isTab1 = false; // 是否在随心看看页面
+
+    function showMsg(text) {
+        const t = document.getElementById('toast');
+        t.innerText = text;
+        t.style.display = 'block';
+        setTimeout(() => t.style.display = 'none', 2000);
+    }
+
+    function changeTab(idx) {
+        isTab1 = (idx === 1);
+        document.querySelectorAll('.tab-item').forEach((el, i) => el.classList.toggle('active', i === idx));
+        document.querySelectorAll('.panel').forEach((el, i) => el.classList.toggle('active', i === idx));
+        // 切换回 Tab1 时如果还有数据，尝试显示加载提示
+        if(isTab1) checkScroll();
+    }
+
+    async function fetchData() {
+        if(isRequesting) return;
+        isRequesting = true;
+
+        const mail = localStorage.getItem('usermail'); 
+        if(!mail) {
+            showMsg("未检测到登录信息");
+            isRequesting = false;
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API}/?mode=get_ranking_data&mail=${encodeURIComponent(mail)}`);
+            const data = await res.json();
+            
+            if (data.code === 200) {
+                renderHot(data.hotList);
+                // 存储并处理随心看看的数据
+                allRandomData = data.randomList ? [...data.randomList].sort(() => Math.random() - 0.5) : [];
+                initRandom(); 
+                document.getElementById('loading-view').style.display = 'none';
+            } else {
+                showMsg(data.msg || "同步失败");
+            }
+        } catch (e) {
+            showMsg("服务器连接超时");
+        } finally {
+            isRequesting = false;
+        }
+    }
+
+    // --- 好评如潮：完全不显示积分 ---
+    function renderHot(list) {
+        const wrap = document.getElementById('podium-wrap');
+        const listWrap = document.getElementById('hot-list');
+        wrap.innerHTML = ""; listWrap.innerHTML = "";
+        
+        if(!list || list.length === 0) {
+            wrap.style.display = 'none';
+            listWrap.innerHTML = '<p style="text-align:center; color:#999; padding-top:40px;">暂无近期活跃应用</p>';
+            return;
+        } else {
+            wrap.style.display = 'flex';
+        }
+
+        const top3 = list.slice(0, 3);
+        const order = [1, 0, 2]; 
+        order.forEach(i => {
+            const item = top3[i];
+            if(!item) {
+                const empty = document.createElement('div');
+                empty.className = `podium-card p-${i+1}`;
+                empty.style.visibility = 'hidden';
+                wrap.appendChild(empty);
+                return;
+            }
+            const card = document.createElement('div');
+            card.className = `podium-card p-${i+1}`;
+            card.onclick = () => openApp(item.id);
+            // 这里移除了积分显示
+            card.innerHTML = `<img src="${item.图标}"><div class="name">${item.名称}</div><div class="num">${i+1}</div>`;
+            wrap.appendChild(card);
+        });
+
+        list.slice(3).forEach((item, i) => {
+            listWrap.appendChild(createRow(item, i + 4, true));
+        });
+    }
+
+    // --- 随心看看：初始化与滚动加载 ---
+    function initRandom() {
+        const wrap = document.getElementById('random-list');
+        wrap.innerHTML = "";
+        currentRandomCount = 0;
+        loadMoreRandom();
+    }
+
+    function loadMoreRandom() {
+        if (currentRandomCount >= allRandomData.length) {
+            document.getElementById('load-more').innerText = "到底啦，没有更多了";
+            return;
+        }
+        
+        const wrap = document.getElementById('random-list');
+        const nextBatch = allRandomData.slice(currentRandomCount, currentRandomCount + PAGE_SIZE);
+        
+        nextBatch.forEach(item => {
+            wrap.appendChild(createRow(item, 0, false));
+        });
+        
+        currentRandomCount += nextBatch.length;
+        document.getElementById('load-more').style.display = 'block';
+    }
+
+    // 核心行渲染逻辑
+    function createRow(item, rank, isHot) {
+        const div = document.createElement('div');
+        div.className = 'item-card';
+        div.onclick = () => openApp(item.id);
+        
+        // 1. 处理排名：随心看看不显示排名，好评如潮显示
+        const rankHtml = (isHot && rank > 0) ? `<div class="item-rank">${rank}</div>` : '';
+        
+        // 2. 处理分数值：好评如潮不显示积分，随心看看显示积分
+        const valHtml = !isHot ? `<div class="item-val">${item.积分 || 0}积分</div>` : '';
+        
+        div.innerHTML = `
+            ${rankHtml}
+            <img class="item-icon" src="${item.图标}">
+            <div class="item-body">
+                <div class="item-name">${item.名称}</div>
+                <div class="item-desc">${item.简介 || ''}</div>
+            </div>
+            ${valHtml}
+        `;
+        return div;
+    }
+
+    // --- 公用跳转逻辑 ---
+    function openApp(id) {
+        // 修改为根目录下的 xiangqing.html
+        const url = 'xiangqing.html?id=' + id;
+        if(window.plus) {
+            plus.webview.open(url, url, {backbuttonMaximize:false, aniShow:'pop-in'});
+        } else {
+            window.location.href = url;
+        }
+    }
+
+    // 监听滚动到底部
+    function checkScroll() {
+        if (!isTab1) return;
+        const scrollHeight = document.documentElement.scrollHeight;
+        const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        const clientHeight = document.documentElement.clientHeight;
+
+        if (scrollTop + clientHeight >= scrollHeight - 100) {
+            loadMoreRandom();
+        }
+    }
+
+    window.onscroll = checkScroll;
+
+    document.addEventListener('plusready', function() {
+        fetchData();
+        plus.key.addEventListener('backbutton', function() {
+            plus.webview.currentWebview().close('auto');
+        });
+    });
+
+    if(!window.plus) window.onload = fetchData;
+</script>
+</body>
+</html>
