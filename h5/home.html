@@ -259,23 +259,42 @@ body {
             margin-bottom: 2px;
         }
 
-        .fab {
-            position: fixed;
-            right: 20px;
-            bottom: 72px;
-            width: 46px;
-            height: 46px;
-            background: rgba(255, 255, 255, 0.95);
-            border: 0.5px solid rgba(0,0,0,0.08);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 26px;
-            font-weight: 300;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            z-index: 99;
-        }
+        .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 52px;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    border-top: 0.5px solid rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 999; /* 确保在最顶层 */
+    transform: none !important; /* 强制不允许被变换影响 */
+}
+
+.fab {
+    position: fixed;
+    right: 20px;
+    bottom: 72px;
+    width: 46px;
+    height: 46px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 0.5px solid rgba(0,0,0,0.08);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: 300;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 998; /* 仅次于导航栏 */
+    transform: none !important;
+}
+
 
         .empty-state {
             flex-direction: column;
@@ -828,27 +847,31 @@ document.addEventListener('touchend', function(e) {
     let finalTranslate = moveY > 0 ? Math.pow(moveY, 0.8) : 0;
 
     if (finalTranslate > threshold) {
-        // 触发刷新
-        indicator.innerText = '正在刷新...';
+        indicator.innerText = '正在刷新';
         container.style.transform = `translate3d(0, 50px, 0)`;
         setTimeout(() => {
             location.reload();
         }, 300);
     } else {
-        // 未达标或滑回去了，彻底归位
+        // 关键改进：回弹后彻底移除 transform 属性，防止干扰 fixed 元素
         container.style.transform = `translate3d(0, 0, 0)`;
-        // 关键：在回弹动画结束后隐藏指示器，并确保 layout 刷新
         setTimeout(() => {
+            container.style.transform = ''; // 彻底移除 transform
             indicator.style.display = 'none';
-            // 额外保险：强制触发一次 window 的 resize 事件或 scroll 重置，修复 fixed 定位失效
-            window.scrollTo(0, 0); 
         }, 300);
     }
-
-    // 变量重置
     startY = 0;
     moveY = 0;
 });
+
+// 针对 5+ App 的特殊补丁：当页面重新激活时，确保布局正确
+document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+        // 页面变回可见时，强制清空 transform
+        container.style.transform = '';
+    }
+});
+
 
 
     </script>
