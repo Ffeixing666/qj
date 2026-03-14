@@ -1161,7 +1161,7 @@ if (res.code === 200 && res.fields && res.fields.length > 0) {
                 } else if (res.code === 400 || res.code === 404) {
                     showEmptyState('请先登录', '登录后查看您分享的应用');
                 } else if (res.code === 403) {
-                    showEmptyState('账号环境异常', '请勿多端登录');
+                    window.location.href = 'index.html';
                 } else {
                     showEmptyState('暂无分享记录', '您还没有分享过应用');
                 }

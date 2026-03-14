@@ -294,7 +294,7 @@
                 if (res.code === 200 && res.fields) {
                     updateAppList(res.fields);
                 } else if (res.code === 403) {
-                    toast('账号环境异常，请勿多端登录');
+                    window.location.href = 'index.html';
                 } else {
                     showEmptyState();
                 }

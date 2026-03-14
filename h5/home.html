@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>应用商店 - 首页</title>
     <style>
+/* 确保背景色统一，防止下拉露底色不美观 */
+body {
+    background-color: var(--bg-color);
+}
+
+#refresh-container {
+    background-color: var(--bg-color);
+    min-height: 100vh;
+}
+
+
         :root {
             --bg-color: #F2F2F7;
             --card-bg: #FFFFFF;
@@ -330,7 +341,20 @@
 </head>
 <body>
 
+
+    <div id="pull-indicator" style="position: fixed; top: 0; width: 100%; text-align: center; color: #8E8E93; font-size: 14px; height: 50px; line-height: 50px; z-index: 0; display: none;">
+        下拉刷新
+    </div>
+
+    <div id="refresh-container" style="position: relative; z-index: 1; transition: transform 0.3s cubic-bezier(0,0,0.5,1);">
+        
     <header>
+
+
+
+
+
+
         <div class="top-row">
             <div class="tabs">
                 <span class="tab-item active" onclick="switchTab('app')">应用</span>
@@ -583,7 +607,7 @@
                 } else if (res.code === 400 || res.code === 404) {
                     showLoginPrompt();
                 } else if (res.code === 403) {
-                    showErrorPrompt(res.msg || '账号环境异常，请重启APP');
+                    window.location.href = 'index.html';
                 }
             } catch (e) {
                 if (mail && retryCount < 1) {
@@ -758,6 +782,75 @@
             initCarousel();
             setTimeout(() => getApps('', true), 200);
         };
+
+
+// --- 强化版下拉刷新逻辑 ---
+let startY = 0;
+let moveY = 0;
+const threshold = 70; 
+const container = document.getElementById('refresh-container');
+const indicator = document.getElementById('pull-indicator');
+
+document.addEventListener('touchstart', function(e) {
+    if (window.scrollY === 0) {
+        startY = e.touches[0].pageY;
+        container.style.transition = 'none'; 
+    }
+}, { passive: false });
+
+document.addEventListener('touchmove', function(e) {
+    if (startY <= 0) return;
+    
+    let currentY = e.touches[0].pageY;
+    moveY = currentY - startY;
+
+    if (window.scrollY === 0) {
+        if (moveY > 0) {
+            // 向下拉
+            let translate = Math.pow(moveY, 0.8); 
+            container.style.transform = `translate3d(0, ${translate}px, 0)`; // 使用 translate3d 性能更好
+            indicator.style.display = 'block';
+            indicator.innerText = translate > threshold ? '松开刷新' : '下拉刷新';
+            
+            if (e.cancelable) e.preventDefault();
+        } else {
+            // 用户往回滑，滑过了起点变成上拉时，立即重置
+            container.style.transform = `translate3d(0, 0, 0)`;
+            indicator.style.display = 'none';
+        }
+    }
+}, { passive: false });
+
+document.addEventListener('touchend', function(e) {
+    if (startY <= 0) return;
+
+    container.style.transition = 'transform 0.3s cubic-bezier(0.2, 1, 0.2, 1)';
+    let finalTranslate = moveY > 0 ? Math.pow(moveY, 0.8) : 0;
+
+    if (finalTranslate > threshold) {
+        // 触发刷新
+        indicator.innerText = '正在刷新...';
+        container.style.transform = `translate3d(0, 50px, 0)`;
+        setTimeout(() => {
+            location.reload();
+        }, 300);
+    } else {
+        // 未达标或滑回去了，彻底归位
+        container.style.transform = `translate3d(0, 0, 0)`;
+        // 关键：在回弹动画结束后隐藏指示器，并确保 layout 刷新
+        setTimeout(() => {
+            indicator.style.display = 'none';
+            // 额外保险：强制触发一次 window 的 resize 事件或 scroll 重置，修复 fixed 定位失效
+            window.scrollTo(0, 0); 
+        }, 300);
+    }
+
+    // 变量重置
+    startY = 0;
+    moveY = 0;
+});
+
+
     </script>
 </body>
 </html>

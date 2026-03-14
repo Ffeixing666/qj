@@ -772,7 +772,7 @@
                 } else if (res.code === 400 || res.code === 404) {
                     showLoginPrompt();
                 } else if (res.code === 403) {
-                    showErrorPrompt(res.msg || '账号环境异常');
+                    window.location.href = 'index.html';
                 } else {
                     showErrorPrompt('搜索失败，请重试');
                 }

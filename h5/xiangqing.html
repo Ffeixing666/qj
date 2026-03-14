@@ -1358,16 +1358,16 @@
                         saveToHistory(appId, app);
                         // 更新收藏按钮状态
                         updateCollectButton();
-                        // 等待0.5秒后获取应用评论，确保应用数据处理完成
+                        // 等待0.3秒后获取应用评论，确保应用数据处理完成
                         setTimeout(() => {
                             if (isPageActive()) {
                                 getAppComments(appId);
                             }
-                        }, 500);
+                        }, 300);
                     }
                 } else if (data.code === 403) {
                     if (isPageActive()) {
-                        alert('账号环境异常，请勿多端登录');
+                        window.location.href = 'index.html';
                     }
                 } else if (data.code === 404) {
                     if (isPageActive()) {
