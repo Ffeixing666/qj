@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>应用商店 - 首页</title>
     <style>
+        /* 隐藏滚动条（兼容主流移动端浏览器） */
+.element {
+  /* 对于 IE、Edge 旧版 */
+  -ms-overflow-style: none;
+  /* 对于 Firefox */
+  scrollbar-width: none;
+}
+
+/* 对于 Chrome、Safari、Opera 等 WebKit 内核浏览器 */
+.element::-webkit-scrollbar {
+  display: none; /* 也可用 width: 0; height: 0; */
+}
 /* 确保背景色统一，防止下拉露底色不美观 */
 body {
     background-color: var(--bg-color);
