@@ -288,7 +288,13 @@
             return str.replace(/&#(\d+);/g, (match, dec) => String.fromCodePoint(dec));
         }
 
-        window.onload = loadData;
+        window.onload = () => {
+    // 使用 setTimeout 延迟 300 毫秒（即 0.3 秒）执行
+    setTimeout(() => {
+        loadData();
+    }, 300);
+};
+
     </script>
 </body>
 </html>
