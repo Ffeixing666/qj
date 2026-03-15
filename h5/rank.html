@@ -55,11 +55,36 @@
             height: 160px; 
             margin: 35px 0 25px; 
             gap: 12px; 
+            table-layout: fixed; /* 辅助固定布局 */
         }
-        .podium-card { flex: 1; display: flex; flex-direction: column; align-items: center; border-radius: 20px 20px 14px 14px; position: relative; padding-bottom: 12px; transition: transform 0.2s ease; }
+        /* 核心修改点：强制 flex 子元素不被内容撑开 */
+        .podium-card { 
+            flex: 1 1 0; 
+            min-width: 0; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            border-radius: 20px 20px 14px 14px; 
+            position: relative; 
+            padding-bottom: 12px; 
+            transition: transform 0.2s ease; 
+        }
         .podium-card:active { transform: scale(0.96); }
         .podium-card img { width: 56px; height: 56px; border-radius: 14px; border: 2.5px solid #fff; background: #fff; margin-top: -28px; margin-bottom: 8px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); flex-shrink: 0; }
-        .podium-card .name { font-size: 12px; font-weight: 600; color: #fff; width: 85%; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px; }
+        
+        /* 核心修改点：优化文字截断，确保不会撑开容器 */
+        .podium-card .name { 
+            font-size: 12px; 
+            font-weight: 600; 
+            color: #fff; 
+            width: 90%; 
+            text-align: center; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            white-space: nowrap; 
+            margin-bottom: 2px;
+            display: block;
+        }
         .podium-card .num { font-size: 26px; font-weight: 900; color: rgba(255,255,255,0.8); line-height: 1; }
         
         .p-2 { height: 80%; background: linear-gradient(135deg, #B8B8B8, #8E8E93); order: 1; }
@@ -68,7 +93,6 @@
 
         .update-tip { color: var(--text-secondary); font-size: 12px; margin-bottom: 16px; border-left: 3px solid var(--accent-blue); padding-left: 10px; font-weight: 500; }
 
-        /* 修改：更高级的卡片样式 */
         .item-card {
             display: flex; align-items: center; background: var(--card-bg);
             padding: 14px 12px; border-radius: 22px; margin-bottom: 14px;
@@ -76,7 +100,6 @@
             transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
             border: 0.5px solid rgba(255,255,255,0.8);
         }
-        /* 模拟 iOS 的按压反馈 */
         .item-card:active {
             transform: scale(0.97);
             background-color: #FBFBFD;
@@ -90,7 +113,6 @@
         .item-name { font-size: 16px; font-weight: 600; margin-bottom: 4px; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; letter-spacing: -0.3px; }
         .item-desc { font-size: 13px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; }
         
-        /* 积分标签也升级得更圆润精致 */
         .item-val { font-size: 12px; font-weight: 600; color: var(--accent-blue); background: rgba(0,122,255,0.08); padding: 5px 12px; border-radius: 10px; white-space: nowrap; margin-left: 10px; }
 
         .load-more-tip { text-align: center; padding: 30px 0; color: var(--text-secondary); font-size: 13px; letter-spacing: 0.5px; }
@@ -260,23 +282,16 @@
         return div;
     }
 
-    /**
-     * 修改点 1：解决 5+ 环境动画问题
-     * 5+ 环境下，使用 plus.webview.create 并 show 是最稳妥的滑动动画实现方式
-     */
     function openApp(id) {
         const url = 'xiangqing.html?id=' + id;
         if(window.plus) {
-            // 预创建或直接打开
-            // 关键：ID 必须唯一，aniShow 必须是原生支持的动画
             const nwv = plus.webview.create(url, 'app_detail_' + id, {
                 render: 'always',
                 popGesture: 'hide',
                 bounce: 'vertical'
             });
-            nwv.show('pop-in', 300); // 使用经典的 iOS 从右向左滑入动画
+            nwv.show('pop-in', 300);
         } else {
-            // 浏览器环境
             window.location.href = url;
         }
     }
