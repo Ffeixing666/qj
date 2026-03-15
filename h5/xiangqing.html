@@ -1612,8 +1612,14 @@
         }
 
         window.onload = function() {
+    // 延迟 0.2 秒再发起第一个应用数据请求
+    setTimeout(() => {
+        if (isPageActive()) {
             getAppDetail();
-        };
+        }
+    }, 200);
+};
+
 
         // 评论相关逻辑
         let currentRating = 0;
