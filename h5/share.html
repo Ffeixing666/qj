@@ -159,7 +159,7 @@
             <div id="pan-section">
                 <div class="pan-header">
                     <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
-                    <span>用户选择网盘分享</span>
+                    <span>大文件仅支持网盘分享</span>
                 </div>
                 <div class="ios-input-group">
                     <div class="ios-item"><input type="text" id="pan-url" placeholder="网盘链接 (必填)"></div>
@@ -413,7 +413,7 @@
             } catch (err) {
                 // 检查是否是用户取消上传
                 if (err.message !== '用户取消上传') {
-                    tip.innerHTML = "解析失败，请检查文件是否损坏<br><span style='color: var(--ios-blue); font-size: 13px; cursor: pointer;' onclick='copyWebUrl()'>若多次尝试失败，可能是当前系统不支持，请点击前往网页版上传（网页版稳定性较差，推荐使用APP）</span>";
+                    tip.innerHTML = "解析失败<br><span style='color: var(--ios-blue); font-size: 13px; cursor: pointer;' onclick='copyWebUrl()'>可尝试切换网络，或尝试网页版上传</span>";
                     console.error('解析错误:', err);
                 } else {
                     // 用户取消上传，隐藏提示
