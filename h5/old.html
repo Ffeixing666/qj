@@ -1,0 +1,437 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>应用商店 - 首页</title>
+    <style type="text/css">
+        /* 基础重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, "Helvetica Neue", "PingFang SC", sans-serif;
+            background-color: #F2F2F7; /* 替换变量 */
+            color: #1C1C1E;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 隐藏滚动条 */
+        .nav-scroll::-webkit-scrollbar, 
+        .element::-webkit-scrollbar {
+            display: none;
+            width: 0;
+            height: 0;
+        }
+
+        /* 头部样式适配 */
+        .header {
+            position: -webkit-sticky; /* iOS 9 必须加前缀 */
+            position: sticky;
+            top: 0;
+            background-color: rgba(242, 242, 247, 0.85);
+            -webkit-backdrop-filter: blur(25px); /* iOS 9 前缀 */
+            z-index: 100;
+            padding: 10px 16px;
+            height: 60px;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-flex-direction: column;
+            flex-direction: column;
+            -webkit-justify-content: center;
+            justify-content: center;
+            border-bottom: 0.5px solid rgba(0,0,0,0.1);
+        }
+
+        .top-row {
+            display: -webkit-flex;
+            display: flex;
+            -webkit-align-items: center;
+            align-items: center;
+            -webkit-justify-content: space-between;
+            justify-content: space-between;
+        }
+
+        .tabs {
+            display: -webkit-flex;
+            display: flex;
+            -webkit-align-items: center;
+            align-items: center;
+        }
+
+        .tab-item {
+            font-size: 20px;
+            font-weight: 600;
+            color: #8E8E93;
+            margin-right: 16px;
+            transition: all 0.3s;
+        }
+
+        .tab-item.active {
+            font-size: 26px;
+            color: #1C1C1E;
+        }
+
+        .right-controls {
+            display: -webkit-flex;
+            display: flex;
+            -webkit-align-items: center;
+            align-items: center;
+        }
+
+        .search-bar-fake {
+            width: 100px;
+            height: 34px;
+            background: #E3E3E6;
+            border-radius: 10px;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-align-items: center;
+            align-items: center;
+            padding: 0 10px;
+            color: #8E8E93;
+            font-size: 13px;
+            margin-right: 8px;
+        }
+
+        .search-icon-img { width: 15px; height: 15px; margin-right: 5px; }
+
+        .msg-box {
+            width: 34px;
+            height: 34px;
+            background: #E3E3E6;
+            border-radius: 10px;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-align-items: center;
+            align-items: center;
+            -webkit-justify-content: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .unread-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            min-width: 18px;
+            height: 18px;
+            background: #FF3B30;
+            color: white;
+            border-radius: 9px;
+            font-size: 11px;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-align-items: center;
+            align-items: center;
+            -webkit-justify-content: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+
+        /* 轮播图 */
+        .featured-section { padding: 10px 16px; }
+        .carousel-container {
+            width: 100%;
+            height: 160px;
+            border-radius: 18px;
+            position: relative;
+            overflow: hidden;
+            background-color: #e0e0e2;
+        }
+        .carousel-track {
+            display: -webkit-flex;
+            display: flex;
+            width: 100%;
+            height: 100%;
+            -webkit-transition: -webkit-transform 0.4s ease;
+        }
+        .carousel-slide {
+            -webkit-flex: 0 0 100%;
+            flex: 0 0 100%;
+            background-position: center;
+            background-size: cover;
+        }
+
+        /* 分类滚动 */
+        .nav-scroll {
+            display: -webkit-flex;
+            display: flex;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch; /* iOS 滚动流畅 */
+            white-space: nowrap;
+            padding: 12px 16px;
+        }
+        .nav-item { 
+            font-size: 15px; 
+            color: #8E8E93; 
+            font-weight: 500; 
+            margin-right: 22px;
+        }
+        .nav-item.active { color: #007AFF; }
+
+        /* 列表项 */
+        .app-list { padding: 4px 16px 100px 16px; }
+        .app-item {
+            display: -webkit-flex;
+            display: flex;
+            -webkit-align-items: center;
+            align-items: center;
+            background: #FFFFFF;
+            padding: 12px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+        }
+        .app-icon {
+            width: 60px;
+            height: 60px;
+            background-color: #f0f0f2;
+            border-radius: 14px;
+            margin-right: 14px;
+            background-size: cover;
+        }
+        .app-info { -webkit-flex: 1; flex: 1; min-width: 0; }
+        .app-name { font-size: 16px; font-weight: 600; margin-bottom: 2px; }
+        .app-desc { 
+            font-size: 12px; color: #8E8E93; 
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+
+        /* 底部导航 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 52px;
+            background: rgba(255, 255, 255, 0.95);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 0.5px solid rgba(0,0,0,0.1);
+            display: -webkit-flex;
+            display: flex;
+            -webkit-justify-content: space-around;
+            justify-content: space-around;
+            z-index: 999;
+        }
+        .bottom-item {
+            display: -webkit-flex;
+            display: flex;
+            -webkit-flex-direction: column;
+            flex-direction: column;
+            -webkit-align-items: center;
+            align-items: center;
+            -webkit-justify-content: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #8E8E93;
+            text-decoration: none;
+        }
+        .bottom-item.active { color: #007AFF; }
+        .nav-icon-img { width: 22px; height: 22px; margin-bottom: 2px; }
+
+        .fab {
+            position: fixed;
+            right: 20px; bottom: 72px;
+            width: 46px; height: 46px;
+            background: #FFFFFF;
+            border-radius: 50%;
+            display: -webkit-flex;
+            display: flex;
+            -webkit-align-items: center;
+            align-items: center;
+            -webkit-justify-content: center;
+            justify-content: center;
+            font-size: 26px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 998;
+        }
+
+        /* 加载中 */
+        .loading-container { text-align: center; padding: 30px; }
+        .loading-text { font-size: 13px; color: #8E8E93; }
+    </style>
+</head>
+<body>
+
+    <div id="pull-indicator" style="position: fixed; top: 0; width: 100%; text-align: center; color: #8E8E93; font-size: 14px; height: 50px; line-height: 50px; display: none;">
+        下拉刷新
+    </div>
+
+    <div id="refresh-container">
+        <div class="header">
+            <div class="top-row">
+                <div class="tabs">
+                    <div class="tab-item active" onclick="switchTab('app')">应用</div>
+                    <div class="tab-item" onclick="switchTab('web')">网页</div>
+                </div>
+                <div class="right-controls">
+                    <div class="search-bar-fake" onclick="location.href='search.html'">
+                        <span>搜索</span>
+                    </div>
+                    <div class="msg-box" onclick="location.href='xiaoxi.html'">
+                        <div class="unread-badge" id="unreadBadge" style="display: none;">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="app-content">
+            <div class="featured-section">
+                <div class="carousel-container" id="carousel">
+                    <div class="carousel-track" id="track"></div>
+                </div>
+            </div>
+
+            <div class="nav-scroll">
+                <div class="nav-item active" onclick="switchCategory('', this)">推荐</div>
+                <div class="nav-item" onclick="location.href='rank.html'">排行</div>
+                <div class="nav-item" onclick="switchCategory('影视音乐', this)">影视音乐</div>
+                <div class="nav-item" onclick="switchCategory('实用工具', this)">实用工具</div>
+                <div class="nav-item" onclick="switchCategory('学习必备', this)">学习必备</div>
+            </div>
+
+            <div class="app-list" id="appList"></div>
+            <div id="loadMoreTip" style="text-align:center; padding: 20px; color: #8E8E93; font-size: 12px; display: none;">加载中...</div>
+        </div>
+
+        <div id="web-content" style="display:none; text-align:center; padding-top:100px;">
+            <h3>开发中</h3>
+        </div>
+    </div>
+
+    <div class="fab" onclick="location.href='share.html'">+</div>
+
+    <div class="bottom-nav">
+        <div class="bottom-item active">
+            <span>首页</span>
+        </div>
+        <div class="bottom-item" onclick="location.href='me.html'">
+            <span>我的</span>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var currentFilter = '';
+        var currentPage = 1;
+        var isLoading = false;
+        var hasMore = true;
+
+        // 兼容版 AJAX 请求函数
+        function ajax(url, callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', url, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            var data = JSON.parse(xhr.responseText);
+                            callback(data);
+                        } catch (e) { console.log("JSON解析失败"); }
+                    }
+                }
+            };
+            xhr.send();
+        }
+
+        function getApps(filter, isRefresh) {
+            if (isLoading) return;
+            var mail = localStorage.getItem('usermail');
+            if (!mail) {
+                document.getElementById('appList').innerHTML = '<div style="text-align:center;padding:20px;">请先登录</div>';
+                return;
+            }
+
+            isLoading = true;
+            var tip = document.getElementById('loadMoreTip');
+            if (isRefresh) {
+                document.getElementById('appList').innerHTML = '<div class="loading-container"><div class="loading-text">加载中...</div></div>';
+            }
+            tip.style.display = 'block';
+
+            var url = 'https://apirank.qujiaweb.top/?mode=get_app_list&mail=' + encodeURIComponent(mail) + '&filter=' + encodeURIComponent(filter) + '&page=' + currentPage;
+            
+            ajax(url, function(res) {
+                isLoading = false;
+                if (res.code === 200 && res.fields) {
+                    if (isRefresh) document.getElementById('appList').innerHTML = '';
+                    renderList(res.fields);
+                    if (res.fields.length < 20) {
+                        hasMore = false;
+                        tip.innerText = '没有更多了';
+                    }
+                }
+            });
+        }
+
+        function renderList(apps) {
+            var container = document.getElementById('appList');
+            for (var i = 0; i < apps.length; i++) {
+                var app = apps[i];
+                var div = document.createElement('div');
+                div.className = 'app-item';
+                div.onclick = (function(id){
+                    return function() { location.href = 'xiangqing.html?id=' + id; }
+                })(app.id);
+
+                var iconStyle = app.图标 ? 'style="background-image: url(' + app.图标 + ')"' : '';
+                div.innerHTML = '<div class="app-icon" ' + iconStyle + '></div>' +
+                                '<div class="app-info">' +
+                                '<div class="app-name">' + (app.名称 || '未知') + '</div>' +
+                                '<div class="app-desc">' + (app.简介 || '') + '</div>' +
+                                '</div>';
+                container.appendChild(div);
+            }
+        }
+
+        function switchCategory(filter, el) {
+            var items = document.getElementsByClassName('nav-item');
+            for(var i=0; i<items.length; i++) items[i].className = 'nav-item';
+            el.className = 'nav-item active';
+            
+            currentFilter = filter;
+            currentPage = 1;
+            hasMore = true;
+            getApps(filter, true);
+        }
+
+        function switchTab(type) {
+            var app = document.getElementById('app-content');
+            var web = document.getElementById('web-content');
+            var tabs = document.getElementsByClassName('tab-item');
+            if (type === 'app') {
+                app.style.display = 'block';
+                web.style.display = 'none';
+                tabs[0].className = 'tab-item active';
+                tabs[1].className = 'tab-item';
+            } else {
+                app.style.display = 'none';
+                web.style.display = 'block';
+                tabs[1].className = 'tab-item active';
+                tabs[0].className = 'tab-item';
+            }
+        }
+
+        // 简单的滚动加载
+        window.onscroll = function() {
+            if (isLoading || !hasMore) return;
+            var scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+            var clientHeight = document.documentElement.clientHeight || document.body.clientHeight;
+            var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+            
+            if (scrollTop + clientHeight >= scrollHeight - 100) {
+                currentPage++;
+                getApps(currentFilter, false);
+            }
+        };
+
+        window.onload = function() {
+            getApps('', true);
+        };
+    </script>
+</body>
+</html>
