@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>个人中心 - 趣加应用</title>
+    <style>
+        /* 降级处理：不使用 CSS 变量，直接使用硬编码颜色 */
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, "Helvetica Neue", "PingFang SC", sans-serif;
+            background-color: #F2F2F7;
+            color: #1C1C1E;
+            overflow-x: hidden;
+        }
+
+        /* 登录界面 */
+        .login-container { padding: 60px 30px; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-align-items: center; align-items: center; }
+        .login-container h1 { font-size: 28px; margin-bottom: 40px; font-weight: 700; }
+        .input-group { width: 100%; margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 8px; font-size: 14px; color: #8E8E93; }
+        .input-group input {
+            width: 100%; padding: 14px; border-radius: 12px;
+            border: 1px solid #ddd; background: #fff; font-size: 16px; outline: none;
+        }
+        .login-button {
+            width: 100%; padding: 15px; background: #007AFF;
+            color: #fff; border: none; border-radius: 16px; font-size: 17px;
+            font-weight: 600; margin-top: 10px;
+        }
+
+        /* 个人中心 Header */
+        header {
+            position: relative; background: #F2F2F7;
+            z-index: 100; padding: 15px 16px;
+            display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: space-between; justify-content: space-between;
+            border-bottom: 1px solid #ddd;
+        }
+        .profile-left { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; }
+        .avatar {
+            width: 52px; height: 52px; background: #ddd; border-radius: 26px;
+            border: 2px solid #fff; object-fit: cover; margin-right: 12px;
+        }
+        .user-meta { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; }
+        .username { font-size: 18px; font-weight: 700; }
+        
+        .points-badge {
+            display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; background: #E3E3E6;
+            padding: 2px 10px; border-radius: 8px; font-size: 13px;
+            color: #8E8E93; font-weight: 600; width: -webkit-fit-content; width: fit-content; margin-top: 4px;
+        }
+        .points-star { color: #FF9500; margin-right: 4px; }
+
+        .top-btns { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; }
+        .icon-box {
+            width: 34px; height: 34px;
+            background: #E3E3E6; border-radius: 10px;
+            display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center;
+            margin-left: 8px; position: relative;
+        }
+        .header-icon-img { width: 20px; height: 20px; }
+
+        .unread-badge {
+            position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px;
+            background: #FF3B30; color: white; border-radius: 9px;
+            font-size: 11px; font-weight: 600; display: none; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center;
+            padding: 0 6px;
+        }
+
+        /* 中间导航 */
+        .middle-nav { padding: 10px 16px; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; }
+        .mid-tab-item {
+            font-size: 18px; font-weight: 600; color: #8E8E93;
+            margin-right: 20px; cursor: pointer;
+        }
+        .mid-tab-item.active { font-size: 24px; color: #1C1C1E; }
+
+        .app-list { padding: 10px 16px 100px 16px; }
+        .app-item {
+            display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; background: #FFFFFF;
+            padding: 12px; border-radius: 16px; margin-bottom: 12px; position: relative;
+        }
+        .app-icon { width: 60px; height: 60px; background: #f0f0f2; border-radius: 14px; margin-right: 14px; -webkit-flex-shrink: 0; flex-shrink: 0; }
+        .app-info { -webkit-flex: 1; flex: 1; min-width: 0; }
+        .app-name { font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+        .app-desc { font-size: 12px; color: #8E8E93; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* 底部导航 */
+        .bottom-nav {
+            position: fixed; bottom: 0; width: 100%; height: 52px;
+            background: #FFFFFF; border-top: 1px solid #ddd; display: -webkit-flex; display: flex;
+            -webkit-justify-content: space-around; justify-content: space-around; -webkit-align-items: center; align-items: center; z-index: 100;
+        }
+        .bottom-item { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; font-size: 10px; color: #8E8E93; -webkit-flex: 1; flex: 1; text-decoration: none; }
+        .bottom-item.active { color: #007AFF; }
+        .nav-icon-img { width: 22px; height: 22px; margin-bottom: 2px; }
+
+        #toast {
+            position: fixed; top: 40px; left: 50%; -webkit-transform: translateX(-50%); transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); color: #fff; padding: 10px 20px;
+            border-radius: 20px; font-size: 14px; display: none; z-index: 999;
+        }
+
+        .fab {
+            position: fixed; right: 20px; bottom: 72px; width: 46px; height: 46px;
+            background: #FFFFFF; border: 1px solid #ddd; border-radius: 23px;
+            display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center;
+            font-size: 26px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 99;
+        }
+
+        /* 简易加载动画 */
+        .loading-text { padding: 20px; text-align: center; color: #8E8E93; font-size: 14px; }
+
+        /* 应用状态徽章 */
+        .status-badge { font-size: 11px; padding: 4px 8px; border-radius: 6px; font-weight: 600; margin-left: 8px; -webkit-flex-shrink: 0; flex-shrink: 0; }
+        .status-shared { background: #EAF9EE; color: #34C759; }
+        .status-failed { background: #FFF0EF; color: #FF3B30; }
+        .status-pending { background: #E3F2FD; color: #2196F3; }
+
+        #ban-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5); z-index: 2000; display: none; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center;
+        }
+        .ban-content { background: white; width: 85%; border-radius: 20px; padding: 25px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div id="toast"></div>
+    <div id="ban-modal">
+        <div class="ban-content">
+            <div style="color:#FF3B30; font-weight:bold; margin-bottom:10px;">⚠️ 当前账号已封禁</div>
+            <div style="font-size:13px; text-align:left; color:#666; background:#f9f9f9; padding:10px; border-radius:10px;">
+                1.上传不良内容<br>2.违规评论<br>3.篡改数据<br><br><b>账号相关资产已冻结。</b>
+            </div>
+        </div>
+    </div>
+
+    <section id="loginSection" style="display: none;">
+        <div class="login-container">
+            <h1>Welcome</h1>
+            <div class="input-group">
+                <label>邮箱</label>
+                <input type="email" id="email" placeholder="输入邮箱地址">
+            </div>
+            <div class="input-group">
+                <label>密码</label>
+                <input type="password" id="pass" placeholder="输入您的密码">
+            </div>
+            <button class="login-button" onclick="handleLogin(true)">马上登录</button>
+            <button class="login-button" style="background:#eee; color:#007AFF; margin-top:15px;" onclick="openLink('zhuce.html')">立即注册</button>
+        </div>
+    </section>
+
+    <section id="profileSection" style="display: none;">
+        <header>
+            <div class="profile-left" onclick="openLink('page.html?user=' + encodeURIComponent(localStorage.getItem('usermail')))">
+                <img src="" class="avatar" id="uAvatar">
+                <div class="user-meta">
+                    <div class="username" id="uName">加载中...</div>
+                    <div class="points-badge">
+                        <span class="points-star">⭐</span><span id="uPoints">0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="top-btns">
+                <div class="icon-box" onclick="openLink('xiaoxi.html')">
+                    <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_N7XqHo5QC_1766889837434.png" class="header-icon-img">
+                    <div class="unread-badge" id="unreadBadge">0</div>
+                </div>
+                <div class="icon-box" onclick="openLink('setting.html')">
+                    <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_tnm1F1efLp_1766889744283.png" class="header-icon-img">
+                </div>
+            </div>
+        </header>
+
+        <nav class="middle-nav">
+            <span class="mid-tab-item active" onclick="switchMidTab(this, 'history')">历史</span>
+            <span class="mid-tab-item" onclick="switchMidTab(this, 'collection')">收藏</span>
+            <span class="mid-tab-item" onclick="switchMidTab(this, 'my')">我的</span>
+            <span class="mid-tab-item" onclick="openLink('guanli.html')" id="reviewTab" style="display: none;">审核</span>
+        </nav>
+
+        <main class="app-list" id="appList"></main>
+    </section>
+
+    <div class="fab" onclick="openLink('share.html')">+</div>
+
+    <nav class="bottom-nav">
+        <div onclick="openLink('index.html')" class="bottom-item">
+            <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_v4UVIMr2qe_1766889744125.png" class="nav-icon-img">
+            <span>首页</span>
+        </div>
+        <div class="bottom-item active">
+            <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_C7AQMwmQxj_1766889744280.png" class="nav-icon-img">
+            <span>我的</span>
+        </div>
+    </nav>
+
+    <script src="https://static2.pgaot.com/Assets/js/jquery-2.2.4.min.js"></script>
+    <script>
+        var API = 'https://apirank.qujiaweb.top/';
+
+        function toast(m) { 
+            $('#toast').text(m).stop(true, true).fadeIn().delay(1500).fadeOut(); 
+        }
+
+        function openLink(url) {
+            window.location.href = url;
+        }
+
+        // ES5 兼容的 HTML 转义处理
+        function decodeHtml(str) {
+            if(!str) return '';
+            return str.replace(/&#(\d+);/g, function(match, dec) {
+                return String.fromCharCode(dec);
+            });
+        }
+
+        function checkLoginStatus() {
+            var mail = localStorage.getItem('usermail');
+            if (!mail) {
+                $('#loginSection').show();
+                $('#profileSection').hide();
+            } else {
+                $('#loginSection').hide();
+                $('#profileSection').show();
+                $('#uName').text(decodeHtml(localStorage.getItem('username') || '用户'));
+                $('#uAvatar').attr('src', localStorage.getItem('userpicture') || 'https://creation.bcmcdn.com/716/appcraft/IMAGE_k7lDKB-Wr_1772007264168.jpeg');
+                $('#uPoints').text(localStorage.getItem('userpoints') || '0');
+                
+                if(localStorage.getItem('isAdmin') === 'true') {
+                    $('#reviewTab').show();
+                }
+                
+                getUnreadCount();
+                showAppList('history');
+            }
+        }
+
+        function handleLogin(isManual, autoEmail, autoPass) {
+            var email = autoEmail || $('#email').val();
+            var password = autoPass || $('#pass').val();
+            if(!email || !password) {
+                if(isManual) toast('请输入邮箱密码');
+                return;
+            }
+            
+            $.ajax({
+                url: API + '?mode=login',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ email: email, password: password }),
+                success: function(res) {
+                    if (res.code === 200 && res.fields && res.fields.length > 0) {
+                        var user = res.fields[0];
+                        localStorage.setItem('usermail', user["邮箱"]);
+                        localStorage.setItem('username', user["昵称"]);
+                        localStorage.setItem('userpicture', user["头像"]);
+                        localStorage.setItem('userpoints', user["积分"] || '0');
+                        localStorage.setItem('isAdmin', user["是否管理"] === '是' ? 'true' : 'false');
+                        localStorage.setItem('usermail_login', email);
+                        localStorage.setItem('userpass_login', password);
+                        checkLoginStatus();
+                    } else if (res.code === 403) {
+                        $('#ban-modal').css('display', '-webkit-flex').css('display', 'flex');
+                    } else {
+                        if(isManual) toast('账号或密码错误');
+                    }
+                },
+                error: function() {
+                    if(isManual) toast('网络连接失败');
+                }
+            });
+        }
+
+        function switchMidTab(el, type) {
+            $('.mid-tab-item').removeClass('active');
+            $(el).addClass('active');
+            showAppList(type);
+        }
+
+        function showAppList(type) {
+            var list = [];
+            var container = $('#appList');
+            container.empty();
+
+            if (type === 'history' || type === 'collection') {
+                var storageKey = (type === 'history') ? 'appHistory' : 'appCollection';
+                try {
+                    list = JSON.parse(localStorage.getItem(storageKey) || '[]');
+                } catch(e) { list = []; }
+                renderList(list, type);
+            } else {
+                // 我的分享 (AJAX)
+                container.html('<div class="loading-text">加载中...</div>');
+                $.ajax({
+                    url: API + '?mode=get_user_apps&mail=' + encodeURIComponent(localStorage.getItem('usermail')),
+                    type: 'GET',
+                    success: function(res) {
+                        if(res.code === 200 && res.fields) {
+                            renderList(res.fields, 'my');
+                        } else {
+                            container.html('<div class="loading-text">暂无分享记录</div>');
+                        }
+                    }
+                });
+            }
+        }
+
+        function renderList(data, type) {
+            var container = $('#appList');
+            container.empty();
+            if(!data || data.length === 0) {
+                container.html('<div class="loading-text">暂无记录</div>');
+                return;
+            }
+
+            for (var i = 0; i < data.length; i++) {
+                var item = data[i];
+                var id = item.id;
+                var name = decodeHtml(item.名称 || item.name || '未知');
+                var desc = decodeHtml(item.简介 || item.description || '暂无简介');
+                var icon = item.图标 || item.icon || '';
+                var status = item.是否推荐 || '';
+
+                var html = '<div class="app-item" onclick="openLink(\'xiangqing.html?id=' + id + '\')">' +
+                    '<div class="app-icon" style="background:url(' + icon + ') center/cover"></div>' +
+                    '<div class="app-info">' +
+                        '<div class="app-name">' + name + '</div>' +
+                        '<div class="app-desc">' + desc + '</div>' +
+                    '</div>';
+                
+                if(type === 'my' && status) {
+                    var cls = 'status-pending';
+                    if(status === '推荐') cls = 'status-shared';
+                    if(status === '未通过') cls = 'status-failed';
+                    html += '<div class="status-badge ' + cls + '">' + status + '</div>';
+                }
+                
+                html += '</div>';
+                container.append(html);
+            }
+        }
+
+        function getUnreadCount() {
+            var mail = localStorage.getItem('usermail');
+            $.ajax({
+                url: API + '?mode=get_messages&mail=' + encodeURIComponent(mail),
+                type: 'GET',
+                success: function(res) {
+                    if (res.code === 200 && res.fields) {
+                        var count = 0;
+                        for(var i=0; i<res.fields.length; i++) {
+                            if(res.fields[i]['是否已读'] === '否' && res.fields[i]['是否删除'] === '否') count++;
+                        }
+                        if(count > 0) {
+                            $('#unreadBadge').text(count > 99 ? '99+' : count).css('display', '-webkit-flex').css('display', 'flex');
+                        }
+                    }
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            checkLoginStatus();
+            var savedEmail = localStorage.getItem('usermail_login');
+            var savedPass = localStorage.getItem('userpass_login');
+            if (savedEmail && savedPass) {
+                handleLogin(false, savedEmail, savedPass);
+            }
+        });
+    </script>
+</body>
+</html>
