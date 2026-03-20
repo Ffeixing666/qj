@@ -5,21 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>个人中心 - 趣加应用</title>
     <style>
-        /* iOS9 极简兼容样式 - 不使用flex的高级用法，采用传统布局+fallback */
+        /* iOS9 完全兼容样式 - 无flex，无calc，无sticky，仅使用传统布局 */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
-        
         body {
             font-family: -apple-system, "Helvetica Neue", Helvetica, sans-serif;
             background-color: #F2F2F7;
             color: #1C1C1E;
             overflow-x: hidden;
         }
-        
         /* 登录界面 */
         .login-container {
             padding: 60px 30px;
@@ -67,10 +65,8 @@
             color: #007AFF;
             margin-top: 15px;
         }
-        
         /* Header */
         header {
-            position: relative;
             background: #F2F2F7;
             padding: 15px 16px;
             overflow: hidden;
@@ -143,14 +139,11 @@
             padding: 0 4px;
             display: none;
         }
-        
-        /* 清除浮动 */
         .clearfix:after {
             content: "";
             display: table;
             clear: both;
         }
-        
         /* 选项卡 */
         .middle-nav {
             padding: 10px 16px;
@@ -169,7 +162,6 @@
             font-size: 24px;
             color: #1C1C1E;
         }
-        
         /* 列表区域 */
         .app-list {
             padding: 10px 16px 100px 16px;
@@ -195,7 +187,7 @@
         }
         .app-info {
             float: left;
-            width: calc(100% - 150px);
+            width: 60%;
         }
         .app-name {
             font-size: 16px;
@@ -227,8 +219,7 @@
             background: #E3F2FD;
             color: #2196F3;
         }
-        
-        /* 底部导航 - 固定定位 */
+        /* 底部导航 */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -258,7 +249,6 @@
             display: block;
             margin: 0 auto 2px;
         }
-        
         /* 轻提示 */
         #toast {
             position: fixed;
@@ -275,7 +265,6 @@
             z-index: 999;
             text-align: center;
         }
-        
         /* FAB 按钮 */
         .fab {
             position: fixed;
@@ -292,7 +281,6 @@
             z-index: 99;
             cursor: pointer;
         }
-        
         .empty-tip {
             text-align: center;
             padding: 40px;
@@ -304,11 +292,16 @@
             padding: 40px;
             color: #666;
         }
+        /* 调试信息（仅用于排查，可隐藏） */
+        #debugInfo {
+            display: none;
+        }
     </style>
 </head>
 <body>
 
 <div id="toast"></div>
+<div id="debugInfo" style="background:#fff; border:1px solid red; padding:10px; margin:10px; font-size:12px; display:none;"></div>
 
 <!-- 登录界面 -->
 <div id="loginSection" style="display: none;">
@@ -375,12 +368,24 @@
 
 <script src="https://static2.pgaot.com/Assets/js/jquery-2.2.4.min.js"></script>
 <script>
-// 使用最古老的 ES3/ES5 语法，避免任何 ES6+ 特性
+// 严格 ES3 兼容，无任何 ES6+ 语法，添加错误捕获
 (function() {
-    // API 地址
+    // 全局变量
     var API_BASE = 'https://apirank.qujiaweb.top/';
     
-    // toast 提示函数
+    // 显示调试信息（可开启以排查问题）
+    function logDebug(msg) {
+        var $debug = $('#debugInfo');
+        if ($debug.length && $debug.is(':visible')) {
+            $debug.append('<div>' + msg + '</div>');
+        }
+        // 可选：控制台输出
+        if (window.console && console.log) {
+            console.log('[Debug] ' + msg);
+        }
+    }
+    
+    // toast 提示
     window.toast = function(msg) {
         var $toast = $('#toast');
         if ($toast.length) {
@@ -399,11 +404,12 @@
             }
             return JSON.parse(val);
         } catch(e) {
+            logDebug('safeGetJson error: ' + e.message);
             return defaultValue;
         }
     }
     
-    // 判断是否为数组
+    // 判断数组
     function isArray(obj) {
         return Object.prototype.toString.call(obj) === '[object Array]';
     }
@@ -419,7 +425,7 @@
         });
     }
     
-    // 渲染应用列表
+    // 渲染列表
     function renderList(data) {
         var $list = $('#appList');
         if (!$list.length) return;
@@ -468,19 +474,29 @@
         }
     }
     
-    // 加载历史记录
+    // 加载历史
     function loadHistory() {
-        var historyData = safeGetJson('appHistory', []);
-        renderList(historyData);
+        try {
+            var historyData = safeGetJson('appHistory', []);
+            renderList(historyData);
+        } catch(e) {
+            logDebug('loadHistory error: ' + e.message);
+            renderList([]);
+        }
     }
     
-    // 加载收藏记录
+    // 加载收藏
     function loadCollection() {
-        var collectData = safeGetJson('appCollection', []);
-        renderList(collectData);
+        try {
+            var collectData = safeGetJson('appCollection', []);
+            renderList(collectData);
+        } catch(e) {
+            logDebug('loadCollection error: ' + e.message);
+            renderList([]);
+        }
     }
     
-    // 获取用户上传的应用
+    // 获取用户应用
     function getUserApps() {
         var mail = localStorage.getItem('usermail');
         if (!mail) {
@@ -496,20 +512,26 @@
             dataType: 'json',
             timeout: 10000,
             success: function(res) {
-                if (res && res.code === 200 && res.fields && isArray(res.fields)) {
-                    renderList(res.fields);
-                } else {
+                try {
+                    if (res && res.code === 200 && res.fields && isArray(res.fields)) {
+                        renderList(res.fields);
+                    } else {
+                        renderList([]);
+                    }
+                } catch(e) {
+                    logDebug('getUserApps success error: ' + e.message);
                     renderList([]);
                 }
             },
-            error: function() {
+            error: function(xhr, status, err) {
+                logDebug('getUserApps ajax error: ' + status + ' ' + err);
                 window.toast('加载失败，请重试');
                 renderList([]);
             }
         });
     }
     
-    // 获取未读消息数
+    // 获取未读消息
     function getUnreadCount() {
         var mail = localStorage.getItem('usermail');
         if (!mail) return;
@@ -519,26 +541,30 @@
             dataType: 'json',
             timeout: 8000,
             success: function(res) {
-                if (res && res.code === 200 && res.fields && isArray(res.fields)) {
-                    var count = 0;
-                    for (var i = 0; i < res.fields.length; i++) {
-                        if (res.fields[i] && res.fields[i]['是否已读'] === '否') {
-                            count++;
+                try {
+                    if (res && res.code === 200 && res.fields && isArray(res.fields)) {
+                        var count = 0;
+                        for (var i = 0; i < res.fields.length; i++) {
+                            if (res.fields[i] && res.fields[i]['是否已读'] === '否') {
+                                count++;
+                            }
+                        }
+                        var $badge = $('#unreadBadge');
+                        if (count > 0) {
+                            $badge.text(count).show();
+                        } else {
+                            $badge.hide();
                         }
                     }
-                    var $badge = $('#unreadBadge');
-                    if (count > 0) {
-                        $badge.text(count).show();
-                    } else {
-                        $badge.hide();
-                    }
+                } catch(e) {
+                    logDebug('getUnreadCount error: ' + e.message);
                 }
             },
             error: function() {}
         });
     }
     
-    // 检查管理员身份
+    // 检查管理员
     function checkAdminStatus() {
         var mail = localStorage.getItem('usermail');
         if (!mail) return;
@@ -548,16 +574,20 @@
             dataType: 'json',
             timeout: 8000,
             success: function(res) {
-                if (res && res.code === 200 && res.fields && res.fields[0]) {
-                    var user = res.fields[0];
-                    var isAdmin = (user['是否管理'] === '是');
-                    localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
-                    var $reviewTab = $('#reviewTab');
-                    if (isAdmin) {
-                        $reviewTab.show();
-                    } else {
-                        $reviewTab.hide();
+                try {
+                    if (res && res.code === 200 && res.fields && res.fields[0]) {
+                        var user = res.fields[0];
+                        var isAdmin = (user['是否管理'] === '是');
+                        localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
+                        var $reviewTab = $('#reviewTab');
+                        if (isAdmin) {
+                            $reviewTab.show();
+                        } else {
+                            $reviewTab.hide();
+                        }
                     }
+                } catch(e) {
+                    logDebug('checkAdminStatus error: ' + e.message);
                 }
             },
             error: function() {}
@@ -566,28 +596,37 @@
     
     // 初始化个人主页
     function initProfile() {
-        var username = localStorage.getItem('username') || '用户';
-        var userPoints = localStorage.getItem('userpoints') || '0';
-        var avatarUrl = localStorage.getItem('userpicture') || 'https://creation.bcmcdn.com/716/appcraft/IMAGE_k7lDKB-Wr_1772007264168.jpeg';
-        $('#uName').text(username);
-        $('#uPoints').text(userPoints);
-        $('#uAvatar').css('background-image', 'url(' + avatarUrl + ')');
-        
-        checkAdminStatus();
-        getUnreadCount();
-        loadHistory();
+        try {
+            var username = localStorage.getItem('username') || '用户';
+            var userPoints = localStorage.getItem('userpoints') || '0';
+            var avatarUrl = localStorage.getItem('userpicture') || 'https://creation.bcmcdn.com/716/appcraft/IMAGE_k7lDKB-Wr_1772007264168.jpeg';
+            $('#uName').text(username);
+            $('#uPoints').text(userPoints);
+            $('#uAvatar').css('background-image', 'url(' + avatarUrl + ')');
+            
+            checkAdminStatus();
+            getUnreadCount();
+            loadHistory(); // 默认加载历史
+        } catch(e) {
+            logDebug('initProfile error: ' + e.message);
+            $('#appList').html('<div class="empty-tip">加载出错，请刷新重试</div>');
+        }
     }
     
     // 切换选项卡
     window.switchMidTab = function(el, type) {
-        $('.mid-tab-item').removeClass('active');
-        $(el).addClass('active');
-        if (type === 'history') {
-            loadHistory();
-        } else if (type === 'collection') {
-            loadCollection();
-        } else if (type === 'mine') {
-            getUserApps();
+        try {
+            $('.mid-tab-item').removeClass('active');
+            $(el).addClass('active');
+            if (type === 'history') {
+                loadHistory();
+            } else if (type === 'collection') {
+                loadCollection();
+            } else if (type === 'mine') {
+                getUserApps();
+            }
+        } catch(e) {
+            logDebug('switchMidTab error: ' + e.message);
         }
     };
     
@@ -609,19 +648,24 @@
             dataType: 'json',
             timeout: 15000,
             success: function(res) {
-                if (res && res.code === 200 && res.fields && res.fields[0]) {
-                    var u = res.fields[0];
-                    localStorage.setItem('usermail', u["邮箱"] || '');
-                    localStorage.setItem('username', u["昵称"] || '用户');
-                    localStorage.setItem('userpicture', u["头像"] || '');
-                    localStorage.setItem('userpoints', u["积分"] || '0');
-                    localStorage.setItem('isAdmin', (u["是否管理"] === '是') ? 'true' : 'false');
-                    window.toast('登录成功');
-                    setTimeout(function() {
-                        location.reload();
-                    }, 600);
-                } else {
-                    window.toast('账号或密码错误');
+                try {
+                    if (res && res.code === 200 && res.fields && res.fields[0]) {
+                        var u = res.fields[0];
+                        localStorage.setItem('usermail', u["邮箱"] || '');
+                        localStorage.setItem('username', u["昵称"] || '用户');
+                        localStorage.setItem('userpicture', u["头像"] || '');
+                        localStorage.setItem('userpoints', u["积分"] || '0');
+                        localStorage.setItem('isAdmin', (u["是否管理"] === '是') ? 'true' : 'false');
+                        window.toast('登录成功');
+                        setTimeout(function() {
+                            location.reload();
+                        }, 600);
+                    } else {
+                        window.toast('账号或密码错误');
+                    }
+                } catch(e) {
+                    logDebug('handleLogin success error: ' + e.message);
+                    window.toast('登录异常');
                 }
             },
             error: function() {
@@ -682,14 +726,21 @@
     
     // 页面启动
     $(document).ready(function() {
-        var userMail = localStorage.getItem('usermail');
-        if (!userMail) {
+        try {
+            var userMail = localStorage.getItem('usermail');
+            if (!userMail) {
+                $('#loginSection').show();
+                $('#profileSection').hide();
+            } else {
+                $('#loginSection').hide();
+                $('#profileSection').show();
+                initProfile();
+            }
+        } catch(e) {
+            logDebug('document.ready error: ' + e.message);
+            // 降级显示登录界面
             $('#loginSection').show();
             $('#profileSection').hide();
-        } else {
-            $('#loginSection').hide();
-            $('#profileSection').show();
-            initProfile();
         }
     });
     
