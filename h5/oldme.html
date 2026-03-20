@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>个人中心 - 趣加应用</title>
     <style>
-        /* iOS9 完全兼容样式 - 无flex，无calc，无sticky，仅使用传统布局 */
+        /* 极简兼容样式 - 无flex，无calc，无sticky */
         * {
             margin: 0;
             padding: 0;
@@ -14,9 +14,8 @@
         }
         body {
             font-family: -apple-system, "Helvetica Neue", Helvetica, sans-serif;
-            background-color: #F2F2F7;
+            background: #F2F2F7;
             color: #1C1C1E;
-            overflow-x: hidden;
         }
         /* 登录界面 */
         .login-container {
@@ -29,7 +28,6 @@
             text-align: center;
         }
         .input-group {
-            width: 100%;
             margin-bottom: 20px;
         }
         .input-group label {
@@ -45,7 +43,6 @@
             border: 1px solid #ddd;
             background: #fff;
             font-size: 16px;
-            outline: none;
             -webkit-appearance: none;
         }
         .login-button {
@@ -249,7 +246,7 @@
             display: block;
             margin: 0 auto 2px;
         }
-        /* 轻提示 */
+        /* 提示 */
         #toast {
             position: fixed;
             top: 40px;
@@ -265,7 +262,6 @@
             z-index: 999;
             text-align: center;
         }
-        /* FAB 按钮 */
         .fab {
             position: fixed;
             right: 20px;
@@ -281,27 +277,30 @@
             z-index: 99;
             cursor: pointer;
         }
-        .empty-tip {
+        .empty-tip, .loading-tip {
             text-align: center;
             padding: 40px;
             color: #999;
-            font-size: 14px;
         }
         .loading-tip {
-            text-align: center;
-            padding: 40px;
             color: #666;
         }
-        /* 调试信息（仅用于排查，可隐藏） */
-        #debugInfo {
+        /* 调试面板（隐藏，可开启） */
+        #debug {
             display: none;
+            background: #fff;
+            border: 1px solid red;
+            padding: 10px;
+            margin: 10px;
+            font-size: 12px;
+            white-space: pre-wrap;
         }
     </style>
 </head>
 <body>
 
 <div id="toast"></div>
-<div id="debugInfo" style="background:#fff; border:1px solid red; padding:10px; margin:10px; font-size:12px; display:none;"></div>
+<div id="debug" style="display:none;"></div>
 
 <!-- 登录界面 -->
 <div id="loginSection" style="display: none;">
@@ -315,15 +314,15 @@
             <label>密码</label>
             <input type="password" id="pass" placeholder="输入您的密码">
         </div>
-        <button class="login-button" onclick="handleLogin(true)">马上登录</button>
-        <button class="login-button secondary" onclick="openRegisterPage()">立即注册</button>
+        <button class="login-button" id="loginBtn">马上登录</button>
+        <button class="login-button secondary" id="registerBtn">立即注册</button>
     </div>
 </div>
 
 <!-- 个人主页内容 -->
 <div id="profileSection" style="display: none;">
     <header class="clearfix">
-        <div class="profile-left" onclick="openUserPage()">
+        <div class="profile-left" id="userProfileBtn">
             <div class="avatar" id="uAvatar" style="background-image: url('https://creation.bcmcdn.com/716/appcraft/IMAGE_k7lDKB-Wr_1772007264168.jpeg');"></div>
             <div class="user-meta">
                 <div class="username" id="uName">加载中...</div>
@@ -331,21 +330,21 @@
             </div>
         </div>
         <div class="top-btns">
-            <div class="icon-box" onclick="openMessagePage()">
+            <div class="icon-box" id="msgBtn">
                 <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_N7XqHo5QC_1766889837434.png" alt="消息">
                 <div class="unread-badge" id="unreadBadge">0</div>
             </div>
-            <div class="icon-box" onclick="openSettingPage()">
+            <div class="icon-box" id="settingBtn">
                 <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_tnm1F1efLp_1766889744283.png" alt="设置">
             </div>
         </div>
     </header>
 
     <div class="middle-nav">
-        <span class="mid-tab-item active" onclick="switchMidTab(this, 'history')">历史</span>
-        <span class="mid-tab-item" onclick="switchMidTab(this, 'collection')">收藏</span>
-        <span class="mid-tab-item" onclick="switchMidTab(this, 'mine')">我的</span>
-        <span class="mid-tab-item" onclick="openReviewPage()" id="reviewTab" style="display: none;">审核</span>
+        <span class="mid-tab-item active" data-type="history">历史</span>
+        <span class="mid-tab-item" data-type="collection">收藏</span>
+        <span class="mid-tab-item" data-type="mine">我的</span>
+        <span class="mid-tab-item" data-type="review" id="reviewTab" style="display: none;">审核</span>
     </div>
 
     <div class="app-list" id="appList">
@@ -353,59 +352,44 @@
     </div>
 </div>
 
-<div class="fab" onclick="openSharePage()">+</div>
+<div class="fab" id="fabBtn">+</div>
 
 <div class="bottom-nav">
-    <div onclick="openHomePage()" class="bottom-item">
+    <div class="bottom-item" id="homeBtn">
         <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_v4UVIMr2qe_1766889744125.png" class="nav-icon-img" alt="首页">
         <span>首页</span>
     </div>
-    <div class="bottom-item active">
+    <div class="bottom-item active" id="profileNavBtn">
         <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_C7AQMwmQxj_1766889744280.png" class="nav-icon-img" alt="我的">
         <span>我的</span>
     </div>
 </div>
 
-<script src="https://static2.pgaot.com/Assets/js/jquery-2.2.4.min.js"></script>
 <script>
-// 严格 ES3 兼容，无任何 ES6+ 语法，添加错误捕获
+// 纯原生 JavaScript，无任何外部依赖，完全兼容 iOS9
 (function() {
-    // 全局变量
+    // 全局配置
     var API_BASE = 'https://apirank.qujiaweb.top/';
     
-    // 显示调试信息（可开启以排查问题）
-    function logDebug(msg) {
-        var $debug = $('#debugInfo');
-        if ($debug.length && $debug.is(':visible')) {
-            $debug.append('<div>' + msg + '</div>');
-        }
-        // 可选：控制台输出
-        if (window.console && console.log) {
-            console.log('[Debug] ' + msg);
-        }
+    // 辅助函数：显示提示
+    function showToast(msg) {
+        var toast = document.getElementById('toast');
+        if (!toast) return;
+        toast.textContent = msg;
+        toast.style.display = 'block';
+        setTimeout(function() {
+            toast.style.display = 'none';
+        }, 1500);
     }
     
-    // toast 提示
-    window.toast = function(msg) {
-        var $toast = $('#toast');
-        if ($toast.length) {
-            $toast.text(msg).stop(true, true).fadeIn().delay(1500).fadeOut();
-        } else {
-            alert(msg);
+    // 调试输出
+    function debugLog(msg) {
+        var debugDiv = document.getElementById('debug');
+        if (debugDiv && debugDiv.style.display === 'block') {
+            debugDiv.innerHTML += '<div>' + msg + '</div>';
         }
-    };
-    
-    // 安全读取 localStorage JSON
-    function safeGetJson(key, defaultValue) {
-        try {
-            var val = localStorage.getItem(key);
-            if (val === null || val === undefined) {
-                return defaultValue;
-            }
-            return JSON.parse(val);
-        } catch(e) {
-            logDebug('safeGetJson error: ' + e.message);
-            return defaultValue;
+        if (window.console && console.log) {
+            console.log(msg);
         }
     }
     
@@ -414,7 +398,7 @@
         return Object.prototype.toString.call(obj) === '[object Array]';
     }
     
-    // HTML 转义
+    // 转义HTML
     function escapeHtml(str) {
         if (!str) return '';
         return String(str).replace(/[&<>]/g, function(m) {
@@ -425,34 +409,92 @@
         });
     }
     
-    // 渲染列表
+    // 安全获取 localStorage
+    function getLocal(key, def) {
+        try {
+            var val = localStorage.getItem(key);
+            return val !== null ? val : def;
+        } catch(e) {
+            return def;
+        }
+    }
+    
+    function setLocal(key, val) {
+        try {
+            localStorage.setItem(key, val);
+        } catch(e) {}
+    }
+    
+    // 解析 JSON 存储
+    function getJson(key, def) {
+        try {
+            var val = localStorage.getItem(key);
+            if (!val) return def;
+            return JSON.parse(val);
+        } catch(e) {
+            return def;
+        }
+    }
+    
+    function setJson(key, val) {
+        try {
+            localStorage.setItem(key, JSON.stringify(val));
+        } catch(e) {}
+    }
+    
+    // AJAX 封装
+    function ajax(method, url, data, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.open(method, url, true);
+        xhr.timeout = 10000;
+        if (method === 'POST') {
+            xhr.setRequestHeader('Content-Type', 'application/json');
+        }
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        var res = JSON.parse(xhr.responseText);
+                        callback(null, res);
+                    } catch(e) {
+                        callback(e, null);
+                    }
+                } else {
+                    callback(new Error('HTTP ' + xhr.status), null);
+                }
+            }
+        };
+        xhr.onerror = function() {
+            callback(new Error('Network error'), null);
+        };
+        xhr.ontimeout = function() {
+            callback(new Error('Timeout'), null);
+        };
+        if (data && method === 'POST') {
+            xhr.send(JSON.stringify(data));
+        } else {
+            xhr.send();
+        }
+    }
+    
+    // 渲染应用列表
     function renderList(data) {
-        var $list = $('#appList');
-        if (!$list.length) return;
-        $list.empty();
-        
+        var container = document.getElementById('appList');
+        if (!container) return;
+        container.innerHTML = '';
         if (!data || !isArray(data) || data.length === 0) {
-            $list.append('<div class="empty-tip">暂无数据</div>');
+            container.innerHTML = '<div class="empty-tip">暂无数据</div>';
             return;
         }
-        
         for (var i = 0; i < data.length; i++) {
             var item = data[i];
-            if (!item) continue;
-            
             var name = item.名称 || item.name || '未知应用';
             var icon = item.图标 || item.icon || '';
             var desc = item.简介 || item.description || '暂无简介';
             var id = item.id || item.ID || '';
-            
             name = escapeHtml(name);
             desc = escapeHtml(desc);
-            
-            var iconStyle = '';
-            if (icon) {
-                iconStyle = 'style="background-image: url(' + encodeURI(icon) + ');"';
-            }
-            
+            var iconStyle = icon ? 'style="background-image: url(' + encodeURI(icon) + ');"' : '';
             var statusHtml = '';
             if (item.是否推荐) {
                 var isRec = (item.是否推荐 === '推荐');
@@ -460,9 +502,8 @@
                 var statusTxt = isRec ? '已发布' : '审核中';
                 statusHtml = '<div class="status-badge ' + statusCls + '">' + statusTxt + '</div>';
             }
-            
             var safeId = (id + '').replace(/'/g, "\\'");
-            var appHtml = '<div class="app-item" onclick="openDetail(\'' + safeId + '\')">' +
+            var appHtml = '<div class="app-item" data-id="' + safeId + '">' +
                 '<div class="app-icon" ' + iconStyle + '></div>' +
                 '<div class="app-info">' +
                 '<div class="app-name">' + name + '</div>' +
@@ -470,213 +511,156 @@
                 '</div>' +
                 statusHtml +
                 '</div>';
-            $list.append(appHtml);
+            container.insertAdjacentHTML('beforeend', appHtml);
+        }
+        // 绑定点击事件
+        var items = container.querySelectorAll('.app-item');
+        for (var i = 0; i < items.length; i++) {
+            items[i].addEventListener('click', function(e) {
+                var id = this.getAttribute('data-id');
+                if (id) openDetail(id);
+            });
         }
     }
     
     // 加载历史
     function loadHistory() {
-        try {
-            var historyData = safeGetJson('appHistory', []);
-            renderList(historyData);
-        } catch(e) {
-            logDebug('loadHistory error: ' + e.message);
-            renderList([]);
-        }
+        var data = getJson('appHistory', []);
+        renderList(data);
     }
     
     // 加载收藏
     function loadCollection() {
-        try {
-            var collectData = safeGetJson('appCollection', []);
-            renderList(collectData);
-        } catch(e) {
-            logDebug('loadCollection error: ' + e.message);
-            renderList([]);
-        }
+        var data = getJson('appCollection', []);
+        renderList(data);
     }
     
     // 获取用户应用
-    function getUserApps() {
-        var mail = localStorage.getItem('usermail');
+    function loadUserApps() {
+        var mail = getLocal('usermail', '');
         if (!mail) {
             renderList([]);
             return;
         }
-        var $list = $('#appList');
-        if ($list.length) $list.html('<div class="loading-tip">加载中...</div>');
-        
-        $.ajax({
-            url: API_BASE + '?mode=get_user_apps&mail=' + encodeURIComponent(mail),
-            type: 'GET',
-            dataType: 'json',
-            timeout: 10000,
-            success: function(res) {
-                try {
-                    if (res && res.code === 200 && res.fields && isArray(res.fields)) {
-                        renderList(res.fields);
-                    } else {
-                        renderList([]);
-                    }
-                } catch(e) {
-                    logDebug('getUserApps success error: ' + e.message);
-                    renderList([]);
-                }
-            },
-            error: function(xhr, status, err) {
-                logDebug('getUserApps ajax error: ' + status + ' ' + err);
-                window.toast('加载失败，请重试');
+        var container = document.getElementById('appList');
+        if (container) container.innerHTML = '<div class="loading-tip">加载中...</div>';
+        ajax('GET', API_BASE + '?mode=get_user_apps&mail=' + encodeURIComponent(mail), null, function(err, res) {
+            if (err) {
+                showToast('加载失败');
+                renderList([]);
+                return;
+            }
+            if (res && res.code === 200 && res.fields && isArray(res.fields)) {
+                renderList(res.fields);
+            } else {
                 renderList([]);
             }
         });
     }
     
-    // 获取未读消息
-    function getUnreadCount() {
-        var mail = localStorage.getItem('usermail');
+    // 获取未读消息数
+    function fetchUnreadCount() {
+        var mail = getLocal('usermail', '');
         if (!mail) return;
-        $.ajax({
-            url: API_BASE + '?mode=get_messages&mail=' + encodeURIComponent(mail),
-            type: 'GET',
-            dataType: 'json',
-            timeout: 8000,
-            success: function(res) {
-                try {
-                    if (res && res.code === 200 && res.fields && isArray(res.fields)) {
-                        var count = 0;
-                        for (var i = 0; i < res.fields.length; i++) {
-                            if (res.fields[i] && res.fields[i]['是否已读'] === '否') {
-                                count++;
-                            }
-                        }
-                        var $badge = $('#unreadBadge');
-                        if (count > 0) {
-                            $badge.text(count).show();
-                        } else {
-                            $badge.hide();
-                        }
-                    }
-                } catch(e) {
-                    logDebug('getUnreadCount error: ' + e.message);
+        ajax('GET', API_BASE + '?mode=get_messages&mail=' + encodeURIComponent(mail), null, function(err, res) {
+            if (err) return;
+            if (res && res.code === 200 && res.fields && isArray(res.fields)) {
+                var count = 0;
+                for (var i = 0; i < res.fields.length; i++) {
+                    if (res.fields[i] && res.fields[i]['是否已读'] === '否') count++;
                 }
-            },
-            error: function() {}
+                var badge = document.getElementById('unreadBadge');
+                if (count > 0) {
+                    badge.textContent = count;
+                    badge.style.display = 'block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
         });
     }
     
-    // 检查管理员
-    function checkAdminStatus() {
-        var mail = localStorage.getItem('usermail');
+    // 检查管理员状态
+    function checkAdmin() {
+        var mail = getLocal('usermail', '');
         if (!mail) return;
-        $.ajax({
-            url: API_BASE + '?mode=get_user_info&mail=' + encodeURIComponent(mail),
-            type: 'GET',
-            dataType: 'json',
-            timeout: 8000,
-            success: function(res) {
-                try {
-                    if (res && res.code === 200 && res.fields && res.fields[0]) {
-                        var user = res.fields[0];
-                        var isAdmin = (user['是否管理'] === '是');
-                        localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false');
-                        var $reviewTab = $('#reviewTab');
-                        if (isAdmin) {
-                            $reviewTab.show();
-                        } else {
-                            $reviewTab.hide();
-                        }
-                    }
-                } catch(e) {
-                    logDebug('checkAdminStatus error: ' + e.message);
+        ajax('GET', API_BASE + '?mode=get_user_info&mail=' + encodeURIComponent(mail), null, function(err, res) {
+            if (err) return;
+            if (res && res.code === 200 && res.fields && res.fields[0]) {
+                var user = res.fields[0];
+                var isAdmin = (user['是否管理'] === '是');
+                setLocal('isAdmin', isAdmin ? 'true' : 'false');
+                var reviewTab = document.getElementById('reviewTab');
+                if (isAdmin) {
+                    reviewTab.style.display = 'inline-block';
+                } else {
+                    reviewTab.style.display = 'none';
                 }
-            },
-            error: function() {}
+            }
         });
     }
     
     // 初始化个人主页
     function initProfile() {
-        try {
-            var username = localStorage.getItem('username') || '用户';
-            var userPoints = localStorage.getItem('userpoints') || '0';
-            var avatarUrl = localStorage.getItem('userpicture') || 'https://creation.bcmcdn.com/716/appcraft/IMAGE_k7lDKB-Wr_1772007264168.jpeg';
-            $('#uName').text(username);
-            $('#uPoints').text(userPoints);
-            $('#uAvatar').css('background-image', 'url(' + avatarUrl + ')');
-            
-            checkAdminStatus();
-            getUnreadCount();
-            loadHistory(); // 默认加载历史
-        } catch(e) {
-            logDebug('initProfile error: ' + e.message);
-            $('#appList').html('<div class="empty-tip">加载出错，请刷新重试</div>');
-        }
+        var username = getLocal('username', '用户');
+        var points = getLocal('userpoints', '0');
+        var avatar = getLocal('userpicture', 'https://creation.bcmcdn.com/716/appcraft/IMAGE_k7lDKB-Wr_1772007264168.jpeg');
+        document.getElementById('uName').textContent = username;
+        document.getElementById('uPoints').textContent = points;
+        document.getElementById('uAvatar').style.backgroundImage = 'url(' + avatar + ')';
+        checkAdmin();
+        fetchUnreadCount();
+        loadHistory(); // 默认加载历史
     }
     
     // 切换选项卡
-    window.switchMidTab = function(el, type) {
-        try {
-            $('.mid-tab-item').removeClass('active');
-            $(el).addClass('active');
-            if (type === 'history') {
-                loadHistory();
-            } else if (type === 'collection') {
-                loadCollection();
-            } else if (type === 'mine') {
-                getUserApps();
+    function switchTab(type) {
+        var tabs = document.querySelectorAll('.mid-tab-item');
+        for (var i = 0; i < tabs.length; i++) {
+            tabs[i].classList.remove('active');
+            if (tabs[i].getAttribute('data-type') === type) {
+                tabs[i].classList.add('active');
             }
-        } catch(e) {
-            logDebug('switchMidTab error: ' + e.message);
         }
-    };
+        if (type === 'history') loadHistory();
+        else if (type === 'collection') loadCollection();
+        else if (type === 'mine') loadUserApps();
+        else if (type === 'review') openReviewPage();
+    }
     
-    // 登录处理
-    window.handleLogin = function(isManual) {
-        var email = $('#email').val().trim();
-        var password = $('#pass').val().trim();
-        if (!email || !password) {
-            window.toast('请输入账号密码');
+    // 登录逻辑
+    function doLogin() {
+        var email = document.getElementById('email').value.trim();
+        var pass = document.getElementById('pass').value.trim();
+        if (!email || !pass) {
+            showToast('请输入账号密码');
             return;
         }
-        if (isManual) window.toast('登录中...');
-        
-        $.ajax({
-            url: API_BASE + '?mode=login',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({ email: email, password: password }),
-            dataType: 'json',
-            timeout: 15000,
-            success: function(res) {
-                try {
-                    if (res && res.code === 200 && res.fields && res.fields[0]) {
-                        var u = res.fields[0];
-                        localStorage.setItem('usermail', u["邮箱"] || '');
-                        localStorage.setItem('username', u["昵称"] || '用户');
-                        localStorage.setItem('userpicture', u["头像"] || '');
-                        localStorage.setItem('userpoints', u["积分"] || '0');
-                        localStorage.setItem('isAdmin', (u["是否管理"] === '是') ? 'true' : 'false');
-                        window.toast('登录成功');
-                        setTimeout(function() {
-                            location.reload();
-                        }, 600);
-                    } else {
-                        window.toast('账号或密码错误');
-                    }
-                } catch(e) {
-                    logDebug('handleLogin success error: ' + e.message);
-                    window.toast('登录异常');
-                }
-            },
-            error: function() {
-                window.toast('网络请求失败');
+        showToast('登录中...');
+        ajax('POST', API_BASE + '?mode=login', { email: email, password: pass }, function(err, res) {
+            if (err) {
+                showToast('网络错误');
+                return;
+            }
+            if (res && res.code === 200 && res.fields && res.fields[0]) {
+                var u = res.fields[0];
+                setLocal('usermail', u["邮箱"] || '');
+                setLocal('username', u["昵称"] || '用户');
+                setLocal('userpicture', u["头像"] || '');
+                setLocal('userpoints', u["积分"] || '0');
+                setLocal('isAdmin', (u["是否管理"] === '是') ? 'true' : 'false');
+                showToast('登录成功');
+                setTimeout(function() {
+                    location.reload();
+                }, 600);
+            } else {
+                showToast('账号或密码错误');
             }
         });
-    };
+    }
     
-    // 页面跳转函数
-    window.openDetail = function(id) {
-        if (!id) return;
+    // 跳转函数
+    function openDetail(id) {
         var url = 'xiangqing.html?id=' + encodeURIComponent(id);
         if (window.plus && plus.webview) {
             var ws = plus.webview.create(url, url);
@@ -684,72 +668,63 @@
         } else {
             window.location.href = url;
         }
-    };
-    
-    window.openHomePage = function() {
+    }
+    function openHomePage() {
         if (window.plus && plus.webview) {
             var current = plus.webview.currentWebview();
             if (current) current.close('pop-out', 300);
         } else {
             window.history.back();
         }
-    };
+    }
+    function openSettingPage() { window.location.href = 'setting.html'; }
+    function openMessagePage() { window.location.href = 'xiaoxi.html'; }
+    function openUserPage() {
+        var mail = getLocal('usermail', '');
+        if (mail) window.location.href = 'page.html?user=' + encodeURIComponent(mail);
+        else showToast('请先登录');
+    }
+    function openSharePage() { window.location.href = 'share.html'; }
+    function openReviewPage() { window.location.href = 'guanli.html'; }
+    function openRegisterPage() { window.location.href = 'zhuce.html'; }
     
-    window.openSettingPage = function() {
-        window.location.href = 'setting.html';
-    };
-    
-    window.openMessagePage = function() {
-        window.location.href = 'xiaoxi.html';
-    };
-    
-    window.openUserPage = function() {
-        var mail = localStorage.getItem('usermail');
-        if (mail) {
-            window.location.href = 'page.html?user=' + encodeURIComponent(mail);
+    // 页面加载完成
+    document.addEventListener('DOMContentLoaded', function() {
+        // 绑定事件
+        document.getElementById('loginBtn').addEventListener('click', doLogin);
+        document.getElementById('registerBtn').addEventListener('click', openRegisterPage);
+        document.getElementById('userProfileBtn').addEventListener('click', openUserPage);
+        document.getElementById('msgBtn').addEventListener('click', openMessagePage);
+        document.getElementById('settingBtn').addEventListener('click', openSettingPage);
+        document.getElementById('fabBtn').addEventListener('click', openSharePage);
+        document.getElementById('homeBtn').addEventListener('click', openHomePage);
+        document.getElementById('profileNavBtn').addEventListener('click', function() { /* 已经在个人页面，无需跳转 */ });
+        
+        // 选项卡点击
+        var tabs = document.querySelectorAll('.mid-tab-item');
+        for (var i = 0; i < tabs.length; i++) {
+            tabs[i].addEventListener('click', function(e) {
+                var type = this.getAttribute('data-type');
+                if (type === 'review') openReviewPage();
+                else switchTab(type);
+            });
+        }
+        
+        // 检查登录状态
+        var usermail = getLocal('usermail', '');
+        var loginSection = document.getElementById('loginSection');
+        var profileSection = document.getElementById('profileSection');
+        if (!usermail) {
+            loginSection.style.display = 'block';
+            profileSection.style.display = 'none';
         } else {
-            window.toast('请先登录');
-        }
-    };
-    
-    window.openSharePage = function() {
-        window.location.href = 'share.html';
-    };
-    
-    window.openReviewPage = function() {
-        window.location.href = 'guanli.html';
-    };
-    
-    window.openRegisterPage = function() {
-        window.location.href = 'zhuce.html';
-    };
-    
-    // 页面启动
-    $(document).ready(function() {
-        try {
-            var userMail = localStorage.getItem('usermail');
-            if (!userMail) {
-                $('#loginSection').show();
-                $('#profileSection').hide();
-            } else {
-                $('#loginSection').hide();
-                $('#profileSection').show();
-                initProfile();
-            }
-        } catch(e) {
-            logDebug('document.ready error: ' + e.message);
-            // 降级显示登录界面
-            $('#loginSection').show();
-            $('#profileSection').hide();
+            loginSection.style.display = 'none';
+            profileSection.style.display = 'block';
+            initProfile();
         }
     });
     
-    // 头像加载失败处理
-    $(document).on('error', '.avatar', function() {
-        $(this).css('background-image', 'url(https://creation.bcmcdn.com/716/appcraft/IMAGE_k7lDKB-Wr_1772007264168.jpeg)');
-    });
-    
-    // storage 监听
+    // 监听 storage 变化
     window.addEventListener('storage', function(e) {
         if (e.key === 'usermail' && !e.newValue) {
             location.reload();
