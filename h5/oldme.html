@@ -5,33 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>个人中心 - 趣加应用</title>
     <style>
-        /* CSS 变量在 iOS 9.4+ 支持，为保险起见，重要属性提供 fallback */
-        :root {
-            --bg-color: #F2F2F7;
-            --card-bg: #FFFFFF;
-            --text-main: #1C1C1E;
-            --text-secondary: #8E8E93;
-            --accent-blue: #007AFF;
-            --control-bg: #E3E3E6;
-            --header-item-height: 34px;
-        }
-
+        /* 彻底移除 CSS 变量，改用硬编码以支持极旧浏览器 */
         * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
+            margin: 0; padding: 0; box-sizing: border-box; 
             -webkit-tap-highlight-color: transparent; 
-            -webkit-user-select: none;
-            user-select: none;
+            -webkit-user-select: none; user-select: none;
         }
 
         body {
             font-family: -apple-system, "Helvetica Neue", "PingFang SC", sans-serif;
             background-color: #F2F2F7;
-            background-color: var(--bg-color);
             color: #1C1C1E;
-            color: var(--text-main);
             overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
         }
 
         /* 登录界面 */
@@ -46,433 +32,263 @@
         .login-button {
             width: 100%; padding: 15px; background: #007AFF;
             color: #fff; border: none; border-radius: 16px; font-size: 17px;
-            font-weight: 600; margin-top: 10px; box-shadow: 0 4px 12px rgba(0,122,255,0.2);
+            font-weight: 600; margin-top: 10px;
         }
 
-        /* Header - iOS 9 需要 -webkit-sticky */
+        /* 导航头 */
         header {
-            position: -webkit-sticky;
-            position: sticky; 
-            top: 0; 
-            background: rgba(242, 242, 247, 0.95); /* iOS 9 不支持 backdrop-filter，改用较高不透明度 */
+            position: -webkit-sticky; position: sticky; 
+            top: 0; background: #F2F2F7; background: rgba(242, 242, 247, 0.95);
             z-index: 100; padding: 15px 16px;
             display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: space-between; justify-content: space-between;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
         }
-        .profile-left { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; gap: 12px; }
+        .profile-left { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; }
         .avatar {
-            width: 52px; height: 52px; background: #ddd; border-radius: 50%;
-            border: 2px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            object-fit: cover;
+            width: 52px; height: 52px; background: #ddd; border-radius: 26px;
+            border: 2px solid #fff; object-fit: cover; margin-right: 12px;
         }
-        .user-meta { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; gap: 4px; }
-        .username { font-size: 18px; font-weight: 700; }
-        
+        .username { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
         .points-badge {
-            display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; background: #E3E3E6;
-            padding: 2px 10px; border-radius: 8px; font-size: 13px;
-            color: #8E8E93; font-weight: 600; width: fit-content;
+            background: #E3E3E6; padding: 2px 10px; border-radius: 8px; font-size: 13px; color: #8E8E93; display: inline-block;
         }
-        .points-star { color: #FF9500; margin-right: 4px; }
 
-        .top-btns { display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; gap: 8px; }
+        .top-btns { display: -webkit-flex; display: flex; }
         .icon-box {
-            width: 34px; height: 34px;
-            background: #E3E3E6; border-radius: 10px;
+            width: 34px; height: 34px; background: #E3E3E6; border-radius: 10px;
             display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center;
-            position: relative;
+            margin-left: 8px; position: relative;
         }
-        .header-icon-img { width: 20px; height: 20px; }
-
         .unread-badge {
             position: absolute; top: -4px; right: -4px;
             min-width: 18px; height: 18px; background: #FF3B30;
             color: white; border-radius: 9px; font-size: 11px;
-            font-weight: 600; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center;
-            padding: 0 6px; box-shadow: 0 2px 4px rgba(255, 59, 48, 0.3);
+            display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center;
         }
 
-        /* 导航 */
-        .middle-nav { padding: 10px 16px; display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; gap: 20px; }
-        .mid-tab-item { font-size: 18px; font-weight: 600; color: #8E8E93; cursor: pointer; }
+        /* 选项卡 */
+        .middle-nav { padding: 10px 16px; display: -webkit-flex; display: flex; -webkit-align-items: baseline; align-items: baseline; }
+        .mid-tab-item { font-size: 18px; font-weight: 600; color: #8E8E93; margin-right: 20px; }
         .mid-tab-item.active { font-size: 24px; color: #1C1C1E; }
 
-        .app-list { padding: 10px 16px 100px 16px; }
+        /* 列表区域 */
+        .app-list { padding: 10px 16px 100px 16px; min-height: 200px; }
         .app-item {
             display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; background: #FFFFFF;
-            padding: 12px; border-radius: 16px; margin-bottom: 12px;
+            padding: 12px; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        .app-icon { width: 60px; height: 60px; background: #f0f0f2; border-radius: 14px; margin-right: 14px; -webkit-flex-shrink: 0; flex-shrink: 0; }
+        .app-icon { width: 60px; height: 60px; background: #f0f0f2; border-radius: 14px; margin-right: 14px; -webkit-flex-shrink: 0; }
         .app-info { -webkit-flex: 1; flex: 1; min-width: 0; }
-        .app-name { font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
-        .app-desc { font-size: 12px; color: #8E8E93; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .app-name { font-size: 16px; font-weight: 600; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .app-desc { font-size: 12px; color: #8E8E93; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* 底部导航 */
+        /* 底部 */
         .bottom-nav {
-            position: fixed; bottom: 0; width: 100%; height: 52px;
-            background: rgba(255, 255, 255, 0.95);
-            border-top: 1px solid rgba(0,0,0,0.1); display: -webkit-flex; display: flex;
-            -webkit-justify-content: space-around; justify-content: space-around; -webkit-align-items: center; align-items: center; z-index: 100;
+            position: fixed; bottom: 0; width: 100%; height: 52px; background: #FFFFFF;
+            border-top: 1px solid rgba(0,0,0,0.1); display: -webkit-flex; display: flex; z-index: 100;
         }
-        .bottom-item { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-align-items: center; align-items: center; font-size: 10px; color: #8E8E93; -webkit-flex: 1; flex: 1; text-decoration: none; }
+        .bottom-item { -webkit-flex: 1; flex: 1; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; font-size: 10px; color: #8E8E93; text-decoration: none; }
         .bottom-item.active { color: #007AFF; }
         .nav-icon-img { width: 22px; height: 22px; margin-bottom: 2px; }
 
         #toast {
             position: fixed; top: 40px; left: 50%; -webkit-transform: translateX(-50%); transform: translateX(-50%);
-            background: rgba(0,0,0,0.8); color: #fff; padding: 10px 20px;
-            border-radius: 20px; font-size: 14px; display: none; z-index: 999;
+            background: rgba(0,0,0,0.8); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 14px; display: none; z-index: 999;
         }
 
-        .fab {
-            position: fixed; right: 20px; bottom: 72px; width: 46px; height: 46px;
-            background: #FFFFFF; border: 1px solid rgba(0,0,0,0.08); border-radius: 50%;
-            display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center;
-            font-size: 26px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 99;
-        }
-
-        /* 加载动画 */
-        .loading-container { padding: 40px 0; text-align: center; }
-        .loading-spinner {
-            width: 30px; height: 30px; border: 3px solid #f3f3f3;
-            border-top: 3px solid #007AFF; border-radius: 50%;
-            margin: 0 auto 10px; -webkit-animation: spin 1s linear infinite; animation: spin 1s linear infinite;
-        }
-        @-webkit-keyframes spin { 0% { -webkit-transform: rotate(0deg); } 100% { -webkit-transform: rotate(360deg); } }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* 状态徽章 */
-        .status-badge { font-size: 11px; padding: 4px 10px; border-radius: 8px; font-weight: 600; margin-left: 12px; -webkit-flex-shrink: 0; flex-shrink: 0; }
+        .status-badge { font-size: 11px; padding: 4px 8px; border-radius: 6px; margin-left: 10px; }
         .status-shared { background: #EAF9EE; color: #34C759; }
-        .status-failed { background: #FFF0EF; color: #FF3B30; }
         .status-pending { background: #E3F2FD; color: #2196F3; }
-
-        /* 封禁弹窗 */
-        #ban-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.6); z-index: 2000; display: none;
-            -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center; padding: 20px;
-        }
-        .ban-content {
-            background: white; width: 90%; max-width: 320px; border-radius: 20px;
-            padding: 25px; text-align: center;
-        }
-
-        /* 长按菜单 */
-        .action-menu {
-            position: fixed; top: 50%; left: 50%; -webkit-transform: translate(-50%, -50%); transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9); color: white; border-radius: 12px;
-            padding: 10px 0; z-index: 9999; min-width: 160px; text-align: center;
-        }
-        .menu-item { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .menu-item:last-child { border-bottom: none; }
     </style>
 </head>
 <body>
 
     <div id="toast"></div>
-    
-    <div id="ban-modal">
-        <div class="ban-content">
-            <div style="color:#ff7675; font-weight:bold; font-size:18px; margin-bottom:15px;">⚠️ 账号已封禁</div>
-            <div style="text-align:left; font-size:13px; color:#666; line-height:1.6; background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:15px;">
-                可能原因：上传违规内容、刷数据或攻击系统。账号资产已冻结。
-            </div>
-            <div style="font-size:12px; color:#999;">申诉邮件：110045310@qq.com</div>
-        </div>
-    </div>
 
     <section id="loginSection" style="display: none;">
         <div class="login-container">
-            <h1>Welcome</h1>
+            <h1>趣加应用</h1>
             <div class="input-group">
                 <label>邮箱</label>
-                <input type="email" id="email" placeholder="输入邮箱地址">
+                <input type="email" id="email" placeholder="example@mail.com">
             </div>
             <div class="input-group">
                 <label>密码</label>
-                <input type="password" id="pass" placeholder="输入您的密码">
+                <input type="password" id="pass" placeholder="请输入密码">
             </div>
-            <button class="login-button" onclick="handleLogin(true)">马上登录</button>
-            <button class="login-button" style="background: #f0f0f0; color: #007AFF; margin-top: 15px;" onclick="location.href='zhuce.html'">立即注册</button>
+            <button class="login-button" onclick="handleLogin(true)">登录</button>
         </div>
     </section>
 
     <section id="profileSection" style="display: none;">
         <header>
-            <div class="profile-left">
-                <img src="" class="avatar" id="uAvatar" onclick="openUserPage()">
+            <div class="profile-left" onclick="location.href='page.html?user='+encodeURIComponent(localStorage.getItem('usermail'))">
+                <img src="" class="avatar" id="uAvatar">
                 <div class="user-meta">
-                    <div class="username" id="uName" onclick="openUserPage()">加载中...</div>
-                    <div class="points-badge" onclick="location.href='mall.html'">
-                        <span class="points-star">⭐</span><span id="uPoints">0</span>
-                    </div>
+                    <div class="username" id="uName">加载中...</div>
+                    <div class="points-badge">⭐ <span id="uPoints">0</span></div>
                 </div>
             </div>
             <div class="top-btns">
                 <div class="icon-box" onclick="location.href='xiaoxi.html'">
-                    <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_N7XqHo5QC_1766889837434.png" class="header-icon-img">
-                    <div class="unread-badge" id="unreadBadge" style="display: none;">0</div>
-                </div>
-                <div class="icon-box" onclick="location.href='setting.html'">
-                    <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_tnm1F1efLp_1766889744283.png" class="header-icon-img">
+                    <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_N7XqHo5QC_1766889837434.png" style="width:20px;">
+                    <div class="unread-badge" id="unreadBadge" style="display:none;">0</div>
                 </div>
             </div>
         </header>
 
         <nav class="middle-nav">
-            <span class="mid-tab-item active" onclick="switchMidTab(this)">历史</span>
-            <span class="mid-tab-item" onclick="switchMidTab(this)">收藏</span>
-            <span class="mid-tab-item" onclick="switchMidTab(this)">我的</span>
-            <span class="mid-tab-item" id="reviewTab" style="display: none;" onclick="location.href='guanli.html'">审核</span>
+            <span class="mid-tab-item active" onclick="switchMidTab(this, 'history')">历史</span>
+            <span class="mid-tab-item" onclick="switchMidTab(this, 'collection')">收藏</span>
+            <span class="mid-tab-item" onclick="switchMidTab(this, 'mine')">我的</span>
         </nav>
 
-        <main class="app-list" id="appList">
-            </main>
+        <div class="app-list" id="appList">
+            </div>
     </section>
 
-    <div class="fab" onclick="location.href='share.html'">+</div>
-
     <nav class="bottom-nav">
-        <div onclick="location.href='old.html'" class="bottom-item">
+        <a href="index.html" class="bottom-item">
             <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_v4UVIMr2qe_1766889744125.png" class="nav-icon-img">
             <span>首页</span>
-        </div>
-        <div class="bottom-item active">
+        </a>
+        <a href="me.html" class="bottom-item active">
             <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_C7AQMwmQxj_1766889744280.png" class="nav-icon-img">
             <span>我的</span>
-        </div>
+        </a>
     </nav>
 
     <script src="https://static2.pgaot.com/Assets/js/jquery-2.2.4.min.js"></script>
-    
     <script>
-        var API = 'https://apirank.qujiaweb.top/';
+        var API_URL = 'https://apirank.qujiaweb.top/';
 
-        function toast(msg) {
-            $('#toast').text(msg).stop(true, true).fadeIn().delay(1500).fadeOut();
+        function showToast(m) {
+            $('#toast').text(m).fadeIn().delay(1500).fadeOut();
         }
 
-        // 实体字符转 Emoji
-        function htmlEntityToEmoji(str) {
-            if(!str) return "";
-            return str.replace(/&#(\d+);/g, function(match, code) {
-                return String.fromCodePoint(parseInt(code));
-            });
-        }
-
-        // 初始化
-        $(function() {
-            var savedEmail = localStorage.getItem('usermail_login');
-            var savedPass = localStorage.getItem('userpass_login');
-            
-            if (savedEmail && savedPass) {
-                handleLogin(false, savedEmail, savedPass);
+        // 页面启动逻辑
+        $(document).ready(function() {
+            var m = localStorage.getItem('usermail');
+            if (!m) {
+                $('#loginSection').show();
             } else {
-                checkLoginStatus();
+                $('#profileSection').show();
+                initProfile();
             }
         });
 
-        function checkLoginStatus() {
-            var mail = localStorage.getItem('usermail');
-            if (!mail) {
-                $('#loginSection').show();
-                $('#profileSection').hide();
-            } else {
-                $('#loginSection').hide();
-                $('#profileSection').show();
-                $('#uName').text(htmlEntityToEmoji(localStorage.getItem('username') || '用户'));
-                $('#uAvatar').attr('src', localStorage.getItem('userpicture') || 'https://creation.bcmcdn.com/716/appcraft/IMAGE_k7lDKB-Wr_1772007264168.jpeg');
-                $('#uPoints').text(localStorage.getItem('userpoints') || '0');
-                
-                checkAdminStatus(mail);
-                getUnreadMessageCount(mail);
-                showHistory();
-            }
+        function initProfile() {
+            // 设置基本信息
+            $('#uName').text(localStorage.getItem('username') || '用户');
+            $('#uAvatar').attr('src', localStorage.getItem('userpicture') || 'https://creation.bcmcdn.com/716/appcraft/IMAGE_k7lDKB-Wr_1772007264168.jpeg');
+            $('#uPoints').text(localStorage.getItem('userpoints') || '0');
+            
+            // 加载初始列表
+            loadHistory();
+            fetchUnread();
         }
 
-        // 使用 jQuery AJAX 替代 Fetch (iOS 9 兼容性关键)
-        function handleLogin(isManual, autoEmail, autoPass) {
-            var email = autoEmail || $('#email').val();
-            var password = autoPass || $('#pass').val();
+        function handleLogin(isManual) {
+            var e = $('#email').val();
+            var p = $('#pass').val();
+            if (!e || !p) return showToast('请填写完整');
 
-            if (!email || !password) {
-                if(isManual) toast('请输入账号密码');
-                return;
-            }
-
-            if(isManual) toast('正在登录...');
-
+            // 关键修复：显式指定请求类型
             $.ajax({
-                url: API + '?mode=login',
+                url: API_URL + '?mode=login',
                 type: 'POST',
+                data: JSON.stringify({ email: e, password: p }),
                 contentType: 'application/json',
-                data: JSON.stringify({ email: email, password: password }),
+                dataType: 'json',
                 success: function(res) {
-                    if (res.code === 200 && res.fields && res.fields.length > 0) {
-                        var user = res.fields[0];
-                        localStorage.setItem('usermail', user["邮箱"]);
-                        localStorage.setItem('username', user["昵称"]);
-                        localStorage.setItem('userpicture', user["头像"]);
-                        localStorage.setItem('userpoints', user["积分"] || '0');
-                        localStorage.setItem('isAdmin', user["是否管理"] === '是' ? 'true' : 'false');
-                        localStorage.setItem('usermail_login', email);
-                        localStorage.setItem('userpass_login', password);
-                        checkLoginStatus();
-                        if(isManual) toast('登录成功');
-                    } else if (res.code === 403) {
-                        $('#ban-modal').css('display', '-webkit-flex').css('display', 'flex');
+                    if (res.code === 200 && res.fields && res.fields[0]) {
+                        var u = res.fields[0];
+                        localStorage.setItem('usermail', u["邮箱"]);
+                        localStorage.setItem('username', u["昵称"]);
+                        localStorage.setItem('userpicture', u["头像"]);
+                        localStorage.setItem('userpoints', u["积分"] || '0');
+                        location.reload();
                     } else {
-                        if(isManual) toast('账号或密码错误');
+                        showToast('登录失败，请检查账号密码');
                     }
                 },
                 error: function() {
-                    if(isManual) toast('网络连接失败');
+                    showToast('网络请求失败');
                 }
             });
         }
 
-        function checkAdminStatus(mail) {
-            $.get(API + '?mode=get_user_info&mail=' + encodeURIComponent(mail), function(res) {
-                if (res.code === 200 && res.fields && res.fields[0]) {
-                    if (res.fields[0]['是否管理'] === '是') {
-                        $('#reviewTab').show();
-                        localStorage.setItem('isAdmin', 'true');
-                    }
-                }
-            });
-        }
-
-        function getUnreadMessageCount(mail) {
-            $.get(API + '?mode=get_messages&mail=' + encodeURIComponent(mail), function(res) {
+        function fetchUnread() {
+            var m = localStorage.getItem('usermail');
+            $.get(API_URL + '?mode=get_messages&mail=' + encodeURIComponent(m), function(res) {
                 if (res.code === 200 && res.fields) {
                     var count = 0;
-                    for (var i = 0; i < res.fields.length; i++) {
-                        if (res.fields[i]['是否已读'] === '否' && res.fields[i]['是否删除'] === '否') {
-                            count++;
-                        }
+                    for(var i=0; i<res.fields.length; i++) {
+                        if(res.fields[i]['是否已读'] === '否') count++;
                     }
-                    if (count > 0) {
-                        $('#unreadBadge').text(count > 99 ? '99+' : count).show();
-                    }
+                    if(count > 0) $('#unreadBadge').text(count).show();
                 }
             });
         }
 
-        function switchMidTab(el) {
+        function switchMidTab(obj, type) {
             $('.mid-tab-item').removeClass('active');
-            $(el).addClass('active');
-            var text = $(el).text();
-            if (text === '我的') getUserApps();
-            else if (text === '历史') showHistory();
-            else if (text === '收藏') showCollection();
+            $(obj).addClass('active');
+            if (type === 'history') loadHistory();
+            else if (type === 'collection') loadCollection();
+            else if (type === 'mine') loadMine();
         }
 
-        // 渲染列表通用函数 (兼容旧版 JS)
-        function renderList(data, type) {
-            var $list = $('#appList').empty();
-            if (!data || data.length === 0) {
-                $list.html('<div class="app-item"><div class="app-icon"></div><div class="app-info"><div class="app-name">暂无记录</div></div></div>');
+        function renderItems(list) {
+            var $box = $('#appList').empty();
+            if (!list || list.length === 0) {
+                $box.append('<div style="text-align:center;color:#999;padding-top:40px;">暂无内容</div>');
                 return;
             }
+            for (var i = 0; i < list.length; i++) {
+                var it = list[i];
+                var name = it.name || it.名称 || '未知';
+                var desc = it.description || it.简介 || '';
+                var icon = it.icon || it.图标 || '';
+                var id = it.id;
 
-            for (var i = 0; i < data.length; i++) {
-                var item = data[i];
-                var name = htmlEntityToEmoji(item.name || item.名称 || '未知');
-                var desc = htmlEntityToEmoji(item.description || item.简介 || '暂无简介');
-                var icon = item.icon || item.图标 || '';
-                var id = item.id;
-
-                var html = '<div class="app-item" data-id="'+id+'">' +
-                    '<div class="app-icon" style="background:url('+icon+') center/cover"></div>' +
+                var html = '<div class="app-item" onclick="location.href=\'xiangqing.html?id=' + id + '\'">' +
+                    '<div class="app-icon" style="background:url(' + icon + ') center/cover"></div>' +
                     '<div class="app-info">' +
-                    '<div class="app-name">'+name+'</div>' +
-                    '<div class="app-desc">'+desc+'</div>' +
+                    '<div class="app-name">' + name + '</div>' +
+                    '<div class="app-desc">' + desc + '</div>' +
                     '</div>';
                 
-                // 增加状态徽章（仅“我的”页面）
-                if (item.是否推荐) {
-                    var statusCls = item.是否推荐 === '推荐' ? 'status-shared' : (item.是否推荐 === '未通过' ? 'status-failed' : 'status-pending');
-                    var statusText = item.是否推荐 === '推荐' ? '已分享' : (item.是否推荐 === '未通过' ? '未通过' : '待审核');
-                    html += '<div class="status-badge '+statusCls+'">'+statusText+'</div>';
+                if (it.是否推荐) {
+                    var statusTxt = it.是否推荐 === '推荐' ? '已分享' : '审核中';
+                    var statusCls = it.是否推荐 === '推荐' ? 'status-shared' : 'status-pending';
+                    html += '<div class="status-badge ' + statusCls + '">' + statusTxt + '</div>';
                 }
-
                 html += '</div>';
-                
-                var $item = $(html);
-                // 绑定点击跳转
-                (function(id){
-                    $item.on('click', function() { location.href = 'xiangqing.html?id=' + id; });
-                    // 绑定长按 (iOS 9 兼容方案)
-                    bindLongPress($item, id, type);
-                })(id);
-
-                $list.append($item);
+                $box.append(html);
             }
         }
 
-        function showHistory() {
-            var history = JSON.parse(localStorage.getItem('appHistory') || '[]');
-            renderList(history, 'history');
+        function loadHistory() {
+            var data = JSON.parse(localStorage.getItem('appHistory') || '[]');
+            renderItems(data);
         }
 
-        function showCollection() {
-            var collection = JSON.parse(localStorage.getItem('appCollection') || '[]');
-            renderList(collection, 'collection');
+        function loadCollection() {
+            var data = JSON.parse(localStorage.getItem('appCollection') || '[]');
+            renderItems(data);
         }
 
-        function getUserApps() {
-            var mail = localStorage.getItem('usermail');
-            $('#appList').html('<div class="loading-container"><div class="loading-spinner"></div><div class="loading-text">加载中...</div></div>');
-            
-            $.get(API + '?mode=get_user_apps&mail=' + encodeURIComponent(mail), function(res) {
+        function loadMine() {
+            var m = localStorage.getItem('usermail');
+            $('#appList').html('<div style="text-align:center;padding:20px;">加载中...</div>');
+            $.get(API_URL + '?mode=get_user_apps&mail=' + encodeURIComponent(m), function(res) {
                 if (res.code === 200) {
-                    renderList(res.fields, 'app');
+                    renderItems(res.fields);
                 } else {
-                    renderList([], 'app');
+                    renderItems([]);
                 }
             });
-        }
-
-        // 长按兼容逻辑
-        function bindLongPress($el, id, type) {
-            var timer = null;
-            $el.on('touchstart', function() {
-                timer = setTimeout(function() {
-                    if (confirm('确定要删除此记录吗？')) {
-                        handleDelete(id, type);
-                    }
-                }, 800);
-            }).on('touchend touchmove', function() {
-                clearTimeout(timer);
-            });
-        }
-
-        function handleDelete(id, type) {
-            if (type === 'history') {
-                var h = JSON.parse(localStorage.getItem('appHistory') || '[]');
-                var newH = h.filter(function(i){ return i.id != id });
-                localStorage.setItem('appHistory', JSON.stringify(newH));
-                showHistory();
-            } else if (type === 'collection') {
-                var c = JSON.parse(localStorage.getItem('appCollection') || '[]');
-                var newC = c.filter(function(i){ return i.id != id });
-                localStorage.setItem('appCollection', JSON.stringify(newC));
-                showCollection();
-            } else if (type === 'app') {
-                var mail = localStorage.getItem('usermail');
-                $.ajax({
-                    url: API + '?mode=delete_user_app&mail=' + encodeURIComponent(mail),
-                    type: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({ id: id, mail: mail }),
-                    success: function() { toast('删除成功'); getUserApps(); }
-                });
-            }
-        }
-
-        function openUserPage() {
-            var mail = localStorage.getItem('usermail');
-            if(mail) location.href = 'page.html?user=' + encodeURIComponent(mail);
         }
     </script>
 </body>
