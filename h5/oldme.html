@@ -355,9 +355,9 @@
 </div>
 
 <script>
-// 纯原生 JavaScript，无外部依赖，所有请求改用 GET 方式（登录也改为 GET）
+// 纯原生 JavaScript，完全兼容 iOS9
 (function() {
-    // 全局配置
+    // API 基础地址
     var API_BASE = 'https://apirank.qujiaweb.top/';
     
     // 显示提示
@@ -376,7 +376,7 @@
         return Object.prototype.toString.call(obj) === '[object Array]';
     }
     
-    // 转义HTML
+    // HTML 转义
     function escapeHtml(str) {
         if (!str) return '';
         return String(str).replace(/[&<>]/g, function(m) {
@@ -420,7 +420,7 @@
         } catch(e) {}
     }
     
-    // AJAX GET 请求封装
+    // AJAX GET 请求
     function ajaxGet(url, callback) {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url, true);
@@ -446,6 +446,35 @@
             callback(new Error('Timeout'), null);
         };
         xhr.send();
+    }
+    
+    // AJAX POST JSON 请求
+    function ajaxPost(url, data, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', url, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.timeout = 15000;
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        var res = JSON.parse(xhr.responseText);
+                        callback(null, res);
+                    } catch(e) {
+                        callback(e, null);
+                    }
+                } else {
+                    callback(new Error('HTTP ' + xhr.status), null);
+                }
+            }
+        };
+        xhr.onerror = function() {
+            callback(new Error('Network error'), null);
+        };
+        xhr.ontimeout = function() {
+            callback(new Error('Timeout'), null);
+        };
+        xhr.send(JSON.stringify(data));
     }
     
     // 渲染应用列表
@@ -602,7 +631,7 @@
         else if (type === 'review') openReviewPage();
     }
     
-    // 登录逻辑（改用 GET 方式）
+    // 登录逻辑：使用 POST JSON
     function doLogin() {
         var email = document.getElementById('email').value.trim();
         var pass = document.getElementById('pass').value.trim();
@@ -611,15 +640,20 @@
             return;
         }
         showToast('登录中...');
-        // 构建 GET 请求 URL
-        var url = API_BASE + '?mode=login&email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(pass);
-        ajaxGet(url, function(err, res) {
+        var url = API_BASE + '?mode=login';
+        ajaxPost(url, { email: email, password: pass }, function(err, res) {
             if (err) {
                 showToast('网络错误: ' + (err.message || '未知错误'));
                 return;
             }
-            if (res && res.code === 200 && res.fields && res.fields[0]) {
+            // 后端登录接口返回的数据结构：res.code 和 res.fields
+            if (res && res.code === 200 && res.fields && res.fields.length > 0) {
                 var u = res.fields[0];
+                // 检查是否封禁
+                if (u['是否封禁'] === '是') {
+                    showToast('账号已被封禁');
+                    return;
+                }
                 setLocal('usermail', u["邮箱"] || '');
                 setLocal('username', u["昵称"] || '用户');
                 setLocal('userpicture', u["头像"] || '');
