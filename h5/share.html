@@ -4,208 +4,1019 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>分享应用</title>
+    <script src="app-info-parser.js" defer></script>
+    <script src="jszip.min.js" defer></script>
     <style>
-        :root { --ios-bg: #F2F2F7; --ios-blue: #007AFF; --line: rgba(0,0,0,0.06); }
+        :root {
+            --ios-bg: #F2F2F7;
+            --ios-card: #FFFFFF;
+            --ios-blue: #007AFF;
+            --ios-orange: #FF9500;
+            --text-main: #1C1C1E;
+            --text-second: #8E8E93;
+            --line-color: rgba(0,0,0,0.06);
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, sans-serif; background: var(--ios-bg); color: #1C1C1E; }
-        header { position: sticky; top: 0; z-index: 100; background: rgba(242,242,247,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 0.5px solid var(--line); }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+            background-color: var(--ios-bg);
+            color: var(--text-main);
+            padding-bottom: 60px;
+        }
+
+        header {
+            position: sticky; top: 0; z-index: 100;
+            background-color: rgba(242, 242, 247, 0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 0.5px solid var(--line-color);
+        }
         .nav-bar { height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
-        .container { padding: 16px; }
-        .card { background: #fff; border-radius: 12px; padding: 25px; text-align: center; border: 1px solid var(--line); }
-        #picker { position: fixed; inset: 0; background: #fff; z-index: 1000; display: none; flex-direction: column; }
-        .p-header { padding: 10px 16px; border-bottom: 0.5px solid var(--line); display: flex; align-items: center; }
-        .search-box { flex: 1; background: #efeff4; border-radius: 10px; padding: 6px 12px; }
-        .search-box input { border: none; background: transparent; width: 100%; outline: none; }
-        #app-list { flex: 1; overflow-y: auto; }
-        .app-item { display: flex; align-items: center; padding: 12px 16px; border-bottom: 0.5px solid var(--line); }
-        .app-icon-placeholder { width: 48px; height: 48px; border-radius: 10px; margin-right: 14px; background: #e5e5ea; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #fff; }
-        #detail-step { display: none; }
-        .info-box { background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 16px; }
-        .preview-header { display: flex; align-items: center; gap: 15px; }
-        .preview-icon { width: 64px; height: 64px; border-radius: 14px; background: #f0f0f0; object-fit: contain; }
-        textarea { width: 100%; border: none; outline: none; font-size: 15px; height: 80px; resize: none; margin-top: 15px; padding: 10px; background: #f9f9f9; border-radius: 8px; }
-        .btn-post { width: 100%; height: 50px; background: var(--ios-blue); color: #fff; border: none; border-radius: 14px; font-size: 17px; font-weight: 600; margin-top: 15px; }
-        #status-log { font-size: 13px; color: var(--ios-blue); margin-top: 10px; text-align: center; }
+        .back-btn { width: 40px; height: 100%; display: flex; align-items: center; }
+        .back-icon { width: 11px; height: 11px; border-left: 2px solid var(--ios-blue); border-bottom: 2px solid var(--ios-blue); transform: rotate(45deg); }
+        .nav-title { font-size: 17px; font-weight: 600; }
+
+        .container { padding: 16px; max-width: 600px; margin: 0 auto; }
+
+        /* 上传卡片 - 初始显示 */
+        #upload-zone {
+            background: var(--ios-card);
+            border: 1.5px dashed #C7C7CC;
+            border-radius: 16px;
+            padding: 40px 16px;
+            text-align: center;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        #upload-zone svg { width: 48px; height: 48px; fill: var(--ios-blue); margin-bottom: 12px; }
+        #upload-zone h4 { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+        #upload-zone p { font-size: 13px; color: var(--text-second); }
+
+        /* 解析状态 */
+        #status-tip { text-align: center; color: var(--ios-blue); font-size: 14px; margin-top: 20px; display: none; }
+
+        /* 后续表单区域 - 初始隐藏 */
+        #content-step { display: none; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .result-card { background: var(--ios-card); border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 16px; }
+        .app-header { display: flex; align-items: center; gap: 16px; padding-bottom: 16px; border-bottom: 0.5px solid var(--line-color); margin-bottom: 16px; }
+        #app-icon { width: 68px; height: 68px; border-radius: 14px; background: #F2F2F7; object-fit: cover; border: 0.5px solid var(--line-color); }
+        .name-area h2 { font-size: 19px; font-weight: 700; margin-bottom: 4px; }
+        .name-area code { font-size: 12px; color: var(--ios-blue); opacity: 0.8; word-break: break-all; }
+
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .info-item { background: #F8F8FA; padding: 12px; border-radius: 10px; }
+        .info-label { font-size: 11px; color: var(--text-second); margin-bottom: 4px; display: block; }
+        .info-value { font-size: 13px; font-weight: 600; }
+
+        /* 截图管理 */
+        .section-header { font-size: 14px; font-weight: 600; color: var(--text-second); margin: 20px 0 10px 4px; display: flex; justify-content: space-between; }
+        .screenshot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .ss-box { aspect-ratio: 9/16; background: #E5E5EA; border-radius: 10px; position: relative; overflow: hidden; border: 0.5px solid var(--line-color); }
+        .ss-box img { width: 100%; height: 100%; object-fit: cover; }
+        .ss-del { position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; background: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; }
+        
+        .ss-add { display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1.5px dashed #C7C7CC; background: transparent; color: var(--text-second); cursor: pointer; }
+        .ss-add svg { width: 24px; height: 24px; fill: var(--text-second); }
+
+        /* 上传加载动画 */
+        .loading-spinner {
+            width: 24px; height: 24px;
+            border: 2px solid rgba(0,122,255,0.2);
+            border-top: 2px solid var(--ios-blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* 网盘区域 */
+        #pan-section { display: none; background: #FFF9F2; border: 0.5px solid #FFE5CC; padding: 16px; border-radius: 12px; margin-bottom: 16px; }
+        .pan-header { display: flex; align-items: center; gap: 6px; color: var(--ios-orange); font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+        .pan-header svg { width: 16px; height: 16px; fill: var(--ios-orange); }
+
+        .ios-input-group { background: var(--ios-card); border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
+        .ios-item { display: flex; align-items: center; padding: 12px 16px; position: relative; }
+        .ios-item:not(:last-child)::after { content: ""; position: absolute; bottom: 0; left: 16px; right: 0; height: 0.5px; background: var(--line-color); }
+        .ios-item input, .ios-item textarea { width: 100%; border: none; outline: none; font-size: 15px; background: transparent; font-family: inherit; }
+        .ios-item textarea { height: 100px; padding: 4px 0; resize: none; }
+
+        .submit-btn { width: 100%; height: 52px; background: var(--ios-blue); color: #fff; border: none; border-radius: 14px; font-size: 17px; font-weight: 600; transition: all 0.2s; margin-top: 10px; }
+        .submit-btn:active { opacity: 0.8; transform: scale(0.99); }
+
+        /* 分类选择器 */
+        .category-section { margin: 20px 0; }
+        .category-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .category-item { padding: 12px; border: 1.5px solid var(--line-color); border-radius: 10px; text-align: center; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .category-item.active { background: var(--ios-blue); color: #fff; border-color: var(--ios-blue); }
+        .category-item:active { transform: scale(0.98); }
     </style>
 </head>
 <body>
 
     <header>
         <div class="nav-bar">
-            <div onclick="location.reload()" style="color:var(--ios-blue)">取消</div>
-            <div style="font-weight:600">分享应用</div>
-            <div style="width:30px"></div>
+            <div class="back-btn" onclick="handleBack()"><div class="back-icon"></div></div>
+            <div class="nav-title">应用分享</div>
+            <div style="width:40px"></div>
         </div>
     </header>
 
-    <div class="container" id="entry-step">
-        <div class="card" onclick="openPicker()"><strong>从已安装列表选择应用</strong></div>
-    </div>
+    <main class="container">
+        <div id="upload-zone" onclick="document.getElementById('apkInput').click()">
+            <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+            <h4>点击上传</h4>
+            <p>请选择本地的APK安装包</p>
+            <input type="file" id="apkInput" style="display:none">
+        </div>
 
-    <div class="container" id="detail-step">
-        <div class="info-box">
-            <div class="preview-header">
-                <img id="res-icon" class="preview-icon">
-                <div><b id="res-name"></b><br><small id="res-pkg" style="color:#8e8e93"></small></div>
+        <div id="status-tip">加载中…</div>
+
+        <div id="content-step">
+            <div class="result-card">
+                <div class="app-header">
+                    <div style="position: relative;">
+                        <img id="app-icon" src="">
+                        <div id="icon-upload-btn" style="position: absolute; bottom: 0; right: 0; width: 24px; height: 24px; background: var(--ios-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; cursor: pointer;">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="white"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                        </div>
+                        <input type="file" id="icon-upload-input" accept="image/*" style="display: none">
+                    </div>
+                    <div class="name-area">
+                        <input type="text" id="app-name" value="-" style="width: 100%; border: none; outline: none; font-size: 19px; font-weight: 700; background: transparent; font-family: inherit;">
+                        <code id="app-pkg">-</code>
+                    </div>
+                </div>
+                <div class="info-grid">
+                    <div class="info-item"><span class="info-label">应用版本</span><span class="info-value" id="v-text">-</span></div>
+                    <div class="info-item"><span class="info-label">应用大小</span><span class="info-value" id="s-text">-</span></div>
+                    <div class="info-item"><span class="info-label">安卓版本</span><span class="info-value" id="sdk-text">-</span></div>
+                    <div class="info-item"><span class="info-label">系统位数</span><span class="info-value" id="arch-text">-</span></div>
+                </div>
             </div>
-            <textarea id="app-intro" placeholder="好东西要大家一起分享，写点介绍吧..."></textarea>
-            <div id="status-log">初始化中...</div>
-            <button class="btn-post" id="submitBtn" disabled onclick="finalSubmit()">同步中...</button>
-        </div>
-    </div>
 
-    <div id="picker">
-        <div class="p-header">
-            <div class="search-box"><input type="text" id="searchInput" placeholder="搜索..." oninput="searchApp(this.value)"></div>
-            <div onclick="closePicker()" style="color:var(--ios-blue); margin-left:12px">关闭</div>
+            <div id="pan-section">
+                <div class="pan-header">
+                    <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                    <span>大文件仅支持网盘分享</span>
+                </div>
+                <div class="ios-input-group">
+                    <div class="ios-item"><input type="text" id="pan-url" placeholder="网盘链接 (必填)"></div>
+                    <div class="ios-item"><input type="text" id="pan-pwd" placeholder="提取密码 (选填)"></div>
+                </div>
+            </div>
+
+            <div class="section-header"><span>应用截图</span><span id="ss-count" style="font-weight:400; font-size:12px;">至少1张</span></div>
+            <div class="screenshot-grid" id="ss-grid">
+                <div class="ss-box ss-add" id="ss-trigger" onclick="document.getElementById('ssFile').click()">
+                    <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                </div>
+            </div>
+            <input type="file" id="ssFile" accept="image/*" style="display:none" multiple>
+
+            <div class="section-header">应用分类</div>
+            <div class="category-section">
+                <div class="category-grid">
+                    <div class="category-item" onclick="selectCategory(this, '影视音乐')">影视音乐</div>
+                    <div class="category-item" onclick="selectCategory(this, '实用工具')">实用工具</div>
+                    <div class="category-item" onclick="selectCategory(this, '娱乐游戏')">娱乐游戏</div>
+                    <div class="category-item" onclick="selectCategory(this, '学习必备')">学习必备</div>
+                    <div class="category-item" onclick="selectCategory(this, '社交生活')">社交生活</div>
+                </div>
+            </div>
+
+            <div class="section-header">应用简介</div>
+            <div class="ios-input-group">
+                <div class="ios-item"><textarea id="app-intro" placeholder="请输入应用的相关介绍..."></textarea></div>
+            </div>
+
+            <button class="submit-btn" onclick="finalSubmit()">立即分享</button>
         </div>
-        <div id="app-list"></div>
-    </div>
+    </main>
 
     <script>
-        let allApps = [];
-        let selectedApp = null;
+        const SDK_MAP = { 18: "4.3", 19: "4.4", 21: "5.0", 22: "5.1", 23: "6.0", 24: "7.0", 25: "7.1", 26: "8.0", 27: "8.1", 28: "9.0", 29: "10", 30: "11", 31: "12", 32: "12L", 33: "13", 34: "14", 35: "15" };
+        let screenshots = [];
+        let apkInfo = null;
+        let selectedCategory = null;
+        let uploadedApkUrl = null;
+        let uploadedIconUrl = null;
 
-        function openPicker() {
-            document.getElementById('picker').style.display = 'flex';
-            if (allApps.length === 0) scanApps();
-        }
-        function closePicker() { document.getElementById('picker').style.display = 'none'; }
-
-        function scanApps() {
-            if (!window.plus) return;
-            const main = plus.android.runtimeMainActivity();
-            const pm = main.getPackageManager();
-            const list = plus.android.invoke(pm, "getInstalledPackages", 0);
-            const count = plus.android.invoke(list, "size");
-            allApps = [];
-            for (let i = 0; i < count; i++) {
-                const pkg = plus.android.invoke(list, "get", i);
-                const ai = plus.android.getAttribute(pkg, "applicationInfo");
-                if ((plus.android.getAttribute(ai, "flags") & 1) !== 0) continue; 
-                allApps.push({
-                    name: plus.android.invoke(ai, "loadLabel", pm).toString(),
-                    pkg: plus.android.getAttribute(pkg, "packageName"),
-                    path: plus.android.getAttribute(ai, "publicSourceDir"),
-                    ver: plus.android.getAttribute(pkg, "versionName")
-                });
+        // --- 增强的 SDK 搜索逻辑 ---
+        function findMinSdk(obj) {
+            if (!obj) return null;
+            
+            // 直接查找顶层 minSdkVersion
+            if (obj.minSdkVersion) return obj.minSdkVersion;
+            
+            // 查找 manifest 中的 uses-sdk
+            const manifest = obj.manifest || obj;
+            if (manifest['uses-sdk']) {
+                const sdkInfo = Array.isArray(manifest['uses-sdk']) ? manifest['uses-sdk'][0] : manifest['uses-sdk'];
+                // 尝试多种可能的键名
+                const sdkVersion = sdkInfo['@android:minSdkVersion'] || 
+                                  sdkInfo['minSdkVersion'] || 
+                                  sdkInfo['android:minSdkVersion'] ||
+                                  sdkInfo['@minSdkVersion'] ||
+                                  sdkInfo['android\:minSdkVersion']; // 处理转义的冒号
+                if (sdkVersion) return sdkVersion;
             }
-            render(allApps);
+            
+            // 直接在 manifest 中搜索 minSdkVersion 相关属性
+            if (manifest) {
+                const sdkVersion = manifest['@android:minSdkVersion'] || 
+                                  manifest['minSdkVersion'] || 
+                                  manifest['android:minSdkVersion'] ||
+                                  manifest['@minSdkVersion'] ||
+                                  manifest['android\:minSdkVersion'];
+                if (sdkVersion) return sdkVersion;
+            }
+            
+            // 递归搜索所有对象属性
+            let found = null;
+            for (let key in obj) {
+                if (typeof obj[key] === 'object' && obj[key] !== null) {
+                    found = findMinSdk(obj[key]);
+                    if (found) return found;
+                }
+            }
+            return null;
         }
 
-        function render(data) {
-            document.getElementById('app-list').innerHTML = data.map((app, i) => `
-                <div class="app-item" onclick="pickApp(${i})">
-                    <div class="app-icon-placeholder">📦</div>
-                    <div style="flex:1"><b>${app.name}</b><br><small style="color:#999">${app.pkg}</small></div>
-                </div>
-            `).join('');
-        }
+        // --- 手动上传图标处理 ---
+        document.getElementById('icon-upload-btn').onclick = function() {
+            document.getElementById('icon-upload-input').click();
+        };
 
-        // ⭐ 物理级解决方案：存为临时文件 ⭐
-        function saveIconToFile(packageName, callback) {
+        document.getElementById('icon-upload-input').onchange = async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
             try {
-                const main = plus.android.runtimeMainActivity();
-                const pm = main.getPackageManager();
-                const ai = pm.getApplicationInfo(packageName, 0);
-                const drawable = ai.loadIcon(pm);
+                // 显示加载状态
+                const appIcon = document.getElementById('app-icon');
+                const originalSrc = appIcon.src;
+                appIcon.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 24 24" fill="%23CCCCCC"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>';
 
-                plus.android.importClass("android.graphics.Bitmap");
-                plus.android.importClass("android.graphics.Canvas");
-                plus.android.importClass("java.io.FileOutputStream");
-                plus.android.importClass("java.io.File");
+                // 预览图片
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    appIcon.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
 
-                const width = Math.max(drawable.getIntrinsicWidth(), 144);
-                const height = Math.max(drawable.getIntrinsicHeight(), 144);
-                const bitmap = window.android.graphics.Bitmap.createBitmap(width, height, window.android.graphics.Bitmap.Config.ARGB_8888);
-                const canvas = new window.android.graphics.Canvas(bitmap);
-                drawable.setBounds(0, 0, width, height);
-                drawable.draw(canvas);
+                // 上传图标到对象存储
+                const formData = new FormData();
+                formData.append('file', file);
 
-                // 保存到 HBuilder 临时目录
-                const fileName = "_doc/temp_icon_" + packageName + ".png";
-                const fullPath = plus.io.convertLocalFileSystemURL(fileName);
-                const file = new window.java.io.File(fullPath);
-                const out = new window.java.io.FileOutputStream(file);
-                
-                bitmap.compress(window.android.graphics.Bitmap.CompressFormat.PNG, 100, out);
-                out.flush();
-                out.close();
-                bitmap.recycle();
+                const uploadResponse = await fetch('https://apirank.qujiaweb.top/?mode=upload_meituan', {
+                    method: 'POST',
+                    body: formData
+                });
 
-                // 返回本地路径供 HTML 使用
-                callback(fileName); 
-            } catch (e) {
-                callback("");
-            }
-        }
-
-        function pickApp(index) {
-            selectedApp = allApps[index];
-            closePicker();
-            document.getElementById('entry-step').style.display = 'none';
-            document.getElementById('detail-step').style.display = 'block';
-            document.getElementById('res-name').innerText = selectedApp.name;
-            document.getElementById('res-pkg').innerText = selectedApp.pkg;
-            
-            document.getElementById('status-log').innerText = "读取应用图标...";
-
-            saveIconToFile(selectedApp.pkg, (localPath) => {
-                if(localPath) {
-                    // 1. 设置预览图
-                    document.getElementById('res-icon').src = localPath + "?" + new Date().getTime();
-                    // 2. 将本地图片转为最终上传需要的 Base64
-                    const reader = new plus.io.FileReader();
-                    reader.onloadend = function(e) {
-                        selectedApp.iconBase64 = e.target.result;
-                        startUploadFlow();
-                    };
-                    plus.io.resolveLocalFileSystemURL(localPath, (entry) => {
-                        entry.file((file) => { reader.readAsDataURL(file); });
-                    });
+                const result = await uploadResponse.json();
+                if (result.full_url) {
+                    uploadedIconUrl = result.full_url;
+                    showToast('图标上传成功');
                 } else {
-                    document.getElementById('status-log').innerText = "图标读取失败";
-                    startUploadFlow();
+                    showToast('图标上传失败，请重试');
+                    appIcon.src = originalSrc;
                 }
-            });
-        }
+            } catch (error) {
+                console.error('图标上传失败:', error);
+                showToast('图标上传失败，请重试');
+            }
+        };
 
-        function startUploadFlow() {
-            const log = document.getElementById('status-log');
-            const btn = document.getElementById('submitBtn');
-            log.innerText = "同步 APK 文件中...";
+        // --- APK 上传与解析 ---
+        document.getElementById('apkInput').onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const tip = document.getElementById('status-tip');
+            tip.style.display = 'block';
+
+            try {
+                const parser = new AppInfoParser(file);
+                const info = await parser.parse();
+                
+                // 1. 处理名称
+                let finalName = info.name;
+                
+                // 优先寻找中文名称
+                if (info.application && info.application.label) {
+                    if (Array.isArray(info.application.label)) {
+                        // 遍历数组，寻找包含中文字符的名称
+                        for (let label of info.application.label) {
+                            if (/[\u4e00-\u9fa5]/.test(label)) {
+                                finalName = label;
+                                break;
+                            }
+                        }
+                        // 如果没有找到中文名称，使用第一个名称
+                        if (!finalName) {
+                            finalName = info.application.label[0];
+                        }
+                    } else {
+                        finalName = info.application.label;
+                    }
+                }
+                
+                if (!finalName || String(finalName).startsWith('@')) finalName = info.package;
+
+                // 2. 处理 SDK
+                let rawSdk = findMinSdk(info);
+                // 确保 rawSdk 是数字类型
+                rawSdk = typeof rawSdk === 'string' ? parseInt(rawSdk) : rawSdk;
+                // 确保 rawSdk 是有效数字
+                rawSdk = isNaN(rawSdk) ? null : rawSdk;
+                const androidVer = SDK_MAP[rawSdk] || "4.4";
+
+                // 3. 处理架构
+                const zip = await JSZip.loadAsync(file);
+                const archs = new Set();
+                Object.keys(zip.files).forEach(p => { if (p.startsWith('lib/')) { const parts = p.split('/'); if (parts.length > 2) archs.add(parts[1]); } });
+                const archArray = Array.from(archs);
+                let bitDisplay = "全架构兼容";
+                if (archArray.length > 0) {
+                    // 检查是否包含64位架构
+                    const is64 = archArray.some(a => a.includes('64') || a === 'arm64-v8a' || a === 'x86_64');
+                    // 检查是否包含32位架构
+                    const is32 = archArray.some(a => 
+                        a.includes('v7a') || 
+                        a === 'armeabi' || 
+                        a === 'armeabi-v7a' || 
+                        a === 'x86'
+                    );
+                    bitDisplay = (is64 && is32) ? "32/64位兼容" : (is64 ? "纯64位" : "纯32位");
+                }
+
+                // 4. 渲染基本信息
+                const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                // 处理应用图标，添加默认图标
+                const appIcon = document.getElementById('app-icon');
+                // 添加图标加载失败的处理
+                appIcon.onerror = function() {
+                    this.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 24 24" fill="%23CCCCCC"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14h-2v-4H8v-2h4V7h2v4h4v2h-4v4z"/></svg>';
+                };
+                if (info.icon && typeof info.icon === 'string' && info.icon.startsWith('data:image/')) {
+                    appIcon.src = info.icon;
+                } else {
+                    // 设置默认图标
+                    appIcon.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 24 24" fill="%23CCCCCC"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14h-2v-4H8v-2h4V7h2v4h4v2h-4v4z"/></svg>';
+                }
+                document.getElementById('app-name').value = finalName;
+                document.getElementById('app-pkg').innerText = info.package || 'unknown';
+                document.getElementById('v-text').innerText = info.versionName || '1.0.0';
+                document.getElementById('s-text').innerText = sizeMB + " MB";
+                document.getElementById('sdk-text').innerText = "Android " + (androidVer || '4.4') + "+";
+                document.getElementById('arch-text').innerText = bitDisplay;
+
+                // 5. 处理APK上传（小于100MB）
+                let appLink = '';
+                if (parseFloat(sizeMB) <= 100) {
+                    // 上传APK到对象存储
+                    try {
+                        appLink = await uploadApk(file);
+                    } catch (uploadErr) {
+                        // 检查是否是用户取消上传
+                        if (uploadErr.message !== '用户取消上传') {
+                            throw uploadErr;
+                        }
+                        // 用户取消上传，appLink保持为空
+                    }
+                } else {
+                    // 大于100MB，显示网盘链接输入
+                    document.getElementById('pan-section').style.display = 'block';
+                }
+
+                // 6. 上传图标到对象存储
+                if (info.icon) {
+                    await uploadIcon(info.icon);
+                }
+
+                // 核心逻辑：隐藏上传框，显示表单
+                document.getElementById('upload-zone').style.display = 'none';
+                tip.style.display = 'none';
+                document.getElementById('content-step').style.display = 'block';
+                apkInfo = { 
+                    finalName, 
+                    sizeMB, 
+                    package: info.package || 'unknown', 
+                    versionName: info.versionName || '1.0.0', 
+                    androidVer: androidVer || '4.4', 
+                    bitDisplay, 
+                    appLink 
+                };
+
+            } catch (err) {
+                // 检查是否是用户取消上传
+                if (err.message !== '用户取消上传') {
+                    tip.innerHTML = "解析失败<br><span style='color: var(--ios-blue); font-size: 13px; cursor: pointer;' onclick='copyWebUrl()'>可尝试切换网络，或尝试网页版上传</span>";
+                    console.error('解析错误:', err);
+                } else {
+                    // 用户取消上传，隐藏提示
+                    tip.style.display = 'none';
+                }
+            }
+        };
+
+        // --- 图片上传逻辑 ---
+        document.getElementById('ssFile').onchange = async (e) => {
+            const files = Array.from(e.target.files);
+            const trigger = document.getElementById('ss-trigger');
             
-            const task = plus.uploader.createUpload("https://apirank.qujiaweb.top/?mode=upload_meituan", { method: "POST" }, (t, status) => {
-                if (status == 200) {
-                    selectedApp.remoteUrl = JSON.parse(t.responseText).full_url;
-                    log.innerHTML = `<span style="color:#4CD964">✅ 准备就绪</span>`;
-                    btn.disabled = false;
-                    btn.innerText = "立即发布";
-                }
+            for (let file of files) {
+                // 显示加载状态
+                trigger.innerHTML = '<div class="loading-spinner"></div>';
+                
+                const fd = new FormData();
+                fd.append('file', file);
+                try {
+                    const res = await fetch('https://apirank.qujiaweb.top/?mode=upload_meituan', { method: 'POST', body: fd });
+                    const data = await res.json();
+                    const url = data.full_url || data.url;
+                    if (url) screenshots.push(url);
+                } catch (err) { console.error(err); }
+            }
+            
+            // 恢复并渲染
+            trigger.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>';
+            renderScreens();
+        };
+
+        function renderScreens() {
+            const grid = document.getElementById('ss-grid');
+            const trigger = document.getElementById('ss-trigger');
+            const items = document.querySelectorAll('.ss-item-node');
+            items.forEach(el => el.remove());
+
+            screenshots.forEach((url, i) => {
+                const div = document.createElement('div');
+                div.className = 'ss-box ss-item-node';
+                div.innerHTML = `<img src="${url}"><div class="ss-del" onclick="removeSS(${i})">✕</div>`;
+                grid.insertBefore(div, trigger);
             });
-            task.addFile(selectedApp.path, { key: "file" });
-            task.start();
+            document.getElementById('ss-count').innerText = `已上传 ${screenshots.length} 张`;
         }
 
+        function removeSS(i) {
+            screenshots.splice(i, 1);
+            renderScreens();
+        }
+
+        // 完整的数据提交逻辑
         async function finalSubmit() {
-            const mail = localStorage.getItem('usermail') || "";
-            const postData = {
-                name: selectedApp.name,
-                link: selectedApp.remoteUrl,
-                icon: selectedApp.iconBase64, // 最终提交转换后的Base64
-                intro: document.getElementById('app-intro').value,
-                package_name: selectedApp.pkg,
-                version: selectedApp.ver
+            // 验证必填字段
+            if (screenshots.length < 1) {
+                showToast('请至少上传一张截图');
+                return;
+            }
+
+            if (!selectedCategory) {
+                showToast('请选择应用分类');
+                return;
+            }
+
+            const intro = document.getElementById('app-intro').value;
+            if (!intro) {
+                showToast('请输入应用简介');
+                return;
+            }
+
+            if (intro.length < 5) {
+                showToast('应用简介至少需要5个字');
+                return;
+            }
+
+            // 验证应用名称和简介不能全为数字
+            const appName = document.getElementById('app-name').value;
+            if (/^\d+$/.test(appName)) {
+                showToast('应用名称不能全为数字');
+                return;
+            }
+
+            if (/^\d+$/.test(intro)) {
+                showToast('应用简介不能全为数字');
+                return;
+            }
+
+            // 获取用户信息（从本地存储）
+            const userMail = localStorage.getItem('usermail') || '';
+            const userName = localStorage.getItem('username') || '';
+
+            if (!userMail || !userName) {
+                showToast('请先登录');
+                return;
+            }
+
+            // 处理应用链接
+            let appLink = apkInfo.appLink;
+            let password = '';
+            // 检查是否需要使用网盘链接：
+            // 1. 文件大小大于100MB，或者
+            // 2. 用户取消了上传（appLink为空）
+            if (parseFloat(apkInfo.sizeMB) > 100 || !appLink) {
+                // 使用网盘链接
+                appLink = document.getElementById('pan-url').value;
+                password = document.getElementById('pan-pwd').value;
+                if (!appLink) {
+                    showToast('请输入网盘链接');
+                    return;
+                }
+            }
+
+            // 构建请求数据
+            const appNameInput = document.getElementById('app-name');
+            const requestData = {
+                name: escapeEmoji(appNameInput.value),
+                link: appLink,
+                icon: uploadedIconUrl,
+                intro: processIntro(intro),
+                images: screenshots.join(','),
+                is_recommended: '待审核',
+                password: password,
+                user: userName,
+                mail: userMail,
+                category: selectedCategory,
+                package_name: apkInfo.package,
+                version: apkInfo.versionName,
+                size: Math.floor(parseFloat(apkInfo.sizeMB)) + ' MB',
+                arch: apkInfo.bitDisplay,
+                android_version: apkInfo.androidVer + '+'
             };
-            const res = await fetch(`https://apirank.qujiaweb.top/?mode=add_app&mail=${mail}`, {
-                method: 'POST',
-                body: JSON.stringify(postData)
-            });
-            if ((await res.json()).code === 200) {
-                alert("发布成功");
-                plus.webview.currentWebview().close();
+            
+            // 打印请求数据以便调试
+            console.log('发送的请求数据:', requestData);
+
+            // 显示加载状态
+            const submitBtn = document.querySelector('.submit-btn');
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = '提交中...';
+            submitBtn.disabled = true;
+
+            try {
+                // 发送请求到后端API
+                console.log('开始发送请求到后端...');
+                const response = await fetch(`https://apirank.qujiaweb.top/?mode=add_app&mail=${encodeURIComponent(userMail)}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                console.log('响应状态:', response.status);
+                const result = await response.json();
+                console.log('后端返回结果:', result);
+                
+                if (result.code === 200) {
+                    showToast('应用分享成功！');
+                    // 延迟返回
+                    setTimeout(() => {
+                        handleBack();
+                    }, 1500);
+                } else {
+                    showToast('提交失败：' + (result.msg || '未知错误'));
+                }
+            } catch (error) {
+                showToast('网络错误，请重试');
+                console.error('提交错误:', error);
+            } finally {
+                // 恢复按钮状态
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
             }
         }
+
+        // 轻提示函数
+        function showToast(message) {
+            // 创建提示元素
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0, 0, 0, 0.7);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                font-size: 14px;
+                z-index: 9999;
+                animation: fadeInOut 2s ease-in-out;
+            `;
+            toast.innerText = message;
+
+            // 添加动画
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeInOut {
+                    0% { opacity: 0; }
+                    20% { opacity: 1; }
+                    80% { opacity: 1; }
+                    100% { opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+
+            // 添加到页面
+            document.body.appendChild(toast);
+
+            // 2秒后移除
+            setTimeout(() => {
+                document.body.removeChild(toast);
+                document.head.removeChild(style);
+            }, 2000);
+        }
+
+        // 分类选择函数
+        function selectCategory(element, category) {
+            // 移除所有active类
+            document.querySelectorAll('.category-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            // 添加active类到当前选择
+            element.classList.add('active');
+            selectedCategory = category;
+        }
+
+        // APK上传到对象存储（带进度条和取消选项）
+        function uploadApk(file) {
+            return new Promise((resolve, reject) => {
+                const tip = document.getElementById('status-tip');
+                tip.innerText = '应用上传中...';
+                tip.style.display = 'block';
+
+                // 创建进度条
+                const progressBar = document.createElement('div');
+                progressBar.style.cssText = `
+                    width: 80%;
+                    height: 6px;
+                    background: #E5E5EA;
+                    border-radius: 3px;
+                    margin: 10px auto;
+                    overflow: hidden;
+                `;
+                
+                const progressFill = document.createElement('div');
+                progressFill.style.cssText = `
+                    width: 0%;
+                    height: 100%;
+                    background: var(--ios-blue);
+                    border-radius: 3px;
+                    transition: width 0.3s ease;
+                `;
+                
+                progressBar.appendChild(progressFill);
+                tip.parentNode.insertBefore(progressBar, tip.nextSibling);
+
+                // 创建取消按钮
+                const cancelButton = document.createElement('div');
+                cancelButton.style.cssText = `
+                    text-align: center;
+                    margin-top: 8px;
+                    font-size: 13px;
+                    color: var(--ios-blue);
+                    cursor: pointer;
+                `;
+                cancelButton.innerText = '上传慢？取消直接上传改为网盘分享方式';
+                tip.parentNode.insertBefore(cancelButton, progressBar.nextSibling);
+
+                // 使用XMLHttpRequest以支持上传进度
+                const xhr = new XMLHttpRequest();
+                const formData = new FormData();
+                formData.append('file', file);
+
+                xhr.open('POST', 'https://apirank.qujiaweb.top/?mode=upload_meituan');
+
+                // 添加进度监听
+                xhr.upload.addEventListener('progress', function(progressEvent) {
+                    if (progressEvent.lengthComputable) {
+                        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                        progressFill.style.width = percentCompleted + '%';
+                    }
+                });
+
+                // 处理响应
+                xhr.onload = function() {
+                    // 移除进度条和取消按钮
+                    progressBar.remove();
+                    cancelButton.remove();
+                    
+                    if (xhr.status === 200) {
+                        try {
+                            const result = JSON.parse(xhr.responseText);
+                            if (result.full_url) {
+                                uploadedApkUrl = result.full_url;
+                                tip.innerText = '应用已上传至服务器，请等待';
+                                resolve(result.full_url);
+                            } else {
+                                tip.innerText = '应用上传失败，请重试';
+                                reject(new Error('APK上传失败'));
+                            }
+                        } catch (e) {
+                            tip.innerText = '应用上传失败，请重试';
+                            reject(new Error('响应解析失败'));
+                        }
+                    } else {
+                        tip.innerText = '应用上传失败，请重试';
+                        reject(new Error('上传请求失败'));
+                    }
+                };
+
+                // 处理错误
+                xhr.onerror = function() {
+                    // 移除进度条和取消按钮
+                    progressBar.remove();
+                    cancelButton.remove();
+                    tip.innerText = '应用上传失败，请重试';
+                    reject(new Error('网络错误'));
+                };
+
+                // 取消上传
+                cancelButton.onclick = function() {
+                    xhr.abort();
+                    progressBar.remove();
+                    cancelButton.remove();
+                    tip.innerText = '已取消上传，切换到网盘分享方式';
+                    
+                    // 显示网盘链接输入
+                    document.getElementById('pan-section').style.display = 'block';
+                    
+                    // 解析应用信息
+                    const parser = new AppInfoParser(file);
+                    parser.parse().then(info => {
+                        // 处理名称
+                        let finalName = info.name;
+                        if (info.application && info.application.label) {
+                            if (Array.isArray(info.application.label)) {
+                                for (let label of info.application.label) {
+                                    if (/[\u4e00-\u9fa5]/.test(label)) {
+                                        finalName = label;
+                                        break;
+                                    }
+                                }
+                                if (!finalName) {
+                                    finalName = info.application.label[0];
+                                }
+                            } else {
+                                finalName = info.application.label;
+                            }
+                        }
+                        if (!finalName || String(finalName).startsWith('@')) finalName = info.package;
+
+                        // 处理 SDK
+                        let rawSdk = findMinSdk(info);
+                        // 确保 rawSdk 是数字类型
+                        rawSdk = typeof rawSdk === 'string' ? parseInt(rawSdk) : rawSdk;
+                        // 确保 rawSdk 是有效数字
+                        rawSdk = isNaN(rawSdk) ? null : rawSdk;
+                        const androidVer = SDK_MAP[rawSdk] || "4.4";
+
+                        // 处理架构
+                        JSZip.loadAsync(file).then(zip => {
+                            const archs = new Set();
+                            Object.keys(zip.files).forEach(p => { if (p.startsWith('lib/')) { const parts = p.split('/'); if (parts.length > 2) archs.add(parts[1]); } });
+                            const archArray = Array.from(archs);
+                            let bitDisplay = "全架构兼容";
+                            if (archArray.length > 0) {
+                                // 检查是否包含64位架构
+                                const is64 = archArray.some(a => a.includes('64') || a === 'arm64-v8a' || a === 'x86_64');
+                                // 检查是否包含32位架构
+                                const is32 = archArray.some(a => 
+                                    a.includes('v7a') || 
+                                    a === 'armeabi' || 
+                                    a === 'armeabi-v7a' || 
+                                    a === 'x86'
+                                );
+                                bitDisplay = (is64 && is32) ? "32/64位兼容" : (is64 ? "纯64位" : "纯32位");
+                            }
+
+                            // 渲染基本信息
+                            const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                            document.getElementById('app-name').value = finalName;
+                            document.getElementById('app-pkg').innerText = info.package || 'unknown';
+                            document.getElementById('v-text').innerText = info.versionName || '1.0.0';
+                            document.getElementById('s-text').innerText = sizeMB + " MB";
+                            document.getElementById('sdk-text').innerText = "Android " + (androidVer || '4.4') + "+";
+                            document.getElementById('arch-text').innerText = bitDisplay;
+
+                            // 上传图标到对象存储
+                            if (info.icon) {
+                                uploadIcon(info.icon);
+                            }
+
+                            // 隐藏上传框，显示表单
+                            document.getElementById('upload-zone').style.display = 'none';
+                            tip.style.display = 'none';
+                            document.getElementById('content-step').style.display = 'block';
+                            apkInfo = { 
+                                finalName, 
+                                sizeMB, 
+                                package: info.package || 'unknown', 
+                                versionName: info.versionName || '1.0.0', 
+                                androidVer: androidVer || '4.4', 
+                                bitDisplay, 
+                                appLink: ''
+                            };
+                        });
+                    });
+
+                    reject(new Error('用户取消上传'));
+                };
+
+                // 发送请求
+                xhr.send(formData);
+            });
+        }
+
+        // 图标上传到对象存储
+        async function uploadIcon(iconData) {
+            try {
+                // 验证图标数据
+                if (!iconData || typeof iconData !== 'string' || !iconData.startsWith('data:image/')) {
+                    console.warn('无效的图标数据，跳过上传');
+                    return null;
+                }
+                
+                // 将base64图标转换为Blob
+                const response = await fetch(iconData);
+                const blob = await response.blob();
+                const file = new File([blob], 'app_icon.png', { type: 'image/png' });
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const uploadResponse = await fetch('https://apirank.qujiaweb.top/?mode=upload_meituan', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await uploadResponse.json();
+                if (result.full_url) {
+                    uploadedIconUrl = result.full_url;
+                    return result.full_url;
+                } else {
+                    console.warn('图标上传失败，返回空');
+                    return null;
+                }
+            } catch (error) {
+                console.error('图标上传失败:', error);
+                // 图标上传失败不影响整个流程
+                return null;
+            }
+        }
+
+        // emoji转HTML实体函数
+        function emojiToHtmlEntity(str) {
+            return [...str].map(char => {
+                const code = char.codePointAt(0);
+                if (
+                    (code >= 0x1F300 && code <= 0x1F6FF) ||
+                    (code >= 0x1F900 && code <= 0x1F9FF) ||
+                    (code >= 0x1FA70 && code <= 0x1FAFF) ||
+                    (code >= 0x2600 && code <= 0x26FF) ||
+                    (code >= 0x2700 && code <= 0x27BF) ||
+                    (code >= 0x1F1E6 && code <= 0x1F1FF)
+                ) {
+                    return `&#${code};`;
+                } else {
+                    return char;
+                }
+            }).join('');
+        }
+
+        // 转义emoji字符
+        function escapeEmoji(text) {
+            return [...text].map(char => {
+                const code = char.codePointAt(0);
+                if (
+                    (code >= 0x1F300 && code <= 0x1F6FF) ||
+                    (code >= 0x1F900 && code <= 0x1F9FF) ||
+                    (code >= 0x1FA70 && code <= 0x1FAFF) ||
+                    (code >= 0x2600 && code <= 0x26FF) ||
+                    (code >= 0x2700 && code <= 0x27BF) ||
+                    (code >= 0x1F1E6 && code <= 0x1F1FF)
+                ) {
+                    return `&#${code};`;
+                } else {
+                    return char;
+                }
+            }).join('').replace(/'/g, "~PGDBSD~");
+        }
+
+        // 处理简介中的emoji和引号
+        function processIntro(intro) {
+            // 将emoji转换为HTML实体
+            let processed = escapeEmoji(intro);
+            return processed;
+        }
+
+        function handleBack() {
+            if (window.plus) {
+                plus.webview.currentWebview().close('auto');
+            } else {
+                window.history.back();
+            }
+        }
+
+        // 复制网页版网址到剪切板
+        function copyWebUrl() {
+            const webUrl = 'https://qujiaweb.top/h5';
+            
+            // 使用现代Clipboard API
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(webUrl)
+                    .then(() => {
+                        showToast('网页版地址已复制到剪贴板');
+                    })
+                    .catch(err => {
+                        console.warn('现代API复制失败，尝试备用方案:', err);
+                        tryFallbackCopy(webUrl);
+                    });
+            } else {
+                // 直接使用备用方案
+                tryFallbackCopy(webUrl);
+            }
+        }
+
+        function tryFallbackCopy(text) {
+            // 使用HTML5+的复制功能
+            if (window.plus && plus.device) {
+                try {
+                    plus.device.setClipboard(text, function() {
+                        showToast('网页版地址已复制到剪贴板');
+                    }, function(err) {
+                        console.warn('HTML5+复制失败:', err);
+                        tryExecCommandCopy(text);
+                    });
+                    return;
+                } catch (e) {
+                    console.warn('HTML5+复制异常:', e);
+                }
+            }
+            
+            // 使用传统的execCommand
+            tryExecCommandCopy(text);
+        }
+
+        function tryExecCommandCopy(text) {
+            // 创建临时文本区域
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showToast('网页版地址已复制到剪贴板');
+                } else {
+                    console.warn('execCommand复制失败');
+                    showToast('复制失败，请手动复制');
+                }
+            } catch (err) {
+                console.error('execCommand执行失败:', err);
+                showToast('复制失败，请手动复制');
+            } finally {
+                document.body.removeChild(textArea);
+            }
+        }
+
+        document.addEventListener('plusready', function() {
+            var webview = plus.webview.currentWebview();
+
+            plus.key.addEventListener('backbutton', function() {
+                webview.canBack(function(e) {
+                    if (e.canBack) {
+                        webview.back();
+                    } else {
+                        var path = window.location.pathname;
+                        // 这里识别为非首页，执行关闭逻辑
+                        var isHomePage = path.indexOf('index.html') !== -1 && path.indexOf('app/') === -1;
+
+                        if (isHomePage) {
+                            plus.nativeUI.confirm("确定退出应用吗？", function(res) {
+                                if (res.index === 0) plus.runtime.quit();
+                            }, "提示", ["确定", "取消"]);
+                        } else {
+                            // 子页面：直接关闭，返回首页
+                            if (plus.webview.all().length > 1) {
+                                webview.close('auto'); 
+                            } else {
+                                history.back();
+                            }
+                        }
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>
