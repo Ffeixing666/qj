@@ -355,12 +355,10 @@
 </div>
 
 <script>
-// 纯原生 JavaScript，完全兼容 iOS9，登录使用 form-urlencoded 避免预检
+// 纯原生 JavaScript，完全兼容 iOS9，使用 GET 请求避免跨域预检
 (function() {
-    // API 基础地址
     var API_BASE = 'https://apirank.qujiaweb.top/';
     
-    // 显示提示
     function showToast(msg) {
         var toast = document.getElementById('toast');
         if (!toast) return;
@@ -371,12 +369,10 @@
         }, 1500);
     }
     
-    // 判断数组
     function isArray(obj) {
         return Object.prototype.toString.call(obj) === '[object Array]';
     }
     
-    // HTML 转义
     function escapeHtml(str) {
         if (!str) return '';
         return String(str).replace(/[&<>]/g, function(m) {
@@ -387,7 +383,6 @@
         });
     }
     
-    // 安全获取 localStorage
     function getLocal(key, def) {
         try {
             var val = localStorage.getItem(key);
@@ -403,7 +398,6 @@
         } catch(e) {}
     }
     
-    // 解析 JSON 存储
     function getJson(key, def) {
         try {
             var val = localStorage.getItem(key);
@@ -420,7 +414,7 @@
         } catch(e) {}
     }
     
-    // AJAX GET 请求
+    // GET 请求（简单请求，无预检）
     function ajaxGet(url, callback) {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url, true);
@@ -448,44 +442,6 @@
         xhr.send();
     }
     
-    // AJAX POST 表单提交 (application/x-www-form-urlencoded)
-    function ajaxPostForm(url, data, callback) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', url, true);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        xhr.timeout = 15000;
-        // 将数据对象转换为 URL 编码字符串
-        var formBody = [];
-        for (var key in data) {
-            if (data.hasOwnProperty(key)) {
-                formBody.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
-            }
-        }
-        var formData = formBody.join('&');
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4) {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    try {
-                        var res = JSON.parse(xhr.responseText);
-                        callback(null, res);
-                    } catch(e) {
-                        callback(e, null);
-                    }
-                } else {
-                    callback(new Error('HTTP ' + xhr.status), null);
-                }
-            }
-        };
-        xhr.onerror = function() {
-            callback(new Error('Network error'), null);
-        };
-        xhr.ontimeout = function() {
-            callback(new Error('Timeout'), null);
-        };
-        xhr.send(formData);
-    }
-    
-    // 渲染应用列表
     function renderList(data) {
         var container = document.getElementById('appList');
         if (!container) return;
@@ -521,7 +477,6 @@
                 '</div>';
             container.insertAdjacentHTML('beforeend', appHtml);
         }
-        // 绑定点击事件
         var items = container.querySelectorAll('.app-item');
         for (var i = 0; i < items.length; i++) {
             items[i].addEventListener('click', function(e) {
@@ -531,19 +486,16 @@
         }
     }
     
-    // 加载历史
     function loadHistory() {
         var data = getJson('appHistory', []);
         renderList(data);
     }
     
-    // 加载收藏
     function loadCollection() {
         var data = getJson('appCollection', []);
         renderList(data);
     }
     
-    // 获取用户应用
     function loadUserApps() {
         var mail = getLocal('usermail', '');
         if (!mail) {
@@ -567,7 +519,6 @@
         });
     }
     
-    // 获取未读消息数
     function fetchUnreadCount() {
         var mail = getLocal('usermail', '');
         if (!mail) return;
@@ -590,7 +541,6 @@
         });
     }
     
-    // 检查管理员状态
     function checkAdmin() {
         var mail = getLocal('usermail', '');
         if (!mail) return;
@@ -611,7 +561,6 @@
         });
     }
     
-    // 初始化个人主页
     function initProfile() {
         var username = getLocal('username', '用户');
         var points = getLocal('userpoints', '0');
@@ -621,10 +570,9 @@
         document.getElementById('uAvatar').style.backgroundImage = 'url(' + avatar + ')';
         checkAdmin();
         fetchUnreadCount();
-        loadHistory(); // 默认加载历史
+        loadHistory();
     }
     
-    // 切换选项卡
     function switchTab(type) {
         var tabs = document.querySelectorAll('.mid-tab-item');
         for (var i = 0; i < tabs.length; i++) {
@@ -639,7 +587,7 @@
         else if (type === 'review') openReviewPage();
     }
     
-    // 登录逻辑：使用 POST 表单提交
+    // 登录：使用 GET 请求（需后端支持从 query 读取参数）
     function doLogin() {
         var email = document.getElementById('email').value.trim();
         var pass = document.getElementById('pass').value.trim();
@@ -648,15 +596,14 @@
             return;
         }
         showToast('登录中...');
-        var url = API_BASE + '?mode=login';
-        ajaxPostForm(url, { email: email, password: pass }, function(err, res) {
+        var url = API_BASE + '?mode=login&email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(pass);
+        ajaxGet(url, function(err, res) {
             if (err) {
                 showToast('网络错误: ' + (err.message || '未知错误'));
                 return;
             }
             if (res && res.code === 200 && res.fields && res.fields.length > 0) {
                 var u = res.fields[0];
-                // 检查是否封禁
                 if (u['是否封禁'] === '是') {
                     showToast('账号已被封禁');
                     return;
@@ -676,7 +623,6 @@
         });
     }
     
-    // 跳转函数
     function openDetail(id) {
         var url = 'xiangqing.html?id=' + encodeURIComponent(id);
         if (window.plus && plus.webview) {
@@ -705,9 +651,7 @@
     function openReviewPage() { window.location.href = 'guanli.html'; }
     function openRegisterPage() { window.location.href = 'zhuce.html'; }
     
-    // 页面加载完成
     document.addEventListener('DOMContentLoaded', function() {
-        // 绑定事件
         document.getElementById('loginBtn').addEventListener('click', doLogin);
         document.getElementById('registerBtn').addEventListener('click', openRegisterPage);
         document.getElementById('userProfileBtn').addEventListener('click', openUserPage);
@@ -715,9 +659,8 @@
         document.getElementById('settingBtn').addEventListener('click', openSettingPage);
         document.getElementById('fabBtn').addEventListener('click', openSharePage);
         document.getElementById('homeBtn').addEventListener('click', openHomePage);
-        document.getElementById('profileNavBtn').addEventListener('click', function() { /* 已经在个人页面，无需跳转 */ });
+        document.getElementById('profileNavBtn').addEventListener('click', function() {});
         
-        // 选项卡点击
         var tabs = document.querySelectorAll('.mid-tab-item');
         for (var i = 0; i < tabs.length; i++) {
             tabs[i].addEventListener('click', function(e) {
@@ -727,7 +670,6 @@
             });
         }
         
-        // 检查登录状态
         var usermail = getLocal('usermail', '');
         var loginSection = document.getElementById('loginSection');
         var profileSection = document.getElementById('profileSection');
@@ -741,7 +683,6 @@
         }
     });
     
-    // 监听 storage 变化
     window.addEventListener('storage', function(e) {
         if (e.key === 'usermail' && !e.newValue) {
             location.reload();
