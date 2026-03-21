@@ -1,155 +1,257 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>选择应用</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>分享应用</title>
+    <style>
+        :root {
+            --ios-bg: #F2F2F7;
+            --ios-blue: #007AFF;
+            --line-color: rgba(0,0,0,0.06);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, sans-serif; background: var(--ios-bg); color: #1C1C1E; }
+        
+        header { position: sticky; top: 0; z-index: 100; background: rgba(242,242,247,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 0.5px solid var(--line-color); }
+        .nav-bar { height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
+        .nav-title { font-size: 17px; font-weight: 600; }
 
-<style>
-body { background:#f2f2f7; font-family:-apple-system; margin:0;}
-.header { padding:12px; text-align:center; font-weight:600;}
-.app-item { display:flex; padding:12px; background:#fff; border-bottom:1px solid #eee; align-items:center;}
-.app-icon { width:45px;height:45px;border-radius:10px;margin-right:10px;background:#eee;}
-</style>
+        .container { padding: 16px; }
+        .card { background: #fff; border-radius: 12px; padding: 25px; text-align: center; border: 1px solid var(--line-color); width: 100%; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+
+        /* 应用列表弹窗 */
+        #picker { position: fixed; inset: 0; background: #fff; z-index: 1000; display: none; flex-direction: column; }
+        .p-header { padding: 10px 16px; border-bottom: 0.5px solid var(--line-color); display: flex; align-items: center; }
+        .search-box { flex: 1; background: #efeff4; border-radius: 10px; padding: 6px 12px; }
+        .search-box input { border: none; background: transparent; width: 100%; outline: none; font-size: 15px; }
+        
+        #app-list { flex: 1; overflow-y: auto; }
+        .app-item { display: flex; align-items: center; padding: 12px 16px; border-bottom: 0.5px solid var(--line-color); }
+        .app-icon-default { width: 48px; height: 48px; border-radius: 10px; margin-right: 14px; background: #e5e5ea; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #fff; }
+        
+        /* 详情表单 */
+        #detail-step { display: none; }
+        .info-box { background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 16px; }
+        .preview-header { display: flex; align-items: center; gap: 15px; margin-bottom: 12px; }
+        .preview-icon { width: 64px; height: 64px; border-radius: 14px; background: #eee; }
+        
+        .input-group { background: #fff; border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
+        .input-item { padding: 14px; }
+        textarea { width: 100%; border: none; outline: none; font-size: 15px; height: 100px; resize: none; }
+        
+        .btn-post { width: 100%; height: 50px; background: var(--ios-blue); color: #fff; border: none; border-radius: 14px; font-size: 17px; font-weight: 600; }
+        .btn-post:disabled { opacity: 0.5; }
+        #status-log { font-size: 13px; color: var(--ios-blue); margin-top: 10px; text-align: center; line-height: 1.6; }
+    </style>
 </head>
-
 <body>
 
-<div class="header">选择已安装应用</div>
-<div id="app-list"></div>
-
-<script>
-let appList = [];
-const uploadApi = "https://apirank.qujiaweb.top/?mode=upload_meituan";
-
-// 默认图标（防破图）
-const defaultIcon = "https://via.placeholder.com/100";
-
-// ✅ 只扫描基本信息（不解析图标！）
-function scanApps(){
-    if(!window.plus){
-        alert("必须在APP运行");
-        return;
-    }
-
-    const main = plus.android.runtimeMainActivity();
-    const pm = main.getPackageManager();
-    const list = plus.android.invoke(pm,"getInstalledPackages",0);
-    const count = plus.android.invoke(list,"size");
-
-    appList = [];
-
-    for(let i=0;i<count;i++){
-        try{
-            const pkg = plus.android.invoke(list,"get",i);
-            const ai = plus.android.getAttribute(pkg,"applicationInfo");
-
-            // 过滤系统应用
-            if((plus.android.getAttribute(ai,"flags") & 1) !== 0) continue;
-
-            appList.push({
-                name: plus.android.invoke(ai,"loadLabel",pm).toString(),
-                pkg: plus.android.getAttribute(pkg,"packageName"),
-                path: plus.android.getAttribute(ai,"publicSourceDir"),
-                ver: plus.android.getAttribute(pkg,"versionName")
-            });
-
-        }catch(e){}
-    }
-
-    render(appList);
-}
-
-// ✅ 渲染列表（先用默认图标）
-function render(list){
-    document.getElementById("app-list").innerHTML = list.map(app=>`
-        <div class="app-item" onclick='selectApp(${JSON.stringify(app)})'>
-            <img class="app-icon" src="${defaultIcon}">
-            <div>
-                <b>${app.name}</b><br>
-                <small>${app.pkg}</small>
-            </div>
+    <header>
+        <div class="nav-bar">
+            <div onclick="location.reload()" style="color:var(--ios-blue)">取消</div>
+            <div class="nav-title">分享应用</div>
+            <div style="width:30px"></div>
         </div>
-    `).join('');
-}
+    </header>
 
-// ⭐⭐⭐核心：从 APK 解析真实图标（100%成功）
-function getApkIcon(path){
-    try{
-        const Bitmap = plus.android.importClass("android.graphics.Bitmap");
-        const Canvas = plus.android.importClass("android.graphics.Canvas");
-        const ByteArrayOutputStream = plus.android.importClass("java.io.ByteArrayOutputStream");
-        const Base64 = plus.android.importClass("android.util.Base64");
+    <div class="container" id="entry-step">
+        <div class="card" onclick="openPicker()">
+            <div style="font-size: 32px; margin-bottom: 8px;">📦</div>
+            <strong>选择已安装应用</strong>
+        </div>
+    </div>
 
-        const main = plus.android.runtimeMainActivity();
-        const pm = main.getPackageManager();
+    <div class="container" id="detail-step">
+        <div class="info-box">
+            <div class="preview-header">
+                <img id="res-icon" class="preview-icon">
+                <div style="flex:1">
+                    <b id="res-name"></b><br>
+                    <small id="res-pkg" style="color:#8e8e93"></small>
+                </div>
+            </div>
+            <div id="status-log">正在初始化...</div>
+        </div>
+        <div class="input-group">
+            <div class="input-item"><textarea id="app-intro" placeholder="输入应用介绍..."></textarea></div>
+        </div>
+        <button class="btn-post" id="submitBtn" disabled onclick="finalSubmit()">等待同步完成</button>
+    </div>
 
-        const pkgInfo = plus.android.invoke(pm,"getPackageArchiveInfo",path,1);
-        const appInfo = plus.android.getAttribute(pkgInfo,"applicationInfo");
+    <div id="picker">
+        <div class="p-header">
+            <div class="search-box"><input type="text" id="searchInput" placeholder="搜索已安装应用..." oninput="searchApp(this.value)"></div>
+            <div onclick="closePicker()" style="color:var(--ios-blue); margin-left:12px">取消</div>
+        </div>
+        <div id="app-list"></div>
+    </div>
 
-        // ⭐ 必须设置
-        appInfo.sourceDir = path;
-        appInfo.publicSourceDir = path;
+    <script>
+        let allApps = [];
+        let selectedApp = null;
+        const uploadApi = "https://apirank.qujiaweb.top/?mode=upload_meituan";
 
-        const drawable = plus.android.invoke(appInfo,"loadIcon",pm);
-
-        let width = drawable.getIntrinsicWidth();
-        let height = drawable.getIntrinsicHeight();
-        if(width <= 0) width = 96;
-        if(height <= 0) height = 96;
-
-        const bitmap = Bitmap.createBitmap(width,height,Bitmap.Config.ARGB_8888);
-        const canvas = new Canvas(bitmap);
-        drawable.setBounds(0,0,width,height);
-        drawable.draw(canvas);
-
-        const stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG,100,stream);
-
-        return "data:image/png;base64," +
-            Base64.encodeToString(stream.toByteArray(), Base64.NO_WRAP);
-
-    }catch(e){
-        console.log("图标解析失败",e);
-        return defaultIcon;
-    }
-}
-
-// ✅ 点击应用
-function selectApp(app){
-    plus.nativeUI.showWaiting("处理中...");
-
-    // 1️⃣ 获取真实图标
-    const icon = getApkIcon(app.path);
-
-    // 2️⃣ 上传APK
-    const task = plus.uploader.createUpload(uploadApi,{method:"POST"},(t,status)=>{
-        plus.nativeUI.closeWaiting();
-
-        if(status==200){
-            const res = JSON.parse(t.responseText);
-
-            alert(
-`成功！
-名称：${app.name}
-版本：${app.ver}
-URL：${res.full_url}`
-            );
-
-            console.log("图标base64:",icon);
-
-        }else{
-            alert("上传失败");
+        function openPicker() {
+            document.getElementById('picker').style.display = 'flex';
+            if (allApps.length === 0) scanApps();
         }
-    });
+        function closePicker() { document.getElementById('picker').style.display = 'none'; }
 
-    task.addFile(app.path,{key:"file"});
-    task.start();
-}
+        // 1. 扫描列表：纯文字提取，不处理图标（保证秒开）
+        function scanApps() {
+            if (!window.plus) return;
+            const main = plus.android.runtimeMainActivity();
+            const pm = main.getPackageManager();
+            const list = plus.android.invoke(pm, "getInstalledPackages", 0);
+            const count = plus.android.invoke(list, "size");
 
-// 启动
-scanApps();
-</script>
+            allApps = [];
+            for (let i = 0; i < count; i++) {
+                const pkg = plus.android.invoke(list, "get", i);
+                const ai = plus.android.getAttribute(pkg, "applicationInfo");
+                if ((plus.android.getAttribute(ai, "flags") & 1) !== 0) continue; 
 
+                allApps.push({
+                    name: plus.android.invoke(ai, "loadLabel", pm).toString(),
+                    pkg: plus.android.getAttribute(pkg, "packageName"),
+                    ver: plus.android.getAttribute(pkg, "versionName"),
+                    path: plus.android.getAttribute(ai, "publicSourceDir")
+                });
+            }
+            allApps.sort((a, b) => a.name.localeCompare(b.name, 'zh'));
+            render(allApps);
+        }
+
+        function render(data) {
+            document.getElementById('app-list').innerHTML = data.map((app, i) => `
+                <div class="app-item" onclick="pickApp(${i})">
+                    <div class="app-icon-default">📦</div>
+                    <div style="flex:1; overflow:hidden;">
+                        <b style="display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${app.name}</b>
+                        <small style="color:#999; font-size:11px;">${app.pkg}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 2. 选中应用：此时才加载图标并启动连续上传
+        async function pickApp(index) {
+            const searchVal = document.getElementById('searchInput').value;
+            const currentList = searchVal ? allApps.filter(a => a.name.includes(searchVal)) : allApps;
+            selectedApp = currentList[index];
+
+            closePicker();
+            document.getElementById('entry-step').style.display = 'none';
+            document.getElementById('detail-step').style.display = 'block';
+            document.getElementById('res-name').innerText = selectedApp.name;
+            document.getElementById('res-pkg').innerText = selectedApp.pkg;
+
+            // 步骤 A: 提取图标
+            document.getElementById('status-log').innerText = "正在提取应用图标...";
+            const iconBase64 = getSingleIcon(selectedApp.pkg);
+            selectedApp.icon = iconBase64;
+            document.getElementById('res-icon').src = iconBase64;
+
+            // 步骤 B: 先上传图标（如果 API 支持），这里为了演示逻辑，我们直接存 icon 字段到数据库
+            // 步骤 C: 上传 APK 文件
+            startUploadFlow();
+        }
+
+        // 单点提取图标函数
+        function getSingleIcon(packageName) {
+            try {
+                const main = plus.android.runtimeMainActivity();
+                const pm = main.getPackageManager();
+                const ai = pm.getApplicationInfo(packageName, 0);
+                const drawable = ai.loadIcon(pm);
+
+                const Bitmap = plus.android.importClass("android.graphics.Bitmap");
+                const Canvas = plus.android.importClass("android.graphics.Canvas");
+                const AdaptiveIconDrawable = plus.android.importClass("android.graphics.drawable.AdaptiveIconDrawable");
+                const ByteArrayOutputStream = plus.android.importClass("java.io.ByteArrayOutputStream");
+                const Base64 = plus.android.importClass("android.util.Base64");
+
+                let w = drawable.getIntrinsicWidth();
+                let h = drawable.getIntrinsicHeight();
+                if (w <= 0) { w = 144; h = 144; }
+
+                const bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+                const canvas = new Canvas(bitmap);
+                drawable.setBounds(0, 0, w, h);
+                drawable.draw(canvas);
+
+                const stream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                return "data:image/png;base64," + Base64.encodeToString(stream.toByteArray(), Base64.NO_WRAP);
+            } catch (e) {
+                return "https://via.placeholder.com/100?text=App";
+            }
+        }
+
+        // 3. 连续上传流
+        function startUploadFlow() {
+            const log = document.getElementById('status-log');
+            const btn = document.getElementById('submitBtn');
+
+            plus.io.resolveLocalFileSystemURL(selectedApp.path, (entry) => {
+                entry.file((file) => {
+                    selectedApp.size = (file.size / 1024 / 1024).toFixed(2) + "MB";
+                    
+                    log.innerText = "图标已就绪，正在同步安装包...";
+                    
+                    const task = plus.uploader.createUpload(uploadApi, { method: "POST" }, (t, status) => {
+                        if (status == 200) {
+                            const res = JSON.parse(t.responseText);
+                            selectedApp.remoteUrl = res.full_url;
+                            log.innerHTML = `<span style="color:#4CD964">✅ 文件同步完成 (${selectedApp.size})</span>`;
+                            btn.disabled = false;
+                            btn.innerText = "立即发布";
+                        } else {
+                            log.innerHTML = `<span style="color:#FF3B30">❌ 同步失败，请重试</span>`;
+                        }
+                    });
+
+                    task.addFile(selectedApp.path, { key: "file" });
+                    task.addEventListener("statechanged", (t) => {
+                        if(t.state == 3) {
+                            const p = Math.round((t.uploadedSize / t.totalSize) * 100);
+                            log.innerText = `正在同步安装包：${p}%`;
+                        }
+                    });
+                    task.start();
+                });
+            });
+        }
+
+        // 4. 提交数据
+        async function finalSubmit() {
+            const mail = localStorage.getItem('usermail') || "";
+            const postData = {
+                name: selectedApp.name,
+                link: selectedApp.remoteUrl,
+                icon: selectedApp.icon,
+                intro: document.getElementById('app-intro').value,
+                package_name: selectedApp.pkg,
+                version: selectedApp.ver,
+                size: selectedApp.size,
+                mail: mail
+            };
+
+            const res = await fetch(`https://apirank.qujiaweb.top/?mode=add_app&mail=${mail}`, {
+                method: 'POST',
+                body: JSON.stringify(postData)
+            });
+            if ((await res.json()).code === 200) {
+                alert("发布成功！");
+                plus.webview.currentWebview().close();
+            }
+        }
+        
+        function searchApp(val) {
+            const filtered = allApps.filter(a => a.name.toLowerCase().includes(val.toLowerCase()));
+            render(filtered);
+        }
+    </script>
 </body>
 </html>
