@@ -18,9 +18,8 @@
         .nav-title { font-size: 17px; font-weight: 600; }
 
         .container { padding: 16px; }
-        .card { background: #fff; border-radius: 12px; padding: 25px; text-align: center; border: 1px solid var(--line-color); width: 100%; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card { background: #fff; border-radius: 12px; padding: 25px; text-align: center; border: 1px solid var(--line-color); width: 100%; }
 
-        /* 应用列表弹窗 */
         #picker { position: fixed; inset: 0; background: #fff; z-index: 1000; display: none; flex-direction: column; }
         .p-header { padding: 10px 16px; border-bottom: 0.5px solid var(--line-color); display: flex; align-items: center; }
         .search-box { flex: 1; background: #efeff4; border-radius: 10px; padding: 6px 12px; }
@@ -30,19 +29,18 @@
         .app-item { display: flex; align-items: center; padding: 12px 16px; border-bottom: 0.5px solid var(--line-color); }
         .app-icon-default { width: 48px; height: 48px; border-radius: 10px; margin-right: 14px; background: #e5e5ea; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #fff; }
         
-        /* 详情表单 */
         #detail-step { display: none; }
         .info-box { background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 16px; }
         .preview-header { display: flex; align-items: center; gap: 15px; margin-bottom: 12px; }
-        .preview-icon { width: 64px; height: 64px; border-radius: 14px; background: #eee; }
+        .preview-icon { width: 64px; height: 64px; border-radius: 14px; background: #f0f0f0; object-fit: contain; }
         
         .input-group { background: #fff; border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
         .input-item { padding: 14px; }
         textarea { width: 100%; border: none; outline: none; font-size: 15px; height: 100px; resize: none; }
         
         .btn-post { width: 100%; height: 50px; background: var(--ios-blue); color: #fff; border: none; border-radius: 14px; font-size: 17px; font-weight: 600; }
-        .btn-post:disabled { opacity: 0.5; }
-        #status-log { font-size: 13px; color: var(--ios-blue); margin-top: 10px; text-align: center; line-height: 1.6; }
+        .btn-post:disabled { background: #ccc; }
+        #status-log { font-size: 13px; color: var(--ios-blue); margin-top: 10px; text-align: center; }
     </style>
 </head>
 <body>
@@ -71,12 +69,12 @@
                     <small id="res-pkg" style="color:#8e8e93"></small>
                 </div>
             </div>
-            <div id="status-log">正在初始化...</div>
+            <div id="status-log">准备中...</div>
         </div>
         <div class="input-group">
-            <div class="input-item"><textarea id="app-intro" placeholder="输入应用介绍..."></textarea></div>
+            <div class="input-item"><textarea id="app-intro" placeholder="说点什么吧..."></textarea></div>
         </div>
-        <button class="btn-post" id="submitBtn" disabled onclick="finalSubmit()">等待同步完成</button>
+        <button class="btn-post" id="submitBtn" disabled onclick="finalSubmit()">上传同步中</button>
     </div>
 
     <div id="picker">
@@ -98,7 +96,6 @@
         }
         function closePicker() { document.getElementById('picker').style.display = 'none'; }
 
-        // 1. 扫描列表：纯文字提取，不处理图标（保证秒开）
         function scanApps() {
             if (!window.plus) return;
             const main = plus.android.runtimeMainActivity();
@@ -111,7 +108,6 @@
                 const pkg = plus.android.invoke(list, "get", i);
                 const ai = plus.android.getAttribute(pkg, "applicationInfo");
                 if ((plus.android.getAttribute(ai, "flags") & 1) !== 0) continue; 
-
                 allApps.push({
                     name: plus.android.invoke(ai, "loadLabel", pm).toString(),
                     pkg: plus.android.getAttribute(pkg, "packageName"),
@@ -128,14 +124,57 @@
                 <div class="app-item" onclick="pickApp(${i})">
                     <div class="app-icon-default">📦</div>
                     <div style="flex:1; overflow:hidden;">
-                        <b style="display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${app.name}</b>
-                        <small style="color:#999; font-size:11px;">${app.pkg}</small>
+                        <b>${app.name}</b><br><small style="color:#999">${app.pkg}</small>
                     </div>
                 </div>
             `).join('');
         }
 
-        // 2. 选中应用：此时才加载图标并启动连续上传
+        // --- 核心：修正后的图标抓取逻辑 ---
+        function getIconSync(packageName) {
+            try {
+                const main = plus.android.runtimeMainActivity();
+                const pm = main.getPackageManager();
+                const ai = pm.getApplicationInfo(packageName, 0);
+                const drawable = ai.loadIcon(pm);
+
+                // 显式导入所有需要的类
+                plus.android.importClass("android.graphics.Bitmap");
+                plus.android.importClass("android.graphics.Canvas");
+                plus.android.importClass("android.graphics.drawable.BitmapDrawable");
+                plus.android.importClass("java.io.ByteArrayOutputStream");
+                plus.android.importClass("android.util.Base64");
+
+                const Bitmap = window.android.graphics.Bitmap;
+                const Canvas = window.android.graphics.Canvas;
+                const ByteArrayOutputStream = window.java.io.ByteArrayOutputStream;
+                const Base64 = window.android.util.Base64;
+
+                let w = drawable.getIntrinsicWidth();
+                let h = drawable.getIntrinsicHeight();
+                if (w <= 0 || h <= 0) { w = 144; h = 144; }
+
+                // 强行创建一个画布绘制，无论它是 Adaptive 还是普通的
+                const bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+                const canvas = new Canvas(bitmap);
+                drawable.setBounds(0, 0, w, h);
+                drawable.draw(canvas);
+
+                const stream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                const bytes = stream.toByteArray();
+                
+                // NO_WRAP (值为 2) 非常关键，去掉所有回车符
+                const base64Str = Base64.encodeToString(bytes, 2); 
+                
+                bitmap.recycle(); // 释放内存
+                return "data:image/png;base64," + base64Str;
+            } catch (e) {
+                console.error("图标获取失败: " + e);
+                return "https://via.placeholder.com/100?text=Error";
+            }
+        }
+
         async function pickApp(index) {
             const searchVal = document.getElementById('searchInput').value;
             const currentList = searchVal ? allApps.filter(a => a.name.includes(searchVal)) : allApps;
@@ -146,50 +185,18 @@
             document.getElementById('detail-step').style.display = 'block';
             document.getElementById('res-name').innerText = selectedApp.name;
             document.getElementById('res-pkg').innerText = selectedApp.pkg;
+            
+            document.getElementById('status-log').innerText = "✨ 正在提取应用图标...";
 
-            // 步骤 A: 提取图标
-            document.getElementById('status-log').innerText = "正在提取应用图标...";
-            const iconBase64 = getSingleIcon(selectedApp.pkg);
-            selectedApp.icon = iconBase64;
-            document.getElementById('res-icon').src = iconBase64;
-
-            // 步骤 B: 先上传图标（如果 API 支持），这里为了演示逻辑，我们直接存 icon 字段到数据库
-            // 步骤 C: 上传 APK 文件
-            startUploadFlow();
+            // 延迟一丢丢执行，给 UI 渲染时间
+            setTimeout(() => {
+                const b64 = getIconSync(selectedApp.pkg);
+                selectedApp.icon = b64;
+                document.getElementById('res-icon').src = b64;
+                startUploadFlow();
+            }, 100);
         }
 
-        // 单点提取图标函数
-        function getSingleIcon(packageName) {
-            try {
-                const main = plus.android.runtimeMainActivity();
-                const pm = main.getPackageManager();
-                const ai = pm.getApplicationInfo(packageName, 0);
-                const drawable = ai.loadIcon(pm);
-
-                const Bitmap = plus.android.importClass("android.graphics.Bitmap");
-                const Canvas = plus.android.importClass("android.graphics.Canvas");
-                const AdaptiveIconDrawable = plus.android.importClass("android.graphics.drawable.AdaptiveIconDrawable");
-                const ByteArrayOutputStream = plus.android.importClass("java.io.ByteArrayOutputStream");
-                const Base64 = plus.android.importClass("android.util.Base64");
-
-                let w = drawable.getIntrinsicWidth();
-                let h = drawable.getIntrinsicHeight();
-                if (w <= 0) { w = 144; h = 144; }
-
-                const bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-                const canvas = new Canvas(bitmap);
-                drawable.setBounds(0, 0, w, h);
-                drawable.draw(canvas);
-
-                const stream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                return "data:image/png;base64," + Base64.encodeToString(stream.toByteArray(), Base64.NO_WRAP);
-            } catch (e) {
-                return "https://via.placeholder.com/100?text=App";
-            }
-        }
-
-        // 3. 连续上传流
         function startUploadFlow() {
             const log = document.getElementById('status-log');
             const btn = document.getElementById('submitBtn');
@@ -197,26 +204,23 @@
             plus.io.resolveLocalFileSystemURL(selectedApp.path, (entry) => {
                 entry.file((file) => {
                     selectedApp.size = (file.size / 1024 / 1024).toFixed(2) + "MB";
-                    
-                    log.innerText = "图标已就绪，正在同步安装包...";
+                    log.innerText = "图标已锁定，开始同步 APK...";
                     
                     const task = plus.uploader.createUpload(uploadApi, { method: "POST" }, (t, status) => {
                         if (status == 200) {
-                            const res = JSON.parse(t.responseText);
-                            selectedApp.remoteUrl = res.full_url;
-                            log.innerHTML = `<span style="color:#4CD964">✅ 文件同步完成 (${selectedApp.size})</span>`;
+                            selectedApp.remoteUrl = JSON.parse(t.responseText).full_url;
+                            log.innerHTML = `<span style="color:#4CD964">✅ 同步成功 (${selectedApp.size})</span>`;
                             btn.disabled = false;
-                            btn.innerText = "立即发布";
+                            btn.innerText = "完成发布";
                         } else {
-                            log.innerHTML = `<span style="color:#FF3B30">❌ 同步失败，请重试</span>`;
+                            log.innerText = "❌ APK 同步失败";
                         }
                     });
-
                     task.addFile(selectedApp.path, { key: "file" });
                     task.addEventListener("statechanged", (t) => {
                         if(t.state == 3) {
                             const p = Math.round((t.uploadedSize / t.totalSize) * 100);
-                            log.innerText = `正在同步安装包：${p}%`;
+                            log.innerText = `同步中：${p}%`;
                         }
                     });
                     task.start();
@@ -224,26 +228,23 @@
             });
         }
 
-        // 4. 提交数据
         async function finalSubmit() {
             const mail = localStorage.getItem('usermail') || "";
-            const postData = {
+            const data = {
                 name: selectedApp.name,
                 link: selectedApp.remoteUrl,
                 icon: selectedApp.icon,
                 intro: document.getElementById('app-intro').value,
                 package_name: selectedApp.pkg,
                 version: selectedApp.ver,
-                size: selectedApp.size,
-                mail: mail
+                size: selectedApp.size
             };
-
             const res = await fetch(`https://apirank.qujiaweb.top/?mode=add_app&mail=${mail}`, {
                 method: 'POST',
-                body: JSON.stringify(postData)
+                body: JSON.stringify(data)
             });
             if ((await res.json()).code === 200) {
-                alert("发布成功！");
+                alert("发布成功");
                 plus.webview.currentWebview().close();
             }
         }
