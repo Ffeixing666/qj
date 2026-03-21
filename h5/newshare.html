@@ -118,50 +118,52 @@
 
         // ⭐ 完美融合的图标提取函数 ⭐
         function drawableToBase64(drawable) {
-            if (!drawable) return "";
-            try {
-                const Bitmap = plus.android.importClass("android.graphics.Bitmap");
-                const Canvas = plus.android.importClass("android.graphics.Canvas");
-                const BitmapDrawable = plus.android.importClass("android.graphics.drawable.BitmapDrawable");
-                const AdaptiveIconDrawable = plus.android.importClass("android.graphics.drawable.AdaptiveIconDrawable");
-                const ByteArrayOutputStream = plus.android.importClass("java.io.ByteArrayOutputStream");
-                const Base64 = plus.android.importClass("android.util.Base64");
+    if (!drawable) return getDefaultIconBase64();
 
-                let bitmap;
-                // 1. 如果是标准的位图图标
-                if (drawable instanceof BitmapDrawable) {
-                    bitmap = drawable.getBitmap();
-                } 
-                // 2. 如果是安卓8.0+的自适应图标
-                else if (typeof AdaptiveIconDrawable !== "undefined" && drawable instanceof AdaptiveIconDrawable) {
-                    const width = 144; // 适中尺寸
-                    const height = 144;
-                    bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                    const canvas = new Canvas(bitmap);
-                    drawable.setBounds(0, 0, width, height);
-                    drawable.draw(canvas);
-                } 
-                // 3. 其他（矢量图等）
-                else {
-                    let w = drawable.getIntrinsicWidth();
-                    let h = drawable.getIntrinsicHeight();
-                    if (w <= 0 || h <= 0) { w = 144; h = 144; }
-                    bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-                    const canvas = new Canvas(bitmap);
-                    drawable.setBounds(0, 0, w, h);
-                    drawable.draw(canvas);
-                }
-
-                const stream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                const bytes = stream.toByteArray();
-                // NO_WRAP 极其重要：防止生成的Base64包含导致图片破损的换行符
-                return "data:image/png;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP);
-            } catch (e) {
-                console.error("图标转Base64失败:", e);
-                return "";
-            }
+    try {
+        const Bitmap = plus.android.importClass("android.graphics.Bitmap");
+        const Canvas = plus.android.importClass("android.graphics.Canvas");
+        const ByteArrayOutputStream = plus.android.importClass("java.io.ByteArrayOutputStream");
+        const Base64 = plus.android.importClass("android.util.Base64");
+        
+        // 固定尺寸，所有图标都缩放到这个大小
+        const size = 144;
+        let bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        let canvas = new Canvas(bitmap);
+        
+        // 清除画布为透明（这样背景不会出现黑色）
+        canvas.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
+        
+        // 对 AdaptiveIconDrawable 特殊处理，因为它的绘制方式稍有不同
+        const AdaptiveIconDrawable = plus.android.importClass("android.graphics.drawable.AdaptiveIconDrawable");
+        if (drawable instanceof AdaptiveIconDrawable) {
+            // 自适应图标需要绘制前景和背景，直接 setBounds 即可
+            drawable.setBounds(0, 0, size, size);
+            drawable.draw(canvas);
+        } else {
+            // 其他所有 Drawable 统一处理
+            drawable.setBounds(0, 0, size, size);
+            drawable.draw(canvas);
         }
+        
+        // 将 Bitmap 转为 Base64
+        const stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        const bytes = stream.toByteArray();
+        const base64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
+        return "data:image/png;base64," + base64;
+        
+    } catch (e) {
+        console.error("图标转换失败", e);
+        return getDefaultIconBase64();
+    }
+}
+
+// 内置一个灰色图标的 Base64（1x1 灰色 png）
+function getDefaultIconBase64() {
+    // 这是一个 144x144 的灰色正方形 PNG 的 Base64 数据
+    return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAAAI0lEQVR4Xu3BMQEAAADCoPVPbQ0PoAAAAAAAAAAAAAAAAAAAAAAA4EwZngABZJN7WwAAAABJRU5ErkJggg==";
+}
 
         function scanApps() {
             if (!window.plus) return;
