@@ -118,53 +118,50 @@
 
         // ⭐ 完美融合的图标提取函数 ⭐
         function drawableToBase64(drawable) {
-    if (!drawable) return "";
-    try {
-        const Bitmap = plus.android.importClass("android.graphics.Bitmap");
-        const Canvas = plus.android.importClass("android.graphics.Canvas");
-        const ByteArrayOutputStream = plus.android.importClass("java.io.ByteArrayOutputStream");
-        const Base64 = plus.android.importClass("android.util.Base64");
-        const TypedValue = plus.android.importClass("android.util.TypedValue");
+            if (!drawable) return "";
+            try {
+                const Bitmap = plus.android.importClass("android.graphics.Bitmap");
+                const Canvas = plus.android.importClass("android.graphics.Canvas");
+                const BitmapDrawable = plus.android.importClass("android.graphics.drawable.BitmapDrawable");
+                const AdaptiveIconDrawable = plus.android.importClass("android.graphics.drawable.AdaptiveIconDrawable");
+                const ByteArrayOutputStream = plus.android.importClass("java.io.ByteArrayOutputStream");
+                const Base64 = plus.android.importClass("android.util.Base64");
 
-        // 固定尺寸，保证能容纳任何图标（通常系统图标 96dp，但自适应图标可能更大）
-        const targetSize = 144;
-        let bitmap = Bitmap.createBitmap(targetSize, targetSize, Bitmap.Config.ARGB_8888);
-        let canvas = new Canvas(bitmap);
-        
-        // 重要：清除背景（透明）
-        canvas.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
-        
-        // 先尝试获取 Drawable 的原始尺寸，如果都无效，则使用目标尺寸的一半（居中绘制）
-        let width = drawable.getIntrinsicWidth();
-        let height = drawable.getIntrinsicHeight();
-        if (width <= 0 || height <= 0) {
-            width = targetSize;
-            height = targetSize;
+                let bitmap;
+                // 1. 如果是标准的位图图标
+                if (drawable instanceof BitmapDrawable) {
+                    bitmap = drawable.getBitmap();
+                } 
+                // 2. 如果是安卓8.0+的自适应图标
+                else if (typeof AdaptiveIconDrawable !== "undefined" && drawable instanceof AdaptiveIconDrawable) {
+                    const width = 144; // 适中尺寸
+                    const height = 144;
+                    bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                    const canvas = new Canvas(bitmap);
+                    drawable.setBounds(0, 0, width, height);
+                    drawable.draw(canvas);
+                } 
+                // 3. 其他（矢量图等）
+                else {
+                    let w = drawable.getIntrinsicWidth();
+                    let h = drawable.getIntrinsicHeight();
+                    if (w <= 0 || h <= 0) { w = 144; h = 144; }
+                    bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+                    const canvas = new Canvas(bitmap);
+                    drawable.setBounds(0, 0, w, h);
+                    drawable.draw(canvas);
+                }
+
+                const stream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                const bytes = stream.toByteArray();
+                // NO_WRAP 极其重要：防止生成的Base64包含导致图片破损的换行符
+                return "data:image/png;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP);
+            } catch (e) {
+                console.error("图标转Base64失败:", e);
+                return "";
+            }
         }
-        
-        // 缩放比例（保持比例，但实际图标通常为正方形，这里简单处理）
-        // 为了不裁剪，将 drawable 绘制区域设为实际宽高，Canvas 会自动缩放？
-        // 更安全：让 drawable 自己决定绘制区域，我们只负责提供画布。
-        // 对于矢量图，setBounds 后绘制即可。
-        drawable.setBounds(0, 0, targetSize, targetSize);
-        drawable.draw(canvas);
-        
-        // 如果绘制后 Bitmap 全透明（如某些 ColorDrawable），则尝试另一种方式：
-        // 检查是否有像素被画上
-        // 简单做法：如果 canvas 为空，回退到获取系统默认图标
-        // 这里我们不做复杂判断，直接输出
-        
-        const stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-        const bytes = stream.toByteArray();
-        return "data:image/png;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP);
-        
-    } catch (e) {
-        console.error("图标转Base64失败:", e);
-        // 返回一个默认图标 Base64（一个灰色方块）
-        return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAAAHUlEQVRoQ+3ZsQ0AIAwAMeP/zjCgwoAKGyrg8gAALH0p8AAAAABJRU5ErkJggg==";
-    }
-}
 
         function scanApps() {
             if (!window.plus) return;
