@@ -9,44 +9,50 @@
             --ios-bg: #F2F2F7;
             --ios-card: #FFFFFF;
             --ios-blue: #007AFF;
-            --line-color: rgba(0,0,0,0.1);
+            --text-main: #1C1C1E;
+            --text-second: #8E8E93;
+            --line-color: rgba(0,0,0,0.06);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, sans-serif; background: var(--ios-bg); color: #1C1C1E; }
+        body { font-family: -apple-system, sans-serif; background: var(--ios-bg); color: var(--text-main); }
         
-        header { position: sticky; top: 0; z-index: 100; background: rgba(242,242,247,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 0.5px solid var(--line-color); }
-        .nav-bar { height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
-        .nav-title { font-size: 17px; font-weight: 700; }
+        header { position: sticky; top: 0; z-index: 100; background: rgba(242,242,247,0.8); backdrop-filter: blur(20px); border-bottom: 0.5px solid var(--line-color); }
+        .nav-bar { height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
+        .nav-title { font-size: 17px; font-weight: 600; }
 
         .container { padding: 16px; }
-        .card-btn { background: #fff; border-radius: 12px; padding: 25px; text-align: center; border: none; width: 100%; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .upload-zone { display: flex; gap: 12px; margin-bottom: 16px; }
+        .card { flex: 1; background: #fff; border-radius: 12px; padding: 20px 10px; text-align: center; border: 1px solid var(--line-color); }
+        .card:active { background: #f0f0f0; }
 
-        /* 列表弹窗 */
         #picker { position: fixed; inset: 0; background: #fff; z-index: 1000; display: none; flex-direction: column; }
-        .p-header { padding: 12px 16px; border-bottom: 0.5px solid var(--line-color); display: flex; align-items: center; gap: 12px; }
-        .search-box { flex: 1; background: #f0f0f0; border-radius: 10px; padding: 8px 12px; }
+        .p-header { padding: 10px 16px; border-bottom: 0.5px solid var(--line-color); display: flex; align-items: center; }
+        .search-box { flex: 1; background: #eee; border-radius: 8px; padding: 6px 12px; }
         .search-box input { border: none; background: transparent; width: 100%; outline: none; }
         
         #app-list { flex: 1; overflow-y: auto; }
-        .app-item { display: flex; align-items: center; padding: 12px 16px; border-bottom: 0.5px solid #f2f2f2; }
-        .app-icon { width: 48px; height: 48px; border-radius: 10px; margin-right: 14px; background: #f9f9f9; }
+        .app-item { display: flex; align-items: center; padding: 12px 16px; border-bottom: 0.5px solid var(--line-color); }
+        .app-icon { width: 45px; height: 45px; border-radius: 10px; margin-right: 12px; background: #f5f5f5; object-fit: cover; }
         
-        /* 详情区 */
         #detail-step { display: none; }
-        .info-card { background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 16px; }
+        .info-box { background: #fff; border-radius: 15px; padding: 15px; margin-bottom: 15px; }
         .preview-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
-        .preview-icon { width: 64px; height: 64px; border-radius: 14px; background: #eee; }
-        .input-group { background: #fff; border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
-        .input-item { padding: 14px; }
+        .preview-icon { width: 60px; height: 60px; border-radius: 12px; background: #f5f5f5; }
+        
+        .input-group { background: #fff; border-radius: 12px; margin-bottom: 15px; overflow: hidden; }
+        .input-item { padding: 12px; border-bottom: 0.5px solid var(--line-color); }
         textarea { width: 100%; border: none; outline: none; font-size: 15px; height: 100px; resize: none; }
-        .btn-post { width: 100%; height: 52px; background: var(--ios-blue); color: #fff; border: none; border-radius: 14px; font-size: 17px; font-weight: 600; }
+        
+        .btn-post { width: 100%; height: 50px; background: var(--ios-blue); color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; }
+        .btn-post:disabled { background: #ccc; }
+        #upload-progress { font-size: 12px; color: var(--ios-blue); margin-top: 8px; font-weight: 500; }
     </style>
 </head>
 <body>
 
     <header>
         <div class="nav-bar">
-            <div onclick="location.reload()" style="color:var(--ios-blue)">取消</div>
+            <div onclick="location.reload()">取消</div>
             <div class="nav-title">分享应用</div>
             <div style="width:30px"></div>
         </div>
@@ -54,140 +60,156 @@
 
     <div class="container">
         <div id="entry-step">
-            <button class="card-btn" onclick="openPicker()">
-                <strong>📦 选择已安装应用</strong>
-            </button>
+            <div class="upload-zone">
+                <div class="card" onclick="openPicker()">
+                    <div style="font-size: 24px;">📦</div>
+                    <strong>已安装应用</strong><br><small>系统自动提取</small>
+                </div>
+            </div>
         </div>
 
         <div id="detail-step">
-            <div class="info-card">
+            <div class="info-box">
                 <div class="preview-header">
                     <img id="res-icon" class="preview-icon">
-                    <div style="flex:1">
+                    <div>
                         <b id="res-name"></b><br>
-                        <small id="res-pkg" style="color:#8e8e93; font-size: 11px;"></small>
+                        <small id="res-pkg" style="color:#8e8e93"></small>
                     </div>
                 </div>
-                <div id="status-log" style="font-size:13px; color:var(--ios-blue);">正在处理文件...</div>
+                <p id="res-meta" style="font-size:12px; color:#666"></p>
+                <div id="upload-progress">正在处理图标...</div>
             </div>
-            <div class="input-group"><div class="input-item"><textarea id="app-intro" placeholder="输入应用介绍..."></textarea></div></div>
-            <button class="btn-post" id="submitBtn" disabled onclick="finalSubmit()">等待上传</button>
+
+            <div class="input-group">
+                <div class="input-item"><textarea id="app-intro" placeholder="给你的应用写一段精彩的介绍吧..."></textarea></div>
+            </div>
+            
+            <button class="btn-post" id="submitBtn" disabled onclick="finalSubmit()">请稍后...</button>
         </div>
     </div>
 
     <div id="picker">
         <div class="p-header">
             <div class="search-box"><input type="text" id="searchInput" placeholder="搜索应用..." oninput="searchApp(this.value)"></div>
-            <div onclick="closePicker()" style="color:var(--ios-blue)">取消</div>
+            <div onclick="closePicker()" style="color:var(--ios-blue); margin-left:10px">关闭</div>
         </div>
-        <div id="app-list"></div>
+        <div id="app-list">
+            <div style="padding:40px; text-align:center; color:#999;">正在加载应用列表...</div>
+        </div>
     </div>
 
     <script>
         let allApps = [];
         let selectedApp = null;
+        const uploadApi = "https://apirank.qujiaweb.top/?mode=upload_meituan";
 
         function openPicker() {
             document.getElementById('picker').style.display = 'flex';
             if (allApps.length === 0) {
-                document.getElementById('app-list').innerHTML = '<div style="padding:40px;text-align:center;color:#999">正在读取应用列表...</div>';
-                setTimeout(scanApps, 100);
+                setTimeout(scanApps, 200); // 延迟执行避免UI阻塞
             }
         }
         function closePicker() { document.getElementById('picker').style.display = 'none'; }
 
-        // --- 核心修复：极致稳定的图标提取 ---
-        function getIconBase64(drawable) {
-            if (!drawable) return "";
+        // --- 核心：最稳健的图标抓取方案 ---
+        function getIconData(packageName) {
             try {
-                // 1. 提前导入必须的类（如果在循环内导入且失败会挂掉）
-                var Bitmap = plus.android.importClass("android.graphics.Bitmap");
-                var Canvas = plus.android.importClass("android.graphics.Canvas");
-                var ByteArrayOutputStream = plus.android.importClass("java.io.ByteArrayOutputStream");
-                var Base64 = plus.android.importClass("android.util.Base64");
+                const main = plus.android.runtimeMainActivity();
+                const pm = main.getPackageManager();
+                const ai = pm.getApplicationInfo(packageName, 0);
+                
+                // 1. 获取图标 Drawable
+                const iconDrawable = ai.loadIcon(pm);
+                if (!iconDrawable) return "";
 
-                // 2. 强制指定宽高，避免读取到 -1 导致 Bitmap 创建失败
-                var w = drawable.getIntrinsicWidth();
-                var h = drawable.getIntrinsicHeight();
-                if (w <= 0 || h <= 0) { w = 150; h = 150; }
+                // 2. 导入绘图类
+                const Bitmap = plus.android.importClass("android.graphics.Bitmap");
+                const Canvas = plus.android.importClass("android.graphics.Canvas");
+                const ByteArrayOutputStream = plus.android.importClass("java.io.ByteArrayOutputStream");
+                const Base64 = plus.android.importClass("android.util.Base64");
 
-                // 3. 限制图标最大尺寸，防止 OOM（内存溢出）导致列表消失
-                if (w > 200) { h = (200 / w) * h; w = 200; }
+                // 3. 确定图标尺寸 (自适应图标必须强制指定)
+                let width = iconDrawable.getIntrinsicWidth();
+                let height = iconDrawable.getIntrinsicHeight();
+                if (width <= 0) width = 144;
+                if (height <= 0) height = 144;
 
-                var bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-                var canvas = new Canvas(bitmap);
-                drawable.setBounds(0, 0, w, h);
-                drawable.draw(canvas);
+                // 4. 创建画板并绘制
+                const bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                const canvas = new Canvas(bitmap);
+                iconDrawable.setBounds(0, 0, width, height);
+                iconDrawable.draw(canvas);
 
-                var stream = new ByteArrayOutputStream();
+                // 5. 编码为无换行符的 Base64
+                const stream = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                var bytes = stream.toByteArray();
+                const bytes = stream.toByteArray();
+                const base64Str = Base64.encodeToString(bytes, Base64.NO_WRAP);
                 
-                // 4. 使用 NO_WRAP 彻底解决“破损图片”问题
-                var base64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
-                
-                bitmap.recycle(); // 释放原生内存
-                return "data:image/png;base64," + base64;
+                bitmap.recycle(); // 及时释放原生内存
+                return "data:image/png;base64," + base64Str;
             } catch (e) {
-                return ""; // 出错返回空字符串，不阻塞列表
+                console.error("图标提取失败: " + e);
+                return ""; 
             }
         }
 
         function scanApps() {
             if (!window.plus) return;
             try {
-                var main = plus.android.runtimeMainActivity();
-                var pm = main.getPackageManager();
-                // 这里的 0 表示基本信息，加载最快
-                var list = plus.android.invoke(pm, "getInstalledPackages", 0);
-                var count = plus.android.invoke(list, "size");
+                const main = plus.android.runtimeMainActivity();
+                const pm = main.getPackageManager();
+                const list = plus.android.invoke(pm, "getInstalledPackages", 0);
+                const count = plus.android.invoke(list, "size");
 
                 allApps = [];
-                for (var i = 0; i < count; i++) {
-                    try {
-                        var pkg = plus.android.invoke(list, "get", i);
-                        var ai = plus.android.getAttribute(pkg, "applicationInfo");
-                        
-                        // 过滤系统应用 (FLAG_SYSTEM = 1)
-                        var flags = plus.android.getAttribute(ai, "flags");
-                        if ((flags & 1) !== 0) continue;
+                for (let i = 0; i < count; i++) {
+                    const pkg = plus.android.invoke(list, "get", i);
+                    const ai = plus.android.getAttribute(pkg, "applicationInfo");
+                    const flags = plus.android.getAttribute(ai, "flags");
+                    
+                    if ((flags & 1) !== 0) continue; // 跳过系统应用
 
-                        var name = plus.android.invoke(ai, "loadLabel", pm).toString();
-                        var pkgName = plus.android.getAttribute(pkg, "packageName");
-                        var path = plus.android.getAttribute(ai, "publicSourceDir");
-                        var ver = plus.android.getAttribute(pkg, "versionName");
-                        
-                        // 获取图标
-                        var iconDrawable = plus.android.invoke(ai, "loadIcon", pm);
-                        var icon64 = getIconBase64(iconDrawable);
+                    const name = plus.android.invoke(ai, "loadLabel", pm).toString();
+                    const pkgName = plus.android.getAttribute(pkg, "packageName");
+                    const path = plus.android.getAttribute(ai, "publicSourceDir");
+                    const ver = plus.android.getAttribute(pkg, "versionName");
 
-                        allApps.push({
-                            name: name,
-                            pkg: pkgName,
-                            ver: ver,
-                            path: path,
-                            icon: icon64
-                        });
-                    } catch (err) { continue; } // 单个 App 出错跳过，不影响全局
+                    allApps.push({
+                        name: name,
+                        pkg: pkgName,
+                        ver: ver,
+                        path: path,
+                        // 列表先不提取图标，点选时或分批提取，防止卡死
+                        icon: "" 
+                    });
                 }
                 allApps.sort((a, b) => a.name.localeCompare(b.name, 'zh'));
                 render(allApps);
             } catch (e) {
-                document.getElementById('app-list').innerHTML = '<div style="padding:20px;">读取失败，请检查权限</div>';
+                alert("权限受限，无法获取列表");
             }
         }
 
         function render(data) {
-            var html = data.map((app, i) => `
+            // 渲染时异步加载图标，防止阻塞
+            document.getElementById('app-list').innerHTML = data.map((app, i) => `
                 <div class="app-item" onclick="pickApp(${i})">
-                    <img src="${app.icon || 'https://via.placeholder.com/48?text=App'}" class="app-icon" onerror="this.src='https://via.placeholder.com/48?text=Error'">
-                    <div style="flex:1; overflow:hidden;">
-                        <b style="display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${app.name}</b>
-                        <small style="color:#999; font-size:11px;">${app.pkg}</small>
-                    </div>
+                    <img id="icon-${i}" src="" class="app-icon" onerror="this.src='https://via.placeholder.com/45?text=Icon'">
+                    <div><b>${app.name}</b><br><small>${app.pkg}</small></div>
                 </div>
             `).join('');
-            document.getElementById('app-list').innerHTML = html || '<div style="padding:40px;text-align:center;">没有找到第三方应用</div>';
+
+            // 异步提取可视区域图标
+            data.forEach((app, i) => {
+                setTimeout(() => {
+                    const iconBase64 = getIconData(app.pkg);
+                    app.icon = iconBase64;
+                    const img = document.getElementById(`icon-${i}`);
+                    if (img) img.src = iconBase64;
+                }, i * 20); // 间隔提取，保证丝滑
+            });
         }
 
         function pickApp(index) {
@@ -202,25 +224,35 @@
 
             plus.io.resolveLocalFileSystemURL(selectedApp.path, (entry) => {
                 entry.file((file) => {
-                    selectedApp.size = (file.size / 1024 / 1024).toFixed(2) + "MB";
+                    const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                    document.getElementById('res-meta').innerText = `版本：${selectedApp.ver} | 大小：${sizeMB}MB`;
+                    selectedApp.size = sizeMB + "MB";
                     startUpload(selectedApp.path);
                 });
             });
         }
 
         function startUpload(filePath) {
-            var log = document.getElementById('status-log');
-            var btn = document.getElementById('submitBtn');
-            var task = plus.uploader.createUpload("https://apirank.qujiaweb.top/?mode=upload_meituan", { method: "POST" }, (t, status) => {
+            const prog = document.getElementById('upload-progress');
+            const btn = document.getElementById('submitBtn');
+            const task = plus.uploader.createUpload(uploadApi, { method: "POST" }, (t, status) => {
                 if (status == 200) {
-                    var res = JSON.parse(t.responseText);
+                    const res = JSON.parse(t.responseText);
                     selectedApp.remoteUrl = res.full_url;
-                    log.innerText = "✅ 文件同步成功";
+                    prog.innerText = "✅ APK 同步成功";
                     btn.disabled = false;
                     btn.innerText = "发布分享";
+                } else {
+                    prog.innerText = "❌ 上传失败，请重试";
                 }
             });
             task.addFile(filePath, { key: "file" });
+            task.addEventListener("statechanged", (t) => {
+                if(t.state == 3) {
+                    const p = Math.round((t.uploadedSize / t.totalSize) * 100);
+                    prog.innerText = `正在同步 APK：${p}%`;
+                }
+            });
             task.start();
         }
 
