@@ -285,22 +285,11 @@
         .loading-tip {
             color: #666;
         }
-        /* 调试面板（隐藏，可开启） */
-        #debug {
-            display: none;
-            background: #fff;
-            border: 1px solid red;
-            padding: 10px;
-            margin: 10px;
-            font-size: 12px;
-            white-space: pre-wrap;
-        }
     </style>
 </head>
 <body>
 
 <div id="toast"></div>
-<div id="debug" style="display:none;"></div>
 
 <!-- 登录界面 -->
 <div id="loginSection" style="display: none;">
@@ -366,12 +355,12 @@
 </div>
 
 <script>
-// 纯原生 JavaScript，无任何外部依赖，完全兼容 iOS9
+// 纯原生 JavaScript，无外部依赖，所有请求改用 GET 方式（登录也改为 GET）
 (function() {
     // 全局配置
     var API_BASE = 'https://apirank.qujiaweb.top/';
     
-    // 辅助函数：显示提示
+    // 显示提示
     function showToast(msg) {
         var toast = document.getElementById('toast');
         if (!toast) return;
@@ -380,17 +369,6 @@
         setTimeout(function() {
             toast.style.display = 'none';
         }, 1500);
-    }
-    
-    // 调试输出
-    function debugLog(msg) {
-        var debugDiv = document.getElementById('debug');
-        if (debugDiv && debugDiv.style.display === 'block') {
-            debugDiv.innerHTML += '<div>' + msg + '</div>';
-        }
-        if (window.console && console.log) {
-            console.log(msg);
-        }
     }
     
     // 判断数组
@@ -442,14 +420,11 @@
         } catch(e) {}
     }
     
-    // AJAX 封装
-    function ajax(method, url, data, callback) {
+    // AJAX GET 请求封装
+    function ajaxGet(url, callback) {
         var xhr = new XMLHttpRequest();
-        xhr.open(method, url, true);
+        xhr.open('GET', url, true);
         xhr.timeout = 10000;
-        if (method === 'POST') {
-            xhr.setRequestHeader('Content-Type', 'application/json');
-        }
         xhr.onreadystatechange = function() {
             if (xhr.readyState === 4) {
                 if (xhr.status >= 200 && xhr.status < 300) {
@@ -470,11 +445,7 @@
         xhr.ontimeout = function() {
             callback(new Error('Timeout'), null);
         };
-        if (data && method === 'POST') {
-            xhr.send(JSON.stringify(data));
-        } else {
-            xhr.send();
-        }
+        xhr.send();
     }
     
     // 渲染应用列表
@@ -544,7 +515,8 @@
         }
         var container = document.getElementById('appList');
         if (container) container.innerHTML = '<div class="loading-tip">加载中...</div>';
-        ajax('GET', API_BASE + '?mode=get_user_apps&mail=' + encodeURIComponent(mail), null, function(err, res) {
+        var url = API_BASE + '?mode=get_user_apps&mail=' + encodeURIComponent(mail);
+        ajaxGet(url, function(err, res) {
             if (err) {
                 showToast('加载失败');
                 renderList([]);
@@ -562,7 +534,8 @@
     function fetchUnreadCount() {
         var mail = getLocal('usermail', '');
         if (!mail) return;
-        ajax('GET', API_BASE + '?mode=get_messages&mail=' + encodeURIComponent(mail), null, function(err, res) {
+        var url = API_BASE + '?mode=get_messages&mail=' + encodeURIComponent(mail);
+        ajaxGet(url, function(err, res) {
             if (err) return;
             if (res && res.code === 200 && res.fields && isArray(res.fields)) {
                 var count = 0;
@@ -584,7 +557,8 @@
     function checkAdmin() {
         var mail = getLocal('usermail', '');
         if (!mail) return;
-        ajax('GET', API_BASE + '?mode=get_user_info&mail=' + encodeURIComponent(mail), null, function(err, res) {
+        var url = API_BASE + '?mode=get_user_info&mail=' + encodeURIComponent(mail);
+        ajaxGet(url, function(err, res) {
             if (err) return;
             if (res && res.code === 200 && res.fields && res.fields[0]) {
                 var user = res.fields[0];
@@ -628,7 +602,7 @@
         else if (type === 'review') openReviewPage();
     }
     
-    // 登录逻辑
+    // 登录逻辑（改用 GET 方式）
     function doLogin() {
         var email = document.getElementById('email').value.trim();
         var pass = document.getElementById('pass').value.trim();
@@ -637,9 +611,11 @@
             return;
         }
         showToast('登录中...');
-        ajax('POST', API_BASE + '?mode=login', { email: email, password: pass }, function(err, res) {
+        // 构建 GET 请求 URL
+        var url = API_BASE + '?mode=login&email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(pass);
+        ajaxGet(url, function(err, res) {
             if (err) {
-                showToast('网络错误');
+                showToast('网络错误: ' + (err.message || '未知错误'));
                 return;
             }
             if (res && res.code === 200 && res.fields && res.fields[0]) {
