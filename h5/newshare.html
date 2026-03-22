@@ -138,7 +138,7 @@
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
                 const bytes = stream.toByteArray();
                 const base64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
-                console.log(`[${appName}] 通过 BitmapDrawable 成功`);
+alert(`[${appName}] 通过 BitmapDrawable 成功`);
                 return "data:image/png;base64," + base64;
             }
         }
@@ -159,7 +159,7 @@
         // 简单采样中心像素
         const centerColor = bitmap.getPixel(size/2, size/2);
         if (centerColor === 0) {
-            console.log(`[${appName}] 绘制后全透明，尝试其他方法`);
+alert(`[${appName}] 绘制后全透明，尝试其他方法`);
             // 策略3：尝试使用 getIntrinsicWidth/Height 创建原生尺寸
             let w = plus.android.invoke(drawable, "getIntrinsicWidth");
             let h = plus.android.invoke(drawable, "getIntrinsicHeight");
@@ -177,11 +177,11 @@
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
         const bytes = stream.toByteArray();
         const base64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
-        console.log(`[${appName}] 通过固定尺寸绘制成功`);
+alert(`[${appName}] 通过固定尺寸绘制成功`);
         return "data:image/png;base64," + base64;
         
     } catch (e) {
-        console.error(`[${appName}] 图标转换异常:`, e.message || e);
+alert(`[${appName}] 图标转换异常:`, e.message || e);
         return getDefaultIconBase64();
     }
 }
