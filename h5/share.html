@@ -39,30 +39,73 @@
 
         .container { padding: 16px; max-width: 600px; margin: 0 auto; }
 
-        /* 上传卡片 - 初始显示 */
+        /* --- 全新设计的上传选项卡区域 --- */
         #upload-zones {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 20px;
+            margin-top: 4px;
         }
         .upload-card {
             background: var(--ios-card);
-            border: 1.5px dashed #C7C7CC;
-            border-radius: 16px;
-            padding: 30px 10px;
-            text-align: center;
-            transition: all 0.2s;
-            cursor: pointer;
+            border: none;
+            border-radius: 20px;
+            padding: 20px 22px;
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.03);
+            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .upload-card:active {
+            transform: scale(0.96);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            background: #FAFAFC;
+        }
+        .upload-card .icon-wrapper {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
             align-items: center;
             justify-content: center;
+            margin-right: 18px;
+            font-size: 26px;
+            flex-shrink: 0;
         }
-        .upload-card:active { background: #f9f9f9; transform: scale(0.98); }
-        .upload-card svg, .upload-card .emoji-icon { width: 40px; height: 40px; fill: var(--ios-blue); margin-bottom: 10px; font-size: 32px; line-height: 40px; }
-        .upload-card h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
-        .upload-card p { font-size: 11px; color: var(--text-second); }
+        .upload-card.installed .icon-wrapper {
+            background: linear-gradient(135deg, #E5F0FF 0%, #CCE0FF 100%);
+            color: var(--ios-blue);
+        }
+        .upload-card.local .icon-wrapper {
+            background: linear-gradient(135deg, #FFF0E5 0%, #FFE0D6 100%);
+            fill: var(--ios-orange);
+        }
+        .upload-card .text-content {
+            flex: 1;
+            text-align: left;
+        }
+        .upload-card h4 {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-main);
+            letter-spacing: 0.3px;
+        }
+        .upload-card p {
+            font-size: 13px;
+            color: var(--text-second);
+        }
+        .upload-card .arrow-icon {
+            width: 20px;
+            height: 20px;
+            fill: #C7C7CC;
+            margin-left: 10px;
+        }
+        /* -------------------------------- */
 
         /* 已安装应用选择器面板 */
         #picker { position: fixed; inset: 0; background: #fff; z-index: 1000; display: none; flex-direction: column; animation: slideUp 0.3s ease-out; }
@@ -105,11 +148,7 @@
 
         /* 上传加载动画 */
         .loading-spinner {
-            width: 24px; height: 24px;
-            border: 2px solid rgba(0,122,255,0.2);
-            border-top: 2px solid var(--ios-blue);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+            width: 24px; height: 24px; border: 2px solid rgba(0,122,255,0.2); border-top: 2px solid var(--ios-blue); border-radius: 50%; animation: spin 0.8s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -147,15 +186,24 @@
 
     <main class="container">
         <div id="upload-zones">
-            <div class="upload-card" onclick="openPicker()">
-                <div class="emoji-icon">📦</div>
-                <h4>已安装应用</h4>
-                <p>从列表中提取</p>
+            <div class="upload-card installed" onclick="openPicker()">
+                <div class="icon-wrapper">📦</div>
+                <div class="text-content">
+                    <h4>已安装应用</h4>
+                    <p>从列表中提取</p>
+                </div>
+                <svg class="arrow-icon" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
             </div>
-            <div class="upload-card" onclick="document.getElementById('apkInput').click()">
-                <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
-                <h4>本地APK</h4>
-                <p>「推荐」上传安装包</p>
+            
+            <div class="upload-card local" onclick="document.getElementById('apkInput').click()">
+                <div class="icon-wrapper">
+                    <svg viewBox="0 0 24 24" width="28" height="28"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+                </div>
+                <div class="text-content">
+                    <h4>本地安装包</h4>
+                    <p>「推荐」上传安装包</p>
+                </div>
+                <svg class="arrow-icon" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
             </div>
             <input type="file" id="apkInput" style="display:none">
         </div>
@@ -393,6 +441,27 @@
             return { tip, progressBar, progressFill, cancelButton };
         }
 
+        // --- 核心新增：新方案兜底及 MT 拦截 ---
+        function getApkSizeNative(path) {
+            try {
+                const File = plus.android.importClass("java.io.File");
+                const file = new File(path);
+                return (file.length() / (1024 * 1024)).toFixed(2);
+            } catch(e) { return 0; }
+        }
+
+        function showMTManagerPrompt() {
+            document.getElementById('upload-zones').style.display = 'flex'; // 恢复主UI
+            document.getElementById('status-tip').style.display = 'none';
+            document.getElementById('content-step').style.display = 'none'; // 安全起见隐藏表单
+            
+            if (window.plus) {
+                plus.nativeUI.alert("当前系统拦截限制不支持直传，强烈推荐您通过 MT管理器 提取安装包后再选择 本地APK 上传", function(){}, "安全受限提示", "我知道了");
+            } else {
+                alert("当前系统不支持，强烈推荐您通过MT管理器提取安装包后再来上传");
+            }
+        }
+
         // --- 已安装应用选择相关 ---
         function openPicker() {
             if (!window.plus) {
@@ -404,7 +473,7 @@
         }
 
         function closePicker() { 
-            document.getElementById('picker').style.display = 'none'; 
+            document.getElementById('picker').style.display = 'none';
         }
 
         function scanApps() {
@@ -419,11 +488,16 @@
                     const pkg = plus.android.invoke(list, "get", i);
                     const ai = plus.android.getAttribute(pkg, "applicationInfo");
                     if ((plus.android.getAttribute(ai, "flags") & 1) !== 0) continue;
+                    
+                    // 获取路径，兼容高版本安卓
+                    const path = plus.android.getAttribute(ai, "publicSourceDir") || plus.android.getAttribute(ai, "sourceDir");
+                    if (!path) continue;
+
                     apps.push({
                         name: plus.android.invoke(ai, "loadLabel", pm).toString(),
                         pkg: plus.android.getAttribute(pkg, "packageName"),
                         ver: plus.android.getAttribute(pkg, "versionName") || "1.0.0",
-                        path: plus.android.getAttribute(ai, "publicSourceDir")
+                        path: path
                     });
                 }
                 allApps = apps.sort((a, b) => a.name.localeCompare(b.name, 'zh'));
@@ -451,7 +525,7 @@
             renderAppList(filtered);
         }
 
-        // 已安装应用专属解析与上传流程 (原生机制，跳过 AppInfoParser 防止报错)
+        // 双保险混合机制解析与上传流程
         function pickApp(pkgName) {
             const app = allApps.find(a => a.pkg === pkgName);
             closePicker();
@@ -473,49 +547,78 @@
             }
             const iconResult = convertIcon(iconDrawable, app.name);
 
-            // 2. 拿到大小并直接填充UI
+            // 2. 首选旧方式读取大小，不行则走新方案兜底
             plus.io.resolveLocalFileSystemURL(app.path, (entry) => {
                 entry.file(async (file) => {
                     const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-                    
-                    const finalName = app.name;
-                    const finalPkg = app.pkg;
-                    const finalVer = app.ver;
-                    const androidVer = "4.4"; // 原生提取暂作默认
-                    const bitDisplay = "全架构兼容";
-
-                    setupAppUI(finalName, finalPkg, finalVer, sizeMB, androidVer, bitDisplay, iconResult);
-
-                    apkInfo = { 
-                        finalName, sizeMB, package: finalPkg, versionName: finalVer, 
-                        androidVer, bitDisplay, appLink: ''
-                    };
-
-                    if (parseFloat(sizeMB) <= 100) {
-                        try {
-                            apkInfo.appLink = await uploadApkNative(app.path);
-                        } catch (uploadErr) {
-                            if (uploadErr.message !== '用户取消上传') console.error(uploadErr);
-                        }
+                    if (sizeMB <= 0) {
+                        tryNativeFallback(app, iconResult, tip);
                     } else {
-                        document.getElementById('pan-section').style.display = 'block';
+                        proceedAppUpload(app, sizeMB, iconResult, tip);
                     }
-
-                    if (iconResult.success && iconResult.data && iconResult.data !== DEFAULT_ICON_BASE64) {
-                        uploadIcon(iconResult.data);
-                    }
-
-                    tip.style.display = 'none';
-                    document.getElementById('content-step').style.display = 'block';
                 }, (e) => {
-                    tip.innerHTML = "读取安装包文件失败";
+                    // 旧方式获取 file 失败，尝试新方式
+                    tryNativeFallback(app, iconResult, tip);
                 });
             }, (e) => {
-                tip.innerHTML = "解析安装包路径失败";
+                // 旧方式解析路径失败，尝试新方式
+                tryNativeFallback(app, iconResult, tip);
             });
         }
 
-        // --- 本地 APK 解析与上传流程 (Web机制) ---
+        function tryNativeFallback(app, iconResult, tip) {
+            console.log("旧方式读取受限，正尝试通过 Java 反射底层提取...");
+            const sizeMB = getApkSizeNative(app.path);
+            if (sizeMB > 0) {
+                proceedAppUpload(app, sizeMB, iconResult, tip);
+            } else {
+                // 退一万步：两者都失败
+                showMTManagerPrompt();
+            }
+        }
+
+        // 修改为 async 等待上传结果，彻底修复瞬间跳跃的异步bug
+        async function proceedAppUpload(app, sizeMB, iconResult, tip) {
+            const finalName = app.name;
+            const finalPkg = app.pkg;
+            const finalVer = app.ver;
+            const androidVer = "4.4"; // 原生提取暂作默认
+            const bitDisplay = "全架构兼容";
+
+            setupAppUI(finalName, finalPkg, finalVer, sizeMB, androidVer, bitDisplay, iconResult);
+
+            apkInfo = { 
+                finalName, sizeMB, package: finalPkg, versionName: finalVer, 
+                androidVer, bitDisplay, appLink: ''
+            };
+
+            if (parseFloat(sizeMB) <= 100) {
+                try {
+                    // 同步等待等待系统原生接口的返回结果
+                    apkInfo.appLink = await uploadApkNative(app.path);
+                } catch (uploadErr) {
+                    if (uploadErr.message === '用户取消上传') {
+                        // 用户主动点击取消直传，界面已经展示网盘，此时继续让它填表即可
+                    } else {
+                        // 系统限制拦截，或者断网等导致的报错
+                        console.error("上传受阻报错拦截:", uploadErr);
+                        showMTManagerPrompt();
+                        return; // 中断，绝不进入内容表单页
+                    }
+                }
+            } else {
+                document.getElementById('pan-section').style.display = 'block';
+            }
+
+            if (iconResult.success && iconResult.data && iconResult.data !== DEFAULT_ICON_BASE64) {
+                uploadIcon(iconResult.data);
+            }
+
+            tip.style.display = 'none';
+            document.getElementById('content-step').style.display = 'block';
+        }
+
+        // --- 本地 APK 解析与上传流程 (Web机制保持不变) ---
         document.getElementById('apkInput').onchange = async (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -620,12 +723,14 @@
         }
 
         // --- 两种上传实现方式 (共用一套UI) ---
-        // 1. 已安装应用路径上传(原生)
+        // 1. 已安装应用路径上传(原生) - 增加容错保护机制
         function uploadApkNative(path) {
             return new Promise((resolve, reject) => {
                 const ui = buildUploadUI();
                 const task = plus.uploader.createUpload('https://apirank.qujiaweb.top/?mode=upload_meituan', { method: "POST" }, (t, status) => {
-                    ui.progressBar.remove(); ui.cancelButton.remove();
+                    if (ui.progressBar && ui.progressBar.parentNode) ui.progressBar.remove();
+                    if (ui.cancelButton && ui.cancelButton.parentNode) ui.cancelButton.remove();
+                    
                     if (status == 200) {
                         try {
                             const res = JSON.parse(t.responseText);
@@ -633,7 +738,7 @@
                             else { ui.tip.innerText = '网络异常，请尝试更换网络'; reject(new Error('上传失败')); }
                         } catch(e) { ui.tip.innerText = '响应解析失败'; reject(new Error('响应解析失败')); }
                     } else {
-                        ui.tip.innerText = '请求失败'; reject(new Error('上传请求失败'));
+                        ui.tip.innerText = '提取受限或请求失败'; reject(new Error('系统安全拦截'));
                     }
                 });
                 task.addFile(path, { key: "file" });
@@ -644,7 +749,8 @@
                 });
                 ui.cancelButton.onclick = function() {
                     task.abort();
-                    ui.progressBar.remove(); ui.cancelButton.remove();
+                    if (ui.progressBar && ui.progressBar.parentNode) ui.progressBar.remove();
+                    if (ui.cancelButton && ui.cancelButton.parentNode) ui.cancelButton.remove();
                     document.getElementById('pan-section').style.display = 'block';
                     reject(new Error('用户取消上传'));
                 };
@@ -668,7 +774,8 @@
                 });
 
                 xhr.onload = function() {
-                    ui.progressBar.remove(); ui.cancelButton.remove();
+                    if (ui.progressBar && ui.progressBar.parentNode) ui.progressBar.remove();
+                    if (ui.cancelButton && ui.cancelButton.parentNode) ui.cancelButton.remove();
                     if (xhr.status === 200) {
                         try {
                             const res = JSON.parse(xhr.responseText);
@@ -678,12 +785,14 @@
                     } else { ui.tip.innerText = '请求失败'; reject(new Error('上传请求失败')); }
                 };
                 xhr.onerror = function() {
-                    ui.progressBar.remove(); ui.cancelButton.remove();
+                    if (ui.progressBar && ui.progressBar.parentNode) ui.progressBar.remove();
+                    if (ui.cancelButton && ui.cancelButton.parentNode) ui.cancelButton.remove();
                     ui.tip.innerText = '网络错误'; reject(new Error('网络错误'));
                 };
                 ui.cancelButton.onclick = function() {
                     xhr.abort();
-                    ui.progressBar.remove(); ui.cancelButton.remove();
+                    if (ui.progressBar && ui.progressBar.parentNode) ui.progressBar.remove();
+                    if (ui.cancelButton && ui.cancelButton.parentNode) ui.cancelButton.remove();
                     document.getElementById('pan-section').style.display = 'block';
                     reject(new Error('用户取消上传'));
                 };
@@ -876,7 +985,7 @@
                         } else {
                             // 子页面：直接关闭，返回首页
                             if (plus.webview.all().length > 1) {
-                                webview.close('auto'); 
+                                webview.close('auto');
                             } else {
                                 history.back();
                             }
