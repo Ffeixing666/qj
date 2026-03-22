@@ -14,7 +14,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, sans-serif; background: var(--ios-bg); color: var(--text-main); overflow-x: hidden; }
         
-        /* 导航栏 */
         header { position: sticky; top: 0; z-index: 100; background: rgba(242,242,247,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 0.5px solid var(--line-color); }
         .nav-bar { height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
         .nav-title { font-size: 17px; font-weight: 600; }
@@ -23,7 +22,6 @@
         .card { background: #fff; border-radius: 12px; padding: 25px; text-align: center; border: 1px solid var(--line-color); width: 100%; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
         .card:active { background: #f9f9f9; }
 
-        /* 应用选择弹窗 */
         #picker { position: fixed; inset: 0; background: #fff; z-index: 1000; display: none; flex-direction: column; animation: slideUp 0.3s ease-out; }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         
@@ -36,7 +34,6 @@
         .app-item:active { background: #f2f2f2; }
         .app-icon { width: 50px; height: 50px; border-radius: 11px; margin-right: 14px; background: #f0f0f0; object-fit: cover; }
         
-        /* 详情表单 */
         #detail-step { display: none; }
         .info-box { background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 16px; }
         .preview-header { display: flex; align-items: center; gap: 15px; margin-bottom: 12px; }
@@ -111,84 +108,76 @@
         function openPicker() {
             document.getElementById('picker').style.display = 'flex';
             if (allApps.length === 0) {
-                setTimeout(scanApps, 300); // 延迟执行，防止UI由于大量计算卡死
+                setTimeout(scanApps, 300);
             }
         }
         function closePicker() { document.getElementById('picker').style.display = 'none'; }
 
+        // 默认灰色图标 Base64
+        function getDefaultIconBase64() {
+            return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAAAI0lEQVR4Xu3BMQEAAADCoPVPbQ0PoAAAAAAAAAAAAAAAAAAAAAAA4EwZngABZJN7WwAAAABJRU5ErkJggg==";
+        }
+
+        // 核心图标转换函数（返回 Base64，失败返回默认图标）
         function drawableToBase64(drawable, appName) {
-    // 如果 drawable 为空，直接返回默认图标
-    if (!drawable) {
-        console.log(`[${appName}] drawable 为空`);
-        return getDefaultIconBase64();
-    }
+            if (!drawable) {
+                return getDefaultIconBase64();
+            }
 
-    try {
-        const Bitmap = plus.android.importClass("android.graphics.Bitmap");
-        const Canvas = plus.android.importClass("android.graphics.Canvas");
-        const ByteArrayOutputStream = plus.android.importClass("java.io.ByteArrayOutputStream");
-        const Base64 = plus.android.importClass("android.util.Base64");
-        const BitmapDrawable = plus.android.importClass("android.graphics.drawable.BitmapDrawable");
+            try {
+                const Bitmap = plus.android.importClass("android.graphics.Bitmap");
+                const Canvas = plus.android.importClass("android.graphics.Canvas");
+                const ByteArrayOutputStream = plus.android.importClass("java.io.ByteArrayOutputStream");
+                const Base64 = plus.android.importClass("android.util.Base64");
+                const BitmapDrawable = plus.android.importClass("android.graphics.drawable.BitmapDrawable");
 
-        // 策略1：如果是 BitmapDrawable，直接取 Bitmap（最可靠）
-        if (drawable instanceof BitmapDrawable) {
-            const bitmap = drawable.getBitmap();
-            if (bitmap && !bitmap.isRecycled()) {
+                // 策略1：直接取 Bitmap（最可靠）
+                if (drawable instanceof BitmapDrawable) {
+                    const bitmap = drawable.getBitmap();
+                    if (bitmap && !bitmap.isRecycled()) {
+                        const stream = new ByteArrayOutputStream();
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        const bytes = stream.toByteArray();
+                        const base64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
+                        return "data:image/png;base64," + base64;
+                    }
+                }
+
+                // 策略2：固定尺寸绘制（144x144）
+                const size = 144;
+                let bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+                let canvas = new Canvas(bitmap);
+                plus.android.invoke(canvas, "drawARGB", 0, 0, 0, 0);
+                plus.android.invoke(drawable, "setBounds", 0, 0, size, size);
+                plus.android.invoke(drawable, "draw", canvas);
+
+                // 检查是否全透明
+                const centerColor = bitmap.getPixel(size/2, size/2);
+                if (centerColor === 0) {
+                    // 策略3：使用原生尺寸再试一次
+                    let w = plus.android.invoke(drawable, "getIntrinsicWidth");
+                    let h = plus.android.invoke(drawable, "getIntrinsicHeight");
+                    if (w <= 0 || h <= 0) {
+                        w = 96; h = 96;
+                    }
+                    bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+                    canvas = new Canvas(bitmap);
+                    plus.android.invoke(canvas, "drawARGB", 0, 0, 0, 0);
+                    plus.android.invoke(drawable, "setBounds", 0, 0, w, h);
+                    plus.android.invoke(drawable, "draw", canvas);
+                }
+
                 const stream = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
                 const bytes = stream.toByteArray();
                 const base64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
-alert(`[${appName}] 通过 BitmapDrawable 成功`);
                 return "data:image/png;base64," + base64;
+
+            } catch (e) {
+                // 转换失败，返回默认图标
+                return getDefaultIconBase64();
             }
         }
-
-        // 策略2：固定尺寸绘制（144x144）
-        const size = 144;
-        let bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-        let canvas = new Canvas(bitmap);
-        
-        // 清除画布为透明
-        plus.android.invoke(canvas, "drawARGB", 0, 0, 0, 0);
-        
-        // 设置绘制区域并绘制
-        plus.android.invoke(drawable, "setBounds", 0, 0, size, size);
-        plus.android.invoke(drawable, "draw", canvas);
-        
-        // 检查绘制后的 Bitmap 是否全透明（可能是绘制失败）
-        // 简单采样中心像素
-        const centerColor = bitmap.getPixel(size/2, size/2);
-        if (centerColor === 0) {
-alert(`[${appName}] 绘制后全透明，尝试其他方法`);
-            // 策略3：尝试使用 getIntrinsicWidth/Height 创建原生尺寸
-            let w = plus.android.invoke(drawable, "getIntrinsicWidth");
-            let h = plus.android.invoke(drawable, "getIntrinsicHeight");
-            if (w <= 0 || h <= 0) {
-                w = 96; h = 96; // 回退尺寸
-            }
-            bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-            canvas = new Canvas(bitmap);
-            plus.android.invoke(canvas, "drawARGB", 0, 0, 0, 0);
-            plus.android.invoke(drawable, "setBounds", 0, 0, w, h);
-            plus.android.invoke(drawable, "draw", canvas);
-        }
-        
-        const stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-        const bytes = stream.toByteArray();
-        const base64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
-alert(`[${appName}] 通过固定尺寸绘制成功`);
-        return "data:image/png;base64," + base64;
-        
-    } catch (e) {
-alert(`[${appName}] 图标转换异常:`, e.message || e);
-        return getDefaultIconBase64();
-    }
-}
-
-function getDefaultIconBase64() {
-    return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAAAI0lEQVR4Xu3BMQEAAADCoPVPbQ0PoAAAAAAAAAAAAAAAAAAAAAAA4EwZngABZJN7WwAAAABJRU5ErkJggg==";
-}
 
         function scanApps() {
             if (!window.plus) return;
@@ -214,7 +203,15 @@ function getDefaultIconBase64() {
                         
                         // 提取图标
                         const iconDrawable = plus.android.invoke(ai, "loadIcon", pm);
-                        const iconBase64 = drawableToBase64(iconDrawable);
+                        const iconBase64 = drawableToBase64(iconDrawable, name);
+                        
+                        // 判断成功与否并弹出 Alert（每个应用只一次）
+                        const isDefault = (iconBase64 === getDefaultIconBase64());
+                        if (isDefault) {
+                            alert(`【失败】${name} 图标转换失败，将使用默认图标。可能原因：Drawable类型特殊或资源损坏。`);
+                        } else {
+                            alert(`【成功】${name} 图标转换成功，已正常显示。`);
+                        }
 
                         allApps.push({
                             name: name,
@@ -223,13 +220,17 @@ function getDefaultIconBase64() {
                             path: path,
                             icon: iconBase64
                         });
-                    } catch (err) { continue; }
+                    } catch (err) {
+                        // 单个应用出错，跳过但提示
+                        alert(`【错误】跳过应用：${err.message || err}`);
+                        continue;
+                    }
                 }
                 // 按名称拼音排序
                 allApps.sort((a, b) => a.name.localeCompare(b.name, 'zh'));
                 render(allApps);
             } catch (e) {
-                alert("无法访问应用列表，请检查权限");
+                alert("无法访问应用列表，请检查权限：" + e.message);
             }
         }
 
@@ -251,7 +252,6 @@ function getDefaultIconBase64() {
         }
 
         function pickApp(index) {
-            // 注意：如果是搜索后的列表，索引需要重新对应，这里简单处理
             const searchVal = document.getElementById('searchInput').value;
             const currentList = searchVal ? allApps.filter(a => a.name.includes(searchVal) || a.pkg.includes(searchVal)) : allApps;
             
@@ -264,7 +264,6 @@ function getDefaultIconBase64() {
             document.getElementById('res-name').innerText = selectedApp.name;
             document.getElementById('res-pkg').innerText = selectedApp.pkg;
 
-            // 获取真实文件大小
             plus.io.resolveLocalFileSystemURL(selectedApp.path, (entry) => {
                 entry.file((file) => {
                     const sizeMB = (file.size / 1024 / 1024).toFixed(2);
