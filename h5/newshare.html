@@ -108,7 +108,7 @@
         function openPicker() {
             document.getElementById('picker').style.display = 'flex';
             if (allApps.length === 0) {
-                scanApps(); // 直接调用异步扫描
+                scanApps(); // 直接调用扫描
             }
         }
         function closePicker() { document.getElementById('picker').style.display = 'none'; }
@@ -120,7 +120,7 @@
             return base64 && base64.startsWith('data:image/') && base64.length > 200;
         }
 
-        // 同步方式：绘制 Drawable 到 Bitmap 并转为 Base64
+        // 同步转换：将 Drawable 绘制为固定尺寸的 Bitmap，并转为 Base64
         function drawableToBase64Sync(drawable, targetSize = 144) {
             if (!drawable) return null;
             try {
@@ -132,7 +132,8 @@
                 // 创建固定画布
                 let bitmap = Bitmap.createBitmap(targetSize, targetSize, Bitmap.Config.ARGB_8888);
                 let canvas = new Canvas(bitmap);
-                plus.android.invoke(canvas, "drawARGB", 0, 0, 0, 0); // 透明背景
+                // 清除为透明背景
+                plus.android.invoke(canvas, "drawARGB", 0, 0, 0, 0);
                 
                 // 设置绘制区域并绘制
                 plus.android.invoke(drawable, "setBounds", 0, 0, targetSize, targetSize);
@@ -145,7 +146,7 @@
                 let base64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
                 let result = "data:image/png;base64," + base64;
                 
-                // 如果 PNG 结果无效，尝试 JPEG
+                // 如果 PNG 结果无效（长度过短），尝试 JPEG
                 if (!isValidBase64(result)) {
                     stream = new ByteArrayOutputStream();
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream);
@@ -158,96 +159,33 @@
                 if (bitmap && !bitmap.isRecycled()) bitmap.recycle();
                 return isValidBase64(result) ? result : null;
             } catch(e) {
+                console.error("同步转换异常:", e);
                 return null;
             }
         }
 
-        // 异步方式：通过临时文件获取 Base64（解决大图截断问题）
-        function drawableToBase64Async(drawable, targetSize = 144) {
-            return new Promise((resolve, reject) => {
-                if (!drawable) {
-                    reject("drawable为空");
-                    return;
-                }
-                try {
-                    const Bitmap = plus.android.importClass("android.graphics.Bitmap");
-                    const Canvas = plus.android.importClass("android.graphics.Canvas");
-                    
-                    // 绘制 Bitmap
-                    let bitmap = Bitmap.createBitmap(targetSize, targetSize, Bitmap.Config.ARGB_8888);
-                    let canvas = new Canvas(bitmap);
-                    plus.android.invoke(canvas, "drawARGB", 0, 0, 0, 0);
-                    plus.android.invoke(drawable, "setBounds", 0, 0, targetSize, targetSize);
-                    plus.android.invoke(drawable, "draw", canvas);
-                    
-                    // 保存为临时 PNG 文件
-                    const fileName = "temp_icon_" + Date.now() + "_" + Math.random() + ".png";
-                    plus.io.requestFileSystem(plus.io.PRIVATE_DOC, fs => {
-                        fs.root.getFile(fileName, { create: true }, entry => {
-                            entry.createWriter(writer => {
-                                writer.onwriteend = () => {
-                                    // 读取文件为 Base64
-                                    entry.file(file => {
-                                        const reader = new plus.io.FileReader();
-                                        reader.onloadend = e => {
-                                            const base64 = e.target.result;
-                                            entry.remove(); // 删除临时文件
-                                            resolve(base64);
-                                        };
-                                        reader.onerror = e => reject(e);
-                                        reader.readAsDataURL(file);
-                                    });
-                                };
-                                writer.onerror = e => reject(e);
-                                // 将 Bitmap 转为 PNG 数据写入
-                                const ByteArrayOutputStream = plus.android.importClass("java.io.ByteArrayOutputStream");
-                                const stream = new ByteArrayOutputStream();
-                                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                                const bytes = stream.toByteArray();
-                                writer.write(new Uint8Array(bytes).buffer);
-                            });
-                        }, reject);
-                    }, reject);
-                } catch(e) {
-                    reject(e);
-                }
-            });
-        }
-
-        // 主转换函数：优先同步，无效则异步临时文件，再无效则返回默认图标
-        async function convertIcon(drawable, appName) {
+        // 主转换函数：仅使用同步方式，失败则返回默认图标
+        function convertIcon(drawable, appName) {
             if (!drawable) {
                 alert(`⚠️ ${appName}: drawable 为空，使用默认图标`);
                 return DEFAULT_ICON_BASE64;
             }
             
-            // 1. 同步尝试
             let base64 = drawableToBase64Sync(drawable);
             if (isValidBase64(base64)) {
-                alert(`✅ ${appName}: 同步转换成功，长度 ${base64.length}`);
+                alert(`✅ ${appName}: 转换成功，长度 ${base64.length}`);
                 return base64;
+            } else {
+                alert(`❌ ${appName}: 转换失败（长度 ${base64 ? base64.length : 0}），使用默认图标`);
+                return DEFAULT_ICON_BASE64;
             }
-            
-            // 2. 异步临时文件尝试
-            try {
-                base64 = await drawableToBase64Async(drawable);
-                if (isValidBase64(base64)) {
-                    alert(`✅ ${appName}: 异步临时文件转换成功，长度 ${base64.length}`);
-                    return base64;
-                } else {
-                    alert(`❌ ${appName}: 异步转换结果无效，长度 ${base64 ? base64.length : 0}`);
-                }
-            } catch(e) {
-                alert(`❌ ${appName}: 异步转换失败 - ${e.message || e}`);
-            }
-            
-            // 3. 保底默认图标
-            alert(`⚠️ ${appName}: 所有转换方式均失败，使用默认图标`);
-            return DEFAULT_ICON_BASE64;
         }
 
-        async function scanApps() {
-            if (!window.plus) return;
+        function scanApps() {
+            if (!window.plus) {
+                alert("5+环境未就绪");
+                return;
+            }
             try {
                 const main = plus.android.runtimeMainActivity();
                 const pm = main.getPackageManager();
@@ -260,7 +198,7 @@
                         const pkg = plus.android.invoke(list, "get", i);
                         const ai = plus.android.getAttribute(pkg, "applicationInfo");
                         
-                        // 过滤系统应用
+                        // 过滤系统应用 (FLAG_SYSTEM = 1)
                         if ((plus.android.getAttribute(ai, "flags") & 1) !== 0) continue;
                         
                         const name = plus.android.invoke(ai, "loadLabel", pm).toString();
@@ -276,8 +214,8 @@
                             iconDrawable = plus.android.invoke(ai, "loadIcon", pm);
                         }
                         
-                        // 异步转换图标
-                        const iconBase64 = await convertIcon(iconDrawable, name);
+                        // 转换图标（同步，不会卡死）
+                        const iconBase64 = convertIcon(iconDrawable, name);
                         
                         apps.push({
                             name: name,
@@ -287,15 +225,19 @@
                             icon: iconBase64
                         });
                     } catch (err) {
-                        console.error("跳过应用:", err);
+                        // 单个应用出错，跳过但提示
+                        alert(`⚠️ 跳过应用：${err.message || err}`);
+                        continue;
                     }
                 }
                 
                 apps.sort((a, b) => a.name.localeCompare(b.name, 'zh'));
                 allApps = apps;
                 render(allApps);
+                alert(`扫描完成，共 ${allApps.length} 个应用`);
             } catch (e) {
-                alert("无法访问应用列表，请检查权限：" + e.message);
+                alert("扫描应用列表失败：" + e.message);
+                console.error(e);
             }
         }
 
