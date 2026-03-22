@@ -1,427 +1,361 @@
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>分享应用</title>
-    <style>
-        :root {
-            --ios-bg: #F2F2F7;
-            --ios-blue: #007AFF;
-            --text-main: #1C1C1E;
-            --line-color: rgba(0,0,0,0.06);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, sans-serif; background: var(--ios-bg); color: var(--text-main); overflow-x: hidden; }
-        
-        header { position: sticky; top: 0; z-index: 100; background: rgba(242,242,247,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 0.5px solid var(--line-color); }
-        .nav-bar { height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
-        .nav-title { font-size: 17px; font-weight: 600; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>分享应用 - 趣加</title>
+    <style>
+        :root {
+            --ios-bg: #F2F2F7;
+            --ios-blue: #007AFF;
+            --text-main: #1C1C1E;
+            --line-color: rgba(0,0,0,0.06);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, sans-serif; background: var(--ios-bg); color: var(--text-main); overflow-x: hidden; }
+        
+        header { position: sticky; top: 0; z-index: 100; background: rgba(242,242,247,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 0.5px solid var(--line-color); }
+        .nav-bar { height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
+        .nav-title { font-size: 17px; font-weight: 600; }
 
-        .container { padding: 16px; }
-        .card { background: #fff; border-radius: 12px; padding: 25px; text-align: center; border: 1px solid var(--line-color); width: 100%; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-        .card:active { background: #f9f9f9; }
+        .container { padding: 16px; }
+        .card { background: #fff; border-radius: 12px; padding: 25px; text-align: center; border: 1px solid var(--line-color); width: 100%; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .card:active { background: #f9f9f9; }
 
-        #picker { position: fixed; inset: 0; background: #fff; z-index: 1000; display: none; flex-direction: column; animation: slideUp 0.3s ease-out; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        
-        .p-header { padding: 10px 16px; border-bottom: 0.5px solid var(--line-color); display: flex; align-items: center; }
-        .search-box { flex: 1; background: #efeff4; border-radius: 10px; padding: 6px 12px; display: flex; align-items: center; }
-        .search-box input { border: none; background: transparent; width: 100%; outline: none; font-size: 15px; }
-        
-        #app-list { flex: 1; overflow-y: auto; }
-        .app-item { display: flex; align-items: center; padding: 12px 16px; border-bottom: 0.5px solid var(--line-color); }
-        .app-item:active { background: #f2f2f2; }
-        .app-icon { width: 50px; height: 50px; border-radius: 11px; margin-right: 14px; background: #f0f0f0; object-fit: cover; }
-        
-        #detail-step { display: none; }
-        .info-box { background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 16px; }
-        .preview-header { display: flex; align-items: center; gap: 15px; margin-bottom: 12px; }
-        .preview-icon { width: 64px; height: 64px; border-radius: 14px; background: #eee; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-        
-        .input-group { background: #fff; border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
-        .input-item { padding: 14px; }
-        textarea { width: 100%; border: none; outline: none; font-size: 15px; height: 100px; resize: none; font-family: inherit; }
-        
-        .btn-post { width: 100%; height: 50px; background: var(--ios-blue); color: #fff; border: none; border-radius: 14px; font-size: 17px; font-weight: 600; transition: opacity 0.2s; }
-        .btn-post:disabled { opacity: 0.5; }
-        #upload-progress { font-size: 13px; color: var(--ios-blue); margin-top: 8px; font-weight: 500; text-align: center; }
-    </style>
+        #picker { position: fixed; inset: 0; background: #fff; z-index: 1000; display: none; flex-direction: column; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        
+        .p-header { padding: 10px 16px; border-bottom: 0.5px solid var(--line-color); display: flex; align-items: center; }
+        .search-box { flex: 1; background: #efeff4; border-radius: 10px; padding: 6px 12px; display: flex; align-items: center; }
+        .search-box input { border: none; background: transparent; width: 100%; outline: none; font-size: 15px; }
+        
+        #app-list { flex: 1; overflow-y: auto; }
+        .app-item { display: flex; align-items: center; padding: 12px 16px; border-bottom: 0.5px solid var(--line-color); }
+        .app-item:active { background: #f2f2f2; }
+        
+        /* 列表图标占位符 */
+        .app-icon-placeholder { width: 44px; height: 44px; border-radius: 10px; margin-right: 14px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #999; font-size: 20px; flex-shrink: 0; }
+        
+        #detail-step { display: none; }
+        .info-box { background: #fff; border-radius: 16px; padding: 16px; margin-bottom: 16px; }
+        .preview-header { display: flex; align-items: center; gap: 15px; margin-bottom: 12px; }
+        .preview-icon { width: 64px; height: 64px; border-radius: 14px; background: #eee; box-shadow: 0 2px 6px rgba(0,0,0,0.1); object-fit: cover; }
+        
+        .status-tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-top: 4px; }
+        .status-success { background: #e1f5fe; color: #0288d1; }
+        .status-fail { background: #fff3e0; color: #f57c00; }
+
+        .input-group { background: #fff; border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
+        .input-item { padding: 14px; }
+        textarea { width: 100%; border: none; outline: none; font-size: 15px; height: 100px; resize: none; font-family: inherit; }
+        
+        .btn-post { width: 100%; height: 50px; background: var(--ios-blue); color: #fff; border: none; border-radius: 14px; font-size: 17px; font-weight: 600; }
+        .btn-post:disabled { opacity: 0.5; }
+        #upload-progress { font-size: 13px; color: var(--ios-blue); margin-top: 8px; text-align: center; }
+    </style>
 </head>
 <body>
 
-    <header>
-        <div class="nav-bar">
-            <div onclick="location.reload()" style="color:var(--ios-blue); font-size: 16px;">取消</div>
-            <div class="nav-title">分享应用</div>
-            <div style="width:35px"></div>
-        </div>
-    </header>
+    <header>
+        <div class="nav-bar">
+            <div onclick="location.reload()" style="color:var(--ios-blue);">取消</div>
+            <div class="nav-title">分享应用</div>
+            <div style="width:35px"></div>
+        </div>
+    </header>
 
-    <div class="container" id="entry-step">
-        <div class="card" onclick="openPicker()">
-            <div style="font-size: 32px; margin-bottom: 8px;">📦</div>
-            <strong>选择已安装应用</strong><br>
-            <small style="color:#8e8e93">从系统中自动提取APK与图标</small>
-        </div>
-    </div>
+    <div class="container" id="entry-step">
+        <div class="card" onclick="openPicker()">
+            <div style="font-size: 32px; margin-bottom: 8px;">📦</div>
+            <strong>选择已安装应用</strong><br>
+            <small style="color:#8e8e93">点击从列表中挑选应用</small>
+        </div>
+    </div>
 
-    <div class="container" id="detail-step">
-        <div class="info-box">
-            <div class="preview-header">
-                <img id="res-icon" class="preview-icon">
-                <div style="flex:1">
-                    <b id="res-name" style="font-size: 18px;"></b><br>
-                    <small id="res-pkg" style="color:#8e8e93; font-size: 12px;"></small>
-                </div>
-            </div>
-            <p id="res-meta" style="font-size:12px; color:#666; padding-top: 8px; border-top: 0.5px solid #eee;"></p>
-            <div id="upload-progress">正在解析文件流...</div>
-        </div>
+    <div class="container" id="detail-step">
+        <div class="info-box">
+            <div class="preview-header">
+                <img id="res-icon" class="preview-icon">
+                <div style="flex:1">
+                    <b id="res-name" style="font-size: 18px;"></b><br>
+                    <div id="icon-status"></div>
+                </div>
+            </div>
+            <p id="res-pkg" style="color:#8e8e93; font-size: 12px; margin-bottom: 8px;"></p>
+            <p id="res-meta" style="font-size:12px; color:#666; padding-top: 8px; border-top: 0.5px solid #eee;"></p>
+            <div id="upload-progress">正在同步应用文件...</div>
+        </div>
 
-        <div class="input-group">
-            <div class="input-item">
-                <textarea id="app-intro" placeholder="聊聊这个应用有什么特别之处..."></textarea>
-            </div>
-        </div>
-        
-        <button class="btn-post" id="submitBtn" disabled onclick="finalSubmit()">等待上传完成</button>
-    </div>
+        <div class="input-group">
+            <div class="input-item">
+                <textarea id="app-intro" placeholder="写点介绍吧..."></textarea>
+            </div>
+        </div>
+        
+        <button class="btn-post" id="submitBtn" disabled onclick="finalSubmit()">同步中...</button>
+    </div>
 
-    <div id="picker">
-        <div class="p-header">
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="搜索应用名称或包名..." oninput="searchApp(this.value)">
-            </div>
-            <div onclick="closePicker()" style="color:var(--ios-blue); margin-left:12px; font-size: 16px;">关闭</div>
-        </div>
-        <div id="app-list">
-            <div style="padding:50px; text-align:center; color:#999;">正在读取系统应用列表...</div>
-        </div>
-    </div>
+    <div id="picker">
+        <div class="p-header">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜索应用..." oninput="searchApp(this.value)">
+            </div>
+            <div onclick="closePicker()" style="color:var(--ios-blue); margin-left:12px;">关闭</div>
+        </div>
+        <div id="app-list">
+            <div style="padding:50px; text-align:center; color:#999;">正在加载系统应用列表...</div>
+        </div>
+    </div>
 
-    <script>
-        let allApps = [];
-        let selectedApp = null;
-        const uploadApi = "https://apirank.qujiaweb.top/?mode=upload_meituan";
+    <script>
+        let allApps = [];
+        let selectedApp = null;
+        const uploadApi = "https://apirank.qujiaweb.top/?mode=upload_meituan";
+        const DEFAULT_ICON_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAAAI0lEQVR4Xu3BMQEAAADCoPVPbQ0PoAAAAAAAAAAAAAAAAAAAAAAA4EwZngABZJN7WwAAAABJRU5ErkJggg==";
 
-        function openPicker() {
-            document.getElementById('picker').style.display = 'flex';
-            if (allApps.length === 0) {
-                scanApps();
-            }
-        }
-        function closePicker() { document.getElementById('picker').style.display = 'none'; }
+        function openPicker() {
+            document.getElementById('picker').style.display = 'flex';
+            if (allApps.length === 0) scanApps();
+        }
+        function closePicker() { document.getElementById('picker').style.display = 'none'; }
 
-        const DEFAULT_ICON_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAAAI0lEQVR4Xu3BMQEAAADCoPVPbQ0PoAAAAAAAAAAAAAAAAAAAAAAA4EwZngABZJN7WwAAAABJRU5ErkJggg==";
+        // --- 你提供的原封不动的图标提取逻辑 ---
+        function isValidBase64(base64) {
+            return base64 && base64.startsWith('data:image/') && base64.length > 200;
+        }
 
-        // 验证 Base64 是否有效（非默认且长度足够）
-        function isValidBase64(base64) {
-            return base64 && base64.startsWith('data:image/') && base64.length > 200;
-        }
+        function bitmapToBase64(bitmap) {
+            if (!bitmap || bitmap.isRecycled()) return null;
+            try {
+                const ByteArrayOutputStream = plus.android.importClass("java.io.ByteArrayOutputStream");
+                const Base64 = plus.android.importClass("android.util.Base64");
+                const Bitmap = plus.android.importClass("android.graphics.Bitmap");
+                let stream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                let bytes = stream.toByteArray();
+                let base64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
+                let result = "data:image/png;base64," + base64;
+                if (isValidBase64(result)) return result;
+                stream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream);
+                bytes = stream.toByteArray();
+                base64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
+                result = "data:image/jpeg;base64," + base64;
+                return isValidBase64(result) ? result : null;
+            } catch(e) { return null; }
+        }
 
-        // 将 Bitmap 转为 Base64（支持 PNG/JPEG 自动降级）
-        function bitmapToBase64(bitmap) {
-            if (!bitmap || bitmap.isRecycled()) return null;
-            try {
-                const ByteArrayOutputStream = plus.android.importClass("java.io.ByteArrayOutputStream");
-                const Base64 = plus.android.importClass("android.util.Base64");
-                const Bitmap = plus.android.importClass("android.graphics.Bitmap");
-                
-                let stream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                let bytes = stream.toByteArray();
-                let base64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
-                let result = "data:image/png;base64," + base64;
-                if (isValidBase64(result)) return result;
-                
-                // PNG 无效，尝试 JPEG
-                stream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream);
-                bytes = stream.toByteArray();
-                base64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
-                result = "data:image/jpeg;base64," + base64;
-                return isValidBase64(result) ? result : null;
-            } catch(e) {
-                return null;
-            }
-        }
+        function drawableToBase64(drawable, appName) {
+            if (!drawable) return null;
+            try {
+                const Bitmap = plus.android.importClass("android.graphics.Bitmap");
+                const Canvas = plus.android.importClass("android.graphics.Canvas");
+                const BitmapDrawable = plus.android.importClass("android.graphics.drawable.BitmapDrawable");
+                if (drawable instanceof BitmapDrawable) {
+                    const bitmap = drawable.getBitmap();
+                    if (bitmap && !bitmap.isRecycled()) {
+                        const result = bitmapToBase64(bitmap);
+                        if (result) return result;
+                    }
+                }
+                const targetSize = 144;
+                let intrinsicW = plus.android.invoke(drawable, "getIntrinsicWidth");
+                let intrinsicH = plus.android.invoke(drawable, "getIntrinsicHeight");
+                let useIntrinsic = (intrinsicW > 0 && intrinsicH > 0);
+                let srcW = useIntrinsic ? intrinsicW : targetSize;
+                let srcH = useIntrinsic ? intrinsicH : targetSize;
+                let srcBitmap = Bitmap.createBitmap(srcW, srcH, Bitmap.Config.ARGB_8888);
+                let srcCanvas = new Canvas(srcBitmap);
+                plus.android.invoke(srcCanvas, "drawARGB", 0, 0, 0, 0);
+                plus.android.invoke(drawable, "setBounds", 0, 0, srcW, srcH);
+                plus.android.invoke(drawable, "draw", srcCanvas);
+                let isTransparent = true;
+                if (srcW > 0 && srcH > 0) {
+                    let centerColor = srcBitmap.getPixel(srcW/2, srcH/2);
+                    if (centerColor !== 0) isTransparent = false;
+                }
+                let finalBitmap = null;
+                if (!isTransparent) {
+                    finalBitmap = Bitmap.createScaledBitmap(srcBitmap, targetSize, targetSize, true);
+                } else {
+                    finalBitmap = Bitmap.createBitmap(targetSize, targetSize, Bitmap.Config.ARGB_8888);
+                    let canvas = new Canvas(finalBitmap);
+                    plus.android.invoke(canvas, "drawARGB", 0, 0, 0, 0);
+                    plus.android.invoke(drawable, "setBounds", 0, 0, targetSize, targetSize);
+                    plus.android.invoke(drawable, "draw", canvas);
+                }
+                if (finalBitmap) {
+                    const result = bitmapToBase64(finalBitmap);
+                    if (result) return result;
+                }
+                try {
+                    const constantState = plus.android.invoke(drawable, "getConstantState");
+                    if (constantState) {
+                        const newDrawable = plus.android.invoke(constantState, "newDrawable");
+                        if (newDrawable) {
+                            let retryBitmap = Bitmap.createBitmap(targetSize, targetSize, Bitmap.Config.ARGB_8888);
+                            let retryCanvas = new Canvas(retryBitmap);
+                            plus.android.invoke(retryCanvas, "drawARGB", 0, 0, 0, 0);
+                            plus.android.invoke(newDrawable, "setBounds", 0, 0, targetSize, targetSize);
+                            plus.android.invoke(newDrawable, "draw", retryCanvas);
+                            const retryResult = bitmapToBase64(retryBitmap);
+                            if (retryResult) return retryResult;
+                        }
+                    }
+                } catch(e) {}
+                return null;
+            } catch(e) { return null; }
+        }
 
-        // 核心转换函数：优先处理 BitmapDrawable，否则通用绘制
-        function drawableToBase64(drawable, appName) {
-            if (!drawable) return null;
+        function convertIcon(drawable, appName) {
+            let base64 = drawableToBase64(drawable, appName);
+            const statusBox = document.getElementById('icon-status');
+            if (isValidBase64(base64)) {
+                statusBox.innerHTML = `<span class="status-tag status-success">✅ 图标提取成功 (${base64.length})</span>`;
+                return base64;
+            } else {
+                statusBox.innerHTML = `<span class="status-tag status-fail">⚠️ 提取失败，已使用默认图标</span>`;
+                return DEFAULT_ICON_BASE64;
+            }
+        }
+        // --- 逻辑结束 ---
 
-            try {
-                const Bitmap = plus.android.importClass("android.graphics.Bitmap");
-                const Canvas = plus.android.importClass("android.graphics.Canvas");
-                const BitmapDrawable = plus.android.importClass("android.graphics.drawable.BitmapDrawable");
+        function scanApps() {
+            if (!window.plus) return;
+            const main = plus.android.runtimeMainActivity();
+            const pm = main.getPackageManager();
+            const list = plus.android.invoke(pm, "getInstalledPackages", 0);
+            const count = plus.android.invoke(list, "size");
+            let apps = [];
+            for (let i = 0; i < count; i++) {
+                const pkg = plus.android.invoke(list, "get", i);
+                const ai = plus.android.getAttribute(pkg, "applicationInfo");
+                if ((plus.android.getAttribute(ai, "flags") & 1) !== 0) continue;
+                apps.push({
+                    name: plus.android.invoke(ai, "loadLabel", pm).toString(),
+                    pkg: plus.android.getAttribute(pkg, "packageName"),
+                    ver: plus.android.getAttribute(pkg, "versionName"),
+                    path: plus.android.getAttribute(ai, "publicSourceDir")
+                });
+            }
+            allApps = apps.sort((a, b) => a.name.localeCompare(b.name, 'zh'));
+            render(allApps);
+        }
 
-                // 1. 如果是 BitmapDrawable，直接取 Bitmap（最可靠）
-                if (drawable instanceof BitmapDrawable) {
-                    const bitmap = drawable.getBitmap();
-                    if (bitmap && !bitmap.isRecycled()) {
-                        const result = bitmapToBase64(bitmap);
-                        if (result) return result;
-                    }
-                }
+        function render(data) {
+            const listDiv = document.getElementById('app-list');
+            listDiv.innerHTML = data.map((app, i) => `
+                <div class="app-item" onclick="pickApp('${app.pkg}')">
+                    <div class="app-icon-placeholder">${app.name.charAt(0)}</div>
+                    <div style="flex:1; overflow:hidden;">
+                        <b style="display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${app.name}</b>
+                        <small style="color:#999; font-size:12px;">${app.pkg}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
 
-                // 2. 通用绘制：先尝试原始尺寸绘制，再缩放到目标尺寸
-                const targetSize = 144;
-                let intrinsicW = plus.android.invoke(drawable, "getIntrinsicWidth");
-                let intrinsicH = plus.android.invoke(drawable, "getIntrinsicHeight");
-                let useIntrinsic = (intrinsicW > 0 && intrinsicH > 0);
-                
-                let srcW = useIntrinsic ? intrinsicW : targetSize;
-                let srcH = useIntrinsic ? intrinsicH : targetSize;
-                
-                // 创建源 Bitmap 并绘制
-                let srcBitmap = Bitmap.createBitmap(srcW, srcH, Bitmap.Config.ARGB_8888);
-                let srcCanvas = new Canvas(srcBitmap);
-                plus.android.invoke(srcCanvas, "drawARGB", 0, 0, 0, 0); // 透明背景
-                plus.android.invoke(drawable, "setBounds", 0, 0, srcW, srcH);
-                plus.android.invoke(drawable, "draw", srcCanvas);
-                
-                // 检查是否全透明（可能绘制失败）
-                let isTransparent = true;
-                if (srcW > 0 && srcH > 0) {
-                    let centerColor = srcBitmap.getPixel(srcW/2, srcH/2);
-                    if (centerColor !== 0) isTransparent = false;
-                }
-                
-                let finalBitmap = null;
-                if (!isTransparent) {
-                    // 非透明，缩放到目标尺寸
-                    finalBitmap = Bitmap.createScaledBitmap(srcBitmap, targetSize, targetSize, true);
-                } else {
-                    // 全透明，尝试直接用目标尺寸绘制（可能某些 Drawable 在原始尺寸下不绘制）
-                    finalBitmap = Bitmap.createBitmap(targetSize, targetSize, Bitmap.Config.ARGB_8888);
-                    let canvas = new Canvas(finalBitmap);
-                    plus.android.invoke(canvas, "drawARGB", 0, 0, 0, 0);
-                    plus.android.invoke(drawable, "setBounds", 0, 0, targetSize, targetSize);
-                    plus.android.invoke(drawable, "draw", canvas);
-                }
-                
-                if (finalBitmap) {
-                    const result = bitmapToBase64(finalBitmap);
-                    if (result) return result;
-                }
-                
-                // 3. 如果仍失败，尝试使用 getConstantState().newDrawable() 重置状态后再绘制
-                try {
-                    const constantState = plus.android.invoke(drawable, "getConstantState");
-                    if (constantState) {
-                        const newDrawable = plus.android.invoke(constantState, "newDrawable");
-                        if (newDrawable) {
-                            let retryBitmap = Bitmap.createBitmap(targetSize, targetSize, Bitmap.Config.ARGB_8888);
-                            let retryCanvas = new Canvas(retryBitmap);
-                            plus.android.invoke(retryCanvas, "drawARGB", 0, 0, 0, 0);
-                            plus.android.invoke(newDrawable, "setBounds", 0, 0, targetSize, targetSize);
-                            plus.android.invoke(newDrawable, "draw", retryCanvas);
-                            const retryResult = bitmapToBase64(retryBitmap);
-                            if (retryResult) return retryResult;
-                        }
-                    }
-                } catch(e) {}
-                
-                return null;
-            } catch(e) {
-                console.error("转换异常:", e);
-                return null;
-            }
-        }
+        function pickApp(pkgName) {
+            // 获取完整应用对象
+            const app = allApps.find(a => a.pkg === pkgName);
+            selectedApp = JSON.parse(JSON.stringify(app)); // 深拷贝防止干扰
+            
+            closePicker();
+            document.getElementById('entry-step').style.display = 'none';
+            document.getElementById('detail-step').style.display = 'block';
+            
+            // UI 基础赋值
+            document.getElementById('res-name').innerText = selectedApp.name;
+            document.getElementById('res-pkg').innerText = selectedApp.pkg;
 
-        // 主转换入口，带 Alert 输出
-        function convertIcon(drawable, appName) {
-            let base64 = drawableToBase64(drawable, appName);
-            if (isValidBase64(base64)) {
-                alert(`✅ ${appName}: 转换成功，长度 ${base64.length}`);
-                return base64;
-            } else {
-                alert(`❌ ${appName}: 转换失败（长度 ${base64 ? base64.length : 0}），使用默认图标`);
-                return DEFAULT_ICON_BASE64;
-            }
-        }
+            // --- 此时才开始尝试获取图标 ---
+            const pm = plus.android.runtimeMainActivity().getPackageManager();
+            let iconDrawable;
+            try {
+                iconDrawable = plus.android.invoke(pm, "getApplicationIcon", selectedApp.pkg);
+            } catch(e) {
+                // 如果 package manager 拿不到，尝试从 applicationInfo 拿
+                const main = plus.android.runtimeMainActivity();
+                const ai = main.getPackageManager().getApplicationInfo(selectedApp.pkg, 0);
+                iconDrawable = plus.android.invoke(ai, "loadIcon", pm);
+            }
+            
+            const base64 = convertIcon(iconDrawable, selectedApp.name);
+            selectedApp.icon = base64;
+            document.getElementById('res-icon').src = base64;
 
-        function scanApps() {
-            if (!window.plus) {
-                alert("5+环境未就绪");
-                return;
-            }
-            try {
-                const main = plus.android.runtimeMainActivity();
-                const pm = main.getPackageManager();
-                const list = plus.android.invoke(pm, "getInstalledPackages", 0);
-                const count = plus.android.invoke(list, "size");
+            // 获取 APK 大小并上传
+            plus.io.resolveLocalFileSystemURL(selectedApp.path, (entry) => {
+                entry.file((file) => {
+                    const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+                    document.getElementById('res-meta').innerText = `版本：${selectedApp.ver} | 大小：${sizeMB} MB`;
+                    selectedApp.size = sizeMB + "MB";
+                    startUpload(selectedApp.path);
+                });
+            });
+        }
 
-                const apps = [];
-                for (let i = 0; i < count; i++) {
-                    try {
-                        const pkg = plus.android.invoke(list, "get", i);
-                        const ai = plus.android.getAttribute(pkg, "applicationInfo");
-                        
-                        // 过滤系统应用
-                        if ((plus.android.getAttribute(ai, "flags") & 1) !== 0) continue;
-                        
-                        const name = plus.android.invoke(ai, "loadLabel", pm).toString();
-                        const pkgName = plus.android.getAttribute(pkg, "packageName");
-                        const path = plus.android.getAttribute(ai, "publicSourceDir");
-                        const ver = plus.android.getAttribute(pkg, "versionName");
-                        
-                        // 获取 Drawable（优先 getApplicationIcon）
-                        let iconDrawable;
-                        try {
-                            iconDrawable = plus.android.invoke(pm, "getApplicationIcon", pkgName);
-                        } catch(e) {
-                            iconDrawable = plus.android.invoke(ai, "loadIcon", pm);
-                        }
-                        
-                        const iconBase64 = convertIcon(iconDrawable, name);
-                        
-                        apps.push({
-                            name: name,
-                            pkg: pkgName,
-                            ver: ver,
-                            path: path,
-                            icon: iconBase64
-                        });
-                    } catch (err) {
-                        alert(`⚠️ 跳过应用：${err.message || err}`);
-                        continue;
-                    }
-                }
-                
-                apps.sort((a, b) => a.name.localeCompare(b.name, 'zh'));
-                allApps = apps;
-                render(allApps);
-                alert(`扫描完成，共 ${allApps.length} 个应用`);
-            } catch (e) {
-                alert("扫描应用列表失败：" + e.message);
-                console.error(e);
-            }
-        }
+        function startUpload(filePath) {
+            const prog = document.getElementById('upload-progress');
+            const btn = document.getElementById('submitBtn');
+            const task = plus.uploader.createUpload(uploadApi, { method: "POST" }, (t, status) => {
+                if (status == 200) {
+                    const res = JSON.parse(t.responseText);
+                    selectedApp.remoteUrl = res.full_url;
+                    prog.innerText = "✅ 安装包同步成功";
+                    btn.disabled = false;
+                    btn.innerText = "立即发布";
+                } else {
+                    prog.innerText = "❌ 上传失败";
+                }
+            });
+            task.addFile(filePath, { key: "file" });
+            task.addEventListener("statechanged", (t) => {
+                if(t.state == 3) {
+                    const p = Math.round((t.uploadedSize / t.totalSize) * 100);
+                    prog.innerText = `正在同步安装包：${p}%`;
+                }
+            });
+            task.start();
+        }
 
-        function render(data) {
-            const listDiv = document.getElementById('app-list');
-            if (data.length === 0) {
-                listDiv.innerHTML = '<div style="padding:50px; text-align:center; color:#999;">未找到匹配的应用</div>';
-                return;
-            }
-            listDiv.innerHTML = data.map((app, i) => `
-                <div class="app-item" onclick="pickApp(${i})">
-                    <img src="${app.icon}" class="app-icon" onerror="this.src='${DEFAULT_ICON_BASE64}'">
-                    <div style="flex:1; overflow:hidden;">
-                        <b style="display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(app.name)}</b>
-                        <small style="color:#999; font-size:12px;">${app.pkg}</small>
-                    </div>
-                </div>
-            `).join('');
-        }
+        async function finalSubmit() {
+            const mail = localStorage.getItem('usermail') || "";
+            const postData = {
+                name: selectedApp.name,
+                link: selectedApp.remoteUrl,
+                icon: selectedApp.icon,
+                intro: document.getElementById('app-intro').value,
+                package_name: selectedApp.pkg,
+                version: selectedApp.ver,
+                size: selectedApp.size,
+                mail: mail
+            };
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = "正在发布...";
+            try {
+                const res = await fetch(`https://apirank.qujiaweb.top/?mode=add_app&mail=${mail}`, {
+                    method: 'POST',
+                    body: JSON.stringify(postData)
+                });
+                if ((await res.json()).code === 200) {
+                    alert("发布成功！");
+                    plus.webview.currentWebview().close();
+                } else {
+                    btn.disabled = false;
+                    btn.innerText = "立即发布";
+                }
+            } catch (e) {
+                alert("发布失败");
+                btn.disabled = false;
+            }
+        }
 
-        function escapeHtml(str) {
-            return str.replace(/[&<>]/g, function(m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            });
-        }
-
-        function pickApp(index) {
-            const searchVal = document.getElementById('searchInput').value;
-            const currentList = searchVal ? allApps.filter(a => a.name.includes(searchVal) || a.pkg.includes(searchVal)) : allApps;
-            
-            selectedApp = currentList[index];
-            closePicker();
-            document.getElementById('entry-step').style.display = 'none';
-            document.getElementById('detail-step').style.display = 'block';
-            
-            document.getElementById('res-icon').src = selectedApp.icon;
-            document.getElementById('res-name').innerText = selectedApp.name;
-            document.getElementById('res-pkg').innerText = selectedApp.pkg;
-
-            plus.io.resolveLocalFileSystemURL(selectedApp.path, (entry) => {
-                entry.file((file) => {
-                    const sizeMB = (file.size / 1024 / 1024).toFixed(2);
-                    document.getElementById('res-meta').innerText = `版本：${selectedApp.ver} | 大小：${sizeMB} MB`;
-                    selectedApp.size = sizeMB + "MB";
-                    startUpload(selectedApp.path);
-                });
-            }, (e) => {
-                document.getElementById('upload-progress').innerText = "无法读取APK路径";
-            });
-        }
-
-        function startUpload(filePath) {
-            const prog = document.getElementById('upload-progress');
-            const btn = document.getElementById('submitBtn');
-            
-            const task = plus.uploader.createUpload(uploadApi, { method: "POST" }, (t, status) => {
-                if (status == 200) {
-                    const res = JSON.parse(t.responseText);
-                    selectedApp.remoteUrl = res.full_url;
-                    prog.innerText = "✅ 应用云端同步成功";
-                    prog.style.color = "#4CD964";
-                    btn.disabled = false;
-                    btn.innerText = "立即分享到平台";
-                } else {
-                    prog.innerText = "❌ 上传失败，请检查网络";
-                    prog.style.color = "#FF3B30";
-                }
-            });
-
-            task.addFile(filePath, { key: "file" });
-            task.addEventListener("statechanged", (t) => {
-                if(t.state == 3) {
-                    const p = Math.round((t.uploadedSize / t.totalSize) * 100);
-                    prog.innerText = `正在同步安装包：${p}%`;
-                }
-            });
-            task.start();
-        }
-
-        async function finalSubmit() {
-            const mail = localStorage.getItem('usermail') || "";
-            const postData = {
-                name: selectedApp.name,
-                link: selectedApp.remoteUrl,
-                icon: selectedApp.icon,
-                intro: document.getElementById('app-intro').value,
-                package_name: selectedApp.pkg,
-                version: selectedApp.ver,
-                size: selectedApp.size,
-                mail: mail
-            };
-
-            const btn = document.getElementById('submitBtn');
-            btn.disabled = true;
-            btn.innerText = "正在提交...";
-
-            try {
-                const res = await fetch(`https://apirank.qujiaweb.top/?mode=add_app&mail=${mail}`, {
-                    method: 'POST',
-                    body: JSON.stringify(postData)
-                });
-                const result = await res.json();
-                if (result.code === 200) {
-                    alert("发布成功！");
-                    plus.webview.currentWebview().close();
-                } else {
-                    alert("发布失败：" + result.msg);
-                    btn.disabled = false;
-                    btn.innerText = "立即分享到平台";
-                }
-            } catch (e) {
-                alert("网络请求出错");
-                btn.disabled = false;
-            }
-        }
-        
-        function searchApp(val) {
-            const filtered = allApps.filter(a => 
-                a.name.toLowerCase().includes(val.toLowerCase()) || 
-                a.pkg.toLowerCase().includes(val.toLowerCase())
-            );
-            render(filtered);
-        }
-    </script>
+        function searchApp(val) {
+            const filtered = allApps.filter(a => a.name.toLowerCase().includes(val.toLowerCase()) || a.pkg.toLowerCase().includes(val.toLowerCase()));
+            render(filtered);
+        }
+    </script>
 </body>
 </html>
