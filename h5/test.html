@@ -2,36 +2,361 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>分享应用</title>
+    <script src="app-info-parser.js" defer></script>
+    <script src="jszip.min.js" defer></script>
     <style>
-        /* 极简样式：仅用于移除默认边距并将文字居中于视口，无任何额外视觉元素或内容 */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --ios-bg: #F2F2F7;
+            --ios-card: #FFFFFF;
+            --ios-blue: #007AFF;
+            --ios-orange: #FF9500;
+            --text-main: #1C1C1E;
+            --text-second: #8E8E93;
+            --line-color: rgba(0,0,0,0.06);
         }
-        body {
-            background: #ffffff;      /* 纯白背景，符合“空白”视觉 */
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: system-ui, -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
-            font-size: 1.25rem;
-            color: #1e1e1e;
-            line-height: 1.5;
-            /* 保证没有任何装饰或额外生成内容 */
-        }
-        /* 确保没有任何伪元素添加文本或图形 */
-        body::before,
-        body::after {
-            display: none;
-            content: none;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; background-color: var(--ios-bg); color: var(--text-main); padding-bottom: 60px; }
+        header { position: sticky; top: 0; z-index: 100; background-color: rgba(242, 242, 247, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 0.5px solid var(--line-color); }
+        .nav-bar { height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
+        .back-btn { width: 40px; height: 100%; display: flex; align-items: center; }
+        .back-icon { width: 11px; height: 11px; border-left: 2px solid var(--ios-blue); border-bottom: 2px solid var(--ios-blue); transform: rotate(45deg); }
+        .nav-title { font-size: 17px; font-weight: 600; }
+        .container { padding: 16px; max-width: 600px; margin: 0 auto; }
+        #upload-zones { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+        .upload-card { background: var(--ios-card); border: 1.5px dashed #C7C7CC; border-radius: 16px; padding: 30px 10px; text-align: center; transition: all 0.2s; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .upload-card svg, .upload-card .emoji-icon { width: 40px; height: 40px; fill: var(--ios-blue); margin-bottom: 10px; font-size: 32px; line-height: 40px; }
+        .upload-card h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+        .upload-card p { font-size: 11px; color: var(--text-second); }
+        #picker { position: fixed; inset: 0; background: #fff; z-index: 1000; display: none; flex-direction: column; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .p-header { padding: 10px 16px; border-bottom: 0.5px solid var(--line-color); display: flex; align-items: center; background: #f8f8f8; }
+        .search-box { flex: 1; background: #e3e3e8; border-radius: 10px; padding: 8px 12px; display: flex; align-items: center; }
+        .search-box input { border: none; background: transparent; width: 100%; outline: none; font-size: 15px; }
+        #app-list { flex: 1; overflow-y: auto; background: #fff;}
+        .app-item { display: flex; align-items: center; padding: 12px 16px; border-bottom: 0.5px solid var(--line-color); }
+        #status-tip { text-align: center; color: var(--ios-blue); font-size: 14px; margin-top: 20px; display: none; }
+        #content-step { display: none; }
+        .result-card { background: var(--ios-card); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+        .app-header { display: flex; align-items: center; gap: 16px; border-bottom: 0.5px solid var(--line-color); padding-bottom: 16px; margin-bottom: 16px; }
+        #app-icon { width: 68px; height: 68px; border-radius: 14px; background: #f2f2f7; object-fit: cover; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .info-item { background: #F8F8FA; padding: 12px; border-radius: 10px; }
+        .info-label { font-size: 11px; color: var(--text-second); margin-bottom: 4px; display: block; }
+        .info-value { font-size: 13px; font-weight: 600; }
+        .section-header { font-size: 14px; font-weight: 600; color: var(--text-second); margin: 20px 0 10px 4px; display: flex; justify-content: space-between; }
+        .screenshot-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .ss-box { aspect-ratio: 9/16; background: #E5E5EA; border-radius: 10px; position: relative; overflow: hidden; }
+        .ss-box img { width: 100%; height: 100%; object-fit: cover; }
+        .ss-del { position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; background: rgba(0,0,0,0.5); border-radius: 50%; color: #fff; text-align: center; line-height: 22px; font-size: 12px; }
+        .ss-add { display: flex; align-items: center; justify-content: center; border: 1.5px dashed #C7C7CC; }
+        #pan-section { display: none; background: #FFF9F2; border: 0.5px solid #FFE5CC; padding: 16px; border-radius: 12px; margin-bottom: 16px; }
+        .ios-input-group { background: var(--ios-card); border-radius: 12px; overflow: hidden; margin-bottom: 16px; border: 0.5px solid var(--line-color); }
+        .ios-item { display: flex; align-items: center; padding: 12px 16px; position: relative; }
+        .ios-item input, .ios-item textarea { width: 100%; border: none; outline: none; font-size: 15px; background: transparent; }
+        .submit-btn { width: 100%; height: 52px; background: var(--ios-blue); color: #fff; border: none; border-radius: 14px; font-size: 17px; font-weight: 600; margin-top: 10px; }
     </style>
 </head>
 <body>
-    当前暂无测试功能
+
+    <header>
+        <div class="nav-bar">
+            <div class="back-btn" onclick="handleBack()"><div class="back-icon"></div></div>
+            <div class="nav-title">分享应用</div>
+            <div style="width:40px"></div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div id="upload-zones">
+            <div class="upload-card" onclick="openPicker()">
+                <div class="emoji-icon">📦</div>
+                <h4>已安装应用</h4>
+                <p>提取本机的APK</p>
+            </div>
+            <div class="upload-card" onclick="document.getElementById('apkInput').click()">
+                <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+                <h4>本地APK</h4>
+                <p>选择文件上传</p>
+            </div>
+            <input type="file" id="apkInput" style="display:none">
+        </div>
+
+        <div id="status-tip"></div>
+
+        <div id="content-step">
+            <div class="result-card">
+                <div class="app-header">
+                    <img id="app-icon" src="">
+                    <div class="name-area" style="flex:1">
+                        <input type="text" id="app-name" style="font-size:18px; font-weight:700; border:none; width:100%;">
+                        <code id="app-pkg" style="font-size:12px; color:var(--ios-blue)"></code>
+                    </div>
+                </div>
+                <div class="info-grid">
+                    <div class="info-item"><span class="info-label">版本</span><span class="info-value" id="v-text">-</span></div>
+                    <div class="info-item"><span class="info-label">大小</span><span class="info-value" id="s-text">-</span></div>
+                    <div class="info-item"><span class="info-label">架构</span><span class="info-value" id="arch-text">-</span></div>
+                    <div class="info-item"><span class="info-label">系统要求</span><span class="info-value" id="sdk-text">-</span></div>
+                </div>
+            </div>
+
+            <div id="pan-section">
+                <div style="font-size:13px; color:var(--ios-orange); margin-bottom:10px;"><b>提示：</b>该包受系统保护或过大，请使用网盘分享</div>
+                <div class="ios-input-group">
+                    <div class="ios-item"><input type="text" id="pan-url" placeholder="网盘链接"></div>
+                    <div class="ios-item"><input type="text" id="pan-pwd" placeholder="提取码 (选填)"></div>
+                </div>
+            </div>
+
+            <div class="section-header">截图 (至少1张)</div>
+            <div class="screenshot-grid" id="ss-grid">
+                <div class="ss-box ss-add" onclick="document.getElementById('ssFile').click()">+</div>
+            </div>
+            <input type="file" id="ssFile" accept="image/*" style="display:none" multiple>
+
+            <div class="section-header">应用简介</div>
+            <div class="ios-input-group">
+                <div class="ios-item"><textarea id="app-intro" rows="4" placeholder="介绍一下这个应用..."></textarea></div>
+            </div>
+            <button class="submit-btn" onclick="finalSubmit()">提交分享</button>
+        </div>
+    </main>
+
+    <div id="picker">
+        <div class="p-header">
+            <div class="search-box"><input type="text" placeholder="搜索已安装应用..." oninput="searchApp(this.value)"></div>
+            <div onclick="closePicker()" style="margin-left:12px; color:var(--ios-blue)">取消</div>
+        </div>
+        <div id="app-list"></div>
+    </div>
+
+    <script>
+        let allApps = [], apkInfo = null, screenshots = [], uploadedIconUrl = "";
+
+        // --- 安卓 14 兼容性：原生文件提取 ---
+        function getApkSizeNative(path) {
+            try {
+                const File = plus.android.importClass("java.io.File");
+                const file = new File(path);
+                return (file.length() / (1024 * 1024)).toFixed(2);
+            } catch(e) { return 0; }
+        }
+
+        // --- 安卓 14 兼容性：APP 列表扫描 ---
+        function scanApps() {
+            if (!window.plus) return;
+            const listDiv = document.getElementById('app-list');
+            listDiv.innerHTML = '<div style="padding:50px; text-align:center;">正在深度扫描...</div>';
+            
+            setTimeout(() => {
+                try {
+                    const main = plus.android.runtimeMainActivity();
+                    const pm = main.getPackageManager();
+                    const packages = plus.android.invoke(pm, "getInstalledPackages", 0);
+                    const count = plus.android.invoke(packages, "size");
+                    let temp = [];
+                    for (let i = 0; i < count; i++) {
+                        const pkg = plus.android.invoke(packages, "get", i);
+                        const ai = plus.android.getAttribute(pkg, "applicationInfo");
+                        const flags = plus.android.getAttribute(ai, "flags");
+                        if ((flags & 1) !== 0) continue; // 过滤系统应用
+
+                        const path = plus.android.getAttribute(ai, "publicSourceDir") || plus.android.getAttribute(ai, "sourceDir");
+                        if (!path) continue;
+
+                        temp.push({
+                            name: plus.android.invoke(ai, "loadLabel", pm).toString(),
+                            pkg: plus.android.getAttribute(pkg, "packageName"),
+                            ver: plus.android.getAttribute(pkg, "versionName") || "1.0",
+                            path: path
+                        });
+                    }
+                    allApps = temp.sort((a, b) => a.name.localeCompare(b.name, 'zh'));
+                    renderAppList(allApps);
+                } catch(e) {
+                    listDiv.innerHTML = '<div style="padding:50px; text-align:center;">读取失败，请通过“本地APK”上传</div>';
+                }
+            }, 100);
+        }
+
+        async function pickApp(pkgName) {
+            const app = allApps.find(a => a.pkg === pkgName);
+            closePicker();
+            document.getElementById('upload-zones').style.display = 'none';
+            const tip = document.getElementById('status-tip');
+            tip.style.display = 'block';
+            tip.innerText = '正在提取应用信息...';
+
+            // 获取大小 (安卓14 必须用原生 File 对象)
+            const sizeMB = getApkSizeNative(app.path);
+            
+            // 提取图标
+            const pm = plus.android.runtimeMainActivity().getPackageManager();
+            const iconDrawable = plus.android.invoke(pm, "getApplicationIcon", app.pkg);
+            const iconBase64 = drawableToBase64(iconDrawable);
+
+            // 填充UI
+            document.getElementById('app-name').value = app.name;
+            document.getElementById('app-pkg').innerText = app.pkg;
+            document.getElementById('v-text').innerText = app.ver;
+            document.getElementById('s-text').innerText = sizeMB + " MB";
+            document.getElementById('arch-text').innerText = "通用架构";
+            document.getElementById('sdk-text').innerText = "Android 5.0+";
+            document.getElementById('app-icon').src = iconBase64 || "";
+
+            apkInfo = { name: app.name, pkg: app.pkg, ver: app.ver, size: sizeMB, path: app.path };
+            
+            // 自动开始原生上传
+            if (parseFloat(sizeMB) < 150) {
+                uploadApkNative(app.path);
+            } else {
+                document.getElementById('pan-section').style.display = 'block';
+                tip.innerText = '文件过大，请手动填写网盘链接';
+            }
+            
+            // 异步上传图标
+            if (iconBase64) uploadIconBase64(iconBase64);
+            document.getElementById('content-step').style.display = 'block';
+        }
+
+        // --- 核心：原生上传函数 ---
+        function uploadApkNative(path) {
+            const tip = document.getElementById('status-tip');
+            tip.innerText = '正在同步安装包至云端... 0%';
+            
+            const task = plus.uploader.createUpload("https://apirank.qujiaweb.top/?mode=upload_meituan", 
+                { method: "POST" }, 
+                (t, status) => {
+                    if (status == 200) {
+                        const res = JSON.parse(t.responseText);
+                        apkInfo.url = res.full_url;
+                        tip.innerText = '✅ 安装包同步成功';
+                    } else {
+                        tip.innerText = '❌ 同步失败，请使用网盘分享';
+                        document.getElementById('pan-section').style.display = 'block';
+                    }
+                }
+            );
+            task.addFile(path, { key: "file" });
+            task.addEventListener("statechanged", (t) => {
+                if (t.state == 3) {
+                    let p = Math.floor(t.uploadedSize / t.totalSize * 100);
+                    tip.innerText = '正在同步安装包至云端... ' + p + '%';
+                }
+            });
+            task.start();
+        }
+
+        // --- 图标转换辅助 ---
+        function drawableToBase64(drawable) {
+            try {
+                const Bitmap = plus.android.importClass("android.graphics.Bitmap");
+                const Canvas = plus.android.importClass("android.graphics.Canvas");
+                const ByteArrayOutputStream = plus.android.importClass("java.io.ByteArrayOutputStream");
+                const Base64 = plus.android.importClass("android.util.Base64");
+                const w = 144, h = 144;
+                const bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+                const canvas = new Canvas(bitmap);
+                plus.android.invoke(drawable, "setBounds", 0, 0, w, h);
+                plus.android.invoke(drawable, "draw", canvas);
+                const out = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+                return "data:image/png;base64," + Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP);
+            } catch(e) { return ""; }
+        }
+
+        // --- 其余 UI 逻辑 ---
+        function openPicker() { document.getElementById('picker').style.display = 'flex'; scanApps(); }
+        function closePicker() { document.getElementById('picker').style.display = 'none'; }
+        function renderAppList(data) {
+            document.getElementById('app-list').innerHTML = data.map(app => `
+                <div class="app-item" onclick="pickApp('${app.pkg}')" style="display:flex; align-items:center; padding:12px; border-bottom:0.5px solid #eee">
+                    <div style="width:40px; height:40px; background:#f0f0f0; border-radius:8px; text-align:center; line-height:40px; margin-right:12px">${app.name[0]}</div>
+                    <div><div style="font-weight:600">${app.name}</div><div style="font-size:11px; color:#999">${app.pkg}</div></div>
+                </div>
+            `).join('');
+        }
+        function searchApp(v) { renderAppList(allApps.filter(a => a.name.includes(v) || a.pkg.includes(v))); }
+
+        // 返回键处理 (原版还原)
+        document.addEventListener('plusready', function() {
+            plus.key.addEventListener('backbutton', function() {
+                const webview = plus.webview.currentWebview();
+                webview.canBack(e => {
+                    if (e.canBack) webview.back();
+                    else {
+                        if (window.location.pathname.includes('index.html')) {
+                            plus.nativeUI.confirm("确定退出？", r => { if(r.index==0) plus.runtime.quit() });
+                        } else {
+                            if (plus.webview.all().length > 1) webview.close('auto'); else history.back();
+                        }
+                    }
+                });
+            });
+        });
+
+        function handleBack() { if(window.plus) plus.webview.currentWebview().close('auto'); else history.back(); }
+
+        // 最终提交
+        async function finalSubmit() {
+            const intro = document.getElementById('app-intro').value;
+            if (screenshots.length < 1) { alert("请上传截图"); return; }
+            if (!intro) { alert("请填写简介"); return; }
+
+            const data = {
+                name: document.getElementById('app-name').value,
+                link: apkInfo.url || document.getElementById('pan-url').value,
+                password: document.getElementById('pan-pwd').value,
+                icon: uploadedIconUrl,
+                intro: intro,
+                images: screenshots.join(','),
+                package_name: apkInfo.pkg,
+                version: apkInfo.ver,
+                size: apkInfo.size + " MB",
+                user: localStorage.getItem('username') || 'Guest',
+                mail: localStorage.getItem('usermail') || '',
+                category: '实用工具', // 默认
+                android_version: '5.0+',
+                arch: '通用架构'
+            };
+
+            const res = await fetch('https://apirank.qujiaweb.top/?mode=add_app', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            if (result.code == 200) { alert("分享成功"); handleBack(); }
+        }
+
+        // 截图处理
+        document.getElementById('ssFile').onchange = async (e) => {
+            for (let file of e.target.files) {
+                const fd = new FormData();
+                fd.append('file', file);
+                const res = await fetch('https://apirank.qujiaweb.top/?mode=upload_meituan', { method: 'POST', body: fd });
+                const d = await res.json();
+                if (d.full_url) {
+                    screenshots.push(d.full_url);
+                    const div = document.createElement('div');
+                    div.className = 'ss-box';
+                    div.innerHTML = `<img src="${d.full_url}">`;
+                    document.getElementById('ss-grid').insertBefore(div, document.getElementById('ss-grid').firstChild);
+                }
+            }
+        };
+
+        async function uploadIconBase64(base64) {
+            const res = await fetch(base64);
+            const blob = await res.blob();
+            const fd = new FormData();
+            fd.append('file', new File([blob], "icon.png"));
+            const up = await fetch('https://apirank.qujiaweb.top/?mode=upload_meituan', { method: 'POST', body: fd });
+            const d = await up.json();
+            if (d.full_url) uploadedIconUrl = d.full_url;
+        }
+    </script>
 </body>
 </html>
