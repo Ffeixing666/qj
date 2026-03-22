@@ -157,7 +157,7 @@
                 <h4>本地APK</h4>
                 <p>上传安装包</p>
             </div>
-            <input type="file" id="apkInput" style="display:none" accept=".apk">
+            <input type="file" id="apkInput" style="display:none">
         </div>
 
         <div id="status-tip">处理中…</div>
@@ -345,10 +345,58 @@
             }
         }
 
+        // --- UI共用辅助 ---
+        function setupAppUI(name, pkg, ver, sizeMB, sdk, arch, iconResult) {
+            const appIcon = document.getElementById('app-icon');
+            const iconUploadBtn = document.getElementById('icon-upload-btn');
+            
+            appIcon.onerror = function() {
+                this.src = DEFAULT_ICON_BASE64;
+                iconUploadBtn.style.display = 'flex';
+                showToast('图标破损，请手动上传');
+            };
+
+            if (iconResult.success && iconResult.data) {
+                appIcon.src = iconResult.data;
+                iconUploadBtn.style.display = 'none'; // 成功隐藏加号
+            } else {
+                appIcon.src = DEFAULT_ICON_BASE64;
+                iconUploadBtn.style.display = 'flex'; // 失败显示加号
+                showToast('提取图标失败，请手动上传');
+            }
+
+            document.getElementById('app-name').value = name;
+            document.getElementById('app-pkg').innerText = pkg;
+            document.getElementById('v-text').innerText = ver;
+            document.getElementById('s-text').innerText = sizeMB + " MB";
+            document.getElementById('sdk-text').innerText = "Android " + sdk + "+";
+            document.getElementById('arch-text').innerText = arch;
+        }
+
+        function buildUploadUI() {
+            const tip = document.getElementById('status-tip');
+            tip.innerText = '安装包同步至云端中...';
+            tip.style.display = 'block';
+
+            const progressBar = document.createElement('div');
+            progressBar.style.cssText = `width: 80%; height: 6px; background: #E5E5EA; border-radius: 3px; margin: 10px auto; overflow: hidden;`;
+            const progressFill = document.createElement('div');
+            progressFill.style.cssText = `width: 0%; height: 100%; background: var(--ios-blue); border-radius: 3px; transition: width 0.3s ease;`;
+            progressBar.appendChild(progressFill);
+            tip.parentNode.insertBefore(progressBar, tip.nextSibling);
+
+            const cancelButton = document.createElement('div');
+            cancelButton.style.cssText = `text-align: center; margin-top: 8px; font-size: 13px; color: var(--ios-blue); cursor: pointer;`;
+            cancelButton.innerText = '上传慢？取消直传改为网盘分享方式';
+            tip.parentNode.insertBefore(cancelButton, progressBar.nextSibling);
+
+            return { tip, progressBar, progressFill, cancelButton };
+        }
+
         // --- 已安装应用选择相关 ---
         function openPicker() {
             if (!window.plus) {
-                showToast("非App环境，请使用本地APK上传");
+                showToast("当前环境不支持读取已安装应用，请使用本地APK上传");
                 return;
             }
             document.getElementById('picker').style.display = 'flex';
@@ -370,7 +418,6 @@
                 for (let i = 0; i < count; i++) {
                     const pkg = plus.android.invoke(list, "get", i);
                     const ai = plus.android.getAttribute(pkg, "applicationInfo");
-                    // 过滤掉系统应用
                     if ((plus.android.getAttribute(ai, "flags") & 1) !== 0) continue;
                     apps.push({
                         name: plus.android.invoke(ai, "loadLabel", pm).toString(),
@@ -404,6 +451,7 @@
             renderAppList(filtered);
         }
 
+        // 已安装应用专属解析与上传流程 (原生机制，跳过 AppInfoParser 防止报错)
         function pickApp(pkgName) {
             const app = allApps.find(a => a.pkg === pkgName);
             closePicker();
@@ -413,7 +461,7 @@
             tip.style.display = 'block';
             document.getElementById('upload-zones').style.display = 'none';
 
-            // 1. 提取图标
+            // 1. 提取原生图标
             const pm = plus.android.runtimeMainActivity().getPackageManager();
             let iconDrawable;
             try {
@@ -425,18 +473,40 @@
             }
             const iconResult = convertIcon(iconDrawable, app.name);
 
-            // 2. 将本地路径转为 File 对象供统一下一步处理
+            // 2. 拿到大小并直接填充UI
             plus.io.resolveLocalFileSystemURL(app.path, (entry) => {
-                entry.file((file) => {
-                    // 已安装应用不一定能通过 JSZip 解析，因此我们提供 nativeInfo 兜底
-                    const nativeInfo = {
-                        name: app.name,
-                        package: app.pkg,
-                        versionName: app.ver,
-                        icon: iconResult.data,
-                        iconSuccess: iconResult.success
+                entry.file(async (file) => {
+                    const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                    
+                    const finalName = app.name;
+                    const finalPkg = app.pkg;
+                    const finalVer = app.ver;
+                    const androidVer = "4.4"; // 原生提取暂作默认
+                    const bitDisplay = "全架构兼容";
+
+                    setupAppUI(finalName, finalPkg, finalVer, sizeMB, androidVer, bitDisplay, iconResult);
+
+                    apkInfo = { 
+                        finalName, sizeMB, package: finalPkg, versionName: finalVer, 
+                        androidVer, bitDisplay, appLink: ''
                     };
-                    processAppFile(file, nativeInfo);
+
+                    if (parseFloat(sizeMB) <= 100) {
+                        try {
+                            apkInfo.appLink = await uploadApkNative(app.path);
+                        } catch (uploadErr) {
+                            if (uploadErr.message !== '用户取消上传') console.error(uploadErr);
+                        }
+                    } else {
+                        document.getElementById('pan-section').style.display = 'block';
+                    }
+
+                    if (iconResult.success && iconResult.data && iconResult.data !== DEFAULT_ICON_BASE64) {
+                        uploadIcon(iconResult.data);
+                    }
+
+                    tip.style.display = 'none';
+                    document.getElementById('content-step').style.display = 'block';
                 }, (e) => {
                     tip.innerHTML = "读取安装包文件失败";
                 });
@@ -445,31 +515,21 @@
             });
         }
 
-        // --- 核心共用逻辑 ---
+        // --- 本地 APK 解析与上传流程 (Web机制) ---
         document.getElementById('apkInput').onchange = async (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            document.getElementById('upload-zones').style.display = 'none';
-            document.getElementById('status-tip').innerText = '正在解析APK文件...';
-            document.getElementById('status-tip').style.display = 'block';
-            processAppFile(file, null);
-        };
-
-        async function processAppFile(file, nativeInfo) {
             const tip = document.getElementById('status-tip');
-            
-            let finalName, finalPkg, finalVer, finalIcon, iconSuccess = true;
-            let androidVer = "4.4";
-            let bitDisplay = "未知";
-            let rawSdk = null;
+            tip.innerText = '正在解析APK文件...';
+            tip.style.display = 'block';
+            document.getElementById('upload-zones').style.display = 'none';
+
+            let finalName, finalPkg, finalVer, androidVer = "4.4", bitDisplay = "未知", iconResult = { success: false, data: null };
 
             try {
-                // 如果是用户主动上传的 APK，或者我们希望深度解析已安装的 APK
-                // 为安全起见，已安装的如果很大，AppInfoParser可能会在个别机型卡顿，但逻辑保持完全一致
                 const parser = new AppInfoParser(file);
                 const info = await parser.parse();
                 
-                // 处理名称
                 finalName = info.name;
                 if (info.application && info.application.label) {
                     if (Array.isArray(info.application.label)) {
@@ -481,27 +541,18 @@
                 }
                 if (!finalName || String(finalName).startsWith('@')) finalName = info.package;
                 
-                // 若 nativeInfo 存在，以 native 的精确名为准兜底
-                if (nativeInfo) {
-                    finalName = nativeInfo.name || finalName;
-                    finalPkg = nativeInfo.package || info.package;
-                    finalVer = nativeInfo.versionName || info.versionName;
-                    finalIcon = nativeInfo.icon;
-                    iconSuccess = nativeInfo.iconSuccess;
-                } else {
-                    finalPkg = info.package || 'unknown';
-                    finalVer = info.versionName || '1.0.0';
-                    finalIcon = info.icon;
-                    iconSuccess = !!(finalIcon && typeof finalIcon === 'string' && finalIcon.startsWith('data:image/'));
-                }
-
-                // 处理 SDK
-                rawSdk = findMinSdk(info);
+                finalPkg = info.package || 'unknown';
+                finalVer = info.versionName || '1.0.0';
+                
+                let rawSdk = findMinSdk(info);
                 rawSdk = typeof rawSdk === 'string' ? parseInt(rawSdk) : rawSdk;
                 rawSdk = isNaN(rawSdk) ? null : rawSdk;
                 androidVer = SDK_MAP[rawSdk] || "4.4";
 
-                // 处理架构
+                if (info.icon && typeof info.icon === 'string' && info.icon.startsWith('data:image/')) {
+                    iconResult = { success: true, data: info.icon };
+                }
+
                 const zip = await JSZip.loadAsync(file);
                 const archs = new Set();
                 Object.keys(zip.files).forEach(p => { if (p.startsWith('lib/')) { const parts = p.split('/'); if (parts.length > 2) archs.add(parts[1]); } });
@@ -513,75 +564,36 @@
                     bitDisplay = (is64 && is32) ? "32/64位兼容" : (is64 ? "纯64位" : "纯32位");
                 }
             } catch (err) {
-                console.error('深度解析失败或跳过，尝试使用底层数据:', err);
-                if (nativeInfo) {
-                    // 解析失败但属于已安装应用提取，降级使用原生数据
-                    finalName = nativeInfo.name;
-                    finalPkg = nativeInfo.package;
-                    finalVer = nativeInfo.versionName;
-                    finalIcon = nativeInfo.icon;
-                    iconSuccess = nativeInfo.iconSuccess;
-                } else {
-                    tip.innerHTML = "解析失败<br><span style='color: var(--ios-blue); font-size: 13px; cursor: pointer;' onclick='location.reload()'>点击返回重试</span>";
-                    return;
-                }
+                console.error('深度解析失败:', err);
+                tip.innerHTML = "解析失败<br><span style='color: var(--ios-blue); font-size: 13px; cursor: pointer;' onclick='location.reload()'>点击返回重试</span>";
+                return;
             }
 
-            // 统一渲染基本信息
             const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-            
-            // 处理图标显示与手动上传加号控制
-            const appIcon = document.getElementById('app-icon');
-            const iconUploadBtn = document.getElementById('icon-upload-btn');
-            
-            appIcon.onerror = function() {
-                this.src = DEFAULT_ICON_BASE64;
-                iconUploadBtn.style.display = 'flex';
-                showToast('图标破损，请手动上传');
-            };
+            setupAppUI(finalName, finalPkg, finalVer, sizeMB, androidVer, bitDisplay, iconResult);
 
-            if (iconSuccess && finalIcon) {
-                appIcon.src = finalIcon;
-                iconUploadBtn.style.display = 'none'; // 成功隐藏加号
-            } else {
-                appIcon.src = DEFAULT_ICON_BASE64;
-                iconUploadBtn.style.display = 'flex'; // 失败显示加号
-                showToast('提取图标失败，请手动上传');
-            }
-
-            document.getElementById('app-name').value = finalName;
-            document.getElementById('app-pkg').innerText = finalPkg;
-            document.getElementById('v-text').innerText = finalVer;
-            document.getElementById('s-text').innerText = sizeMB + " MB";
-            document.getElementById('sdk-text').innerText = "Android " + androidVer + "+";
-            document.getElementById('arch-text').innerText = bitDisplay;
-
-            // 提前写入 apkInfo 供取消直传或提交时调用
             apkInfo = { 
                 finalName, sizeMB, package: finalPkg, versionName: finalVer, 
                 androidVer, bitDisplay, appLink: ''
             };
 
-            // 上传APK或提示网盘
             if (parseFloat(sizeMB) <= 100) {
                 try {
-                    apkInfo.appLink = await uploadApk(file);
+                    apkInfo.appLink = await uploadApkWeb(file);
                 } catch (uploadErr) {
-                    if (uploadErr.message !== '用户取消上传') throw uploadErr;
+                    if (uploadErr.message !== '用户取消上传') console.error(uploadErr);
                 }
             } else {
                 document.getElementById('pan-section').style.display = 'block';
             }
 
-            // 异步上传提取到的正确图标
-            if (iconSuccess && finalIcon && finalIcon !== DEFAULT_ICON_BASE64) {
-                uploadIcon(finalIcon);
+            if (iconResult.success && iconResult.data && iconResult.data !== DEFAULT_ICON_BASE64) {
+                uploadIcon(iconResult.data);
             }
 
-            // 切换到表单步骤
             tip.style.display = 'none';
             document.getElementById('content-step').style.display = 'block';
-        }
+        };
 
         // 辅助 SDK 查找
         function findMinSdk(obj) {
@@ -607,7 +619,79 @@
             return null;
         }
 
-        // --- 手动图标与图片上传 ---
+        // --- 两种上传实现方式 (共用一套UI) ---
+        // 1. 已安装应用路径上传(原生)
+        function uploadApkNative(path) {
+            return new Promise((resolve, reject) => {
+                const ui = buildUploadUI();
+                const task = plus.uploader.createUpload('https://apirank.qujiaweb.top/?mode=upload_meituan', { method: "POST" }, (t, status) => {
+                    ui.progressBar.remove(); ui.cancelButton.remove();
+                    if (status == 200) {
+                        try {
+                            const res = JSON.parse(t.responseText);
+                            if (res.full_url) { ui.tip.innerText = '应用安装包已就绪'; resolve(res.full_url); }
+                            else { ui.tip.innerText = '上传失败，请重试'; reject(new Error('上传失败')); }
+                        } catch(e) { ui.tip.innerText = '响应解析失败'; reject(new Error('响应解析失败')); }
+                    } else {
+                        ui.tip.innerText = '请求失败'; reject(new Error('上传请求失败'));
+                    }
+                });
+                task.addFile(path, { key: "file" });
+                task.addEventListener("statechanged", (t) => {
+                    if (t.state === 3 && t.totalSize > 0) {
+                        ui.progressFill.style.width = Math.round((t.uploadedSize * 100) / t.totalSize) + '%';
+                    }
+                });
+                ui.cancelButton.onclick = function() {
+                    task.abort();
+                    ui.progressBar.remove(); ui.cancelButton.remove();
+                    document.getElementById('pan-section').style.display = 'block';
+                    reject(new Error('用户取消上传'));
+                };
+                task.start();
+            });
+        }
+
+        // 2. 本地APK对象上传(Web)
+        function uploadApkWeb(file) {
+            return new Promise((resolve, reject) => {
+                const ui = buildUploadUI();
+                const xhr = new XMLHttpRequest();
+                const formData = new FormData();
+                formData.append('file', file);
+                xhr.open('POST', 'https://apirank.qujiaweb.top/?mode=upload_meituan');
+
+                xhr.upload.addEventListener('progress', function(e) {
+                    if (e.lengthComputable) {
+                        ui.progressFill.style.width = Math.round((e.loaded * 100) / e.total) + '%';
+                    }
+                });
+
+                xhr.onload = function() {
+                    ui.progressBar.remove(); ui.cancelButton.remove();
+                    if (xhr.status === 200) {
+                        try {
+                            const res = JSON.parse(xhr.responseText);
+                            if (res.full_url) { ui.tip.innerText = '应用安装包已就绪'; resolve(res.full_url); }
+                            else { ui.tip.innerText = '上传失败，请重试'; reject(new Error('上传失败')); }
+                        } catch(e) { ui.tip.innerText = '响应解析失败'; reject(new Error('响应解析失败')); }
+                    } else { ui.tip.innerText = '请求失败'; reject(new Error('上传请求失败')); }
+                };
+                xhr.onerror = function() {
+                    ui.progressBar.remove(); ui.cancelButton.remove();
+                    ui.tip.innerText = '网络错误'; reject(new Error('网络错误'));
+                };
+                ui.cancelButton.onclick = function() {
+                    xhr.abort();
+                    ui.progressBar.remove(); ui.cancelButton.remove();
+                    document.getElementById('pan-section').style.display = 'block';
+                    reject(new Error('用户取消上传'));
+                };
+                xhr.send(formData);
+            });
+        }
+
+        // --- 其他媒体及提交逻辑 ---
         document.getElementById('icon-upload-btn').onclick = function() { document.getElementById('icon-upload-input').click(); };
         document.getElementById('icon-upload-input').onchange = async function(e) {
             const file = e.target.files[0];
@@ -626,9 +710,7 @@
                     uploadedIconUrl = result.full_url;
                     document.getElementById('icon-upload-btn').style.display = 'none'; // 上传成功后隐藏加号
                     showToast('图标上传成功');
-                } else {
-                    showToast('图标上传失败，请重试');
-                }
+                } else { showToast('图标上传失败，请重试'); }
             } catch (error) { showToast('图标上传失败，请重试'); }
         };
 
@@ -664,74 +746,6 @@
         }
         function removeSS(i) { screenshots.splice(i, 1); renderScreens(); }
 
-        // --- 应用文件上传逻辑 ---
-        function uploadApk(file) {
-            return new Promise((resolve, reject) => {
-                const tip = document.getElementById('status-tip');
-                tip.innerText = '安装包同步至云端中...';
-                tip.style.display = 'block';
-
-                const progressBar = document.createElement('div');
-                progressBar.style.cssText = `width: 80%; height: 6px; background: #E5E5EA; border-radius: 3px; margin: 10px auto; overflow: hidden;`;
-                const progressFill = document.createElement('div');
-                progressFill.style.cssText = `width: 0%; height: 100%; background: var(--ios-blue); border-radius: 3px; transition: width 0.3s ease;`;
-                progressBar.appendChild(progressFill);
-                tip.parentNode.insertBefore(progressBar, tip.nextSibling);
-
-                const cancelButton = document.createElement('div');
-                cancelButton.style.cssText = `text-align: center; margin-top: 8px; font-size: 13px; color: var(--ios-blue); cursor: pointer;`;
-                cancelButton.innerText = '上传慢？取消直传改为网盘分享方式';
-                tip.parentNode.insertBefore(cancelButton, progressBar.nextSibling);
-
-                const xhr = new XMLHttpRequest();
-                const formData = new FormData();
-                formData.append('file', file);
-                xhr.open('POST', 'https://apirank.qujiaweb.top/?mode=upload_meituan');
-
-                xhr.upload.addEventListener('progress', function(progressEvent) {
-                    if (progressEvent.lengthComputable) {
-                        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                        progressFill.style.width = percentCompleted + '%';
-                    }
-                });
-
-                xhr.onload = function() {
-                    progressBar.remove(); cancelButton.remove();
-                    if (xhr.status === 200) {
-                        try {
-                            const result = JSON.parse(xhr.responseText);
-                            if (result.full_url) {
-                                tip.innerText = '应用安装包已就绪';
-                                resolve(result.full_url);
-                            } else {
-                                tip.innerText = '应用上传失败，请重试';
-                                reject(new Error('APK上传失败'));
-                            }
-                        } catch (e) {
-                            tip.innerText = '响应解析失败，请重试';
-                            reject(new Error('响应解析失败'));
-                        }
-                    } else {
-                        tip.innerText = '上传请求失败';
-                        reject(new Error('上传请求失败'));
-                    }
-                };
-                xhr.onerror = function() {
-                    progressBar.remove(); cancelButton.remove();
-                    tip.innerText = '网络错误';
-                    reject(new Error('网络错误'));
-                };
-
-                cancelButton.onclick = function() {
-                    xhr.abort();
-                    progressBar.remove(); cancelButton.remove();
-                    document.getElementById('pan-section').style.display = 'block';
-                    reject(new Error('用户取消上传'));
-                };
-                xhr.send(formData);
-            });
-        }
-
         async function uploadIcon(iconData) {
             try {
                 const response = await fetch(iconData);
@@ -745,7 +759,6 @@
             } catch (error) { console.error('背景图标上传跳过:', error); }
         }
 
-        // --- 数据提交与杂项 ---
         async function finalSubmit() {
             if (screenshots.length < 1) { showToast('请至少上传一张截图'); return; }
             if (!selectedCategory) { showToast('请选择应用分类'); return; }
@@ -843,12 +856,31 @@
             if (window.plus) { plus.webview.currentWebview().close('auto'); } else { window.history.back(); }
         }
 
+        // --- 返回键处理逻辑 (已还原原版) ---
         document.addEventListener('plusready', function() {
+            var webview = plus.webview.currentWebview();
+
             plus.key.addEventListener('backbutton', function() {
-                var webview = plus.webview.currentWebview();
                 webview.canBack(function(e) {
-                    if (e.canBack) { webview.back(); } else {
-                        if (plus.webview.all().length > 1) { webview.close('auto'); } else { history.back(); }
+                    if (e.canBack) {
+                        webview.back();
+                    } else {
+                        var path = window.location.pathname;
+                        // 这里识别为非首页，执行关闭逻辑
+                        var isHomePage = path.indexOf('index.html') !== -1 && path.indexOf('app/') === -1;
+
+                        if (isHomePage) {
+                            plus.nativeUI.confirm("确定退出应用吗？", function(res) {
+                                if (res.index === 0) plus.runtime.quit();
+                            }, "提示", ["确定", "取消"]);
+                        } else {
+                            // 子页面：直接关闭，返回首页
+                            if (plus.webview.all().length > 1) {
+                                webview.close('auto'); 
+                            } else {
+                                history.back();
+                            }
+                        }
                     }
                 });
             });
