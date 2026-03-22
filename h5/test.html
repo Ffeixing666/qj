@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title></title>
+    <style>
+        /* 极简样式：仅用于移除默认边距并将文字居中于视口，无任何额外视觉元素或内容 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #ffffff;      /* 纯白背景，符合“空白”视觉 */
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: system-ui, -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            font-size: 1.25rem;
+            color: #1e1e1e;
+            line-height: 1.5;
+            /* 保证没有任何装饰或额外生成内容 */
+        }
+        /* 确保没有任何伪元素添加文本或图形 */
+        body::before,
+        body::after {
+            display: none;
+            content: none;
+        }
+    </style>
+</head>
+<body>
+    当前暂无测试功能
+</body>
+</html>
