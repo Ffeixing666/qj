@@ -40,18 +40,40 @@
         .container { padding: 16px; max-width: 600px; margin: 0 auto; }
 
         /* 上传卡片 - 初始显示 */
-        #upload-zone {
+        #upload-zones {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .upload-card {
             background: var(--ios-card);
             border: 1.5px dashed #C7C7CC;
             border-radius: 16px;
-            padding: 40px 16px;
+            padding: 30px 10px;
             text-align: center;
             transition: all 0.2s;
             cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
-        #upload-zone svg { width: 48px; height: 48px; fill: var(--ios-blue); margin-bottom: 12px; }
-        #upload-zone h4 { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
-        #upload-zone p { font-size: 13px; color: var(--text-second); }
+        .upload-card:active { background: #f9f9f9; transform: scale(0.98); }
+        .upload-card svg, .upload-card .emoji-icon { width: 40px; height: 40px; fill: var(--ios-blue); margin-bottom: 10px; font-size: 32px; line-height: 40px; }
+        .upload-card h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+        .upload-card p { font-size: 11px; color: var(--text-second); }
+
+        /* 已安装应用选择器面板 */
+        #picker { position: fixed; inset: 0; background: #fff; z-index: 1000; display: none; flex-direction: column; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .p-header { padding: 10px 16px; border-bottom: 0.5px solid var(--line-color); display: flex; align-items: center; background: #f8f8f8; }
+        .search-box { flex: 1; background: #e3e3e8; border-radius: 10px; padding: 8px 12px; display: flex; align-items: center; }
+        .search-box input { border: none; background: transparent; width: 100%; outline: none; font-size: 15px; }
+        #app-list { flex: 1; overflow-y: auto; background: #fff;}
+        .app-item { display: flex; align-items: center; padding: 12px 16px; border-bottom: 0.5px solid var(--line-color); }
+        .app-item:active { background: #f2f2f2; }
+        .app-icon-placeholder { width: 44px; height: 44px; border-radius: 10px; margin-right: 14px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #999; font-size: 20px; flex-shrink: 0; }
 
         /* 解析状态 */
         #status-tip { text-align: center; color: var(--ios-blue); font-size: 14px; margin-top: 20px; display: none; }
@@ -124,21 +146,28 @@
     </header>
 
     <main class="container">
-        <div id="upload-zone" onclick="document.getElementById('apkInput').click()">
-            <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
-            <h4>点击上传</h4>
-            <p>请选择本地的APK安装包</p>
+        <div id="upload-zones">
+            <div class="upload-card" onclick="openPicker()">
+                <div class="emoji-icon">📦</div>
+                <h4>已安装应用</h4>
+                <p>从列表中提取</p>
+            </div>
+            <div class="upload-card" onclick="document.getElementById('apkInput').click()">
+                <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+                <h4>本地APK</h4>
+                <p>「推荐」上传安装包</p>
+            </div>
             <input type="file" id="apkInput" style="display:none">
         </div>
 
-        <div id="status-tip">加载中…</div>
+        <div id="status-tip">处理中…</div>
 
         <div id="content-step">
             <div class="result-card">
                 <div class="app-header">
                     <div style="position: relative;">
                         <img id="app-icon" src="">
-                        <div id="icon-upload-btn" style="position: absolute; bottom: 0; right: 0; width: 24px; height: 24px; background: var(--ios-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; cursor: pointer;">
+                        <div id="icon-upload-btn" style="display: none; position: absolute; bottom: 0; right: 0; width: 24px; height: 24px; background: var(--ios-blue); border-radius: 50%; align-items: center; justify-content: center; color: white; font-size: 14px; cursor: pointer;">
                             <svg viewBox="0 0 24 24" width="14" height="14" fill="white"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
                         </div>
                         <input type="file" id="icon-upload-input" accept="image/*" style="display: none">
@@ -159,7 +188,7 @@
             <div id="pan-section">
                 <div class="pan-header">
                     <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
-                    <span>大文件仅支持网盘分享</span>
+                    <span>大文件或取消直传后使用网盘分享</span>
                 </div>
                 <div class="ios-input-group">
                     <div class="ios-item"><input type="text" id="pan-url" placeholder="网盘链接 (必填)"></div>
@@ -195,45 +224,391 @@
         </div>
     </main>
 
+    <div id="picker">
+        <div class="p-header">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜索已安装应用..." oninput="searchApp(this.value)">
+            </div>
+            <div onclick="closePicker()" style="color:var(--ios-blue); font-weight: 600; margin-left:12px; cursor: pointer;">取消</div>
+        </div>
+        <div id="app-list">
+            <div style="padding:50px; text-align:center; color:#999;">正在加载系统应用列表...</div>
+        </div>
+    </div>
+
     <script>
         const SDK_MAP = { 18: "4.3", 19: "4.4", 21: "5.0", 22: "5.1", 23: "6.0", 24: "7.0", 25: "7.1", 26: "8.0", 27: "8.1", 28: "9.0", 29: "10", 30: "11", 31: "12", 32: "12L", 33: "13", 34: "14", 35: "15" };
+        const DEFAULT_ICON_BASE64 = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='68' height='68' viewBox='0 0 24 24' fill='%23CCCCCC'><path d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14h-2v-4H8v-2h4V7h2v4h4v2h-4v4z'/></svg>";
+        
         let screenshots = [];
         let apkInfo = null;
         let selectedCategory = null;
         let uploadedApkUrl = null;
         let uploadedIconUrl = null;
+        let allApps = [];
 
-        // --- 增强的 SDK 搜索逻辑 ---
+        // --- H5+ 获取已安装应用图标的基础函数 ---
+        function isValidBase64(base64) {
+            return base64 && base64.startsWith('data:image/') && base64.length > 200;
+        }
+
+        function bitmapToBase64(bitmap) {
+            if (!bitmap || bitmap.isRecycled()) return null;
+            try {
+                const ByteArrayOutputStream = plus.android.importClass("java.io.ByteArrayOutputStream");
+                const Base64 = plus.android.importClass("android.util.Base64");
+                const Bitmap = plus.android.importClass("android.graphics.Bitmap");
+                let stream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                let bytes = stream.toByteArray();
+                let base64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
+                let result = "data:image/png;base64," + base64;
+                if (isValidBase64(result)) return result;
+                
+                stream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, stream);
+                bytes = stream.toByteArray();
+                base64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
+                result = "data:image/jpeg;base64," + base64;
+                return isValidBase64(result) ? result : null;
+            } catch(e) { return null; }
+        }
+
+        function drawableToBase64(drawable, appName) {
+            if (!drawable) return null;
+            try {
+                const Bitmap = plus.android.importClass("android.graphics.Bitmap");
+                const Canvas = plus.android.importClass("android.graphics.Canvas");
+                const BitmapDrawable = plus.android.importClass("android.graphics.drawable.BitmapDrawable");
+                if (drawable instanceof BitmapDrawable) {
+                    const bitmap = drawable.getBitmap();
+                    if (bitmap && !bitmap.isRecycled()) {
+                        const result = bitmapToBase64(bitmap);
+                        if (result) return result;
+                    }
+                }
+                const targetSize = 144;
+                let intrinsicW = plus.android.invoke(drawable, "getIntrinsicWidth");
+                let intrinsicH = plus.android.invoke(drawable, "getIntrinsicHeight");
+                let useIntrinsic = (intrinsicW > 0 && intrinsicH > 0);
+                let srcW = useIntrinsic ? intrinsicW : targetSize;
+                let srcH = useIntrinsic ? intrinsicH : targetSize;
+                let srcBitmap = Bitmap.createBitmap(srcW, srcH, Bitmap.Config.ARGB_8888);
+                let srcCanvas = new Canvas(srcBitmap);
+                plus.android.invoke(srcCanvas, "drawARGB", 0, 0, 0, 0);
+                plus.android.invoke(drawable, "setBounds", 0, 0, srcW, srcH);
+                plus.android.invoke(drawable, "draw", srcCanvas);
+                let isTransparent = true;
+                if (srcW > 0 && srcH > 0) {
+                    let centerColor = srcBitmap.getPixel(srcW/2, srcH/2);
+                    if (centerColor !== 0) isTransparent = false;
+                }
+                let finalBitmap = null;
+                if (!isTransparent) {
+                    finalBitmap = Bitmap.createScaledBitmap(srcBitmap, targetSize, targetSize, true);
+                } else {
+                    finalBitmap = Bitmap.createBitmap(targetSize, targetSize, Bitmap.Config.ARGB_8888);
+                    let canvas = new Canvas(finalBitmap);
+                    plus.android.invoke(canvas, "drawARGB", 0, 0, 0, 0);
+                    plus.android.invoke(drawable, "setBounds", 0, 0, targetSize, targetSize);
+                    plus.android.invoke(drawable, "draw", canvas);
+                }
+                if (finalBitmap) {
+                    const result = bitmapToBase64(finalBitmap);
+                    if (result) return result;
+                }
+                try {
+                    const constantState = plus.android.invoke(drawable, "getConstantState");
+                    if (constantState) {
+                        const newDrawable = plus.android.invoke(constantState, "newDrawable");
+                        if (newDrawable) {
+                            let retryBitmap = Bitmap.createBitmap(targetSize, targetSize, Bitmap.Config.ARGB_8888);
+                            let retryCanvas = new Canvas(retryBitmap);
+                            plus.android.invoke(retryCanvas, "drawARGB", 0, 0, 0, 0);
+                            plus.android.invoke(newDrawable, "setBounds", 0, 0, targetSize, targetSize);
+                            plus.android.invoke(newDrawable, "draw", retryCanvas);
+                            const retryResult = bitmapToBase64(retryBitmap);
+                            if (retryResult) return retryResult;
+                        }
+                    }
+                } catch(e) {}
+                return null;
+            } catch(e) { return null; }
+        }
+
+        function convertIcon(drawable, appName) {
+            let base64 = drawableToBase64(drawable, appName);
+            if (isValidBase64(base64)) {
+                return { success: true, data: base64 };
+            } else {
+                return { success: false, data: DEFAULT_ICON_BASE64 };
+            }
+        }
+
+        // --- UI共用辅助 ---
+        function setupAppUI(name, pkg, ver, sizeMB, sdk, arch, iconResult) {
+            const appIcon = document.getElementById('app-icon');
+            const iconUploadBtn = document.getElementById('icon-upload-btn');
+            
+            appIcon.onerror = function() {
+                this.src = DEFAULT_ICON_BASE64;
+                iconUploadBtn.style.display = 'flex';
+                showToast('图标破损，请手动上传');
+            };
+
+            if (iconResult.success && iconResult.data) {
+                appIcon.src = iconResult.data;
+                iconUploadBtn.style.display = 'none'; // 成功隐藏加号
+            } else {
+                appIcon.src = DEFAULT_ICON_BASE64;
+                iconUploadBtn.style.display = 'flex'; // 失败显示加号
+                showToast('提取图标失败，请手动上传');
+            }
+
+            document.getElementById('app-name').value = name;
+            document.getElementById('app-pkg').innerText = pkg;
+            document.getElementById('v-text').innerText = ver;
+            document.getElementById('s-text').innerText = sizeMB + " MB";
+            document.getElementById('sdk-text').innerText = "Android " + sdk + "+";
+            document.getElementById('arch-text').innerText = arch;
+        }
+
+        function buildUploadUI() {
+            const tip = document.getElementById('status-tip');
+            tip.innerText = '安装包同步至云端中...';
+            tip.style.display = 'block';
+
+            const progressBar = document.createElement('div');
+            progressBar.style.cssText = `width: 80%; height: 6px; background: #E5E5EA; border-radius: 3px; margin: 10px auto; overflow: hidden;`;
+            const progressFill = document.createElement('div');
+            progressFill.style.cssText = `width: 0%; height: 100%; background: var(--ios-blue); border-radius: 3px; transition: width 0.3s ease;`;
+            progressBar.appendChild(progressFill);
+            tip.parentNode.insertBefore(progressBar, tip.nextSibling);
+
+            const cancelButton = document.createElement('div');
+            cancelButton.style.cssText = `text-align: center; margin-top: 8px; font-size: 13px; color: var(--ios-blue); cursor: pointer;`;
+            cancelButton.innerText = '上传慢？取消直传改为网盘分享方式';
+            tip.parentNode.insertBefore(cancelButton, progressBar.nextSibling);
+
+            return { tip, progressBar, progressFill, cancelButton };
+        }
+
+        // --- 已安装应用选择相关 ---
+        function openPicker() {
+            if (!window.plus) {
+                showToast("当前环境不支持读取已安装应用，请使用本地APK上传");
+                return;
+            }
+            document.getElementById('picker').style.display = 'flex';
+            if (allApps.length === 0) scanApps();
+        }
+
+        function closePicker() { 
+            document.getElementById('picker').style.display = 'none'; 
+        }
+
+        function scanApps() {
+            if (!window.plus) return;
+            try {
+                const main = plus.android.runtimeMainActivity();
+                const pm = main.getPackageManager();
+                const list = plus.android.invoke(pm, "getInstalledPackages", 0);
+                const count = plus.android.invoke(list, "size");
+                let apps = [];
+                for (let i = 0; i < count; i++) {
+                    const pkg = plus.android.invoke(list, "get", i);
+                    const ai = plus.android.getAttribute(pkg, "applicationInfo");
+                    if ((plus.android.getAttribute(ai, "flags") & 1) !== 0) continue;
+                    apps.push({
+                        name: plus.android.invoke(ai, "loadLabel", pm).toString(),
+                        pkg: plus.android.getAttribute(pkg, "packageName"),
+                        ver: plus.android.getAttribute(pkg, "versionName") || "1.0.0",
+                        path: plus.android.getAttribute(ai, "publicSourceDir")
+                    });
+                }
+                allApps = apps.sort((a, b) => a.name.localeCompare(b.name, 'zh'));
+                renderAppList(allApps);
+            } catch(e) {
+                document.getElementById('app-list').innerHTML = '<div style="padding:50px; text-align:center;">读取应用列表失败</div>';
+            }
+        }
+
+        function renderAppList(data) {
+            const listDiv = document.getElementById('app-list');
+            listDiv.innerHTML = data.map(app => `
+                <div class="app-item" onclick="pickApp('${app.pkg}')">
+                    <div class="app-icon-placeholder">${app.name.charAt(0)}</div>
+                    <div style="flex:1; overflow:hidden;">
+                        <b style="display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:15px;">${app.name}</b>
+                        <small style="color:#999; font-size:12px;">${app.pkg}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function searchApp(val) {
+            const filtered = allApps.filter(a => a.name.toLowerCase().includes(val.toLowerCase()) || a.pkg.toLowerCase().includes(val.toLowerCase()));
+            renderAppList(filtered);
+        }
+
+        // 已安装应用专属解析与上传流程 (原生机制，跳过 AppInfoParser 防止报错)
+        function pickApp(pkgName) {
+            const app = allApps.find(a => a.pkg === pkgName);
+            closePicker();
+            
+            const tip = document.getElementById('status-tip');
+            tip.innerText = '正在读取系统应用信息...';
+            tip.style.display = 'block';
+            document.getElementById('upload-zones').style.display = 'none';
+
+            // 1. 提取原生图标
+            const pm = plus.android.runtimeMainActivity().getPackageManager();
+            let iconDrawable;
+            try {
+                iconDrawable = plus.android.invoke(pm, "getApplicationIcon", app.pkg);
+            } catch(e) {
+                const main = plus.android.runtimeMainActivity();
+                const ai = main.getPackageManager().getApplicationInfo(app.pkg, 0);
+                iconDrawable = plus.android.invoke(ai, "loadIcon", pm);
+            }
+            const iconResult = convertIcon(iconDrawable, app.name);
+
+            // 2. 拿到大小并直接填充UI
+            plus.io.resolveLocalFileSystemURL(app.path, (entry) => {
+                entry.file(async (file) => {
+                    const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                    
+                    const finalName = app.name;
+                    const finalPkg = app.pkg;
+                    const finalVer = app.ver;
+                    const androidVer = "4.4"; // 原生提取暂作默认
+                    const bitDisplay = "全架构兼容";
+
+                    setupAppUI(finalName, finalPkg, finalVer, sizeMB, androidVer, bitDisplay, iconResult);
+
+                    apkInfo = { 
+                        finalName, sizeMB, package: finalPkg, versionName: finalVer, 
+                        androidVer, bitDisplay, appLink: ''
+                    };
+
+                    if (parseFloat(sizeMB) <= 100) {
+                        try {
+                            apkInfo.appLink = await uploadApkNative(app.path);
+                        } catch (uploadErr) {
+                            if (uploadErr.message !== '用户取消上传') console.error(uploadErr);
+                        }
+                    } else {
+                        document.getElementById('pan-section').style.display = 'block';
+                    }
+
+                    if (iconResult.success && iconResult.data && iconResult.data !== DEFAULT_ICON_BASE64) {
+                        uploadIcon(iconResult.data);
+                    }
+
+                    tip.style.display = 'none';
+                    document.getElementById('content-step').style.display = 'block';
+                }, (e) => {
+                    tip.innerHTML = "读取安装包文件失败";
+                });
+            }, (e) => {
+                tip.innerHTML = "解析安装包路径失败";
+            });
+        }
+
+        // --- 本地 APK 解析与上传流程 (Web机制) ---
+        document.getElementById('apkInput').onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const tip = document.getElementById('status-tip');
+            tip.innerText = '正在解析';
+            tip.style.display = 'block';
+            document.getElementById('upload-zones').style.display = 'none';
+
+            let finalName, finalPkg, finalVer, androidVer = "4.4", bitDisplay = "未知", iconResult = { success: false, data: null };
+
+            try {
+                const parser = new AppInfoParser(file);
+                const info = await parser.parse();
+                
+                finalName = info.name;
+                if (info.application && info.application.label) {
+                    if (Array.isArray(info.application.label)) {
+                        for (let label of info.application.label) {
+                            if (/[\u4e00-\u9fa5]/.test(label)) { finalName = label; break; }
+                        }
+                        if (!finalName) finalName = info.application.label[0];
+                    } else { finalName = info.application.label; }
+                }
+                if (!finalName || String(finalName).startsWith('@')) finalName = info.package;
+                
+                finalPkg = info.package || 'unknown';
+                finalVer = info.versionName || '1.0.0';
+                
+                let rawSdk = findMinSdk(info);
+                rawSdk = typeof rawSdk === 'string' ? parseInt(rawSdk) : rawSdk;
+                rawSdk = isNaN(rawSdk) ? null : rawSdk;
+                androidVer = SDK_MAP[rawSdk] || "4.4";
+
+                if (info.icon && typeof info.icon === 'string' && info.icon.startsWith('data:image/')) {
+                    iconResult = { success: true, data: info.icon };
+                }
+
+                const zip = await JSZip.loadAsync(file);
+                const archs = new Set();
+                Object.keys(zip.files).forEach(p => { if (p.startsWith('lib/')) { const parts = p.split('/'); if (parts.length > 2) archs.add(parts[1]); } });
+                const archArray = Array.from(archs);
+                bitDisplay = "全架构兼容";
+                if (archArray.length > 0) {
+                    const is64 = archArray.some(a => a.includes('64') || a === 'arm64-v8a' || a === 'x86_64');
+                    const is32 = archArray.some(a => a.includes('v7a') || a === 'armeabi' || a === 'armeabi-v7a' || a === 'x86');
+                    bitDisplay = (is64 && is32) ? "32/64位兼容" : (is64 ? "纯64位" : "纯32位");
+                }
+            } catch (err) {
+                console.error('深度解析失败:', err);
+                tip.innerHTML = "解析失败<br><span style='color: var(--ios-blue); font-size: 13px; cursor: pointer;' onclick='location.reload()'>点击返回重试</span>";
+                return;
+            }
+
+            const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+            setupAppUI(finalName, finalPkg, finalVer, sizeMB, androidVer, bitDisplay, iconResult);
+
+            apkInfo = { 
+                finalName, sizeMB, package: finalPkg, versionName: finalVer, 
+                androidVer, bitDisplay, appLink: ''
+            };
+
+            if (parseFloat(sizeMB) <= 100) {
+                try {
+                    apkInfo.appLink = await uploadApkWeb(file);
+                } catch (uploadErr) {
+                    if (uploadErr.message !== '用户取消上传') console.error(uploadErr);
+                }
+            } else {
+                document.getElementById('pan-section').style.display = 'block';
+            }
+
+            if (iconResult.success && iconResult.data && iconResult.data !== DEFAULT_ICON_BASE64) {
+                uploadIcon(iconResult.data);
+            }
+
+            tip.style.display = 'none';
+            document.getElementById('content-step').style.display = 'block';
+        };
+
+        // 辅助 SDK 查找
         function findMinSdk(obj) {
             if (!obj) return null;
-            
-            // 直接查找顶层 minSdkVersion
             if (obj.minSdkVersion) return obj.minSdkVersion;
-            
-            // 查找 manifest 中的 uses-sdk
             const manifest = obj.manifest || obj;
             if (manifest['uses-sdk']) {
                 const sdkInfo = Array.isArray(manifest['uses-sdk']) ? manifest['uses-sdk'][0] : manifest['uses-sdk'];
-                // 尝试多种可能的键名
-                const sdkVersion = sdkInfo['@android:minSdkVersion'] || 
-                                  sdkInfo['minSdkVersion'] || 
-                                  sdkInfo['android:minSdkVersion'] ||
-                                  sdkInfo['@minSdkVersion'] ||
-                                  sdkInfo['android\:minSdkVersion']; // 处理转义的冒号
+                const sdkVersion = sdkInfo['@android:minSdkVersion'] || sdkInfo['minSdkVersion'] || sdkInfo['android:minSdkVersion'] || sdkInfo['@minSdkVersion'] || sdkInfo['android\:minSdkVersion'];
                 if (sdkVersion) return sdkVersion;
             }
-            
-            // 直接在 manifest 中搜索 minSdkVersion 相关属性
             if (manifest) {
-                const sdkVersion = manifest['@android:minSdkVersion'] || 
-                                  manifest['minSdkVersion'] || 
-                                  manifest['android:minSdkVersion'] ||
-                                  manifest['@minSdkVersion'] ||
-                                  manifest['android\:minSdkVersion'];
+                const sdkVersion = manifest['@android:minSdkVersion'] || manifest['minSdkVersion'] || manifest['android:minSdkVersion'] || manifest['@minSdkVersion'] || manifest['android\:minSdkVersion'];
                 if (sdkVersion) return sdkVersion;
             }
-            
-            // 递归搜索所有对象属性
             let found = null;
             for (let key in obj) {
                 if (typeof obj[key] === 'object' && obj[key] !== null) {
@@ -244,193 +619,106 @@
             return null;
         }
 
-        // --- 手动上传图标处理 ---
-        document.getElementById('icon-upload-btn').onclick = function() {
-            document.getElementById('icon-upload-input').click();
-        };
+        // --- 两种上传实现方式 (共用一套UI) ---
+        // 1. 已安装应用路径上传(原生)
+        function uploadApkNative(path) {
+            return new Promise((resolve, reject) => {
+                const ui = buildUploadUI();
+                const task = plus.uploader.createUpload('https://apirank.qujiaweb.top/?mode=upload_meituan', { method: "POST" }, (t, status) => {
+                    ui.progressBar.remove(); ui.cancelButton.remove();
+                    if (status == 200) {
+                        try {
+                            const res = JSON.parse(t.responseText);
+                            if (res.full_url) { ui.tip.innerText = '应用安装包已就绪'; resolve(res.full_url); }
+                            else { ui.tip.innerText = '网络异常，请尝试更换网络'; reject(new Error('上传失败')); }
+                        } catch(e) { ui.tip.innerText = '响应解析失败'; reject(new Error('响应解析失败')); }
+                    } else {
+                        ui.tip.innerText = '请求失败'; reject(new Error('上传请求失败'));
+                    }
+                });
+                task.addFile(path, { key: "file" });
+                task.addEventListener("statechanged", (t) => {
+                    if (t.state === 3 && t.totalSize > 0) {
+                        ui.progressFill.style.width = Math.round((t.uploadedSize * 100) / t.totalSize) + '%';
+                    }
+                });
+                ui.cancelButton.onclick = function() {
+                    task.abort();
+                    ui.progressBar.remove(); ui.cancelButton.remove();
+                    document.getElementById('pan-section').style.display = 'block';
+                    reject(new Error('用户取消上传'));
+                };
+                task.start();
+            });
+        }
 
+        // 2. 本地APK对象上传(Web)
+        function uploadApkWeb(file) {
+            return new Promise((resolve, reject) => {
+                const ui = buildUploadUI();
+                const xhr = new XMLHttpRequest();
+                const formData = new FormData();
+                formData.append('file', file);
+                xhr.open('POST', 'https://apirank.qujiaweb.top/?mode=upload_meituan');
+
+                xhr.upload.addEventListener('progress', function(e) {
+                    if (e.lengthComputable) {
+                        ui.progressFill.style.width = Math.round((e.loaded * 100) / e.total) + '%';
+                    }
+                });
+
+                xhr.onload = function() {
+                    ui.progressBar.remove(); ui.cancelButton.remove();
+                    if (xhr.status === 200) {
+                        try {
+                            const res = JSON.parse(xhr.responseText);
+                            if (res.full_url) { ui.tip.innerText = '应用安装包已就绪'; resolve(res.full_url); }
+                            else { ui.tip.innerText = '网络异常，请尝试更换网络'; reject(new Error('上传失败')); }
+                        } catch(e) { ui.tip.innerText = '响应解析失败'; reject(new Error('响应解析失败')); }
+                    } else { ui.tip.innerText = '请求失败'; reject(new Error('上传请求失败')); }
+                };
+                xhr.onerror = function() {
+                    ui.progressBar.remove(); ui.cancelButton.remove();
+                    ui.tip.innerText = '网络错误'; reject(new Error('网络错误'));
+                };
+                ui.cancelButton.onclick = function() {
+                    xhr.abort();
+                    ui.progressBar.remove(); ui.cancelButton.remove();
+                    document.getElementById('pan-section').style.display = 'block';
+                    reject(new Error('用户取消上传'));
+                };
+                xhr.send(formData);
+            });
+        }
+
+        // --- 其他媒体及提交逻辑 ---
+        document.getElementById('icon-upload-btn').onclick = function() { document.getElementById('icon-upload-input').click(); };
         document.getElementById('icon-upload-input').onchange = async function(e) {
             const file = e.target.files[0];
             if (!file) return;
-
             try {
-                // 显示加载状态
                 const appIcon = document.getElementById('app-icon');
-                const originalSrc = appIcon.src;
-                appIcon.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 24 24" fill="%23CCCCCC"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>';
-
-                // 预览图片
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    appIcon.src = e.target.result;
-                };
+                reader.onload = function(e) { appIcon.src = e.target.result; };
                 reader.readAsDataURL(file);
 
-                // 上传图标到对象存储
                 const formData = new FormData();
                 formData.append('file', file);
-
-                const uploadResponse = await fetch('https://apirank.qujiaweb.top/?mode=upload_meituan', {
-                    method: 'POST',
-                    body: formData
-                });
-
+                const uploadResponse = await fetch('https://apirank.qujiaweb.top/?mode=upload_meituan', { method: 'POST', body: formData });
                 const result = await uploadResponse.json();
                 if (result.full_url) {
                     uploadedIconUrl = result.full_url;
+                    document.getElementById('icon-upload-btn').style.display = 'none'; // 上传成功后隐藏加号
                     showToast('图标上传成功');
-                } else {
-                    showToast('图标上传失败，请重试');
-                    appIcon.src = originalSrc;
-                }
-            } catch (error) {
-                console.error('图标上传失败:', error);
-                showToast('图标上传失败，请重试');
-            }
+                } else { showToast('图标获取异常，请手动传一张'); }
+            } catch (error) { showToast('图标上传失败'); }
         };
 
-        // --- APK 上传与解析 ---
-        document.getElementById('apkInput').onchange = async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const tip = document.getElementById('status-tip');
-            tip.style.display = 'block';
-
-            try {
-                const parser = new AppInfoParser(file);
-                const info = await parser.parse();
-                
-                // 1. 处理名称
-                let finalName = info.name;
-                
-                // 优先寻找中文名称
-                if (info.application && info.application.label) {
-                    if (Array.isArray(info.application.label)) {
-                        // 遍历数组，寻找包含中文字符的名称
-                        for (let label of info.application.label) {
-                            if (/[\u4e00-\u9fa5]/.test(label)) {
-                                finalName = label;
-                                break;
-                            }
-                        }
-                        // 如果没有找到中文名称，使用第一个名称
-                        if (!finalName) {
-                            finalName = info.application.label[0];
-                        }
-                    } else {
-                        finalName = info.application.label;
-                    }
-                }
-                
-                if (!finalName || String(finalName).startsWith('@')) finalName = info.package;
-
-                // 2. 处理 SDK
-                let rawSdk = findMinSdk(info);
-                // 确保 rawSdk 是数字类型
-                rawSdk = typeof rawSdk === 'string' ? parseInt(rawSdk) : rawSdk;
-                // 确保 rawSdk 是有效数字
-                rawSdk = isNaN(rawSdk) ? null : rawSdk;
-                const androidVer = SDK_MAP[rawSdk] || "4.4";
-
-                // 3. 处理架构
-                const zip = await JSZip.loadAsync(file);
-                const archs = new Set();
-                Object.keys(zip.files).forEach(p => { if (p.startsWith('lib/')) { const parts = p.split('/'); if (parts.length > 2) archs.add(parts[1]); } });
-                const archArray = Array.from(archs);
-                let bitDisplay = "全架构兼容";
-                if (archArray.length > 0) {
-                    // 检查是否包含64位架构
-                    const is64 = archArray.some(a => a.includes('64') || a === 'arm64-v8a' || a === 'x86_64');
-                    // 检查是否包含32位架构
-                    const is32 = archArray.some(a => 
-                        a.includes('v7a') || 
-                        a === 'armeabi' || 
-                        a === 'armeabi-v7a' || 
-                        a === 'x86'
-                    );
-                    bitDisplay = (is64 && is32) ? "32/64位兼容" : (is64 ? "纯64位" : "纯32位");
-                }
-
-                // 4. 渲染基本信息
-                const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-                // 处理应用图标，添加默认图标
-                const appIcon = document.getElementById('app-icon');
-                // 添加图标加载失败的处理
-                appIcon.onerror = function() {
-                    this.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 24 24" fill="%23CCCCCC"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14h-2v-4H8v-2h4V7h2v4h4v2h-4v4z"/></svg>';
-                };
-                if (info.icon && typeof info.icon === 'string' && info.icon.startsWith('data:image/')) {
-                    appIcon.src = info.icon;
-                } else {
-                    // 设置默认图标
-                    appIcon.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="68" height="68" viewBox="0 0 24 24" fill="%23CCCCCC"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14h-2v-4H8v-2h4V7h2v4h4v2h-4v4z"/></svg>';
-                }
-                document.getElementById('app-name').value = finalName;
-                document.getElementById('app-pkg').innerText = info.package || 'unknown';
-                document.getElementById('v-text').innerText = info.versionName || '1.0.0';
-                document.getElementById('s-text').innerText = sizeMB + " MB";
-                document.getElementById('sdk-text').innerText = "Android " + (androidVer || '4.4') + "+";
-                document.getElementById('arch-text').innerText = bitDisplay;
-
-                // 5. 处理APK上传（小于100MB）
-                let appLink = '';
-                if (parseFloat(sizeMB) <= 100) {
-                    // 上传APK到对象存储
-                    try {
-                        appLink = await uploadApk(file);
-                    } catch (uploadErr) {
-                        // 检查是否是用户取消上传
-                        if (uploadErr.message !== '用户取消上传') {
-                            throw uploadErr;
-                        }
-                        // 用户取消上传，appLink保持为空
-                    }
-                } else {
-                    // 大于100MB，显示网盘链接输入
-                    document.getElementById('pan-section').style.display = 'block';
-                }
-
-                // 6. 上传图标到对象存储
-                if (info.icon) {
-                    await uploadIcon(info.icon);
-                }
-
-                // 核心逻辑：隐藏上传框，显示表单
-                document.getElementById('upload-zone').style.display = 'none';
-                tip.style.display = 'none';
-                document.getElementById('content-step').style.display = 'block';
-                apkInfo = { 
-                    finalName, 
-                    sizeMB, 
-                    package: info.package || 'unknown', 
-                    versionName: info.versionName || '1.0.0', 
-                    androidVer: androidVer || '4.4', 
-                    bitDisplay, 
-                    appLink 
-                };
-
-            } catch (err) {
-                // 检查是否是用户取消上传
-                if (err.message !== '用户取消上传') {
-                    tip.innerHTML = "解析失败<br><span style='color: var(--ios-blue); font-size: 13px; cursor: pointer;' onclick='copyWebUrl()'>可尝试切换网络，或尝试网页版上传</span>";
-                    console.error('解析错误:', err);
-                } else {
-                    // 用户取消上传，隐藏提示
-                    tip.style.display = 'none';
-                }
-            }
-        };
-
-        // --- 图片上传逻辑 ---
         document.getElementById('ssFile').onchange = async (e) => {
             const files = Array.from(e.target.files);
             const trigger = document.getElementById('ss-trigger');
-            
             for (let file of files) {
-                // 显示加载状态
                 trigger.innerHTML = '<div class="loading-spinner"></div>';
-                
                 const fd = new FormData();
                 fd.append('file', file);
                 try {
@@ -440,8 +728,6 @@
                     if (url) screenshots.push(url);
                 } catch (err) { console.error(err); }
             }
-            
-            // 恢复并渲染
             trigger.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>';
             renderScreens();
         };
@@ -449,9 +735,7 @@
         function renderScreens() {
             const grid = document.getElementById('ss-grid');
             const trigger = document.getElementById('ss-trigger');
-            const items = document.querySelectorAll('.ss-item-node');
-            items.forEach(el => el.remove());
-
+            document.querySelectorAll('.ss-item-node').forEach(el => el.remove());
             screenshots.forEach((url, i) => {
                 const div = document.createElement('div');
                 div.className = 'ss-box ss-item-node';
@@ -460,80 +744,46 @@
             });
             document.getElementById('ss-count').innerText = `已上传 ${screenshots.length} 张`;
         }
+        function removeSS(i) { screenshots.splice(i, 1); renderScreens(); }
 
-        function removeSS(i) {
-            screenshots.splice(i, 1);
-            renderScreens();
+        async function uploadIcon(iconData) {
+            try {
+                const response = await fetch(iconData);
+                const blob = await response.blob();
+                const file = new File([blob], 'app_icon.png', { type: 'image/png' });
+                const formData = new FormData();
+                formData.append('file', file);
+                const uploadResponse = await fetch('https://apirank.qujiaweb.top/?mode=upload_meituan', { method: 'POST', body: formData });
+                const result = await uploadResponse.json();
+                if (result.full_url) uploadedIconUrl = result.full_url;
+            } catch (error) { console.error('背景图标上传跳过:', error); }
         }
 
-        // 完整的数据提交逻辑
         async function finalSubmit() {
-            // 验证必填字段
-            if (screenshots.length < 1) {
-                showToast('请至少上传一张截图');
-                return;
-            }
-
-            if (!selectedCategory) {
-                showToast('请选择应用分类');
-                return;
-            }
-
+            if (screenshots.length < 1) { showToast('请至少上传一张截图'); return; }
+            if (!selectedCategory) { showToast('请选择应用分类'); return; }
             const intro = document.getElementById('app-intro').value;
-            if (!intro) {
-                showToast('请输入应用简介');
-                return;
-            }
-
-            if (intro.length < 5) {
-                showToast('应用简介至少需要5个字');
-                return;
-            }
-
-            // 验证应用名称和简介不能全为数字
+            if (!intro || intro.length < 5) { showToast('应用简介至少需要5个字'); return; }
             const appName = document.getElementById('app-name').value;
-            if (/^\d+$/.test(appName)) {
-                showToast('应用名称不能全为数字');
-                return;
-            }
+            if (/^\d+$/.test(appName) || /^\d+$/.test(intro)) { showToast('名称或简介不能全为数字'); return; }
 
-            if (/^\d+$/.test(intro)) {
-                showToast('应用简介不能全为数字');
-                return;
-            }
-
-            // 获取用户信息（从本地存储）
             const userMail = localStorage.getItem('usermail') || '';
             const userName = localStorage.getItem('username') || '';
+            if (!userMail || !userName) { showToast('请先登录'); return; }
 
-            if (!userMail || !userName) {
-                showToast('请先登录');
-                return;
-            }
-
-            // 处理应用链接
             let appLink = apkInfo.appLink;
             let password = '';
-            // 检查是否需要使用网盘链接：
-            // 1. 文件大小大于100MB，或者
-            // 2. 用户取消了上传（appLink为空）
             if (parseFloat(apkInfo.sizeMB) > 100 || !appLink) {
-                // 使用网盘链接
                 appLink = document.getElementById('pan-url').value;
                 password = document.getElementById('pan-pwd').value;
-                if (!appLink) {
-                    showToast('请输入网盘链接');
-                    return;
-                }
+                if (!appLink) { showToast('未直传安装包，请输入网盘链接'); return; }
             }
 
-            // 构建请求数据
-            const appNameInput = document.getElementById('app-name');
             const requestData = {
-                name: escapeEmoji(appNameInput.value),
+                name: escapeEmoji(appName),
                 link: appLink,
                 icon: uploadedIconUrl,
-                intro: processIntro(intro),
+                intro: escapeEmoji(intro),
                 images: screenshots.join(','),
                 is_recommended: '待审核',
                 password: password,
@@ -546,449 +796,67 @@
                 arch: apkInfo.bitDisplay,
                 android_version: apkInfo.androidVer + '+'
             };
-            
-            // 打印请求数据以便调试
-            console.log('发送的请求数据:', requestData);
 
-            // 显示加载状态
             const submitBtn = document.querySelector('.submit-btn');
             const originalText = submitBtn.innerText;
             submitBtn.innerText = '提交中...';
             submitBtn.disabled = true;
 
             try {
-                // 发送请求到后端API
-                console.log('开始发送请求到后端...');
                 const response = await fetch(`https://apirank.qujiaweb.top/?mode=add_app&mail=${encodeURIComponent(userMail)}`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(requestData)
                 });
-
-                console.log('响应状态:', response.status);
                 const result = await response.json();
-                console.log('后端返回结果:', result);
-                
                 if (result.code === 200) {
-                    showToast('应用分享成功！');
-                    // 延迟返回
-                    setTimeout(() => {
-                        handleBack();
-                    }, 1500);
+                    showToast('应用分享成功');
+                    setTimeout(() => { handleBack(); }, 1500);
                 } else {
                     showToast('提交失败：' + (result.msg || '未知错误'));
                 }
             } catch (error) {
                 showToast('网络错误，请重试');
-                console.error('提交错误:', error);
             } finally {
-                // 恢复按钮状态
                 submitBtn.innerText = originalText;
                 submitBtn.disabled = false;
             }
         }
 
-        // 轻提示函数
         function showToast(message) {
-            // 创建提示元素
             const toast = document.createElement('div');
-            toast.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: rgba(0, 0, 0, 0.7);
-                color: white;
-                padding: 12px 20px;
-                border-radius: 8px;
-                font-size: 14px;
-                z-index: 9999;
-                animation: fadeInOut 2s ease-in-out;
-            `;
+            toast.style.cssText = `position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.7); color: white; padding: 12px 20px; border-radius: 8px; font-size: 14px; z-index: 9999; animation: fadeInOut 2s ease-in-out;`;
             toast.innerText = message;
-
-            // 添加动画
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes fadeInOut {
-                    0% { opacity: 0; }
-                    20% { opacity: 1; }
-                    80% { opacity: 1; }
-                    100% { opacity: 0; }
-                }
-            `;
-            document.head.appendChild(style);
-
-            // 添加到页面
+            if(!document.getElementById('toast-style')) {
+                const style = document.createElement('style');
+                style.id = 'toast-style';
+                style.textContent = `@keyframes fadeInOut { 0% { opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; } }`;
+                document.head.appendChild(style);
+            }
             document.body.appendChild(toast);
-
-            // 2秒后移除
-            setTimeout(() => {
-                document.body.removeChild(toast);
-                document.head.removeChild(style);
-            }, 2000);
+            setTimeout(() => { document.body.removeChild(toast); }, 2000);
         }
 
-        // 分类选择函数
         function selectCategory(element, category) {
-            // 移除所有active类
-            document.querySelectorAll('.category-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            // 添加active类到当前选择
+            document.querySelectorAll('.category-item').forEach(item => item.classList.remove('active'));
             element.classList.add('active');
             selectedCategory = category;
         }
 
-        // APK上传到对象存储（带进度条和取消选项）
-        function uploadApk(file) {
-            return new Promise((resolve, reject) => {
-                const tip = document.getElementById('status-tip');
-                tip.innerText = '应用上传中...';
-                tip.style.display = 'block';
-
-                // 创建进度条
-                const progressBar = document.createElement('div');
-                progressBar.style.cssText = `
-                    width: 80%;
-                    height: 6px;
-                    background: #E5E5EA;
-                    border-radius: 3px;
-                    margin: 10px auto;
-                    overflow: hidden;
-                `;
-                
-                const progressFill = document.createElement('div');
-                progressFill.style.cssText = `
-                    width: 0%;
-                    height: 100%;
-                    background: var(--ios-blue);
-                    border-radius: 3px;
-                    transition: width 0.3s ease;
-                `;
-                
-                progressBar.appendChild(progressFill);
-                tip.parentNode.insertBefore(progressBar, tip.nextSibling);
-
-                // 创建取消按钮
-                const cancelButton = document.createElement('div');
-                cancelButton.style.cssText = `
-                    text-align: center;
-                    margin-top: 8px;
-                    font-size: 13px;
-                    color: var(--ios-blue);
-                    cursor: pointer;
-                `;
-                cancelButton.innerText = '上传慢？取消直接上传改为网盘分享方式';
-                tip.parentNode.insertBefore(cancelButton, progressBar.nextSibling);
-
-                // 使用XMLHttpRequest以支持上传进度
-                const xhr = new XMLHttpRequest();
-                const formData = new FormData();
-                formData.append('file', file);
-
-                xhr.open('POST', 'https://apirank.qujiaweb.top/?mode=upload_meituan');
-
-                // 添加进度监听
-                xhr.upload.addEventListener('progress', function(progressEvent) {
-                    if (progressEvent.lengthComputable) {
-                        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                        progressFill.style.width = percentCompleted + '%';
-                    }
-                });
-
-                // 处理响应
-                xhr.onload = function() {
-                    // 移除进度条和取消按钮
-                    progressBar.remove();
-                    cancelButton.remove();
-                    
-                    if (xhr.status === 200) {
-                        try {
-                            const result = JSON.parse(xhr.responseText);
-                            if (result.full_url) {
-                                uploadedApkUrl = result.full_url;
-                                tip.innerText = '应用已上传至服务器，请等待';
-                                resolve(result.full_url);
-                            } else {
-                                tip.innerText = '应用上传失败，请重试';
-                                reject(new Error('APK上传失败'));
-                            }
-                        } catch (e) {
-                            tip.innerText = '应用上传失败，请重试';
-                            reject(new Error('响应解析失败'));
-                        }
-                    } else {
-                        tip.innerText = '应用上传失败，请重试';
-                        reject(new Error('上传请求失败'));
-                    }
-                };
-
-                // 处理错误
-                xhr.onerror = function() {
-                    // 移除进度条和取消按钮
-                    progressBar.remove();
-                    cancelButton.remove();
-                    tip.innerText = '应用上传失败，请重试';
-                    reject(new Error('网络错误'));
-                };
-
-                // 取消上传
-                cancelButton.onclick = function() {
-                    xhr.abort();
-                    progressBar.remove();
-                    cancelButton.remove();
-                    tip.innerText = '已取消上传，切换到网盘分享方式';
-                    
-                    // 显示网盘链接输入
-                    document.getElementById('pan-section').style.display = 'block';
-                    
-                    // 解析应用信息
-                    const parser = new AppInfoParser(file);
-                    parser.parse().then(info => {
-                        // 处理名称
-                        let finalName = info.name;
-                        if (info.application && info.application.label) {
-                            if (Array.isArray(info.application.label)) {
-                                for (let label of info.application.label) {
-                                    if (/[\u4e00-\u9fa5]/.test(label)) {
-                                        finalName = label;
-                                        break;
-                                    }
-                                }
-                                if (!finalName) {
-                                    finalName = info.application.label[0];
-                                }
-                            } else {
-                                finalName = info.application.label;
-                            }
-                        }
-                        if (!finalName || String(finalName).startsWith('@')) finalName = info.package;
-
-                        // 处理 SDK
-                        let rawSdk = findMinSdk(info);
-                        // 确保 rawSdk 是数字类型
-                        rawSdk = typeof rawSdk === 'string' ? parseInt(rawSdk) : rawSdk;
-                        // 确保 rawSdk 是有效数字
-                        rawSdk = isNaN(rawSdk) ? null : rawSdk;
-                        const androidVer = SDK_MAP[rawSdk] || "4.4";
-
-                        // 处理架构
-                        JSZip.loadAsync(file).then(zip => {
-                            const archs = new Set();
-                            Object.keys(zip.files).forEach(p => { if (p.startsWith('lib/')) { const parts = p.split('/'); if (parts.length > 2) archs.add(parts[1]); } });
-                            const archArray = Array.from(archs);
-                            let bitDisplay = "全架构兼容";
-                            if (archArray.length > 0) {
-                                // 检查是否包含64位架构
-                                const is64 = archArray.some(a => a.includes('64') || a === 'arm64-v8a' || a === 'x86_64');
-                                // 检查是否包含32位架构
-                                const is32 = archArray.some(a => 
-                                    a.includes('v7a') || 
-                                    a === 'armeabi' || 
-                                    a === 'armeabi-v7a' || 
-                                    a === 'x86'
-                                );
-                                bitDisplay = (is64 && is32) ? "32/64位兼容" : (is64 ? "纯64位" : "纯32位");
-                            }
-
-                            // 渲染基本信息
-                            const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-                            document.getElementById('app-name').value = finalName;
-                            document.getElementById('app-pkg').innerText = info.package || 'unknown';
-                            document.getElementById('v-text').innerText = info.versionName || '1.0.0';
-                            document.getElementById('s-text').innerText = sizeMB + " MB";
-                            document.getElementById('sdk-text').innerText = "Android " + (androidVer || '4.4') + "+";
-                            document.getElementById('arch-text').innerText = bitDisplay;
-
-                            // 上传图标到对象存储
-                            if (info.icon) {
-                                uploadIcon(info.icon);
-                            }
-
-                            // 隐藏上传框，显示表单
-                            document.getElementById('upload-zone').style.display = 'none';
-                            tip.style.display = 'none';
-                            document.getElementById('content-step').style.display = 'block';
-                            apkInfo = { 
-                                finalName, 
-                                sizeMB, 
-                                package: info.package || 'unknown', 
-                                versionName: info.versionName || '1.0.0', 
-                                androidVer: androidVer || '4.4', 
-                                bitDisplay, 
-                                appLink: ''
-                            };
-                        });
-                    });
-
-                    reject(new Error('用户取消上传'));
-                };
-
-                // 发送请求
-                xhr.send(formData);
-            });
-        }
-
-        // 图标上传到对象存储
-        async function uploadIcon(iconData) {
-            try {
-                // 验证图标数据
-                if (!iconData || typeof iconData !== 'string' || !iconData.startsWith('data:image/')) {
-                    console.warn('无效的图标数据，跳过上传');
-                    return null;
-                }
-                
-                // 将base64图标转换为Blob
-                const response = await fetch(iconData);
-                const blob = await response.blob();
-                const file = new File([blob], 'app_icon.png', { type: 'image/png' });
-
-                const formData = new FormData();
-                formData.append('file', file);
-
-                const uploadResponse = await fetch('https://apirank.qujiaweb.top/?mode=upload_meituan', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const result = await uploadResponse.json();
-                if (result.full_url) {
-                    uploadedIconUrl = result.full_url;
-                    return result.full_url;
-                } else {
-                    console.warn('图标上传失败，返回空');
-                    return null;
-                }
-            } catch (error) {
-                console.error('图标上传失败:', error);
-                // 图标上传失败不影响整个流程
-                return null;
-            }
-        }
-
-        // emoji转HTML实体函数
-        function emojiToHtmlEntity(str) {
+        function escapeEmoji(str) {
             return [...str].map(char => {
                 const code = char.codePointAt(0);
-                if (
-                    (code >= 0x1F300 && code <= 0x1F6FF) ||
-                    (code >= 0x1F900 && code <= 0x1F9FF) ||
-                    (code >= 0x1FA70 && code <= 0x1FAFF) ||
-                    (code >= 0x2600 && code <= 0x26FF) ||
-                    (code >= 0x2700 && code <= 0x27BF) ||
-                    (code >= 0x1F1E6 && code <= 0x1F1FF)
-                ) {
+                if ( (code >= 0x1F300 && code <= 0x1F6FF) || (code >= 0x1F900 && code <= 0x1F9FF) || (code >= 0x1FA70 && code <= 0x1FAFF) || (code >= 0x2600 && code <= 0x26FF) || (code >= 0x2700 && code <= 0x27BF) || (code >= 0x1F1E6 && code <= 0x1F1FF) ) {
                     return `&#${code};`;
-                } else {
-                    return char;
-                }
-            }).join('');
-        }
-
-        // 转义emoji字符
-        function escapeEmoji(text) {
-            return [...text].map(char => {
-                const code = char.codePointAt(0);
-                if (
-                    (code >= 0x1F300 && code <= 0x1F6FF) ||
-                    (code >= 0x1F900 && code <= 0x1F9FF) ||
-                    (code >= 0x1FA70 && code <= 0x1FAFF) ||
-                    (code >= 0x2600 && code <= 0x26FF) ||
-                    (code >= 0x2700 && code <= 0x27BF) ||
-                    (code >= 0x1F1E6 && code <= 0x1F1FF)
-                ) {
-                    return `&#${code};`;
-                } else {
-                    return char;
-                }
+                } else return char;
             }).join('').replace(/'/g, "~PGDBSD~");
         }
 
-        // 处理简介中的emoji和引号
-        function processIntro(intro) {
-            // 将emoji转换为HTML实体
-            let processed = escapeEmoji(intro);
-            return processed;
-        }
-
         function handleBack() {
-            if (window.plus) {
-                plus.webview.currentWebview().close('auto');
-            } else {
-                window.history.back();
-            }
+            if (window.plus) { plus.webview.currentWebview().close('auto'); } else { window.history.back(); }
         }
 
-        // 复制网页版网址到剪切板
-        function copyWebUrl() {
-            const webUrl = 'https://qujiaweb.top/h5';
-            
-            // 使用现代Clipboard API
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(webUrl)
-                    .then(() => {
-                        showToast('网页版地址已复制到剪贴板');
-                    })
-                    .catch(err => {
-                        console.warn('现代API复制失败，尝试备用方案:', err);
-                        tryFallbackCopy(webUrl);
-                    });
-            } else {
-                // 直接使用备用方案
-                tryFallbackCopy(webUrl);
-            }
-        }
-
-        function tryFallbackCopy(text) {
-            // 使用HTML5+的复制功能
-            if (window.plus && plus.device) {
-                try {
-                    plus.device.setClipboard(text, function() {
-                        showToast('网页版地址已复制到剪贴板');
-                    }, function(err) {
-                        console.warn('HTML5+复制失败:', err);
-                        tryExecCommandCopy(text);
-                    });
-                    return;
-                } catch (e) {
-                    console.warn('HTML5+复制异常:', e);
-                }
-            }
-            
-            // 使用传统的execCommand
-            tryExecCommandCopy(text);
-        }
-
-        function tryExecCommandCopy(text) {
-            // 创建临时文本区域
-            const textArea = document.createElement('textarea');
-            textArea.value = text;
-            textArea.style.position = 'fixed';
-            textArea.style.left = '-999999px';
-            textArea.style.top = '-999999px';
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            
-            try {
-                const successful = document.execCommand('copy');
-                if (successful) {
-                    showToast('网页版地址已复制到剪贴板');
-                } else {
-                    console.warn('execCommand复制失败');
-                    showToast('复制失败，请手动复制');
-                }
-            } catch (err) {
-                console.error('execCommand执行失败:', err);
-                showToast('复制失败，请手动复制');
-            } finally {
-                document.body.removeChild(textArea);
-            }
-        }
-
+        // --- 返回键处理逻辑 (已还原原版) ---
         document.addEventListener('plusready', function() {
             var webview = plus.webview.currentWebview();
 
