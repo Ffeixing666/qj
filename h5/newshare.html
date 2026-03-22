@@ -117,9 +117,7 @@
         function closePicker() { document.getElementById('picker').style.display = 'none'; }
 
         function drawableToBase64(drawable) {
-    // 1. 如果 drawable 为空，直接返回默认图标
     if (!drawable) return getDefaultIconBase64();
-
     try {
         // 导入必要的 Java 类
         const Bitmap = plus.android.importClass("android.graphics.Bitmap");
@@ -127,20 +125,20 @@
         const ByteArrayOutputStream = plus.android.importClass("java.io.ByteArrayOutputStream");
         const Base64 = plus.android.importClass("android.util.Base64");
         
-        // 固定图标尺寸（144x144，足够清晰）
         const size = 144;
-        // 创建 ARGB_8888 格式的 Bitmap
+        // 创建固定大小的 Bitmap
         let bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         let canvas = new Canvas(bitmap);
         
-        // 清除画布为透明（避免黑色背景）
-        canvas.drawARGB(0, 0, 0, 0);
+        // 清除画布为透明背景（避免黑色块）
+        plus.android.invoke(canvas, "drawARGB", 0, 0, 0, 0);
         
-        // 关键：任何 Drawable 都可以通过 setBounds + draw 绘制到指定画布
-        drawable.setBounds(0, 0, size, size);
-        drawable.draw(canvas);
+        // 设置 drawable 的绘制区域
+        plus.android.invoke(drawable, "setBounds", 0, 0, size, size);
+        // 执行绘制
+        plus.android.invoke(drawable, "draw", canvas);
         
-        // 将 Bitmap 转为 PNG Base64
+        // 将 Bitmap 转为 PNG 的 Base64
         const stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
         const bytes = stream.toByteArray();
@@ -148,15 +146,18 @@
         return "data:image/png;base64," + base64;
         
     } catch (e) {
-alert("图标转换失败: " + (e.message || e));
+        console.error("图标转换失败: " + (e.message || e));
         return getDefaultIconBase64();
     }
 }
 
-// 返回一个固定的灰色图标 Base64（144x144 PNG）
+// 默认灰色图标（144x144 PNG）
 function getDefaultIconBase64() {
     return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAAAI0lEQVR4Xu3BMQEAAADCoPVPbQ0PoAAAAAAAAAAAAAAAAAAAAAAA4EwZngABZJN7WwAAAABJRU5ErkJggg==";
 }
+
+// 返回一个固定的灰色图标 Base64（144x144 PNG）
+
         function scanApps() {
             if (!window.plus) return;
             try {
