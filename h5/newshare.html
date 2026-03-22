@@ -113,14 +113,15 @@
         }
         function closePicker() { document.getElementById('picker').style.display = 'none'; }
 
-        // 默认灰色图标 Base64（固定值，用于比较）
+        // 默认灰色图标 Base64（仅作为终极保底，正常情况下不会使用）
         const DEFAULT_ICON_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAAAI0lEQVR4Xu3BMQEAAADCoPVPbQ0PoAAAAAAAAAAAAAAAAAAAAAAA4EwZngABZJN7WwAAAABJRU5ErkJggg==";
 
-        function isDefaultIcon(base64) {
-            return base64 === DEFAULT_ICON_BASE64;
+        // 检查 Base64 是否有效（非默认且长度足够）
+        function isValidIcon(base64) {
+            return base64 && base64 !== DEFAULT_ICON_BASE64 && base64.length > 200;
         }
 
-        // 核心图标转换函数（返回 Base64，失败返回默认图标）
+        // 将 Drawable 转换为 PNG Base64（万无一失版）
         function drawableToBase64(drawable, appName) {
             if (!drawable) {
                 return DEFAULT_ICON_BASE64;
@@ -132,63 +133,91 @@
                 const ByteArrayOutputStream = plus.android.importClass("java.io.ByteArrayOutputStream");
                 const Base64 = plus.android.importClass("android.util.Base64");
                 const BitmapDrawable = plus.android.importClass("android.graphics.drawable.BitmapDrawable");
+                const AdaptiveIconDrawable = plus.android.importClass("android.graphics.drawable.AdaptiveIconDrawable");
 
-                let finalBase64 = null;
+                // 固定尺寸，保证图标清晰且统一
+                const targetSize = 144;
+                let bitmap = null;
+                let canvas = null;
 
-                // 策略1：直接取 Bitmap（最可靠）
+                // 尝试多种方法获取 Bitmap
+                let finalBitmap = null;
+
+                // 方法1：如果是 BitmapDrawable，直接取 Bitmap
                 if (drawable instanceof BitmapDrawable) {
-                    const bitmap = drawable.getBitmap();
-                    if (bitmap && !bitmap.isRecycled()) {
-                        const stream = new ByteArrayOutputStream();
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                        const bytes = stream.toByteArray();
-                        finalBase64 = "data:image/png;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP);
+                    const bmp = drawable.getBitmap();
+                    if (bmp && !bmp.isRecycled()) {
+                        finalBitmap = bmp;
                     }
                 }
 
-                // 如果策略1无效，尝试固定尺寸绘制
-                if (!finalBase64) {
-                    const size = 144;
-                    let bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-                    let canvas = new Canvas(bitmap);
+                // 方法2：使用通用绘制（兼容所有 Drawable 类型）
+                if (!finalBitmap) {
+                    bitmap = Bitmap.createBitmap(targetSize, targetSize, Bitmap.Config.ARGB_8888);
+                    canvas = new Canvas(bitmap);
+                    // 清除为透明
                     plus.android.invoke(canvas, "drawARGB", 0, 0, 0, 0);
-                    plus.android.invoke(drawable, "setBounds", 0, 0, size, size);
-                    plus.android.invoke(drawable, "draw", canvas);
-
-                    // 检查是否全透明
-                    const centerColor = bitmap.getPixel(size/2, size/2);
-                    if (centerColor === 0) {
-                        // 策略3：使用原生尺寸再试一次
+                    
+                    // 对自适应图标特殊处理：需要设置 bounds 并绘制
+                    if (drawable instanceof AdaptiveIconDrawable) {
+                        plus.android.invoke(drawable, "setBounds", 0, 0, targetSize, targetSize);
+                        plus.android.invoke(drawable, "draw", canvas);
+                    } else {
+                        // 其他 Drawable：先尝试获取原始尺寸，如果无效则使用目标尺寸
                         let w = plus.android.invoke(drawable, "getIntrinsicWidth");
                         let h = plus.android.invoke(drawable, "getIntrinsicHeight");
                         if (w <= 0 || h <= 0) {
-                            w = 96; h = 96;
+                            w = targetSize;
+                            h = targetSize;
                         }
-                        bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-                        canvas = new Canvas(bitmap);
-                        plus.android.invoke(canvas, "drawARGB", 0, 0, 0, 0);
+                        // 缩放绘制
                         plus.android.invoke(drawable, "setBounds", 0, 0, w, h);
-                        plus.android.invoke(drawable, "draw", canvas);
+                        // 创建一个新的 canvas 以原始尺寸绘制，再缩放到目标尺寸
+                        let tempBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+                        let tempCanvas = new Canvas(tempBitmap);
+                        plus.android.invoke(tempCanvas, "drawARGB", 0, 0, 0, 0);
+                        plus.android.invoke(drawable, "draw", tempCanvas);
+                        // 缩放至目标尺寸
+                        finalBitmap = Bitmap.createScaledBitmap(tempBitmap, targetSize, targetSize, true);
+                        if (tempBitmap && !tempBitmap.isRecycled()) tempBitmap.recycle();
                     }
-
-                    const stream = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                    const bytes = stream.toByteArray();
-                    finalBase64 = "data:image/png;base64," + Base64.encodeToString(bytes, Base64.NO_WRAP);
-                    
-                    // 可选：回收 Bitmap（如果担心内存）
-                    if (bitmap && !bitmap.isRecycled()) bitmap.recycle();
                 }
 
-                // 验证最终 Base64 是否有效（非空且长度大于 100）
-                if (finalBase64 && finalBase64.length > 100) {
-                    return finalBase64;
-                } else {
+                // 如果仍未获得 Bitmap，使用当前 canvas 的 bitmap
+                if (!finalBitmap && bitmap) {
+                    finalBitmap = bitmap;
+                }
+
+                if (!finalBitmap) {
                     return DEFAULT_ICON_BASE64;
                 }
 
+                // 检查 Bitmap 是否有效（非空且有内容）
+                if (finalBitmap.getWidth() <= 0 || finalBitmap.getHeight() <= 0) {
+                    return DEFAULT_ICON_BASE64;
+                }
+
+                // 采样中心像素，如果全透明则可能绘制失败
+                const centerColor = finalBitmap.getPixel(finalBitmap.getWidth()/2, finalBitmap.getHeight()/2);
+                if (centerColor === 0) {
+                    // 可能为透明，尝试通过资源 ID 获取另一种图标
+                    // 此情况极少见，回退即可
+                    return DEFAULT_ICON_BASE64;
+                }
+
+                // 转换为 Base64
+                const stream = new ByteArrayOutputStream();
+                finalBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                const bytes = stream.toByteArray();
+                const base64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
+                const result = "data:image/png;base64," + base64;
+                
+                // 回收中间 Bitmap（避免内存泄漏）
+                if (bitmap && bitmap !== finalBitmap && !bitmap.isRecycled()) bitmap.recycle();
+                
+                return result;
+
             } catch (e) {
-                // 转换失败，返回默认图标
                 return DEFAULT_ICON_BASE64;
             }
         }
@@ -215,16 +244,22 @@
                         const path = plus.android.getAttribute(ai, "publicSourceDir");
                         const ver = plus.android.getAttribute(pkg, "versionName");
                         
-                        // 提取图标
-                        const iconDrawable = plus.android.invoke(ai, "loadIcon", pm);
-                        const iconBase64 = drawableToBase64(iconDrawable, name);
+                        // 优先使用 PackageManager.getApplicationIcon 获取图标（兼容性更好）
+                        let iconDrawable = null;
+                        try {
+                            iconDrawable = plus.android.invoke(pm, "getApplicationIcon", pkgName);
+                        } catch(e) {
+                            // 如果失败，回退到 loadIcon
+                            iconDrawable = plus.android.invoke(ai, "loadIcon", pm);
+                        }
                         
-                        // 判断成功与否
-                        const isSuccess = !isDefaultIcon(iconBase64);
+                        const iconBase64 = drawableToBase64(iconDrawable, name);
+                        const isSuccess = isValidIcon(iconBase64);
+                        
                         if (isSuccess) {
-                            //alert(`【成功】${name} 图标转换成功，已正常显示。`);
+                            alert(`✅ ${name} 图标提取成功`);
                         } else {
-                            alert(`【失败】${name} 图标转换失败，将使用默认图标。可能原因：Drawable类型特殊、资源损坏或转换后无效。`);
+                            alert(`❌ ${name} 图标提取失败（已使用默认占位图）`);
                         }
 
                         allApps.push({
@@ -235,11 +270,10 @@
                             icon: iconBase64
                         });
                     } catch (err) {
-                        alert(`【错误】跳过应用：${err.message || err}`);
+                        alert(`⚠️ 跳过应用：${err.message || err}`);
                         continue;
                     }
                 }
-                // 按名称拼音排序
                 allApps.sort((a, b) => a.name.localeCompare(b.name, 'zh'));
                 render(allApps);
             } catch (e) {
