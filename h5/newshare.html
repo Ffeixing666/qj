@@ -116,46 +116,79 @@
         }
         function closePicker() { document.getElementById('picker').style.display = 'none'; }
 
-        function drawableToBase64(drawable) {
-    if (!drawable) return getDefaultIconBase64();
+        function drawableToBase64(drawable, appName) {
+    // 如果 drawable 为空，直接返回默认图标
+    if (!drawable) {
+        console.log(`[${appName}] drawable 为空`);
+        return getDefaultIconBase64();
+    }
+
     try {
-        // 导入必要的 Java 类
         const Bitmap = plus.android.importClass("android.graphics.Bitmap");
         const Canvas = plus.android.importClass("android.graphics.Canvas");
         const ByteArrayOutputStream = plus.android.importClass("java.io.ByteArrayOutputStream");
         const Base64 = plus.android.importClass("android.util.Base64");
-        
+        const BitmapDrawable = plus.android.importClass("android.graphics.drawable.BitmapDrawable");
+
+        // 策略1：如果是 BitmapDrawable，直接取 Bitmap（最可靠）
+        if (drawable instanceof BitmapDrawable) {
+            const bitmap = drawable.getBitmap();
+            if (bitmap && !bitmap.isRecycled()) {
+                const stream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                const bytes = stream.toByteArray();
+                const base64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
+                console.log(`[${appName}] 通过 BitmapDrawable 成功`);
+                return "data:image/png;base64," + base64;
+            }
+        }
+
+        // 策略2：固定尺寸绘制（144x144）
         const size = 144;
-        // 创建固定大小的 Bitmap
         let bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         let canvas = new Canvas(bitmap);
         
-        // 清除画布为透明背景（避免黑色块）
+        // 清除画布为透明
         plus.android.invoke(canvas, "drawARGB", 0, 0, 0, 0);
         
-        // 设置 drawable 的绘制区域
+        // 设置绘制区域并绘制
         plus.android.invoke(drawable, "setBounds", 0, 0, size, size);
-        // 执行绘制
         plus.android.invoke(drawable, "draw", canvas);
         
-        // 将 Bitmap 转为 PNG 的 Base64
+        // 检查绘制后的 Bitmap 是否全透明（可能是绘制失败）
+        // 简单采样中心像素
+        const centerColor = bitmap.getPixel(size/2, size/2);
+        if (centerColor === 0) {
+            console.log(`[${appName}] 绘制后全透明，尝试其他方法`);
+            // 策略3：尝试使用 getIntrinsicWidth/Height 创建原生尺寸
+            let w = plus.android.invoke(drawable, "getIntrinsicWidth");
+            let h = plus.android.invoke(drawable, "getIntrinsicHeight");
+            if (w <= 0 || h <= 0) {
+                w = 96; h = 96; // 回退尺寸
+            }
+            bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+            canvas = new Canvas(bitmap);
+            plus.android.invoke(canvas, "drawARGB", 0, 0, 0, 0);
+            plus.android.invoke(drawable, "setBounds", 0, 0, w, h);
+            plus.android.invoke(drawable, "draw", canvas);
+        }
+        
         const stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
         const bytes = stream.toByteArray();
         const base64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
+        console.log(`[${appName}] 通过固定尺寸绘制成功`);
         return "data:image/png;base64," + base64;
         
     } catch (e) {
-alert("图标转换失败: " + (e.message || e));
+        console.error(`[${appName}] 图标转换异常:`, e.message || e);
         return getDefaultIconBase64();
     }
 }
 
-// 默认灰色图标（144x144 PNG）
 function getDefaultIconBase64() {
     return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAAAI0lEQVR4Xu3BMQEAAADCoPVPbQ0PoAAAAAAAAAAAAAAAAAAAAAAA4EwZngABZJN7WwAAAABJRU5ErkJggg==";
 }
-
 
         function scanApps() {
             if (!window.plus) return;
