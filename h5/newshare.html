@@ -232,7 +232,7 @@
             try {
                 base64 = await drawableToBase64Async(drawable);
                 if (isValidBase64(base64)) {
-                    //alert(`✅ ${appName}: 异步临时文件转换成功，长度 ${base64.length}`);
+                    alert(`✅ ${appName}: 异步临时文件转换成功，长度 ${base64.length}`);
                     return base64;
                 } else {
                     alert(`❌ ${appName}: 异步转换结果无效，长度 ${base64 ? base64.length : 0}`);
