@@ -146,7 +146,7 @@
         return "data:image/png;base64," + base64;
         
     } catch (e) {
-        console.error("图标转换失败: " + (e.message || e));
+alert("图标转换失败: " + (e.message || e));
         return getDefaultIconBase64();
     }
 }
@@ -156,7 +156,6 @@ function getDefaultIconBase64() {
     return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTM0A1t6AAAAI0lEQVR4Xu3BMQEAAADCoPVPbQ0PoAAAAAAAAAAAAAAAAAAAAAAA4EwZngABZJN7WwAAAABJRU5ErkJggg==";
 }
 
-// 返回一个固定的灰色图标 Base64（144x144 PNG）
 
         function scanApps() {
             if (!window.plus) return;
