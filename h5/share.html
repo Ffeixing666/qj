@@ -200,7 +200,7 @@
                     <svg viewBox="0 0 24 24" width="28" height="28"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
                 </div>
                 <div class="text-content">
-                    <h4>本地安装包</h4>
+                    <h4>本地APK</h4>
                     <p>「推荐」上传安装包</p>
                 </div>
                 <svg class="arrow-icon" viewBox="0 0 24 24"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
@@ -300,6 +300,7 @@
             return base64 && base64.startsWith('data:image/') && base64.length > 200;
         }
 
+        // 原有的图标解析提取方式 (兼容性好的一般图标)
         function bitmapToBase64(bitmap) {
             if (!bitmap || bitmap.isRecycled()) return null;
             try {
@@ -384,13 +385,75 @@
             } catch(e) { return null; }
         }
 
+        // --- 新增：底层兜底的图标强行提取方式 (兼容高版本 AdaptiveIcon) ---
+        function drawableToBase64Fallback(drawable) {
+            if (!drawable) return null;
+            try {
+                const Bitmap = plus.android.importClass('android.graphics.Bitmap');
+                const ByteArrayOutputStream = plus.android.importClass("java.io.ByteArrayOutputStream");
+                const Canvas = plus.android.importClass('android.graphics.Canvas');
+                const Base64 = plus.android.importClass("android.util.Base64");
+
+                let bimp = null;
+                try {
+                    // 尝试直接获取
+                    bimp = plus.android.invoke(drawable, "getBitmap");
+                } catch (e) {
+                    // 获取失败时，通过指定宽高强制建立画布并描绘
+                    let width = plus.android.invoke(drawable, "getIntrinsicWidth");
+                    let height = plus.android.invoke(drawable, "getIntrinsicHeight");
+                    if (width <= 0) width = 144;
+                    if (height <= 0) height = 144;
+                    bimp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                    const canvas = new Canvas(bimp);
+                    plus.android.invoke(drawable, "setBounds", 0, 0, width, height);
+                    plus.android.invoke(drawable, "draw", canvas);
+                }
+
+                if (!bimp) return null;
+
+                const baos = new ByteArrayOutputStream();
+                // 优先尝试使用 PNG 以保留透明通道
+                plus.android.invoke(bimp, "compress", Bitmap.CompressFormat.PNG, 100, baos);
+                plus.android.invoke(baos, "flush");
+                plus.android.invoke(baos, "close");
+                
+                const bitmapBytes = plus.android.invoke(baos, "toByteArray");
+                const base64Str = plus.android.invoke(Base64, "encodeToString", bitmapBytes, 0); 
+                
+                let result = "data:image/png;base64," + base64Str;
+                
+                // 如果 PNG 编码异常，则根据文章使用 JPEG 彻底兜底
+                if (!isValidBase64(result)) {
+                    const baosJpeg = new ByteArrayOutputStream();
+                    plus.android.invoke(bimp, "compress", Bitmap.CompressFormat.JPEG, 100, baosJpeg);
+                    const bytesJpeg = plus.android.invoke(baosJpeg, "toByteArray");
+                    const strJpeg = plus.android.invoke(Base64, "encodeToString", bytesJpeg, 0);
+                    result = "data:image/jpeg;base64," + strJpeg;
+                }
+
+                return isValidBase64(result) ? result : null;
+            } catch (err) {
+                return null;
+            }
+        }
+
+        // 修改转换入口：双重保险
         function convertIcon(drawable, appName) {
+            // 首先尝试原有的复杂解析逻辑
             let base64 = drawableToBase64(drawable, appName);
             if (isValidBase64(base64)) {
                 return { success: true, data: base64 };
-            } else {
-                return { success: false, data: DEFAULT_ICON_BASE64 };
             }
+
+            // 如果原有方式失败（返回空或默认），立即启用新增的强力方法重试
+            let fallbackBase64 = drawableToBase64Fallback(drawable);
+            if (isValidBase64(fallbackBase64)) {
+                return { success: true, data: fallbackBase64 };
+            }
+
+            // 所有绝招用尽，返回失败及默认占位图标
+            return { success: false, data: DEFAULT_ICON_BASE64 };
         }
 
         // --- UI共用辅助 ---
@@ -545,6 +608,7 @@
                 const ai = main.getPackageManager().getApplicationInfo(app.pkg, 0);
                 iconDrawable = plus.android.invoke(ai, "loadIcon", pm);
             }
+            // 此时 convertIcon 内部已经集成了旧方案与新方案的双重校验
             const iconResult = convertIcon(iconDrawable, app.name);
 
             // 2. 首选旧方式读取大小，不行则走新方案兜底
@@ -577,7 +641,6 @@
             }
         }
 
-        // 修改为 async 等待上传结果，彻底修复瞬间跳跃的异步bug
         async function proceedAppUpload(app, sizeMB, iconResult, tip) {
             const finalName = app.name;
             const finalPkg = app.pkg;
