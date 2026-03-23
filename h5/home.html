@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>应用商店 - 首页</title>
     <style>
-        /* --- 1. 终极 CSS 隐藏滚动条 --- */
-        /* 针对所有元素，防止局部滚动容器出现滚动条 */
+        /* --- 终极 CSS 隐藏滚动条 --- */
         * {
             -ms-overflow-style: none; /* IE/Edge */
             scrollbar-width: none;    /* Firefox */
@@ -19,10 +18,9 @@
             -webkit-appearance: none;
         }
 
-        /* 特别确保 html 和 body 不显示 */
         html, body {
             overflow-x: hidden;
-            -webkit-overflow-scrolling: touch; /* 保证弹性滚动流畅 */
+            -webkit-overflow-scrolling: touch; 
         }
 
         /* 确保背景色统一，防止下拉露底色不美观 */
@@ -33,7 +31,6 @@
         #refresh-container {
             background-color: var(--bg-color);
             min-height: 100vh;
-            /* 避免 transform 导致 fixed 定位抖动 */
             will-change: transform;
         }
 
@@ -386,10 +383,9 @@
     </nav>
 
     <script>
-        // --- 2. 终极 JS 隐藏滚动条 (5+ App 原生方案) ---
+        // --- 隐藏 5+ App 原生滚动条 ---
         function hideNativeScrollbar() {
             if (window.plus) {
-                // 直接告诉 WebView 隐藏滚动指示器
                 plus.webview.currentWebview().setStyle({
                     scrollIndicator: 'none' 
                 });
@@ -402,7 +398,6 @@
         let hasMore = true;
         const pagedCategories = ['影视音乐', '实用工具', '娱乐游戏', '学习必备', '社交生活'];
 
-        // 轮播数据
         const bannerData = [
             {
                 img: 'https://creation.bcmcdn.com/716/appcraft/IMAGE__2anY_mk7_1771559520857.png',
@@ -469,26 +464,54 @@
             if (isLoading) return;
             const mail = localStorage.getItem('usermail');
             if (!mail) { showLoginPrompt(); return; }
+
             const appList = document.querySelector('.app-list');
             const loadMoreTip = document.getElementById('loadMoreTip');
+
             if (isRefresh) {
                 appList.innerHTML = `<div class="loading-container"><div class="loading-spinner"></div><div class="loading-text">加载中...</div></div>`;
                 loadMoreTip.style.display = 'none';
-            } else { loadMoreTip.style.display = 'block'; }
+            } else { 
+                loadMoreTip.style.display = 'block'; 
+            }
+
             isLoading = true;
+
             try {
                 const url = `https://apirank.qujiaweb.top/?mode=get_app_list&mail=${encodeURIComponent(mail)}&filter=${encodeURIComponent(filter)}&page=${currentPage}`;
                 const response = await fetch(url, { method: 'GET' });
                 const res = await response.json();
+                
                 if (res.code === 200 && res.fields) {
                     if (isRefresh) appList.innerHTML = '';
                     updateAppList(res.fields, isRefresh);
-                    if (res.fields.length < 20) { hasMore = false; loadMoreTip.textContent = "已经到底啦"; } 
-                    else { hasMore = true; loadMoreTip.textContent = "继续向下滑动加载更多"; }
-                } else if (res.code === 400 || res.code === 404) { showLoginPrompt(); }
+                    
+                    // --- 完整保留你的分页判断逻辑 ---
+                    // 如果返回的数据少于 20 条（后端单页上限），说明没有更多了
+                    if (res.fields.length < 20) {
+                        hasMore = false;
+                        loadMoreTip.textContent = "已经到底啦";
+                    } else {
+                        hasMore = true;
+                        loadMoreTip.textContent = "继续向下滑动加载更多";
+                    }
+                } else if (res.code === 400 || res.code === 404) {
+                    showLoginPrompt();
+                } else if (res.code === 403) {
+                    window.location.href = 'index.html';
+                }
             } catch (e) {
-                if (mail && retryCount < 1) { setTimeout(() => getApps(filter, isRefresh, retryCount + 1), 1500); return; }
-            } finally { isLoading = false; getUnreadMessageCount(); }
+                if (mail && retryCount < 1) {
+                    setTimeout(() => getApps(filter, isRefresh, retryCount + 1), 1500);
+                    return;
+                }
+                if (isRefresh) {
+                    appList.innerHTML = '<div class="app-item" style="justify-content: center;"><div class="app-info" style="text-align: center;"><div class="app-name">加载失败</div><div class="app-desc">网络连接异常</div></div></div>';
+                }
+            } finally { 
+                isLoading = false; 
+                getUnreadMessageCount(); 
+            }
         }
 
         function updateAppList(apps, isRefresh) {
@@ -542,7 +565,6 @@
         }
 
         document.addEventListener('plusready', function() {
-            // 调用原生方法隐藏滚动条
             hideNativeScrollbar();
             
             var webview = plus.webview.currentWebview();
@@ -561,7 +583,6 @@
         window.onload = function() {
             initCarousel();
             setTimeout(() => getApps('', true), 200);
-            // 兜底隐藏
             hideNativeScrollbar();
         };
 
