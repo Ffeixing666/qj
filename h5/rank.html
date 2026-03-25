@@ -11,13 +11,21 @@
             --text-main: #1C1C1E;
             --text-secondary: #8E8E93;
             --accent-blue: #007AFF;
-            /* 重新定义的 iOS/鸿蒙 风格阴影：多层、高扩散、极低透明度 */
             --ios-shadow: 0 4px 12px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.02);
             --ios-active-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, "SF Pro Display", "PingFang SC", "HarmonyOS Sans", sans-serif; background: var(--bg-color); color: var(--text-main); overflow-x: hidden; }
+        body { 
+            font-family: -apple-system, "SF Pro Display", "PingFang SC", "HarmonyOS Sans", sans-serif; 
+            background: var(--bg-color); 
+            color: var(--text-main); 
+            overflow-x: hidden; 
+            /* 配合原生隐藏，CSS端也建议加上隐藏声明 */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        body::-webkit-scrollbar { display: none; }
 
         header {
             position: sticky; top: 0; z-index: 100;
@@ -48,43 +56,11 @@
         .panel.active { display: block; animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
-        .podium { 
-            display: flex; 
-            align-items: flex-end; 
-            justify-content: center; 
-            height: 160px; 
-            margin: 35px 0 25px; 
-            gap: 12px; 
-            table-layout: fixed; /* 辅助固定布局 */
-        }
-        /* 核心修改点：强制 flex 子元素不被内容撑开 */
-        .podium-card { 
-            flex: 1 1 0; 
-            min-width: 0; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            border-radius: 20px 20px 14px 14px; 
-            position: relative; 
-            padding-bottom: 12px; 
-            transition: transform 0.2s ease; 
-        }
+        .podium { display: flex; align-items: flex-end; justify-content: center; height: 160px; margin: 35px 0 25px; gap: 12px; }
+        .podium-card { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; border-radius: 20px 20px 14px 14px; position: relative; padding-bottom: 12px; transition: transform 0.2s ease; }
         .podium-card:active { transform: scale(0.96); }
         .podium-card img { width: 56px; height: 56px; border-radius: 14px; border: 2.5px solid #fff; background: #fff; margin-top: -28px; margin-bottom: 8px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); flex-shrink: 0; }
-        
-        /* 核心修改点：优化文字截断，确保不会撑开容器 */
-        .podium-card .name { 
-            font-size: 12px; 
-            font-weight: 600; 
-            color: #fff; 
-            width: 90%; 
-            text-align: center; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-            white-space: nowrap; 
-            margin-bottom: 2px;
-            display: block;
-        }
+        .podium-card .name { font-size: 12px; font-weight: 600; color: #fff; width: 90%; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px; display: block; }
         .podium-card .num { font-size: 26px; font-weight: 900; color: rgba(255,255,255,0.8); line-height: 1; }
         
         .p-2 { height: 80%; background: linear-gradient(135deg, #B8B8B8, #8E8E93); order: 1; }
@@ -100,19 +76,12 @@
             transition: all 0.25s cubic-bezier(0.2, 0, 0, 1);
             border: 0.5px solid rgba(255,255,255,0.8);
         }
-        .item-card:active {
-            transform: scale(0.97);
-            background-color: #FBFBFD;
-            box-shadow: var(--ios-active-shadow);
-        }
-        
+        .item-card:active { transform: scale(0.97); background-color: #FBFBFD; box-shadow: var(--ios-active-shadow); }
         .item-rank { width: 32px; font-size: 17px; font-weight: 700; color: #AEAEB2; text-align: center; margin-right: 8px; flex-shrink: 0; font-style: italic; }
         .item-icon { width: 52px; height: 52px; border-radius: 12px; background: #f0f0f2; object-fit: cover; flex-shrink: 0; margin-right: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        
         .item-body { flex: 1; min-width: 0; }
         .item-name { font-size: 16px; font-weight: 600; margin-bottom: 4px; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; letter-spacing: -0.3px; }
         .item-desc { font-size: 13px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; }
-        
         .item-val { font-size: 12px; font-weight: 600; color: var(--accent-blue); background: rgba(0,122,255,0.08); padding: 5px 12px; border-radius: 10px; white-space: nowrap; margin-left: 10px; }
 
         .load-more-tip { text-align: center; padding: 30px 0; color: var(--text-secondary); font-size: 13px; letter-spacing: 0.5px; }
@@ -308,10 +277,19 @@
 
     window.onscroll = checkScroll;
 
+    // 核心修改部分：原生 Webview 调优
     document.addEventListener('plusready', function() {
+        const ws = plus.webview.currentWebview();
+        
+        // 彻底关闭系统级滚动条
+        ws.setStyle({
+            'scrollIndicator': 'none'
+        });
+
         fetchData();
+        
         plus.key.addEventListener('backbutton', function() {
-            plus.webview.currentWebview().close('pop-out');
+            ws.close('pop-out');
         });
     });
 
