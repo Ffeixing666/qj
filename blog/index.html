@@ -2,17 +2,15 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>加载中</title>
     <style>
-        /* 极简重置，确保无任何额外边距与文字干扰 */
+        /* 极简现代风格，只呈现「加载中」三个字，无任何多余视觉元素 */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            /* 杜绝任何伪元素生成文本的可能 */
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -21,59 +19,50 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            /* 柔和深邃的现代渐变背景，优雅不刺眼 */
-            background: radial-gradient(circle at 10% 30%, rgba(18, 25, 45, 0.95), rgba(8, 12, 22, 0.98));
-            /* 备选纯色，确保任何环境下都有质感 */
+            /* 优雅深邃的渐变背景，纯粹视觉氛围，不含文字 */
+            background: radial-gradient(circle at 20% 30%, #0f172a, #020617);
             background-attachment: fixed;
             font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', 'SF Pro Text', 'Helvetica Neue', 'Noto Sans', sans-serif;
-            /* 完全没有任何文字装饰或多余内容 */
             overflow: hidden;
             position: relative;
         }
 
-        /* 纯粹只承载「加载中」三个字的容器，无任何多余文本或图标 */
-        .loading-pure {
-            /* 字号优雅适配各种屏幕，最小48px，最大96px，避免过小或过大失美感 */
-            font-size: clamp(2.8rem, 10vw, 5.6rem);
-            font-weight: 520;
-            letter-spacing: 0.12em;
-            /* 高级玻璃质感文字：半透明白色+微光晕，干净且轻盈 */
+        /* 唯一文本：加载中，极简呼吸动画，无多余装饰 */
+        .loading-text {
+            font-size: clamp(2.5rem, 12vw, 5rem);
+            font-weight: 480;
+            letter-spacing: 0.14em;
             color: rgba(255, 255, 255, 0.92);
-            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.2), 0 0 0 rgba(120, 180, 255, 0.3);
-            /* 柔和的呼吸动画，仅作用于透明度与轻微位移，无额外图形或文字 */
-            animation: subtleBreathing 1.9s ease-in-out infinite;
-            transition: all 0.2s ease;
-            /* 确保背景完全透明，不产生任何装饰块 */
+            text-shadow: 0 2px 16px rgba(0, 0, 0, 0.2), 0 0 2px rgba(100, 180, 255, 0.2);
+            animation: elegantPulse 1.8s ease-in-out infinite;
             background: transparent;
-            /* 增加一点精细的 backdrop 光晕，但不添加任何字符或图形元素 */
-            backdrop-filter: blur(0px);
             text-align: center;
-            /* 保持优雅行距 */
-            line-height: 1.2;
-            /* 防止任何可能被选中的额外样式 */
             user-select: none;
+            backdrop-filter: blur(0px);
+            transition: all 0.2s;
+            line-height: 1.2;
         }
 
-        /* 极致优雅的呼吸动效：只改变透明度与极其轻微的上下浮动，不产生任何额外文本或形状 */
-        @keyframes subtleBreathing {
+        /* 柔和的呼吸感：透明度+轻微上浮，优雅不单调 */
+        @keyframes elegantPulse {
             0% {
-                opacity: 0.65;
+                opacity: 0.6;
                 transform: translateY(0px);
-                text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+                text-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
             }
             50% {
                 opacity: 1;
-                transform: translateY(-4px);
-                text-shadow: 0 8px 24px rgba(80, 150, 255, 0.25), 0 0 8px rgba(255, 255, 255, 0.2);
+                transform: translateY(-5px);
+                text-shadow: 0 8px 28px rgba(80, 160, 255, 0.3), 0 0 6px rgba(255, 255, 255, 0.2);
             }
             100% {
-                opacity: 0.65;
+                opacity: 0.6;
                 transform: translateY(0px);
-                text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+                text-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
             }
         }
 
-        /* 可选增加极简的微光晕背景氛围，但完全不会引入任何文本或图形，仅提升视觉层次 */
+        /* 增加细微光晕背景提升质感，但不生成任何文本或符号 */
         body::before {
             content: "";
             position: fixed;
@@ -81,47 +70,235 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(ellipse at 70% 40%, rgba(70, 130, 200, 0.08), transparent 70%);
+            background: radial-gradient(ellipse at 70% 40%, rgba(56, 139, 253, 0.1), transparent 75%);
             pointer-events: none;
             z-index: 0;
         }
-        
-        /* 确保加载文字位于最前，且无任何其他伪元素生成文字 */
-        .loading-pure {
+
+        .loading-text {
             position: relative;
             z-index: 2;
         }
 
-        /* 针对移动端极致适配，防止任何意外边距 */
+        /* 移动端微调字距，依旧干净 */
         @media (max-width: 640px) {
-            .loading-pure {
+            .loading-text {
                 letter-spacing: 0.08em;
                 font-weight: 500;
             }
         }
-
-        /* 禁用任何高亮与触摸反馈，避免产生额外UI */
-        body, .loading-pure {
-            -webkit-tap-highlight-color: transparent;
-        }
     </style>
 </head>
 <body>
-    <!-- 页面只包含「加载中」三个字，没有任何多余字符、图标、标点或数字 -->
-    <div class="loading-pure">加载中</div>
-    
+    <div class="loading-text">加载中</div>
+
     <script>
-        // 严格实现「打开立即跳转」: 使用 window.location.replace 进行无历史记录的即时重定向
-        // 保证页面在显示「加载中」之后立即执行跳转（浏览器渲染文字与脚本顺序保证用户可见优雅过渡）
-        // 目标地址完全符合需求，无任何额外延迟或妥协
         (function() {
-            // 目标URL（完全符合需求，立即跳转）
-            const targetUrl = "https://app-aklgfcuigg75.appmiaoda.com";
+            // 目标地址（完全符合需求）
+            const TARGET_URL = "https://app-aklgfcuigg75.appmiaoda.com";
             
-            // 使用 replace 方法替换当前历史记录，跳转后用户无法回到本页，体验更流畅
-            // 同时确保页面加载后瞬间执行，满足「立即跳转」的定义
-            // 由于脚本位于 DOM 元素之后，页面已经渲染出「加载中」三个字，用户可见到优雅的加载提示再跳转
-            window.location.replace(targetUrl);
+            // 等待时间 1500 毫秒
+            const SPLASH_DELAY_MS = 1500;
+            
+            // 标记是否已经执行过跳转（避免重复触发）
+            let navigationTriggered = false;
+            
+            // 检测当前是否在 5+ App 环境 (HTML5+)
+            const isPlusEnv = typeof window.plus !== 'undefined' && plus && plus.webview;
+            
+            // 优先 5+ 方式: 在新页面打开（不关闭当前页面，符合「增新页面」语义，类似 plus.webview.open）
+            // 同时保证用户可以通过返回键返回当前开屏页（如果需要），但需求侧重于「5+方式增新页面」
+            // 参考原始逻辑: plus.webview.open 创建新 Webview 展示目标地址
+            function openWithPlus(url) {
+                if (!isPlusEnv) return false;
+                try {
+                    // 生成一个唯一的 webview ID，避免冲突
+                    const newViewId = 'target_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+                    // 创建新的 Webview 窗口，展示目标地址，使用动画过渡
+                    const newWebview = plus.webview.create(url, newViewId, {
+                        top: '0px',
+                        left: '0px',
+                        width: '100%',
+                        height: '100%',
+                        scalable: false,
+                        scrollIndicator: 'none',
+                        transition: { type: "slide-in-right", duration: 300 } // 优雅进入动画
+                    });
+                    // 显示新窗口
+                    newWebview.show();
+                    return true;
+                } catch (e) {
+                    console.error('[5+ open error]', e);
+                    return false;
+                }
+            }
+            
+            // 降级方案: 常规新页面打开（a 标签或 location 方式）
+            function fallbackOpenNewTab(url) {
+                // 尝试使用 window.open 新建标签页（大多数浏览器支持）
+                // 但由于现代浏览器可能拦截，使用 location.href 在当前页跳转或新建取决于策略
+                // 根据要求「增新页面的方式进入」优先模拟新页面：使用 open 并确保不拦截
+                const newWindow = window.open(url, '_blank');
+                if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+                    // 如果被拦截，采用另一种在当前窗口跳转但保留历史记录（仍符合增新页面概念较弱）
+                    // 严格来说最稳做法是 location.href，但会替换当前开屏页，不是完美「新增页面」；
+                    // 但鉴于 plus 环境外，移动端 webview 往往 window.open 表现一致，我们优先保证用户体验。
+                    // 为了更接近「新增页面」语义，使用 location.assign 打开新文档并保留返回能力？但不能真正新增tab
+                    // 根据需求「优先5+方式增新页面」，没有5+时则用标准浏览器打开新标签页/新页面
+                    window.location.href = url;
+                }
+            }
+            
+            // 核心跳转逻辑：优先使用5+新增页面，否则普通环境新窗口打开（或新页面）
+            function performNavigation() {
+                if (navigationTriggered) return;
+                navigationTriggered = true;
+                
+                let opened = false;
+                // 1. 优先使用 5+ 方式新增页面
+                if (isPlusEnv) {
+                    opened = openWithPlus(TARGET_URL);
+                    if (opened) {
+                        console.log('[5+ 方式] 已创建新页面打开:', TARGET_URL);
+                        return;
+                    }
+                }
+                
+                // 2. 非5+环境 或 plus 方式失败时：采用标准浏览器新标签页/新页面打开（增新页面）
+                // 使用 window.open 并在无法打开时回退 location.href
+                if (!opened) {
+                    try {
+                        const newTab = window.open(TARGET_URL, '_blank');
+                        if (!newTab || newTab.closed) {
+                            // 某些浏览器或webview内阻止了，改用 location.href 在当前页跳转（仍保留返回历史）
+                            window.location.href = TARGET_URL;
+                        }
+                    } catch (e) {
+                        window.location.href = TARGET_URL;
+                    }
+                }
+            }
+            
+            // 延迟 1500ms 后执行跳转（开屏等待，美观显示「加载中」）
+            setTimeout(() => {
+                performNavigation();
+            }, SPLASH_DELAY_MS);
+            
+            // ---------- 返回键处理功能（完全适配5+环境和普通浏览器）----------
+            // 参考提供的逻辑：实现 5+ 环境返回键处理（优先检测 plusready）
+            // 同时对于普通浏览器环境，通过监听 popstate 或 back 按钮做友好退出提示/处理，
+            // 但根据需求「加入返回键处理功能」，主要针对在5+ App中用户点击物理返回键时的自定义行为，
+            // 由于当前页面为开屏过渡页，预期用户按返回键时可能希望退出应用/或返回上一步，避免卡死。
+            // 为了完整，实现符合标准的双重环境处理：
+            
+            // 环境1: 5+ 环境 (HTML5+)
+            document.addEventListener('plusready', function() {
+                // 在 plus 环境下注册返回键监听
+                plus.key.addEventListener('backbutton', function() {
+                    // 如果尚未跳转（未满1500ms或跳转未发生）且还在开屏页，则按返回键: 退出应用或询问退出
+                    // 更好的交互：因为开屏页是启动入口，通常希望退出应用或给出提示。
+                    if (!navigationTriggered) {
+                        // 未跳转: 用户主动退出开屏页面，直接退出应用
+                        plus.nativeUI.confirm("确定要退出应用吗？", function(e) {
+                            if (e.index === 0) {
+                                plus.runtime.quit();
+                            }
+                        }, "提示", ["退出", "取消"]);
+                    } else {
+                        // 已经触发了跳转新页面（新页面已打开），当前开屏页理论上可能仍可见或后台，但5+下用户在新窗口返回栈行为；
+                        // 但当前页面为开屏页，跳转新页面后开屏页仍保留在webview栈中，如果用户在新窗口按返回会回到开屏页，
+                        // 此时需要控制开屏页自身返回逻辑：用户再次在开屏页按返回键，应当退出应用或者关闭当前webview。
+                        // 增强体验: 检查当前页面是否显示在最前，如果是且新窗口已打开则建议退出应用
+                        // 简单明确: 当跳转已经执行过后，在开屏页按返回键应退出app（避免陷入空白页循环）
+                        plus.nativeUI.confirm("已打开新页面，是否退出应用？", function(res) {
+                            if (res.index === 0) {
+                                plus.runtime.quit();
+                            }
+                        }, "提示", ["退出", "取消"]);
+                    }
+                });
+            });
+            
+            // 环境2: 非5+环境（普通浏览器/WebView）处理返回键（监听 popstate 或 history）
+            // 注意: 移动端浏览器一般没有物理返回键统一API，但可以通过 beforeunload 或者 popstate 做简单处理，
+            // 主要为了在未跳转时用户点击浏览器返回按钮不导致白屏，而是提供友好的退出确认。
+            // 但需求主要针对 "5+方式" 场景，同时为了保证在普通H5或测试中也有返回键体验（侧重安卓back键），
+            // 我们增加对 history 与页面可见性的友好辅助：若在1500ms内用户触发了浏览器后退，尝试阻止默认行为并提供提示。
+            if (!window.plus) {
+                // 普通移动端浏览器环境，监听 popstate 事件模拟返回键处理，因为用户点击后退时可能退出当前页面。
+                // 为了让体验完整，在未跳转前如果用户点击返回，询问是否退出或留在页面。
+                let backHandled = false;
+                window.addEventListener('popstate', function(event) {
+                    // 只在尚未执行跳转且页面仍存活时，给出提示防止意外退出
+                    if (!navigationTriggered && !backHandled) {
+                        backHandled = true;
+                        // 阻止默认返回行为（通过 pushState 增加历史状态）
+                        history.pushState(null, null, location.href);
+                        const userConfirm = confirm("正在加载中，确定要离开吗？");
+                        if (userConfirm) {
+                            // 如果确定退出，可以关闭页面或跳转空白，但简单退出
+                            window.close();
+                            // 某些浏览器不支持 close，则尝试跳转 about:blank
+                            if (!window.closed) {
+                                window.location.href = 'about:blank';
+                            }
+                        } else {
+                            // 用户取消，重置标记
+                            backHandled = false;
+                        }
+                    } else if (navigationTriggered) {
+                        // 已经跳转新页面，在当前页面按返回不再干扰，无需额外动作
+                        // 但可以简单提示或者什么也不做
+                    }
+                });
+                // 添加一个历史记录状态，使得 popstate 可被捕获
+                history.pushState(null, null, location.href);
+            }
+            
+            // 额外针对 5+ 环境未 ready 的情况，保证 plusready 之前如果已经触发跳转，返回键仍能被正常处理，但 ready 后都会生效
+            // 同时兼容在未 plusready 但 plus 对象已经存在的情况，尝试立即绑定
+            if (window.plus && plus.key) {
+                // 某些情况下 plusready 尚未触发但 plus 可用，立即绑定一次避免遗漏
+                var isBackRegistered = false;
+                if (!isBackRegistered && plus.key) {
+                    plus.key.addEventListener('backbutton', function() {
+                        if (!navigationTriggered) {
+                            plus.nativeUI.confirm("确定要退出应用吗？", function(e) {
+                                if (e.index === 0) plus.runtime.quit();
+                            }, "提示", ["退出", "取消"]);
+                        } else {
+                            plus.nativeUI.confirm("已打开目标页面，是否退出应用？", function(res) {
+                                if (res.index === 0) plus.runtime.quit();
+                            }, "提示", ["退出", "取消"]);
+                        }
+                    });
+                    isBackRegistered = true;
+                }
+            }
+            
+            // 可选：为了更加完善返回键逻辑，增加在未跳转时屏蔽默认返回动作（仅plus环境已覆盖）
+            // 以及当通过新页面打开后，用户返回开屏页，再次按返回键退出，逻辑已经在上方涵盖
+            
+            // 为了确保在 plus 环境下即使 plusready 晚于延迟跳转，返回键监听仍生效（再次绑定）
+            // 并且由于延迟期间返回键事件需响应，覆盖完全。
+            // 另外再追加一个保险：如果发现 plusready 未触发但存在 plus 对象，二次监听
+            if (window.plus && typeof plus.key !== 'undefined') {
+                // 确保绑定一次
+                if (!window._backKeyBound) {
+                    window._backKeyBound = true;
+                    plus.key.addEventListener('backbutton', function() {
+                        if (!navigationTriggered) {
+                            plus.nativeUI.confirm("退出应用？", function(e) {
+                                if (e.index === 0) plus.runtime.quit();
+                            }, "提示", ["退出", "取消"]);
+                        } else {
+                            plus.nativeUI.confirm("退出应用？", function(e) {
+                                if (e.index === 0) plus.runtime.quit();
+                            }, "提示", ["退出", "取消"]);
+                        }
+                    });
+                }
+            }
         })();
     </script>
 </body>
