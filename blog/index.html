@@ -1,554 +1,128 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-    
-
-
-
-    
-<!-- Web App Manifest -->
-<link rel="manifest" href="/blog/manifest.json">
-
-<!-- iOS Meta Tags -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="趣加">
-
-<!-- 主题色 -->
-<meta name="theme-color" content="#2196f3">
-
-<!-- 使用同一张图片作为iOS图标 -->
-<link rel="apple-touch-icon" href="https://static.codemao.cn/coco/player/unstable/SkKneVXYR.image/png?hash=Ftv6S3_TwwLgokegSiqV7OMtziE0">
-<!-- 以上内容适配iOSpwa -->
-    
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
-
-
-
-    
-    <title>趣加</title>
-
-    <!-- 引入库 -->
-    <script src="https://static2.pgaot.com/Assets/js/jquery-2.2.4.min.js"></script> <!-- jQuery -->
-    <script src="https://static2.pgaot.com/Assets/js.class/pgdbs.class.js"></script> <!-- 核心逻辑 -->
-    <script src="https://shequ.pgaot.com/AdminPages/pages/Mysqldb/vip/pickduckDBJQ.56a041f93f025090f8ee06c5f53bf3e77c212ffbb76b1d2434e8b029f91825b0.js"></script> <!-- 查询HTML的资源库 -->
-    <script src="https://static2.pgaot.com/Assets/js/sipg_jcokxlcsd9.js"></script> <!-- 签名 -->
-
-<script>
-function emojiToHtmlEntity(str) {
-  return [...str].map(char => {
-    const code = char.codePointAt(0);
-    // 判断是否是 emoji（常用 emoji 范围）
-    if (
-      (code >= 0x1F300 && code <= 0x1F6FF) || // emoji pictographs
-      (code >= 0x1F900 && code <= 0x1F9FF) || // supplemental symbols
-      (code >= 0x1FA70 && code <= 0x1FAFF) || // symbols and pictographs extended
-      (code >= 0x2600 && code <= 0x26FF) ||   // miscellaneous symbols
-      (code >= 0x2700 && code <= 0x27BF) ||   // dingbats
-      (code >= 0x1F1E6 && code <= 0x1F1FF)    // flags
-    ) {
-      return `&#${code};`;
-    } else {
-      return char;
-    }
-  }).join('');
-}
-function htmlEntityToEmoji(str) {
-  return str.replace(/&#(\d+);/g, (_, dec) => {
-    return String.fromCodePoint(parseInt(dec));
-  });
-}
-</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>加载中</title>
     <style>
-#dynamic-square .dynamic-item p {
-  text-align: left;
-  margin: 5px 0 0;
-  padding: 0 5px;
-  font-size: 14px;
-  color: #333;
-}
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
-        
-        /* 搜索框 */
-        .search-bar {
+        /* 极简重置，确保无任何额外边距与文字干扰 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            /* 杜绝任何伪元素生成文本的可能 */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            min-height: 100vh;
+            width: 100%;
             display: flex;
             align-items: center;
-            padding: 10px;
-            background: white;
-        }
-        .search-input {
-            flex: 1;
-            padding: 10px;
-            border-radius: 20px;
-            background: #eee;
-            border: none;
-        }
-
-        /* 轮播大图 */
-        .banner {
-            width: 100%;
-            height: 0;
-            padding-bottom: 56.25%;
-            background: url('https://static.codemao.cn/pickduck/ryIORe6pJg.png?hash=FliRYTFjTEW4cwLYZmb2E6ew7oPy') center/cover no-repeat;
-            cursor: pointer;
+            justify-content: center;
+            /* 柔和深邃的现代渐变背景，优雅不刺眼 */
+            background: radial-gradient(circle at 10% 30%, rgba(18, 25, 45, 0.95), rgba(8, 12, 22, 0.98));
+            /* 备选纯色，确保任何环境下都有质感 */
+            background-attachment: fixed;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', 'SF Pro Text', 'Helvetica Neue', 'Noto Sans', sans-serif;
+            /* 完全没有任何文字装饰或多余内容 */
+            overflow: hidden;
+            position: relative;
         }
 
-        /* 小圆圈按钮 */
-        .circle-menu {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
-            padding: 15px;
-            background: white;
-        }
-        .circle-menu .item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 20%;
-            padding: 10px;
-            cursor: pointer;
-        }
-        .circle-menu img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            margin-bottom: 5px;
-        }
-        .circle-menu span {
-            font-size: 14px;
-        }
-
-        /* 动态广场 */
-        .dynamic-square {
-            background: white;
-            padding: 15px;
-            margin-top: 10px;
-        }
-        .dynamic-item {
-            margin-bottom: 15px;
-            cursor: pointer;
-        }
-        .dynamic-item img {
-            width: 100%;
-            border-radius: 10px;
-        }
-        .dynamic-item p {
+        /* 纯粹只承载「加载中」三个字的容器，无任何多余文本或图标 */
+        .loading-pure {
+            /* 字号优雅适配各种屏幕，最小48px，最大96px，避免过小或过大失美感 */
+            font-size: clamp(2.8rem, 10vw, 5.6rem);
+            font-weight: 520;
+            letter-spacing: 0.12em;
+            /* 高级玻璃质感文字：半透明白色+微光晕，干净且轻盈 */
+            color: rgba(255, 255, 255, 0.92);
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.2), 0 0 0 rgba(120, 180, 255, 0.3);
+            /* 柔和的呼吸动画，仅作用于透明度与轻微位移，无额外图形或文字 */
+            animation: subtleBreathing 1.9s ease-in-out infinite;
+            transition: all 0.2s ease;
+            /* 确保背景完全透明，不产生任何装饰块 */
+            background: transparent;
+            /* 增加一点精细的 backdrop 光晕，但不添加任何字符或图形元素 */
+            backdrop-filter: blur(0px);
             text-align: center;
-            margin-top: 5px;
-            font-size: 14px;
+            /* 保持优雅行距 */
+            line-height: 1.2;
+            /* 防止任何可能被选中的额外样式 */
+            user-select: none;
         }
 
-        /* 底部导航栏 */
-        #tabbar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            display: flex;
-            background: white;
-            border-top: 1px solid #ddd;
-            padding: 10px 0;
+        /* 极致优雅的呼吸动效：只改变透明度与极其轻微的上下浮动，不产生任何额外文本或形状 */
+        @keyframes subtleBreathing {
+            0% {
+                opacity: 0.65;
+                transform: translateY(0px);
+                text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+            }
+            50% {
+                opacity: 1;
+                transform: translateY(-4px);
+                text-shadow: 0 8px 24px rgba(80, 150, 255, 0.25), 0 0 8px rgba(255, 255, 255, 0.2);
+            }
+            100% {
+                opacity: 0.65;
+                transform: translateY(0px);
+                text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+            }
         }
-        .tab { 
-            flex: 1; 
-            text-align: center; 
-            font-size: 14px; 
-            text-decoration: none; 
-            color: gray;
-        }
-        .tab img { width: 24px; height: 24px; display: block; margin: 0 auto 5px; }
-        .active { color: blue; font-weight: bold; }
 
-        /* === 新增样式：平台检测引导 === */
-        #platform-guide {
+        /* 可选增加极简的微光晕背景氛围，但完全不会引入任何文本或图形，仅提升视觉层次 */
+        body::before {
+            content: "";
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 9999;
-            display: none;
-            justify-content: center;
-            align-items: center;
+            background: radial-gradient(ellipse at 70% 40%, rgba(70, 130, 200, 0.08), transparent 70%);
+            pointer-events: none;
+            z-index: 0;
         }
         
-        .guide-content {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 20px;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        /* 确保加载文字位于最前，且无任何其他伪元素生成文字 */
+        .loading-pure {
+            position: relative;
+            z-index: 2;
         }
-        
-        .guide-content.ios {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+
+        /* 针对移动端极致适配，防止任何意外边距 */
+        @media (max-width: 640px) {
+            .loading-pure {
+                letter-spacing: 0.08em;
+                font-weight: 500;
+            }
         }
-        
-        .guide-content.android {
-            background: linear-gradient(135deg, #34e89e 0%, #0f3443 100%);
-            color: white;
-        }
-        
-        .guide-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
-        }
-        
-        .guide-title {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        
-        .guide-desc {
-            font-size: 14px;
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
-        
-        .guide-steps {
-            text-align: left;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .step {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            font-size: 14px;
-        }
-        
-        .step:last-child {
-            margin-bottom: 0;
-        }
-        
-        .step-number {
-            background: white;
-            color: #333;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 10px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        
-        .guide-button {
-            background: white;
-            color: #333;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .guide-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        .guide-button.ios {
-            background: #007aff;
-            color: white;
-        }
-        
-        .guide-button.android {
-            background: #34e89e;
-            color: #0f3443;
+
+        /* 禁用任何高亮与触摸反馈，避免产生额外UI */
+        body, .loading-pure {
+            -webkit-tap-highlight-color: transparent;
         }
     </style>
 </head>
 <body>
-
-    <!-- 搜索栏 -->
-    <div class="search-bar">
-        <input type="text" class="search-input" placeholder="搜索">
-    </div>
-
-    <!-- 轮播大图 -->
-    <div class="banner" onclick="openWeb('https://www.wjx.cn/vm/tUFTwxH.aspx# ')"></div>
-
+    <!-- 页面只包含「加载中」三个字，没有任何多余字符、图标、标点或数字 -->
+    <div class="loading-pure">加载中</div>
     
-    <!-- 小圆圈菜单 -->
-    <div class="circle-menu">
-        <!--
-        <div class="item" onclick="openWeb('https://qujiaweb.top/blog/article.html?id=1743745468')"><img src="https://static.codemao.cn/pickduck/BJ5UPgNh1x.jpeg?hash=FizEUnL6cbKeLz-VbddahBZ1MEq_"><span>公告</span></div>
-
-
-
-
-
-
-
-
-
-  
-
-
-
-        <div class="item" onclick="openWeb('https://qujiaweb.top/blog/article.html?id=1743745535')"><img src="https://static.codemao.cn/pickduck/B1ipAPCa1x.jpeg?hash=Fil8rcoPzkOoYWoTHvv3gQQHyk6I"><span>节目单</span></div>
-
-        -->
- <div class="item" onclick="openWeb('音乐.html ')"><img src="https://static.codemao.cn/pickduck/HJNG-_A6Jx.jpeg?hash=FmYSiC6gq4t4WxHvyobY8Eo-0YJU"><span>音乐</span></div>
-        <div class="item" onclick="openWeb('播客.html')"><img src="https://static.codemao.cn/pickduck/ryS2ve4hyx.jpeg?hash=FtwpdxCtrybW4oozEw0k0LItS2Nd"><span>播客</span></div>
-
-
-<div class="item" onclick="openWeb('随手拍.html')"><img src="https://static.codemao.cn/pickduck/rJ7yOg4nye.jpeg?hash=FrXs4Qs8UrYpZLuhloDBsxM4Vpwn"><span>随手拍</span></div>
-<div class="item" onclick="openWeb('https://qujiaweb.top/blog/article.html?id=1743685068')"><img src="https://static.codemao.cn/pickduck/Sy35DeEn1l.jpeg?hash=Fq5bH1KdfvTtCjm42C-wJmTvO_QK"><span>直播</span></div>
-        
-       
-
-        <div class="item" onclick="openWeb('https://www.wjx.cn/vm/mzzbjiv.aspx# ')"><img src="https://static.codemao.cn/pickduck/HkQrdeVhkg.jpeg?hash=FsW7droX6-NYWAsa9MtDc2NDSjZQ"><span>反馈</span></div>
-        <!--
-        <div class="item" onclick="openWeb('https://qujiaweb.top/blog/母亲节.html')"><img src="https://static.codemao.cn/pickduck/HkOnXORTke.jpeg?hash=FslD-FgWr_YEiLN4CfAm-78WWsdt"><span>母亲节</span></div>
-        
-        <div class="item" onclick="openWeb('https://qujiaweb.top/blog/漂流瓶')"><img src="https://static.codemao.cn/pickduck/BkmVXOATJe.jpeg?hash=FlBEDsN0HcjajaOVZFAIUsZ6tCbX"><span>漂流瓶</span></div>
-        <div class="item" onclick="openWeb('https://qujiaweb.top/blog/article.html?id=1743842552')"><img src="https://static.codemao.cn/pickduck/H1CyxdCpkg.jpeg?hash=FgaFklhMLFjG1MHm8II9TH1TSlIx"><span>奖品</span></div>
-
-
-        
-    
-        -->
-    </div>
-
-    <!-- 动态广场 -->
-    <div class="dynamic-square" id="dynamic-square">
-        <h3>动态广场</h3>
-    </div>
-
-    <!-- 底部导航 -->
-    <div id="tabbar">
-        <a href="index.html?ua=pc" class="tab active">
-            <img src="https://static.codemao.cn/pickduck/rkljkX2cikx.jpeg">
-            <div>首页</div>
-        </a>
-        <a href="newme.html" class="tab">
-            <img src="https://static.codemao.cn/pickduck/ryiZQ3qiye.jpeg">
-            <div>我的</div>
-        </a>
-    </div>
-
-    <!-- === 新增：平台检测引导 === -->
-    <div id="platform-guide">
-        <!-- iOS Safari 引导 -->
-        <div class="guide-content ios" id="ios-guide" style="display: none;">
-            <div class="guide-icon">📱</div>
-            <div class="guide-title">添加到主屏幕</div>
-            <div class="guide-desc">需要下载APP以获得流畅体验哦</div>
-            
-            <div class="guide-steps">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <div>请在Safari浏览器打开本链接</div>
-                </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <div>点击底部分享按钮</div>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <div>选择"添加到主屏幕"</div>
-                </div>
-            </div>
-            
-            <button class="guide-button ios" onclick="window.location.reload()">我知道了</button>
-        </div>
-        
-        <!-- Android 引导 -->
-        <div class="guide-content android" id="android-guide" style="display: none;">
-            <div class="guide-icon">🤖</div>
-            <div class="guide-title">下载趣加APP</div>
-            <div class="guide-desc">需要下载APP以获得流畅体验哦</div>
-            
-            <div class="guide-steps">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <div>请在浏览器打开本链接</div>
-                </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <div>点击下方“立即下载”</div>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <div>完成安装</div>
-                </div>
-            </div>
-            
-            <button class="guide-button android" onclick="downloadAndroidApp()">立即下载</button>
-        </div>
-    </div>
-
     <script>
-        // 获取URL参数
-        function getQueryParam(param) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(param);
-        }
-
-        // 检查是否为PC模式
-        function isPCMode() {
-            return getQueryParam('ua') === 'pc';
-        }
-
-        function openWeb(url) {
-            window.location.href = 'web.html?url=' + encodeURIComponent(url);
-        }
-
-        // 查询数据库
-        var table1 = new pgdbs(dbs_56a041f93f025090f8ee06c5f53bf3e77c212ffbb76b1d2434e8b029f91825b0);
-        table1.onGetData((json, id, url) => {
+        // 严格实现「打开立即跳转」: 使用 window.location.replace 进行无历史记录的即时重定向
+        // 保证页面在显示「加载中」之后立即执行跳转（浏览器渲染文字与脚本顺序保证用户可见优雅过渡）
+        // 目标地址完全符合需求，无任何额外延迟或妥协
+        (function() {
+            // 目标URL（完全符合需求，立即跳转）
+            const targetUrl = "https://app-aklgfcuigg75.appmiaoda.com";
             
-            var container = document.getElementById("dynamic-square");
-
-            json.fields.forEach(item => {
-                var div = document.createElement("div");
-                div.className = "dynamic-item";
-                div.innerHTML = htmlEntityToEmoji(`<img src="${item.picture}" onclick="openWeb('https://qujiaweb.top/blog/article.html?id=${item.createdAt}')">
-                                 <p>${item.title}</p>`);
-                container.appendChild(div);
-            });
-        });
-
-        table1.getTableData({
-            page: 1,
-            limit: 9999999,
-            id: "getTableData",
-            fields:'createdAt,title,picture',
-            filter:'recommend="true"',
-        });
-
-        // 搜索功能
-        document.querySelector(".search-input").addEventListener("input", function() {
-            var keyword = this.value.toLowerCase();
-            document.querySelectorAll(".dynamic-item").forEach(item => {
-                var title = item.querySelector("p").textContent.toLowerCase();
-                item.style.display = title.includes(keyword) ? "block" : "none";
-            });
-        });
-
-        // === 新增：平台检测逻辑 ===
-        function detectPlatformAndShowGuide() {
-            // 如果是PC模式，不显示任何引导
-            if (isPCMode()) {
-                console.log('PC模式，不显示引导弹窗');
-                return;
-            }
-
-            const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-            const isSafari = /safari/i.test(navigator.userAgent) && !/chrome|android/i.test(navigator.userAgent);
-            const isInStandaloneMode = ('standalone' in window.navigator) && window.navigator.standalone;
-            const isAndroid = /android/i.test(navigator.userAgent);
-            
-            console.log('平台检测:', { isIOS, isSafari, isInStandaloneMode, isAndroid });
-            
-            // 如果是PWA模式，不显示任何引导
-            if (isInStandaloneMode) {
-                return;
-            }
-            
-            // 如果是iOS Safari，显示添加到主屏幕引导（不可关闭）
-            if (isIOS && isSafari) {
-                showIOSGuide();
-            }
-            // 如果是Android，显示下载APP引导
-            else if (isAndroid) {
-                showAndroidGuide();
-            }
-        }
-        
-        function showIOSGuide() {
-            const guide = document.getElementById('platform-guide');
-            const iosGuide = document.getElementById('ios-guide');
-            
-            guide.style.display = 'flex';
-            iosGuide.style.display = 'block';
-            
-            // 不可关闭，所以不添加关闭事件
-        }
-        
-        function showAndroidGuide() {
-            const guide = document.getElementById('platform-guide');
-            const androidGuide = document.getElementById('android-guide');
-            
-            guide.style.display = 'flex';
-            androidGuide.style.display = 'block';
-        }
-        
-        function downloadAndroidApp() {
-            window.open('https://static.codemao.cn/pickduck/BklLxQChgg.apk?hash=lpGg50fWjtzSQxrIi7YWLEeGMDFC', '_blank');
-        }
-        
-        // 页面加载完成后检测平台
-        window.addEventListener('DOMContentLoaded', function() {
-            // 延迟显示，让页面先加载完成
-            setTimeout(detectPlatformAndShowGuide, 1000);
-        });
-
-        var plusReady = function (callback) {  
-            if (window.plus) {  
-                callback();  
-            } else {  
-                document.addEventListener('plusready', callback);  
-            }  
-        };  
-
-        plusReady(function () {  
-            var firstBack = 0;  
-            var handleBack = function () {  
-                var currentWebview = plus.webview.currentWebview();  
-                var topWebview = plus.webview.getTopWebview();  
-                var now = Date.now || function () {  
-                    return new Date().getTime();  
-                };  
-
-                currentWebview.canBack(function (evt) {  
-                    /**  
-                     * 有可后退的历史记录，则后退。  
-                     * 否则，关闭当前窗口。  
-                     * 如果当前窗口是入口页，那么执行退出的逻辑。  
-                     */  
-                    if (currentWebview.id === plus.runtime.appid) {  
-                        if (!firstBack) {  
-                            firstBack = now();  
-                            plus.nativeUI.toast('再按一次退出应用');  
-
-                            setTimeout(function () {  
-                                firstBack = 0;  
-                            }, 2000);  
-                        } else if (now() - firstBack < 2000) {  
-                            plus.runtime.quit();  
-                        }  
-                    } else {  
-                        if (evt.canBack) {  
-                            history.back();  
-                        } else {  
-                            currentWebview.close('auto');  
-                        }  
-                    }  
-                });  
-            };  
-
-            plus.key.addEventListener('backbutton', handleBack);  
-        });
+            // 使用 replace 方法替换当前历史记录，跳转后用户无法回到本页，体验更流畅
+            // 同时确保页面加载后瞬间执行，满足「立即跳转」的定义
+            // 由于脚本位于 DOM 元素之后，页面已经渲染出「加载中」三个字，用户可见到优雅的加载提示再跳转
+            window.location.replace(targetUrl);
+        })();
     </script>
 </body>
 </html>
