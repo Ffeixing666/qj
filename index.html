@@ -1,13 +1,50 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>趣加应用官网</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>趣加应用</title>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+
     <style>
+        /* --- 通用初始化 --- */
+        #pc-view, #mobile-view {
+            display: none; /* 初始隐藏，由JS决定显示哪个 */
+        }
+
+        /* --- PC端样式 (完全保留原样) --- */
+        .pc-body-style {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            overflow: hidden; 
+        }
+        .fullscreen-iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .fixed-image {
+            position: fixed;
+            bottom: 3px;
+            right: 3px;
+            z-index: 9999;
+            max-width: 150px; 
+            cursor: pointer;
+        }
+        .fixed-image img {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        /* --- 手机端样式 (完全保留原样) --- */
         :root {
             --primary: #4a6bdf;
             --primary-dark: #3a56b2;
@@ -17,18 +54,12 @@
             --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
         
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
+        .mobile-wrapper {
             font-family: 'Noto Sans SC', sans-serif;
             background-color: #f5f7ff;
             color: var(--dark);
             line-height: 1.6;
-            overflow-x: hidden;
+            min-height: 100vh;
         }
         
         .container {
@@ -37,7 +68,6 @@
             padding: 0 20px;
         }
         
-        /* 粒子背景 */
         #particles-js {
             position: absolute;
             width: 100%;
@@ -48,7 +78,6 @@
             opacity: 0.5;
         }
         
-        /* 头部 */
         header {
             padding: 60px 0 40px;
             text-align: center;
@@ -68,7 +97,6 @@
             animation: fadeInUp 0.8s ease-out forwards;
         }
         
-        /* 按钮区域 */
         .button-group {
             display: flex;
             justify-content: center;
@@ -132,7 +160,6 @@
             opacity: 0.8;
         }
         
-        /* 特性区域 */
         .features {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -151,17 +178,9 @@
             transform: translateY(20px);
         }
         
-        .feature-card:nth-child(1) {
-            animation: fadeInUp 0.8s ease-out 0.4s forwards;
-        }
-        
-        .feature-card:nth-child(2) {
-            animation: fadeInUp 0.8s ease-out 0.5s forwards;
-        }
-        
-        .feature-card:nth-child(3) {
-            animation: fadeInUp 0.8s ease-out 0.6s forwards;
-        }
+        .feature-card:nth-child(1) { animation: fadeInUp 0.8s ease-out 0.4s forwards; }
+        .feature-card:nth-child(2) { animation: fadeInUp 0.8s ease-out 0.5s forwards; }
+        .feature-card:nth-child(3) { animation: fadeInUp 0.8s ease-out 0.6s forwards; }
         
         .feature-card:hover {
             transform: translateY(-5px);
@@ -186,7 +205,6 @@
             font-size: 1rem;
         }
         
-        /* 页脚 */
         footer {
             text-align: center;
             padding: 30px 0;
@@ -195,200 +213,105 @@
             border-top: 1px solid rgba(0, 0, 0, 0.05);
         }
         
-        /* 动画 */
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
-        /* 响应式调整 */
         @media (max-width: 768px) {
-            .button-group {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .btn {
-                width: 100%;
-                max-width: 280px;
-            }
-            
-            .features {
-                grid-template-columns: 1fr;
-            }
+            .button-group { flex-direction: column; align-items: center; }
+            .btn { width: 100%; max-width: 280px; }
+            .features { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <div id="particles-js"></div>
-    
-    <div class="container">
-        <header>
-            <h1 class="title">Welcome to 趣加应用</h1>
-            
-            <div class="button-group">
-                <a href="https://db0ai4hqk7tsfy.database.nocode.cn/storage/v1/object/public/qujia//%E8%B6%A3%E5%8A%A0%E5%BA%94%E7%94%A82.0.1.apk" class="btn btn-primary">
-                    <span class="btn-text">立即下载</span>
-                    <span class="btn-subtext">最新版本v2.0.1|260215</span>
-                </a>
-                
-                <a href="http://qujiaweb.top/overview" class="btn btn-secondary">
-                    <span class="btn-text">访问网页版</span>
-                    <span class="btn-subtext">网页版不稳定，推荐下载APP</span>
-                </a>
-            </div>
-        </header>
-        
-        <main>
-            <div class="features">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                    </div>
-                    <h3 class="feature-title">应用分享</h3>
-                    <p class="feature-desc">自由上传，随心下载</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-bolt"></i>
-                    </div>
-                    <h3 class="feature-title">网页共享</h3>
-                    <p class="feature-desc">闪电分享，超多实用</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-gem"></i>
-                    </div>
-                    <h3 class="feature-title">免费畅享</h3>
-                    <p class="feature-desc">纯洁无广，无忧体验</p>
-                </div>
-            </div>
-        </main>
-        
-        <footer>
-            Copyright © 2026 趣味加倍科技. All Rights Reserved
-        </footer>
+
+    <div id="pc-view">
+        <iframe src="https://app-ar7sfvuq9tkx.appmiaoda.com/pc-software" class="fullscreen-iframe"></iframe>
+        <div class="fixed-image">
+            <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_izsbOFvjO_1775484649035.png" alt="Floating Image">
+        </div>
     </div>
-    
-    <!-- 粒子效果库 -->
+
+    <div id="mobile-view" class="mobile-wrapper">
+        <div id="particles-js"></div>
+        <div class="container">
+            <header>
+                <h1 class="title">Welcome to 趣加应用</h1>
+                <div class="button-group">
+                    <a href="https://db0ai4hqk7tsfy.database.nocode.cn/storage/v1/object/public/qujia//%E8%B6%A3%E5%8A%A0%E5%BA%94%E7%94%A82.0.1.apk" class="btn btn-primary">
+                        <span class="btn-text">立即下载</span>
+                        <span class="btn-subtext">最新版本v2.0.1|260215</span>
+                    </a>
+                    <a href="http://qujiaweb.top/overview" class="btn btn-secondary">
+                        <span class="btn-text">访问网页版</span>
+                        <span class="btn-subtext">电脑版已升级，请通过电脑访问</span>
+                    </a>
+                </div>
+            </header>
+            <main>
+                <div class="features">
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                        <h3 class="feature-title">应用分享</h3>
+                        <p class="feature-desc">自由上传，随心下载</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+                        <h3 class="feature-title">网页共享</h3>
+                        <p class="feature-desc">闪电分享，超多实用</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon"><i class="fas fa-gem"></i></div>
+                        <h3 class="feature-title">免费畅享</h3>
+                        <p class="feature-desc">纯洁无广，无忧体验</p>
+                    </div>
+                </div>
+            </main>
+            <footer>Copyright © 2026 趣味加倍科技. All Rights Reserved</footer>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
-        // 初始化粒子效果
-        document.addEventListener('DOMContentLoaded', function() {
-            particlesJS('particles-js', {
-                "particles": {
-                    "number": {
-                        "value": 80,
-                        "density": {
-                            "enable": true,
-                            "value_area": 800
-                        }
-                    },
-                    "color": {
-                        "value": "#4a6bdf"
-                    },
-                    "shape": {
-                        "type": "circle",
-                        "stroke": {
-                            "width": 0,
-                            "color": "#000000"
+        (function() {
+            // 判断是否为手机端
+            var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            var pcEl = document.getElementById('pc-view');
+            var mobileEl = document.getElementById('mobile-view');
+
+            if (isMobile) {
+                // 手机端逻辑
+                mobileEl.style.display = 'block';
+                document.body.style.overflow = 'auto'; // 允许滚动
+                
+                // 初始化粒子效果
+                if (typeof particlesJS !== 'undefined') {
+                    particlesJS('particles-js', {
+                        "particles": {
+                            "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
+                            "color": { "value": "#4a6bdf" },
+                            "shape": { "type": "circle" },
+                            "opacity": { "value": 0.3 },
+                            "size": { "value": 3, "random": true },
+                            "line_linked": { "enable": true, "distance": 150, "color": "#4a6bdf", "opacity": 0.2, "width": 1 },
+                            "move": { "enable": true, "speed": 2 }
                         },
-                        "polygon": {
-                            "nb_sides": 5
-                        }
-                    },
-                    "opacity": {
-                        "value": 0.3,
-                        "random": false,
-                        "anim": {
-                            "enable": false,
-                            "speed": 1,
-                            "opacity_min": 0.1,
-                            "sync": false
-                        }
-                    },
-                    "size": {
-                        "value": 3,
-                        "random": true,
-                        "anim": {
-                            "enable": false,
-                            "speed": 40,
-                            "size_min": 0.1,
-                            "sync": false
-                        }
-                    },
-                    "line_linked": {
-                        "enable": true,
-                        "distance": 150,
-                        "color": "#4a6bdf",
-                        "opacity": 0.2,
-                        "width": 1
-                    },
-                    "move": {
-                        "enable": true,
-                        "speed": 2,
-                        "direction": "none",
-                        "random": false,
-                        "straight": false,
-                        "out_mode": "out",
-                        "bounce": false,
-                        "attract": {
-                            "enable": false,
-                            "rotateX": 600,
-                            "rotateY": 1200
-                        }
-                    }
-                },
-                "interactivity": {
-                    "detect_on": "canvas",
-                    "events": {
-                        "onhover": {
-                            "enable": true,
-                            "mode": "grab"
+                        "interactivity": {
+                            "events": { "onhover": { "enable": true, "mode": "grab" }, "onclick": { "enable": true, "mode": "push" } }
                         },
-                        "onclick": {
-                            "enable": true,
-                            "mode": "push"
-                        },
-                        "resize": true
-                    },
-                    "modes": {
-                        "grab": {
-                            "distance": 140,
-                            "line_linked": {
-                                "opacity": 1
-                            }
-                        },
-                        "bubble": {
-                            "distance": 400,
-                            "size": 40,
-                            "duration": 2,
-                            "opacity": 8,
-                            "speed": 3
-                        },
-                        "repulse": {
-                            "distance": 200,
-                            "duration": 0.4
-                        },
-                        "push": {
-                            "particles_nb": 4
-                        },
-                        "remove": {
-                            "particles_nb": 2
-                        }
-                    }
-                },
-                "retina_detect": true
-            });
-        });
+                        "retina_detect": true
+                    });
+                }
+            } else {
+                // PC端逻辑
+                pcEl.style.display = 'block';
+                document.documentElement.classList.add('pc-body-style');
+                document.body.classList.add('pc-body-style'); // 应用PC端的overflow:hidden
+            }
+        })();
     </script>
 </body>
 </html>
