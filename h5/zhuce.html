@@ -2,11 +2,17 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>用户注册 - 趣加应用</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>用户注册</title>
     <script src="https://static2.pgaot.com/Assets/js/jquery-2.2.4.min.js"></script>
     <style>
-        :root { --primary: #007AFF; }
+        :root { 
+            --primary: #007AFF; 
+            --bg: #F2F2F7;
+            --card-bg: #FFFFFF;
+            --text-main: #000000;
+            --text-sec: #8E8E93;
+        }
         * { 
             margin: 0; 
             padding: 0; 
@@ -15,52 +21,196 @@
             -webkit-user-select: none;
             user-select: none;
         }
-        body { background: #F2F2F7; font-family: -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        .card { width: 90%; max-width: 400px; background: #fff; border-radius: 24px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        body { 
+            background: var(--bg); 
+            font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 顶部导航栏 - 同设置页面 */
+        .nav-bar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            z-index: 100;
+            border-bottom: 0.5px solid #d1d1d6;
+            padding-top: env(safe-area-inset-top);
+            height: calc(44px + env(safe-area-inset-top));
+        }
+        .back-btn {
+            display: flex;
+            align-items: center;
+            color: var(--primary);
+            font-size: 17px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .back-btn::before {
+            content: "";
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-left: 2px solid var(--primary);
+            border-bottom: 2px solid var(--primary);
+            transform: rotate(45deg);
+            margin-right: 4px;
+        }
+
+        /* 主体内容 */
+        .container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            margin-top: calc(44px + env(safe-area-inset-top));
+        }
+        .card { 
+            width: 100%; 
+            max-width: 400px; 
+            background: var(--card-bg); 
+            border-radius: 20px; 
+            padding: 30px 24px; 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.04); 
+        }
+
+        h2 { font-size: 24px; font-weight: 700; text-align: center; margin-bottom: 24px; color: var(--text-main); }
+        
         .step { display: none; }
-        .active { display: block; animation: fadeIn 0.4s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid #e5e5ea; border-radius: 12px; background: #f9f9fb; outline: none; box-sizing: border-box; font-size: 16px; -webkit-user-select: text; user-select: text; }
-        .btn { width: 100%; padding: 14px; background: var(--primary); color: #fff; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn:disabled { background: #ccc; cursor: not-allowed; }
-        #toast { position: fixed; top: 20px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 20px; border-radius: 20px; display: none; font-size: 14px; z-index: 9999; }
+        .active { display: block; animation: fadeIn 0.4s cubic-bezier(0.25, 0.1, 0.25, 1); }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(8px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        input { 
+            width: 100%; 
+            padding: 14px 16px; 
+            margin: 8px 0 16px; 
+            border: none;
+            border-radius: 12px; 
+            background: #F2F2F7; 
+            outline: none; 
+            font-size: 16px; 
+            transition: all 0.2s;
+            -webkit-user-select: text; 
+            user-select: text; 
+        }
+        input:focus { background: #E5E5EA; box-shadow: 0 0 0 2px var(--primary); }
+
+        .btn { 
+            width: 100%; 
+            padding: 14px; 
+            background: var(--primary); 
+            color: #fff; 
+            border: none; 
+            border-radius: 12px; 
+            font-size: 16px;
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: opacity 0.2s;
+        }
+        .btn:active { opacity: 0.8; }
+        .btn:disabled { background: #D1D1D6; cursor: not-allowed; }
+
+        /* 帮助信息样式 */
+        .help-trigger {
+            display: block;
+            text-align: center;
+            color: var(--primary);
+            font-size: 14px;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+        .help-content {
+            display: none;
+            margin-top: 15px;
+            padding: 12px;
+            background: #F9F9FB;
+            border-radius: 10px;
+            font-size: 13px;
+            color: var(--text-sec);
+            line-height: 1.6;
+        }
+        .help-content li { margin-bottom: 4px; list-style: none; }
+
+        #toast { 
+            position: fixed; 
+            bottom: 50px; 
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.75); 
+            backdrop-filter: blur(5px);
+            color: #fff; 
+            padding: 10px 20px; 
+            border-radius: 25px; 
+            display: none; 
+            font-size: 14px; 
+            z-index: 9999; 
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
+
+<div class="nav-bar">
+    <div class="back-btn" onclick="history.back()">返回</div>
+</div>
+
 <div id="toast"></div>
-<div class="card">
-    <h2 style="text-align:center; margin-bottom: 20px;">Welcome</h2>
-    
-    <div id="s1" class="step active">
-        <input type="email" id="email" placeholder="输入邮箱地址">
-        <button id="sendBtn" class="btn" onclick="goStep1()">发送验证码</button>
-    </div>
 
-    <div id="s2" class="step">
-        <p style="font-size:13px; color:#888;">验证码已发送至邮箱<br>QQ邮箱请使用QQ邮箱APP或网页版查收，QQ内推送可能会有延迟</p>
-        <input type="number" id="vcode" placeholder="4位验证码" pattern="\d*">
-        <button class="btn" onclick="goStep2()">校验验证码</button>
-    </div>
+<div class="container">
+    <div class="card">
+        <h2>用户注册</h2>
+        
+        <div id="s1" class="step active">
+            <input type="email" id="email" placeholder="输入邮箱地址">
+            <button id="sendBtn" class="btn" onclick="goStep1()">发送验证码</button>
+        </div>
 
-    <div id="s3" class="step">
-        <input type="text" id="nick" placeholder="用户昵称">
-        <input type="password" id="p1" placeholder="设置密码">
-        <input type="password" id="p2" placeholder="确认密码">
-        <button id="regBtn" class="btn" onclick="goStep3()">完成注册</button>
+        <div id="s2" class="step">
+            <p style="font-size:15px; color:#333; text-align:center; margin-bottom:10px;">验证码已发送</p>
+            <input type="number" id="vcode" placeholder="4位验证码" pattern="\d*">
+            <button class="btn" onclick="goStep2()">校验验证码</button>
+            
+            <span class="help-trigger" onclick="$('#helpBox').slideToggle(200)">收不到验证码？</span>
+            <div id="helpBox" class="help-content">
+                <li>1. QQ邮箱请使用QQ邮箱APP或网页版查收，QQ应用内推送可能会有延迟。</li>
+                <li>2. 同一设备仅支持注册一个账号。</li>
+                <li>3. 如有疑问请联系：110045310@qq.com</li>
+            </div>
+        </div>
+
+        <div id="s3" class="step">
+            <input type="text" id="nick" placeholder="用户昵称">
+            <input type="password" id="p1" placeholder="设置密码">
+            <input type="password" id="p2" placeholder="确认密码">
+            <button id="regBtn" class="btn" onclick="goStep3()">完成注册</button>
+        </div>
     </div>
 </div>
 
 <script>
     const API = 'https://apirank.qujiaweb.top/';
-    // 初始化 cache 确保 code 为空字符串
     let cache = { email: '', code: '' };
     let countdownTimer = null;
 
-    function toast(m) { $('#toast').text(m).stop(true, true).fadeIn().delay(2000).fadeOut(); }
+    function toast(m) { $('#toast').text(m).stop(true, true).fadeIn(200).delay(2000).fadeOut(300); }
 
-    function showStep(n) { $('.step').removeClass('active'); $(`#s${n}`).addClass('active'); }
+    function showStep(n) { 
+        $('.step').removeClass('active'); 
+        $(`#s${n}`).addClass('active'); 
+    }
 
-    // --- 新增：处理倒计时逻辑 ---
     function initSendBtn() {
         const lastTime = localStorage.getItem('last_vcode_time');
         if (lastTime) {
@@ -74,9 +224,7 @@
     function startCountdown(seconds) {
         const $btn = $('#sendBtn');
         $btn.prop('disabled', true);
-        
         if (countdownTimer) clearInterval(countdownTimer);
-        
         countdownTimer = setInterval(() => {
             seconds--;
             if (seconds <= 0) {
@@ -88,28 +236,24 @@
             }
         }, 1000);
     }
-    // 页面加载完成后检查锁定状态
-    $(document).ready(initSendBtn);
-    // -------------------------
 
-    // 步骤 1: 发送验证码
+    $(document).ready(initSendBtn);
+
     async function goStep1() {
         const email = $('#email').val().trim();
-        if(!email.includes('@')) return toast('请输入有效邮箱');
+        const emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if(!emailReg.test(email)) return toast('请输入有效邮箱');
 
-        // --- 修改点：立即锁定按钮防止重复点击并记录时间 ---
         const $btn = $('#sendBtn');
         $btn.prop('disabled', true).text('正在发送...');
         localStorage.setItem('last_vcode_time', Date.now());
         startCountdown(300);
-        // --------------------------------------------
         
-        // 1. 先生成验证码并存入 cache
         const generatedCode = Math.floor(1000 + Math.random() * 9000).toString();
         cache.code = generatedCode;
         cache.email = email;
 
-        toast('正在发送验证码...');
+        toast('正在请求发送...');
         
         try {
             const mail = await fetch(`${API}?mode=send_mail`, {
@@ -118,29 +262,19 @@
                 body: JSON.stringify({ to: email, code: generatedCode })
             }).then(r => r.json());
 
-            console.log('发送反馈:', mail);
-
             if(mail.code === 200) { 
                 showStep(2); 
                 toast('验证码已发送'); 
             } else { 
                 toast('发送失败：' + (mail.msg || '服务商拦截'));
-                // 如果接口明确返回失败，根据需求决定是否清除锁定。
-                // 此处按你要求“5分钟内不得再发送”保留锁定。
             }
         } catch(e) { 
-            console.error(e);
             toast('网络繁忙，请稍后再试'); 
         }
     }
 
-    // 步骤 2: 校验验证码 (修复对比逻辑)
     function goStep2() {
         const inputCode = $('#vcode').val().trim();
-        
-        console.log('用户输入:', inputCode, '缓存验证码:', cache.code);
-        
-        // 使用双等号或强制转字符串对比，防止类型不匹配
         if(inputCode && inputCode.toString() === cache.code.toString()) {
             showStep(3);
         } else {
@@ -148,13 +282,10 @@
         }
     }
 
-    // 检查密码是否包含特殊字符
     function hasSpecialChars(password) {
-        // 只允许字母、数字和下划线
         return !/^[a-zA-Z0-9_]+$/.test(password);
     }
 
-    // 转义emoji字符
     function escapeEmoji(text) {
         return [...text].map(char => {
             const code = char.codePointAt(0);
@@ -173,7 +304,6 @@
         }).join('').replace(/'/g, "~PGDBSD~");
     }
 
-    // 步骤 3: 注册提交
     async function goStep3() {
         const nick = $('#nick').val().trim();
         const p1 = $('#p1').val();
@@ -184,13 +314,9 @@
         if(p1 !== p2) return toast('两次输入的密码不一致');
         if(hasSpecialChars(p1)) return toast('密码请勿包含特殊字符');
 
-        // 转义emoji字符
         const escapedNick = escapeEmoji(nick);
-
-        // --- 修改部分：禁用按钮防止重复点击 ---
         const $btn = $('#regBtn');
         $btn.prop('disabled', true).text('提交中...');
-        // ------------------------------------
 
         toast('正在完成注册...');
         try {
@@ -206,22 +332,18 @@
 
             if(res.code === 200) {
                 toast('注册成功！');
-                setTimeout(() => {
-                    location.href = 'index.html'; 
-                }, 1500);
+                setTimeout(() => { location.href = 'index.html'; }, 1500);
             } else {
                 toast('提交失败：' + (res.msg || '接口错误'));
-                // 失败时恢复按钮
                 $btn.prop('disabled', false).text('完成注册');
             }
         } catch(e) { 
             toast('提交出错，请稍后重试'); 
-            // 异常时恢复按钮
             $btn.prop('disabled', false).text('完成注册');
         }
     }
 
-    // 返回键处理
+
     document.addEventListener('plusready', function() {
         var webview = plus.webview.currentWebview();
         plus.key.addEventListener('backbutton', function() {
@@ -229,14 +351,7 @@
                 if (e.canBack) {
                     webview.back();
                 } else {
-                    var path = window.location.pathname;
-                    if (path.indexOf('index.html') !== -1) {
-                        plus.nativeUI.confirm("确定退出应用吗？", function(res) {
-                            if (res.index === 0) plus.runtime.quit();
-                        }, "提示", ["确定", "取消"]);
-                    } else {
-                        webview.close('pop-out', 300);
-                    }
+                    webview.close('pop-out', 300);
                 }
             });
         });
