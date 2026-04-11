@@ -7,7 +7,7 @@
     <style>
         :root {
             --primary-color: #4facfe;
-            --text-color: #2d3436;
+            --text-color: #1a1a1a;
             --bg-color: #ffffff;
             --danger-color: #ff7675;
         }
@@ -25,65 +25,53 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
             overflow: hidden;
-            color: var(--text-color);
         }
 
-        /* 高端背景装饰：极简淡色渐变 */
-        .bg-gradient {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 50% 50%, rgba(79, 172, 254, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
-            z-index: -1;
-        }
-
-        /* 文字动画容器 */
         .welcome-wrapper {
+            position: relative;
+            width: 100%;
+            display: none;
             text-align: center;
-            display: none; /* 初始隐藏，仅登录态显示 */
         }
 
         .loading-text {
-            font-size: 24px;
-            font-weight: 300;
-            letter-spacing: 8px;
-            color: #333;
-            position: relative;
-            height: 40px;
+            font-size: 28px;
+            font-weight: 600;
+            letter-spacing: 12px;
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 60px;
         }
 
-        /* 文字淡入淡出循环动画 */
         .text-item {
             position: absolute;
-            width: 100%;
-            left: 0;
             opacity: 0;
-            animation: fadeLoop 4s infinite;
+            white-space: nowrap;
+            animation: pureFade 6s infinite;
         }
 
         .text-item:nth-child(2) {
-            animation-delay: 2s;
+            animation-delay: 3s;
         }
 
-        @keyframes fadeLoop {
-            0%, 10% { opacity: 0; transform: translateY(10px); }
-            30%, 60% { opacity: 1; transform: translateY(0); }
-            80%, 100% { opacity: 0; transform: translateY(-10px); }
+        @keyframes pureFade {
+            0%, 10% { opacity: 0; }
+            40%, 60% { opacity: 1; }
+            90%, 100% { opacity: 0; }
         }
 
-        /* 封禁弹窗区 */
         #ban-modal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(15px);
             z-index: 1000;
             display: none;
             align-items: center;
@@ -93,18 +81,18 @@
 
         .ban-content {
             background: white;
-            width: 90%;
+            width: 85%;
             max-width: 320px;
-            border-radius: 30px;
-            padding: 40px 24px;
+            border-radius: 32px;
+            padding: 45px 25px;
             text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.08);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.06);
         }
 
         .ban-title {
             color: var(--danger-color);
-            font-size: 20px;
-            font-weight: 600;
+            font-size: 22px;
+            font-weight: 700;
             margin-bottom: 20px;
         }
 
@@ -113,18 +101,17 @@
             font-size: 14px;
             line-height: 1.8;
             text-align: left;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
         }
 
         .ban-mail {
             color: var(--primary-color);
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 700;
         }
     </style>
 </head>
 <body>
-    <div class="bg-gradient"></div>
 
     <div class="welcome-wrapper" id="ui-container">
         <div class="loading-text">
@@ -135,16 +122,15 @@
 
     <div id="ban-modal">
         <div class="ban-content">
-            <div class="ban-title">账号状态异常</div>
+            <div class="ban-title">访问受限</div>
             <div class="ban-body">
-                该账号已被系统封禁，可能由于以下原因：<br>
-                1. 违反社区内容发布规范。<br>
-                2. 存在恶意刷取积分等违规行为。<br>
-                3. 检测到非法客户端接入。<br><br>
-                <strong>相关资产已锁定，无法继续使用。</strong>
+                抱歉，您的账号因违反社区规定已被封禁。<br><br>
+                1. 严禁发布违规及有害资源内容。<br>
+                2. 严禁使用第三方工具恶意破坏。<br>
+                3. 请保持文明健康的互动环境。
             </div>
-            <div style="font-size: 12px; color: #b2bec3;">
-                申诉请联系：<br>
+            <div style="font-size: 13px; color: #b2bec3;">
+                申诉邮箱：<br>
                 <a href="mailto:110045310@qq.com" class="ban-mail">110045310@qq.com</a>
             </div>
         </div>
@@ -152,115 +138,87 @@
 
     <script>
         const API = 'https://apirank.qujiaweb.top/';
-        let isProcessing = false; // 防止重复执行标记
+        let hasExecuted = false;
 
-        // 统一进入首页的逻辑
         function enterHome() {
             if (window.plus) {
-                const home = plus.webview.create('home.html', 'home.html', {
+                const h = plus.webview.create('home.html', 'home.html', {
                     backbuttonMaximize: false,
                     scrollIndicator: 'none'
                 });
-                home.show('fade-in', 300);
-                // 延迟关闭当前页，确保过渡平滑
-                setTimeout(() => {
-                    plus.webview.currentWebview().close('none');
-                }, 500);
+                h.show('fade-in', 300);
+                setTimeout(() => { plus.webview.currentWebview().close('none'); }, 500);
             } else {
                 window.location.replace('home.html');
             }
         }
 
-        // 清除所有登录缓存
-        function clearUserCache() {
-            const keysToRemove = [
-                'usermail_login', 'userpass_login', 
-                'usermail', 'username', 
-                'userpicture', 'userpoints'
-            ];
-            keysToRemove.forEach(key => localStorage.removeItem(key));
+        function clearSession() {
+            const list = ['usermail_login', 'userpass_login', 'usermail', 'username', 'userpicture', 'userpoints'];
+            list.forEach(k => localStorage.removeItem(k));
         }
 
-        async function startFlow() {
-            if (isProcessing) return;
-            isProcessing = true;
+        async function process() {
+            if (hasExecuted) return;
+            hasExecuted = true;
 
-            const savedEmail = localStorage.getItem('usermail_login');
-            const savedPass = localStorage.getItem('userpass_login');
+            const mail = localStorage.getItem('usermail_login');
+            const pass = localStorage.getItem('userpass_login');
 
-            // --- 状态1：未登录状态 ---
-            if (!savedEmail || !savedPass) {
+            if (!mail || !pass) {
                 enterHome();
                 return;
             }
 
-            // --- 状态2：登录状态，显示高端UI ---
             document.getElementById('ui-container').style.display = 'block';
 
             try {
                 const response = await fetch(`${API}?mode=login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: savedEmail, password: savedPass })
+                    body: JSON.stringify({ email: mail, password: pass })
                 });
 
                 const res = await response.json();
 
                 if (res.code === 200) {
-                    // 登录成功，更新数据
                     if (res.fields && res.fields.length > 0) {
-                        const user = res.fields[0];
-                        localStorage.setItem('usermail', user["邮箱"]);
-                        localStorage.setItem('username', user["昵称"]);
-                        localStorage.setItem('userpicture', user["头像"]);
-                        localStorage.setItem('userpoints', user["积分"] || '0');
+                        const u = res.fields[0];
+                        localStorage.setItem('usermail', u["邮箱"]);
+                        localStorage.setItem('username', u["昵称"]);
+                        localStorage.setItem('userpicture', u["头像"]);
+                        localStorage.setItem('userpoints', u["积分"] || '0');
                     }
                     enterHome();
                 } else if (res.code === 403) {
-                    // 账号封禁
                     document.getElementById('ui-container').style.display = 'none';
                     document.getElementById('ban-modal').style.display = 'flex';
                 } else {
-                    // 账号异常（如密码被改、账号删除等）
                     alert("账号异常，请重新登录");
-                    clearUserCache();
+                    clearSession();
                     enterHome();
                 }
             } catch (e) {
-                // 网络异常情况，暂时放行进首页（首页会有后续网络判断）
-                console.error('Network Error:', e);
                 enterHome();
             }
         }
 
-        // 核心：处理不管第一次进入还是back回来都请求且仅请求一次
-        window.addEventListener('pageshow', (event) => {
-            // event.persisted 为 true 表示从缓存（如后退）中读取
-            startFlow();
-        });
+        window.addEventListener('pageshow', process);
 
-        // 5+ SDK 相关逻辑
         document.addEventListener('plusready', function() {
-            // 设置状态栏样式
             plus.navigator.setStatusBarStyle('dark');
-            
             plus.key.addEventListener('backbutton', function() {
-                // 封禁状态拦截返回键
                 if (document.getElementById('ban-modal').style.display === 'flex') {
                     plus.nativeUI.confirm("确定退出应用吗？", function(res) {
                         if (res.index === 0) plus.runtime.quit();
                     }, "提示", ["确定", "取消"]);
-                    return;
+                } else {
+                    plus.runtime.quit();
                 }
-                // 过渡页由于是自动跳转，通常不处理 back，或直接退出
-                plus.runtime.quit();
             });
         });
 
-        // 兜底执行（防止 pageshow 在某些旧版本环境不触发）
-        if (document.readyState === 'complete') {
-            startFlow();
-        }
+        if (document.readyState === 'complete') process();
     </script>
 </body>
 </html>
