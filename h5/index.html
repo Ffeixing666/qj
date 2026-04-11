@@ -7,9 +7,8 @@
     <style>
         :root {
             --primary-color: #4facfe;
-            --accent-color: #00f2fe;
             --text-color: #2d3436;
-            --bg-color: #f7f9fc;
+            --bg-color: #ffffff;
             --danger-color: #ff7675;
         }
 
@@ -18,85 +17,75 @@
             padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
-            -webkit-user-select: none;
         }
 
         body {
             background: var(--bg-color);
             height: 100vh;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+            font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
             overflow: hidden;
-        }
-
-        /* 装饰背景圆圈 */
-        .decoration {
-            position: absolute;
-            z-index: -1;
-            background: rgba(79, 172, 254, 0.1);
-            border-radius: 50%;
-        }
-
-        /* --- 启动动画区 --- */
-        .welcome-container {
-            text-align: center;
-            animation: bounceIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .app-icon-wrapper {
-            position: relative;
-            width: 100px;
-            height: 100px;
-            background: white;
-            border-radius: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.05);
-            margin: 0 auto 25px;
-            border: 4px solid #fff;
-            animation: iconFloat 2s ease-in-out infinite;
-        }
-
-        .app-icon-inner {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .app-icon-inner::after {
-            content: '＋';
-            color: white;
-            font-size: 32px;
-            font-weight: bold;
-        }
-
-        .welcome-text {
-            font-size: 22px;
             color: var(--text-color);
-            font-weight: 600;
-            letter-spacing: 1px;
-            margin-top: 10px;
         }
 
-        /* --- 封禁弹窗区 --- */
+        /* 高端背景装饰：极简淡色渐变 */
+        .bg-gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, rgba(79, 172, 254, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
+            z-index: -1;
+        }
+
+        /* 文字动画容器 */
+        .welcome-wrapper {
+            text-align: center;
+            display: none; /* 初始隐藏，仅登录态显示 */
+        }
+
+        .loading-text {
+            font-size: 24px;
+            font-weight: 300;
+            letter-spacing: 8px;
+            color: #333;
+            position: relative;
+            height: 40px;
+        }
+
+        /* 文字淡入淡出循环动画 */
+        .text-item {
+            position: absolute;
+            width: 100%;
+            left: 0;
+            opacity: 0;
+            animation: fadeLoop 4s infinite;
+        }
+
+        .text-item:nth-child(2) {
+            animation-delay: 2s;
+        }
+
+        @keyframes fadeLoop {
+            0%, 10% { opacity: 0; transform: translateY(10px); }
+            30%, 60% { opacity: 1; transform: translateY(0); }
+            80%, 100% { opacity: 0; transform: translateY(-10px); }
+        }
+
+        /* 封禁弹窗区 */
         #ban-modal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(5px);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             z-index: 1000;
-            display: none; /* 初始隐藏 */
+            display: none;
             align-items: center;
             justify-content: center;
             padding: 20px;
@@ -106,88 +95,56 @@
             background: white;
             width: 90%;
             max-width: 320px;
-            border-radius: 28px;
-            padding: 30px 24px;
+            border-radius: 30px;
+            padding: 40px 24px;
             text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.08);
         }
 
         .ban-title {
             color: var(--danger-color);
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
         }
 
         .ban-body {
             color: #636e72;
-            font-size: 13px;
-            line-height: 1.6;
+            font-size: 14px;
+            line-height: 1.8;
             text-align: left;
-            margin-bottom: 20px;
-            background: #fdf2f2;
-            padding: 15px;
-            border-radius: 16px;
-        }
-
-        .ban-footer {
-            color: #b2bec3;
-            font-size: 12px;
-            border-top: 1px dashed #dfe6e9;
-            padding-top: 15px;
+            margin-bottom: 25px;
         }
 
         .ban-mail {
             color: var(--primary-color);
             text-decoration: none;
-            font-weight: bold;
-        }
-
-        /* 动画关键帧 */
-        @keyframes bounceIn {
-            from { opacity: 0; transform: scale(0.5); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        @keyframes iconFloat {
-            0%, 100% { transform: translateY(0) rotate(0); }
-            50% { transform: translateY(-15px) rotate(5deg); }
-        }
-        @keyframes modalPop {
-            from { opacity: 0; transform: translateY(30px) scale(0.9); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
-    <div class="decoration" style="width: 300px; height: 300px; top: -100px; right: -50px;"></div>
-    <div class="decoration" style="width: 150px; height: 150px; bottom: 50px; left: -30px;"></div>
+    <div class="bg-gradient"></div>
 
-    <div class="welcome-container" id="init-view">
-        <div class="app-icon-wrapper">
-            <div class="app-icon-inner"></div>
+    <div class="welcome-wrapper" id="ui-container">
+        <div class="loading-text">
+            <div class="text-item">欢迎回来</div>
+            <div class="text-item">马上就好</div>
         </div>
-        <div class="welcome-text">欢迎回来</div>
     </div>
 
     <div id="ban-modal">
         <div class="ban-content">
-            <div class="ban-title">
-                <span>⚠️</span> 当前账号已封禁
-            </div>
+            <div class="ban-title">账号状态异常</div>
             <div class="ban-body">
-                可能存在的原因：<br>
-                1.上传包括但不限于病毒软件，低俗资源等不良内容。<br>
-                2.未遵守社区互动规则，刷评论，引战等。<br>
-                3.使用非趣加应用官方客户端尝试修改相关数据的（如抓包、外挂等）。<br><br>
-                <strong>账号相关资产已冻结，无法登录。</strong>
+                该账号已被系统封禁，可能由于以下原因：<br>
+                1. 违反社区内容发布规范。<br>
+                2. 存在恶意刷取积分等违规行为。<br>
+                3. 检测到非法客户端接入。<br><br>
+                <strong>相关资产已锁定，无法继续使用。</strong>
             </div>
-            <div class="ban-footer">
-                如有疑问请咨询：<br>
+            <div style="font-size: 12px; color: #b2bec3;">
+                申诉请联系：<br>
                 <a href="mailto:110045310@qq.com" class="ban-mail">110045310@qq.com</a>
             </div>
         </div>
@@ -195,93 +152,115 @@
 
     <script>
         const API = 'https://apirank.qujiaweb.top/';
+        let isProcessing = false; // 防止重复执行标记
 
-        async function silentLogin() {
+        // 统一进入首页的逻辑
+        function enterHome() {
+            if (window.plus) {
+                const home = plus.webview.create('home.html', 'home.html', {
+                    backbuttonMaximize: false,
+                    scrollIndicator: 'none'
+                });
+                home.show('fade-in', 300);
+                // 延迟关闭当前页，确保过渡平滑
+                setTimeout(() => {
+                    plus.webview.currentWebview().close('none');
+                }, 500);
+            } else {
+                window.location.replace('home.html');
+            }
+        }
+
+        // 清除所有登录缓存
+        function clearUserCache() {
+            const keysToRemove = [
+                'usermail_login', 'userpass_login', 
+                'usermail', 'username', 
+                'userpicture', 'userpoints'
+            ];
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+        }
+
+        async function startFlow() {
+            if (isProcessing) return;
+            isProcessing = true;
+
             const savedEmail = localStorage.getItem('usermail_login');
             const savedPass = localStorage.getItem('userpass_login');
-            
-            if (savedEmail && savedPass) {
-                try {
-                    const response = await fetch(`${API}?mode=login`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: savedEmail, password: savedPass })
-                    });
-                    
-                    const res = await response.json();
-                    
-                    // 核心修改：检测到封禁 (403)，返回特殊标识
-                    if (res.code === 403) {
-                        return 'banned';
-                    }
-                    
-                    if (res.code === 200 && res.fields && res.fields.length > 0) {
+
+            // --- 状态1：未登录状态 ---
+            if (!savedEmail || !savedPass) {
+                enterHome();
+                return;
+            }
+
+            // --- 状态2：登录状态，显示高端UI ---
+            document.getElementById('ui-container').style.display = 'block';
+
+            try {
+                const response = await fetch(`${API}?mode=login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: savedEmail, password: savedPass })
+                });
+
+                const res = await response.json();
+
+                if (res.code === 200) {
+                    // 登录成功，更新数据
+                    if (res.fields && res.fields.length > 0) {
                         const user = res.fields[0];
                         localStorage.setItem('usermail', user["邮箱"]);
                         localStorage.setItem('username', user["昵称"]);
                         localStorage.setItem('userpicture', user["头像"]);
                         localStorage.setItem('userpoints', user["积分"] || '0');
-                        return true;
                     }
-                } catch(e) {
-                    console.error('Silent Login Error:', e);
-                }
-            }
-            return false;
-        }
-
-        async function init() {
-            const startTime = Date.now();
-            const loginStatus = await silentLogin();
-            
-            const elapsedTime = Date.now() - startTime;
-            const waitTime = Math.max(0, 2500 - elapsedTime);
-
-            // 延迟执行跳转或弹窗，确保开屏动画展示完整
-            setTimeout(() => {
-                if (loginStatus === 'banned') {
-                    // 显示封禁窗口，不跳转，不改存储
+                    enterHome();
+                } else if (res.code === 403) {
+                    // 账号封禁
+                    document.getElementById('ui-container').style.display = 'none';
                     document.getElementById('ban-modal').style.display = 'flex';
                 } else {
-                    // 正常进入首页
-                    if (window.plus) {
-                        plus.webview.open('home.html', 'home.html', {
-                            backbuttonMaximize: false,
-                            transition: { type: 'fade-in', duration: 300 }
-                        });
-                        setTimeout(() => { plus.webview.currentWebview().close('none'); }, 500);
-                    } else {
-                        window.location.href = 'home.html';
-                    }
+                    // 账号异常（如密码被改、账号删除等）
+                    alert("账号异常，请重新登录");
+                    clearUserCache();
+                    enterHome();
                 }
-            }, waitTime);
+            } catch (e) {
+                // 网络异常情况，暂时放行进首页（首页会有后续网络判断）
+                console.error('Network Error:', e);
+                enterHome();
+            }
         }
 
-        window.onload = init;
+        // 核心：处理不管第一次进入还是back回来都请求且仅请求一次
+        window.addEventListener('pageshow', (event) => {
+            // event.persisted 为 true 表示从缓存（如后退）中读取
+            startFlow();
+        });
 
-        // 5+ 返回键逻辑
+        // 5+ SDK 相关逻辑
         document.addEventListener('plusready', function() {
-            var webview = plus.webview.currentWebview();
+            // 设置状态栏样式
+            plus.navigator.setStatusBarStyle('dark');
+            
             plus.key.addEventListener('backbutton', function() {
-                // 如果封禁弹窗已打开，点击返回键直接提示退出应用
+                // 封禁状态拦截返回键
                 if (document.getElementById('ban-modal').style.display === 'flex') {
                     plus.nativeUI.confirm("确定退出应用吗？", function(res) {
                         if (res.index === 0) plus.runtime.quit();
                     }, "提示", ["确定", "取消"]);
                     return;
                 }
-
-                webview.canBack(function(e) {
-                    if (e.canBack) {
-                        webview.back();
-                    } else {
-                        plus.nativeUI.confirm("确定退出应用吗？", function(res) {
-                            if (res.index === 0) plus.runtime.quit();
-                        }, "提示", ["确定", "取消"]);
-                    }
-                });
+                // 过渡页由于是自动跳转，通常不处理 back，或直接退出
+                plus.runtime.quit();
             });
         });
+
+        // 兜底执行（防止 pageshow 在某些旧版本环境不触发）
+        if (document.readyState === 'complete') {
+            startFlow();
+        }
     </script>
 </body>
 </html>
