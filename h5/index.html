@@ -6,10 +6,19 @@
     <title>趣加应用</title>
     <style>
         :root {
-            --primary-color: #4facfe;
-            --text-color: #1a1a1a;
-            --bg-color: #ffffff;
-            --danger-color: #ff7675;
+            --bg-color: #F2F2F7;
+            --text-color: #1c1c1e;
+            --danger-color: #ff3b30;
+            --accent-color: #007aff;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #000000;
+                --text-color: #ffffff;
+                --danger-color: #ff453a;
+                --accent-color: #0a84ff;
+            }
         }
 
         * {
@@ -20,33 +29,34 @@
         }
 
         body {
-            background: var(--bg-color);
+            background-color: var(--bg-color);
             height: 100vh;
             width: 100vw;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             overflow: hidden;
+            transition: background-color 0.3s ease;
         }
 
         .welcome-wrapper {
             position: relative;
             display: none;
             width: 100%;
-            height: 100px;
-            display: flex;
+            height: 120px;
             align-items: center;
             justify-content: center;
+            transform: translateY(-40px);
         }
 
         .loading-text {
             position: relative;
-            font-size: 32px;
-            font-weight: 500;
-            letter-spacing: 15px;
+            font-size: 34px;
+            font-weight: 600;
+            letter-spacing: 10px;
             color: var(--text-color);
-            text-indent: 15px;
+            text-indent: 10px;
         }
 
         .text-item {
@@ -56,17 +66,17 @@
             transform: translate(-50%, -50%);
             opacity: 0;
             white-space: nowrap;
-            animation: elegantFade 6s cubic-bezier(0.445, 0.05, 0.55, 0.95) infinite;
+            animation: ultraFade 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
 
         .text-item:nth-child(2) {
-            animation-delay: 3s;
+            animation-delay: 3.5s;
         }
 
-        @keyframes elegantFade {
+        @keyframes ultraFade {
             0%, 5% { opacity: 0; }
             20%, 45% { opacity: 1; }
-            55%, 100% { opacity: 0; }
+            60%, 100% { opacity: 0; }
         }
 
         #ban-modal {
@@ -75,51 +85,46 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 1);
+            background: var(--bg-color);
             z-index: 1000;
             display: none;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 30px;
         }
 
         .ban-content {
-            background: #fff;
-            width: 85%;
-            max-width: 320px;
+            width: 100%;
+            max-width: 340px;
             text-align: center;
         }
 
         .ban-title {
             color: var(--danger-color);
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 700;
             margin-bottom: 25px;
-            letter-spacing: 1px;
         }
 
         .ban-body {
-            color: #636e72;
-            font-size: 15px;
-            line-height: 2;
+            color: var(--text-color);
+            font-size: 16px;
+            line-height: 1.8;
             text-align: left;
-            margin-bottom: 35px;
-            padding: 20px;
-            background: #fdfdfd;
-            border-radius: 16px;
+            margin-bottom: 40px;
+            opacity: 0.8;
         }
 
         .ban-mail {
-            color: var(--primary-color);
+            color: var(--accent-color);
             text-decoration: none;
             font-weight: 600;
-            border-bottom: 1px solid var(--primary-color);
         }
     </style>
 </head>
 <body>
 
-    <div class="welcome-wrapper" id="ui-container" style="display: none;">
+    <div class="welcome-wrapper" id="ui-container">
         <div class="loading-text">
             <div class="text-item">欢迎回来</div>
             <div class="text-item">马上就好</div>
@@ -130,13 +135,13 @@
         <div class="ban-content">
             <div class="ban-title">账号受限</div>
             <div class="ban-body">
-                抱歉，您的账号已被系统封禁。<br>
-                1. 严禁发布违规内容。<br>
-                2. 严禁恶意抓包或修改数据。<br>
-                3. 请遵守社区文明互动规范。
+                抱歉，检测到您的账号存在异常情况，目前已被系统限制访问。<br><br>
+                1. 请确保遵守社区使用协议。<br>
+                2. 禁止任何形式的恶意攻击行为。<br>
+                3. 系统自动监测违规实时封禁。
             </div>
-            <div style="font-size: 13px; color: #b2bec3;">
-                申诉联络：<br>
+            <div style="font-size: 14px; color: var(--text-color); opacity: 0.5;">
+                如有疑问请联络：<br>
                 <a href="mailto:110045310@qq.com" class="ban-mail">110045310@qq.com</a>
             </div>
         </div>
@@ -144,44 +149,49 @@
 
     <script>
         const API = 'https://apirank.qujiaweb.top/';
-        let isTaskStarted = false;
+        let hasInited = false;
 
-        function applyNativeUI() {
+        function updateStatusBarStyle() {
             if (window.plus) {
-                plus.navigator.setFullscreen(false);
-                plus.navigator.setStatusBarBackground('#FFFFFF');
-                plus.navigator.setStatusBarStyle('dark');
+                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (isDark) {
+                    plus.navigator.setStatusBarBackground('#000000');
+                    plus.navigator.setStatusBarStyle('light');
+                } else {
+                    plus.navigator.setStatusBarBackground('#F2F2F7');
+                    plus.navigator.setStatusBarStyle('dark');
+                }
             }
         }
 
-        function navigate() {
+        function clearAndExit() {
+            const keys = ['usermail_login', 'userpass_login', 'usermail', 'username', 'userpicture', 'userpoints'];
+            keys.forEach(k => localStorage.removeItem(k));
+            goHome();
+        }
+
+        function goHome() {
             if (window.plus) {
-                const target = plus.webview.create('home.html', 'home.html', {
+                const h = plus.webview.create('home.html', 'home.html', {
                     backbuttonMaximize: false,
-                    scrollIndicator: 'none',
-                    statusbar: { background: "#FFFFFF" }
+                    scrollIndicator: 'none'
                 });
-                target.show('fade-in', 300);
+                h.show('fade-in', 250);
                 setTimeout(() => { plus.webview.currentWebview().close('none'); }, 500);
             } else {
                 window.location.replace('home.html');
             }
         }
 
-        function clearStorage() {
-            const keys = ['usermail_login', 'userpass_login', 'usermail', 'username', 'userpicture', 'userpoints'];
-            keys.forEach(k => localStorage.removeItem(k));
-        }
+        async function startApp() {
+            if (hasInited) return;
+            hasInited = true;
 
-        async function initAction() {
-            if (isTaskStarted) return;
-            isTaskStarted = true;
+            const m = localStorage.getItem('usermail_login');
+            const p = localStorage.getItem('userpass_login');
 
-            const u_m = localStorage.getItem('usermail_login');
-            const u_p = localStorage.getItem('userpass_login');
-
-            if (!u_m || !u_p) {
-                navigate();
+            if (!m || !p) {
+                goHome();
                 return;
             }
 
@@ -191,43 +201,42 @@
                 const response = await fetch(`${API}?mode=login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: u_m, password: u_p })
+                    body: JSON.stringify({ email: m, password: p })
                 });
+                const res = await response.json();
 
-                const data = await response.json();
-
-                if (data.code === 200) {
-                    if (data.fields && data.fields.length > 0) {
-                        const info = data.fields[0];
-                        localStorage.setItem('usermail', info["邮箱"]);
-                        localStorage.setItem('username', info["昵称"]);
-                        localStorage.setItem('userpicture', info["头像"]);
-                        localStorage.setItem('userpoints', info["积分"] || '0');
-                    }
-                    navigate();
-                } else if (data.code === 403) {
+                if (res.code === 200 && res.fields && res.fields.length > 0) {
+                    const u = res.fields[0];
+                    localStorage.setItem('usermail', u["邮箱"]);
+                    localStorage.setItem('username', u["昵称"]);
+                    localStorage.setItem('userpicture', u["头像"]);
+                    localStorage.setItem('userpoints', u["积分"] || '0');
+                    goHome();
+                } else if (res.code === 403) {
                     document.getElementById('ui-container').style.display = 'none';
                     document.getElementById('ban-modal').style.display = 'flex';
                 } else {
                     alert("账号异常，请重新登录");
-                    clearStorage();
-                    navigate();
+                    clearAndExit();
                 }
-            } catch (err) {
-                navigate();
+            } catch (e) {
+                goHome();
             }
         }
 
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateStatusBarStyle);
+
         window.addEventListener('pageshow', () => {
-            applyNativeUI();
-            initAction();
+            updateStatusBarStyle();
+            startApp();
         });
 
         document.addEventListener('plusready', () => {
-            applyNativeUI();
+            updateStatusBarStyle();
+            plus.navigator.setFullscreen(false);
             plus.key.addEventListener('backbutton', () => {
                 if (document.getElementById('ban-modal').style.display === 'flex') {
-                    plus.nativeUI.confirm("确定退出应用吗？", (e) => {
+                    plus.nativeUI.confirm("确定退出吗？", (e) => {
                         if (e.index === 0) plus.runtime.quit();
                     }, "提示", ["确定", "取消"]);
                 } else {
@@ -237,8 +246,8 @@
         });
 
         if (document.readyState === 'complete') {
-            applyNativeUI();
-            initAction();
+            updateStatusBarStyle();
+            startApp();
         }
     </script>
 </body>
