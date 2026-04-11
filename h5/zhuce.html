@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>用户注册</title>
+    <title>用户注册 - 趣加应用</title>
     <script src="https://static2.pgaot.com/Assets/js/jquery-2.2.4.min.js"></script>
     <style>
         :root { 
             --primary: #007AFF; 
             --bg: #F2F2F7;
-            --card-bg: #FFFFFF;
-            --text-main: #000000;
-            --text-sec: #8E8E93;
+            --card: #FFFFFF;
+            --text: #000000;
+            --secondary-text: #8E8E93;
         }
         * { 
             margin: 0; 
@@ -23,81 +23,69 @@
         }
         body { 
             background: var(--bg); 
-            font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif; 
-            min-height: 100vh;
-            display: flex;
+            font-family: -apple-system, "SF Pro Display", "PingFang SC", sans-serif; 
+            display: flex; 
             flex-direction: column;
+            min-height: 100vh;
         }
 
-        /* 顶部导航栏 - 同设置页面 */
+        /* 精美导航栏 */
         .nav-bar {
             position: fixed;
             top: 0;
             width: 100%;
             height: 44px;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             display: flex;
             align-items: center;
             padding: 0 16px;
+            background: rgba(242, 242, 247, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             z-index: 100;
-            border-bottom: 0.5px solid #d1d1d6;
-            padding-top: env(safe-area-inset-top);
-            height: calc(44px + env(safe-area-inset-top));
+            margin-top: env(safe-area-inset-top);
         }
         .back-btn {
             display: flex;
             align-items: center;
-            color: var(--primary);
-            font-size: 17px;
-            text-decoration: none;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.05);
             cursor: pointer;
         }
-        .back-btn::before {
-            content: "";
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-left: 2px solid var(--primary);
-            border-bottom: 2px solid var(--primary);
-            transform: rotate(45deg);
-            margin-right: 4px;
-        }
+        .back-btn svg { width: 18px; height: 18px; color: #333; }
 
-        /* 主体内容 */
         .container {
             flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
-            margin-top: calc(44px + env(safe-area-inset-top));
+            margin-top: 44px;
         }
+
         .card { 
             width: 100%; 
             max-width: 400px; 
-            background: var(--card-bg); 
-            border-radius: 20px; 
-            padding: 30px 24px; 
-            box-shadow: 0 8px 24px rgba(0,0,0,0.04); 
+            background: var(--card); 
+            border-radius: 28px; 
+            padding: 32px 24px; 
+            box-shadow: 0 12px 40px rgba(0,0,0,0.06); 
         }
 
-        h2 { font-size: 24px; font-weight: 700; text-align: center; margin-bottom: 24px; color: var(--text-main); }
-        
+        .title { text-align: center; font-size: 28px; font-weight: 700; margin-bottom: 24px; color: var(--text); letter-spacing: -0.5px; }
+
         .step { display: none; }
-        .active { display: block; animation: fadeIn 0.4s cubic-bezier(0.25, 0.1, 0.25, 1); }
-        @keyframes fadeIn { 
-            from { opacity: 0; transform: translateY(8px); } 
-            to { opacity: 1; transform: translateY(0); } 
-        }
+        .active { display: block; animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         input { 
             width: 100%; 
-            padding: 14px 16px; 
-            margin: 8px 0 16px; 
-            border: none;
-            border-radius: 12px; 
+            padding: 16px; 
+            margin: 12px 0; 
+            border: none; 
+            border-radius: 14px; 
             background: #F2F2F7; 
             outline: none; 
             font-size: 16px; 
@@ -105,72 +93,76 @@
             -webkit-user-select: text; 
             user-select: text; 
         }
-        input:focus { background: #E5E5EA; box-shadow: 0 0 0 2px var(--primary); }
+        input:focus { background: #E5E5EA; box-shadow: 0 0 0 2px rgba(0,122,255,0.1); }
 
         .btn { 
             width: 100%; 
-            padding: 14px; 
+            padding: 16px; 
             background: var(--primary); 
             color: #fff; 
             border: none; 
-            border-radius: 12px; 
-            font-size: 16px;
+            border-radius: 14px; 
             font-weight: 600; 
+            font-size: 17px;
             cursor: pointer; 
-            transition: opacity 0.2s;
+            margin-top: 12px;
+            transition: transform 0.1s active;
         }
-        .btn:active { opacity: 0.8; }
+        .btn:active { transform: scale(0.98); opacity: 0.9; }
         .btn:disabled { background: #D1D1D6; cursor: not-allowed; }
 
-        /* 帮助信息样式 */
-        .help-trigger {
-            display: block;
+        /* 辅助提示样式 */
+        .tips-trigger {
             text-align: center;
+            font-size: 13px;
             color: var(--primary);
-            font-size: 14px;
             margin-top: 20px;
             cursor: pointer;
+            font-weight: 500;
         }
-        .help-content {
+        .help-panel {
             display: none;
-            margin-top: 15px;
-            padding: 12px;
             background: #F9F9FB;
-            border-radius: 10px;
+            border-radius: 14px;
+            padding: 16px;
+            margin-top: 15px;
             font-size: 13px;
-            color: var(--text-sec);
             line-height: 1.6;
+            color: #666;
+            border: 1px solid #EEE;
         }
-        .help-content li { margin-bottom: 4px; list-style: none; }
+        .help-panel li { list-style: none; margin-bottom: 6px; }
 
         #toast { 
             position: fixed; 
-            bottom: 50px; 
+            top: 15%; 
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0,0,0,0.75); 
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(10px);
             color: #fff; 
-            padding: 10px 20px; 
+            padding: 12px 24px; 
             border-radius: 25px; 
             display: none; 
             font-size: 14px; 
             z-index: 9999; 
-            white-space: nowrap;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
         }
     </style>
 </head>
 <body>
 
 <div class="nav-bar">
-    <div class="back-btn" onclick="history.back()">返回</div>
+    <div class="back-btn" onclick="goBack()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </div>
 </div>
 
 <div id="toast"></div>
 
 <div class="container">
     <div class="card">
-        <h2>用户注册</h2>
+        <h2 class="title">Welcome</h2>
         
         <div id="s1" class="step active">
             <input type="email" id="email" placeholder="输入邮箱地址">
@@ -178,12 +170,12 @@
         </div>
 
         <div id="s2" class="step">
-            <p style="font-size:15px; color:#333; text-align:center; margin-bottom:10px;">验证码已发送</p>
+            <p style="text-align:center; font-size:14px; color:#333; margin-bottom: 10px;">验证码已发送</p>
             <input type="number" id="vcode" placeholder="4位验证码" pattern="\d*">
             <button class="btn" onclick="goStep2()">校验验证码</button>
             
-            <span class="help-trigger" onclick="$('#helpBox').slideToggle(200)">收不到验证码？</span>
-            <div id="helpBox" class="help-content">
+            <div class="tips-trigger" onclick="$('#help').fadeToggle()">收不到验证码？</div>
+            <div id="help" class="help-panel">
                 <li>1. QQ邮箱请使用QQ邮箱APP或网页版查收，QQ应用内推送可能会有延迟。</li>
                 <li>2. 同一设备仅支持注册一个账号。</li>
                 <li>3. 如有疑问请联系：110045310@qq.com</li>
@@ -204,20 +196,31 @@
     let cache = { email: '', code: '' };
     let countdownTimer = null;
 
-    function toast(m) { $('#toast').text(m).stop(true, true).fadeIn(200).delay(2000).fadeOut(300); }
+    function toast(m) { $('#toast').text(m).stop(true, true).fadeIn().delay(2000).fadeOut(); }
+    function showStep(n) { $('.step').removeClass('active'); $(`#s${n}`).addClass('active'); }
 
-    function showStep(n) { 
-        $('.step').removeClass('active'); 
-        $(`#s${n}`).addClass('active'); 
+    // 返回功能
+    function goBack() {
+        if ($('#s2').hasClass('active')) {
+            showStep(1);
+        } else if ($('#s3').hasClass('active')) {
+            showStep(2);
+        } else {
+            // H5+ 环境下关闭
+            if(window.plus) {
+                plus.webview.currentWebview().close('pop-out', 300);
+            } else {
+                history.back();
+            }
+        }
     }
 
+    // 逻辑部分保持原样
     function initSendBtn() {
         const lastTime = localStorage.getItem('last_vcode_time');
         if (lastTime) {
             const diff = Math.floor((Date.now() - lastTime) / 1000);
-            if (diff < 300) {
-                startCountdown(300 - diff);
-            }
+            if (diff < 300) { startCountdown(300 - diff); }
         }
     }
 
@@ -241,8 +244,7 @@
 
     async function goStep1() {
         const email = $('#email').val().trim();
-        const emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if(!emailReg.test(email)) return toast('请输入有效邮箱');
+        if(!email.includes('@')) return toast('请输入有效邮箱');
 
         const $btn = $('#sendBtn');
         $btn.prop('disabled', true).text('正在发送...');
@@ -253,8 +255,7 @@
         cache.code = generatedCode;
         cache.email = email;
 
-        toast('正在请求发送...');
-        
+        toast('正在发送验证码...');
         try {
             const mail = await fetch(`${API}?mode=send_mail`, {
                 method: 'POST',
@@ -282,25 +283,14 @@
         }
     }
 
-    function hasSpecialChars(password) {
-        return !/^[a-zA-Z0-9_]+$/.test(password);
-    }
+    function hasSpecialChars(password) { return !/^[a-zA-Z0-9_]+$/.test(password); }
 
     function escapeEmoji(text) {
         return [...text].map(char => {
             const code = char.codePointAt(0);
-            if (
-                (code >= 0x1F300 && code <= 0x1F6FF) ||
-                (code >= 0x1F900 && code <= 0x1F9FF) ||
-                (code >= 0x1FA70 && code <= 0x1FAFF) ||
-                (code >= 0x2600 && code <= 0x26FF) ||
-                (code >= 0x2700 && code <= 0x27BF) ||
-                (code >= 0x1F1E6 && code <= 0x1F1FF)
-            ) {
+            if ((code >= 0x1F300 && code <= 0x1F6FF) || (code >= 0x1F900 && code <= 0x1F9FF) || (code >= 0x2600 && code <= 0x27BF)) {
                 return `&#${code};`;
-            } else {
-                return char;
-            }
+            } else { return char; }
         }).join('').replace(/'/g, "~PGDBSD~");
     }
 
@@ -343,18 +333,9 @@
         }
     }
 
-
+    // 原生返回键监听
     document.addEventListener('plusready', function() {
-        var webview = plus.webview.currentWebview();
-        plus.key.addEventListener('backbutton', function() {
-            webview.canBack(function(e) {
-                if (e.canBack) {
-                    webview.back();
-                } else {
-                    webview.close('pop-out', 300);
-                }
-            });
-        });
+        plus.key.addEventListener('backbutton', goBack);
     });
 </script>
 </body>
