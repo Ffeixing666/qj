@@ -180,7 +180,7 @@
 
         var fullPrompt = text + getContextText();
         var xhr = new XMLHttpRequest();
-        var url = 'https://api.pearktrue.cn/api/xfai/?message=' + encodeURIComponent(fullPrompt);
+        var url = 'https://api.pearapi.ai/api/xfai/?message=' + encodeURIComponent(fullPrompt);
         
         xhr.open('GET', url, true);
         xhr.onreadystatechange = function() {
