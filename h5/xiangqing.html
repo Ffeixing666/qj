@@ -1160,7 +1160,7 @@
         // 解析蓝奏云链接
         async function parselanzouUrl(url, password) {
             try {
-                const apiUrl = `https://api.pearktrue.cn/api/lanzou/api.php?url=${encodeURIComponent(url)}&pwd=${encodeURIComponent(password || '')}`;
+                const apiUrl = `https://api.pearapi.ai/api/lanzou/api.php?url=${encodeURIComponent(url)}&pwd=${encodeURIComponent(password || '')}`;
                 const response = await fetch(apiUrl);
                 const data = await response.json();
                 
