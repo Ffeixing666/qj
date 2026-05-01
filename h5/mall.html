@@ -389,6 +389,25 @@
         }
 
         window.onload = init;
+         // --- 核心功能：返回键万能段 ---
+        document.addEventListener('plusready', function() {
+            var webview = plus.webview.currentWebview();
+            plus.key.addEventListener('backbutton', function() {
+                webview.canBack(function(e) {
+                    if (e.canBack) {
+                        webview.back();
+                    } else {
+                        // 子页面：直接关闭当前窗口
+                        // 此处判断逻辑优化，只要不是首页就直接关闭
+                        if (plus.webview.all().length > 1) {
+                            webview.close('auto'); 
+                        } else {
+                            history.back();
+                        }
+                    }
+                });
+            });
+        });
     </script>
 </body>
 </html>
