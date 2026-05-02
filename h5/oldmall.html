@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>积分商城（旧兼容）</title>
+    <style>
+        * { margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; -webkit-touch-callout: none; box-sizing: border-box; }
+        body {
+            font-family: Helvetica, STHeiti, "Microsoft YaHei", sans-serif;
+            background-color: #F2F2F7;
+            color: #1C1C1E;
+            padding-bottom: 60px;
+            line-height: 1.4;
+            font-size: 14px;
+        }
+        header {
+            position: relative; top: 0; z-index: 100;
+            background-color: #F2F2F7;
+            border-bottom: 1px solid #D1D1D6;
+            height: 50px;
+        }
+        .nav-bar { height: 50px; width: 100%; position: relative; }
+        .back-btn { position: absolute; left: 0; top: 0; width: 44px; height: 50px; }
+        .back-icon { 
+            width: 10px; height: 10px; 
+            border-left: 2px solid #007AFF; border-bottom: 2px solid #007AFF; 
+            -webkit-transform: rotate(45deg); margin: 18px 0 0 16px; 
+        }
+        .nav-title { 
+            text-align: center; line-height: 50px; 
+            font-size: 17px; font-weight: bold; 
+        }
+
+        .container { padding: 16px; max-width: 600px; margin: 0 auto; }
+
+        .points-card {
+            background-color: #007AFF;
+            background: -webkit-linear-gradient(top left, #007AFF, #5856D6);
+            border-radius: 20px;
+            padding: 25px;
+            color: #ffffff;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .points-label { font-size: 13px; margin-bottom: 5px; }
+        .points-balance { font-size: 36px; font-weight: bold; }
+
+        .section-header { font-size: 18px; font-weight: bold; margin: 20px 0 10px 4px; }
+        .pay-section {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 15px;
+        }
+        .sub-label { font-size: 12px; color: #8E8E93; margin-bottom: 10px; display: block; }
+        
+        .pay-grid { width: 100%; overflow: hidden; margin-bottom: 15px; }
+        .pay-option {
+            float: left; width: 31%; margin-right: 3%;
+            border: 1px solid #F2F2F7;
+            background: #F2F2F7;
+            border-radius: 10px;
+            padding: 12px 0;
+            text-align: center;
+        }
+        .pay-option-last { margin-right: 0; }
+        .pay-option.active {
+            border-color: #007AFF;
+            background: #EBF5FF;
+        }
+        .pay-option .amount { font-size: 16px; font-weight: bold; }
+        .pay-option .desc { font-size: 10px; color: #8E8E93; }
+
+        .method-list { clear: both; }
+        .method-item {
+            display: block; width: 100%;
+            padding: 12px; background: #F9F9FB; border-radius: 12px;
+            margin-bottom: 8px; border: 1px solid #F9F9FB;
+            position: relative;
+        }
+        .method-item.active { border-color: #007AFF; background: #EBF5FF; }
+        .method-icon { display: inline-block; vertical-align: middle; width: 24px; height: 24px; margin-right: 10px; }
+        .method-name { font-size: 15px; font-weight: bold; vertical-align: middle; }
+        .radio-circle {
+            position: absolute; right: 12px; top: 15px;
+            width: 18px; height: 18px; border: 1px solid #D1D1D6;
+            border-radius: 10px;
+        }
+        .method-item.active .radio-circle { background: #007AFF; border-color: #007AFF; }
+
+        .pay-submit-btn {
+            width: 100%; height: 48px; background: #007AFF; color: #ffffff;
+            border: none; border-radius: 12px; font-size: 17px; font-weight: bold;
+            margin-top: 15px; display: none;
+        }
+
+        .task-item {
+            background: #ffffff; border-radius: 15px; padding: 15px;
+            margin-bottom: 10px; position: relative; overflow: hidden;
+        }
+        .task-icon { 
+            float: left; width: 44px; height: 44px; border-radius: 10px; 
+            text-align: center; line-height: 50px;
+        }
+        .bg-orange { background: #FFF9F0; }
+        .bg-blue { background: #F0F7FF; }
+        .task-content { margin-left: 55px; margin-right: 70px; }
+        .task-name { font-size: 15px; font-weight: bold; }
+        .task-reward { font-size: 12px; color: #FF9500; }
+        .task-btn { 
+            position: absolute; right: 15px; top: 22px;
+            padding: 6px 12px; border-radius: 15px; font-size: 12px; 
+            border: none; background: #007AFF; color: #fff;
+        }
+
+        .detail-card { background: #ffffff; border-radius: 15px; }
+        .detail-item { padding: 12px; border-bottom: 1px solid #F2F2F7; position: relative; }
+        .detail-info h4 { font-size: 14px; }
+        .detail-info p { font-size: 11px; color: #8E8E93; }
+        .detail-amount { position: absolute; right: 12px; top: 15px; font-weight: bold; }
+        .plus { color: #007AFF; }
+        
+        .progress-bar-wrap { width: 100%; height: 4px; background: #E5E5EA; border-radius: 2px; margin-top: 5px; }
+        .progress-bar-fill { height: 100%; background: #007AFF; width: 0%; }
+        .footer-tips { text-align: center; font-size: 11px; color: #8E8E93; padding: 20px 0; }
+        .clearfix:after { content: ""; display: block; clear: both; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="nav-bar">
+            <div class="back-btn" onclick="handleBack()"><div class="back-icon"></div></div>
+            <div class="nav-title">积分商城</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="points-card">
+            <div class="points-label">当前可用积分</div>
+            <div class="points-balance" id="totalPoints">0</div>
+        </div>
+
+        <div class="section-header">积分充值</div>
+        <div class="pay-section">
+            <span class="sub-label">选择金额</span>
+            <div class="pay-grid" id="payOptions">
+                <div class="pay-option" onclick="selectAmount(this, 1)">
+                    <div class="amount">￥1</div>
+                    <div class="desc">50积分</div>
+                </div>
+                <div class="pay-option" onclick="selectAmount(this, 5)">
+                    <div class="amount">￥5</div>
+                    <div class="desc">250积分</div>
+                </div>
+                <div class="pay-option pay-option-last" onclick="selectAmount(this, 10)">
+                    <div class="amount">￥10</div>
+                    <div class="desc">500积分</div>
+                </div>
+            </div>
+
+            <span class="sub-label">支付方式</span>
+            <div class="method-list">
+                <div class="method-item" onclick="selectMethod(this, 'alipay')">
+                    <div class="method-icon">
+                        <svg width="24" height="24" viewBox="0 0 1024 1024"><path d="M891.56 128H132.44C71.32 128 21.33 177.99 21.33 239.11v545.78C21.33 846.01 71.32 896 132.44 896h759.12c61.12 0 111.11-49.99 111.11-111.11V239.11C1002.67 177.99 952.68 128 891.56 128z" fill="#1677FF"/><path d="M574.65 410.98c-30.82-14.73-63.5-27.46-97.35-37.52 40.54-46.06 72.82-100.91 87.05-161.78h-88.7c-9.7 34.61-26.68 67.57-49.19 96.69-28.53-7.55-58.46-12.87-89.47-15.54l-14.28 72.6c39.69 3.01 78.43 10.3 115.34 21.35-43.25 45.41-102.39 80.5-173.85 98.42l26.24 70.82c89.17-25.1 160.84-74.89 211.75-141.51 30.65 9.04 60.1 19.89 87.81 32.32l-15.35 64.15H332.22c-8.91 0-16.14 7.23-16.14 16.14v32.28c0 8.91 7.23 16.14 16.14 16.14h183.17c-21.78 45.92-56.78 86.13-102.43 116.51-28.54-18.42-53.7-42-74.58-69.57l-60.12 47.96c31.11 39.81 71.55 72.58 118.66 95.14-55.77 22.09-122.95 34.69-199.19 35.8l20.47 74.45c110.02-3.15 204.38-26.31 278.34-65.04 67.12 43.19 148.97 71.21 241.6 77.29l21.2-76.32c-79.08-4.22-149.25-24.96-207.28-59.01 56.45-38.31 100.23-91.13 125.79-152.68H752.4c8.91 0 16.14-7.23 16.14-16.14v-32.28c0-8.91-7.23-16.14-16.14-16.14H590l15.35-64.15z" fill="#FFF"/></svg>
+                    </div>
+                    <span class="method-name">支付宝支付</span>
+                    <div class="radio-circle"></div>
+                </div>
+                <div class="method-item" onclick="selectMethod(this, 'wxpay')">
+                    <div class="method-icon">
+                        <svg width="24" height="24" viewBox="0 0 1024 1024"><path d="M523.3 126.3c-238.1 0-431.1 169-431.1 377.3 0 118.6 62.4 224.2 161.4 300.9l-41.2 121.7c-2.4 7.1 5.3 13.5 11.8 9.9l144.1-80.4c50.5 16.5 106.1 25.5 164.5 25.5 19.5 0 38.6-1 57.2-2.9-10.4-36.4-16.2-74.8-16.2-114.5 0-192.5 178.2-348.6 398.1-348.6 0.2 0 0.5 0 0.7 0C749 220 645.7 126.3 523.3 126.3z" fill="#07C160"/><path d="M931.3 514c0-155.8-144.7-282.2-323.2-282.2s-323.2 126.3-323.2 282.2 144.7 282.2 323.2 282.2c43.8 0 85.5-7.6 123.4-21.2l108.1 60.3c4.8 2.7 10.6-2 8.9-7.3l-30.9-91.3c74.1-57.5 120.7-136.6 120.7-225.2z" fill="#07C160"/></svg>
+                    </div>
+                    <span class="method-name">微信支付</span>
+                    <div class="radio-circle"></div>
+                </div>
+            </div>
+
+            <button class="pay-submit-btn" id="payBtn" onclick="handlePay()">立即支付</button>
+        </div>
+
+        <div class="section-header">我的任务</div>
+        <div class="task-list">
+            <div class="task-item clearfix" onclick="handleAd()">
+                <div class="task-icon bg-orange">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#FF9500" style="margin-top:12px"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM8 15h2v2H8zm0-4h2v2H8zm0-4h2v2H8zm4 8h4v2h-4zm0-4h4v2h-4zm0-4h4v2h-4z"/></svg>
+                </div>
+                <div class="task-content">
+                    <div class="task-name">每日观看广告</div>
+                    <div class="task-reward">+3 积分/次</div>
+                    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="adProgress" style="width: 0%;"></div></div>
+                    <div style="font-size:10px; color:#8E8E93; margin-top:4px" id="adText">今日进度 0/10</div>
+                </div>
+                <button class="task-btn">去完成</button>
+            </div>
+
+            <div class="task-item clearfix" onclick="handleUpload()">
+                <div class="task-icon bg-blue">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#007AFF" style="margin-top:12px"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+                </div>
+                <div class="task-content">
+                    <div class="task-name">每日上传资源</div>
+                    <div class="task-reward">+10 积分/次</div>
+                    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="uploadProgress" style="width: 0%;"></div></div>
+                    <div style="font-size:10px; color:#8E8E93; margin-top:4px" id="uploadText">今日进度 0/10</div>
+                </div>
+                <button class="task-btn">去完成</button>
+            </div>
+        </div>
+
+        <div class="section-header">积分明细</div>
+        <div class="detail-card" id="coinLogContainer">
+            <div class="detail-item" style="text-align: center; padding: 30px 0;">
+                <p style="color: #8E8E93;">加载中...</p>
+            </div>
+        </div>
+        <p class="footer-tips">仅显示最近30天记录</p>
+    </div>
+
+    <script type="text/javascript">
+        var selectedAmount = null;
+        var selectedType = null;
+
+        function selectAmount(el, val) {
+            var opts = document.getElementById('payOptions').getElementsByTagName('div');
+            for(var i=0; i<opts.length; i++) {
+                if(opts[i].className.indexOf('pay-option') !== -1) {
+                    opts[i].className = opts[i].className.replace(' active', '');
+                }
+            }
+            el.className += ' active';
+            selectedAmount = val;
+            checkSelection();
+        }
+
+        function selectMethod(el, type) {
+            var items = document.getElementsByClassName('method-item');
+            for(var i=0; i<items.length; i++) {
+                items[i].className = items[i].className.replace(' active', '');
+            }
+            el.className += ' active';
+            selectedType = type;
+            checkSelection();
+        }
+
+        function checkSelection() {
+            if (selectedAmount && selectedType) {
+                document.getElementById('payBtn').style.display = 'block';
+            }
+        }
+
+        function ajax(options) {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        options.success(JSON.parse(xhr.responseText));
+                    } else {
+                        options.error();
+                    }
+                }
+            };
+            xhr.open(options.method || 'GET', options.url, true);
+            if (options.method === 'POST') {
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.send(JSON.stringify(options.data));
+            } else {
+                xhr.send();
+            }
+        }
+
+        function handlePay() {
+            var usermail = localStorage.getItem('usermail');
+            if (!usermail) { showToast('请先登录'); return; }
+            showLoading();
+            ajax({
+                method: 'POST',
+                url: 'https://apirank.qujiaweb.top/?mode=create_pay_order',
+                data: { mail: usermail, amount: selectedAmount, type: selectedType },
+                success: function(res) {
+                    hideLoading();
+                    if (res.code === 200 && res.payUrl) {
+                        window.location.href = res.payUrl;
+                    } else {
+                        showToast(res.msg || '获取失败');
+                    }
+                },
+                error: function() { hideLoading(); showToast('网络错误'); }
+            });
+        }
+
+        function handleBack() {
+            if (window.plus) { plus.webview.currentWebview().close('auto'); } else { history.back(); }
+        }
+
+        function handleAd() {
+            var usermail = localStorage.getItem('usermail');
+            if (!usermail) { showToast('请先登录'); return; }
+            if (window.plus && plus.ad) {
+                var adReward = plus.ad.createRewardedVideoAd({adpid:'1358284724'});
+                adReward.onLoad(function() { adReward.show(); });
+                adReward.onClose(function(e) {
+                    if(e.isEnded) { addAdRewardCoins(); }
+                    adReward.destroy();
+                });
+                adReward.load();
+            } else { showToast('请在APP环境使用'); }
+        }
+
+        function addAdRewardCoins() {
+            var usermail = localStorage.getItem('usermail');
+            ajax({
+                url: 'https://apirank.qujiaweb.top/?mode=ad_reward&mail=' + encodeURIComponent(usermail),
+                success: function(res) { if(res.code === 200) init(); }
+            });
+        }
+
+        function handleUpload() { window.location.href = 'oldindex.html'; }
+
+        function showToast(m) { if (window.plus) { plus.nativeUI.toast(m); } else { alert(m); } }
+        function showLoading() { if (window.plus) plus.nativeUI.showWaiting('请稍候...'); }
+        function hideLoading() { if (window.plus) plus.nativeUI.closeWaiting(); }
+
+        function init() {
+            var savedEmail = localStorage.getItem('usermail_login');
+            var savedPass = localStorage.getItem('userpass_login');
+            if (savedEmail && savedPass) {
+                ajax({
+                    method: 'POST',
+                    url: 'https://apirank.qujiaweb.top/?mode=login',
+                    data: { email: savedEmail, password: savedPass },
+                    success: function(res) {
+                        if (res.code === 200 && res.fields) {
+                            var p = res.fields[0]["积分"] || '0';
+                            document.getElementById('totalPoints').innerHTML = p;
+                        }
+                    }
+                });
+            }
+            var userMail = localStorage.getItem('usermail');
+            if (userMail) {
+                ajax({
+                    url: 'https://apirank.qujiaweb.top/?mode=get_coin_log&mail=' + encodeURIComponent(userMail),
+                    success: function(res) {
+                        if (res.code === 200) {
+                            updateUI(res.fields);
+                        }
+                    }
+                });
+            }
+        }
+
+        function updateUI(logs) {
+            var container = document.getElementById('coinLogContainer');
+            container.innerHTML = '';
+            var adCount = 0, upCount = 0;
+            var today = new Date().toLocaleDateString();
+
+            for (var i = 0; i < logs.length; i++) {
+                var log = logs[i];
+                var div = document.createElement('div');
+                div.className = 'detail-item';
+                var change = log["积分变动"] || '0';
+                div.innerHTML = '<div class="detail-info"><h4>'+log.类型+'</h4><p>'+log.时间+'</p></div><div class="detail-amount plus">'+change+'</div>';
+                container.appendChild(div);
+
+                if(log.时间.indexOf(today.replace(/\//g, '-')) !== -1) {
+                    if(log.类型 === '观看广告奖励') adCount++;
+                    if(log.类型 === '上传资源奖励') upCount++;
+                }
+            }
+            document.getElementById('adProgress').style.width = (adCount * 10) + '%';
+            document.getElementById('adText').innerHTML = '今日进度 ' + adCount + '/10';
+            document.getElementById('uploadProgress').style.width = (upCount * 10) + '%';
+            document.getElementById('uploadText').innerHTML = '今日进度 ' + upCount + '/10';
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
