@@ -85,12 +85,12 @@
             background-color: #E0E0E2;
         }
         .carousel-track {
-            display: -webkit-box;
-            width: 100%; height: 100%;
+            width: 200%; height: 100%;
             -webkit-transition: -webkit-transform 0.4s ease-out;
         }
         .carousel-slide {
-            width: 100%; height: 100%;
+            width: 50%; height: 100%;
+            float: left;
             background-position: center;
             background-size: cover;
         }
@@ -117,7 +117,7 @@
             padding: 12px;
             border-radius: 14px;
             margin-bottom: 12px;
-            overflow: hidden; /* 兼容旧版清除浮动 */
+            overflow: hidden; 
         }
         .app-icon {
             width: 60px; height: 60px;
@@ -130,7 +130,6 @@
         .app-name { font-size: 16px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .app-desc { font-size: 12px; color: #8E8E93; margin-top: 4px; height: 32px; overflow: hidden; }
 
-        /* 修改后的底部导航栏 - 参照 me.html 逻辑 */
         .bottom-nav {
             position: fixed;
             bottom: 0; left: 0; right: 0;
@@ -180,7 +179,7 @@
             -webkit-box-align: center;
             z-index: 10001;
         }
-        .ad-content { position: relative; width: 260px; }
+        .ad-content { position: relative; width: 260px; margin: 50% auto 0; }
         .ad-content img { width: 100%; border-radius: 20px; }
         .ad-close {
             position: absolute; top: -10px; right: -10px;
@@ -226,15 +225,14 @@
         <main id="app-content">
             <section class="featured-section">
                 <div class="carousel-container" id="carousel">
-                    <div class="carousel-track" id="track"></div>
+                    <div class="carousel-track clearfix" id="track"></div>
                 </div>
             </section>
 
-            <!-- 补全的分区导航 -->
             <nav class="nav-scroll">
                 <span class="nav-item active" onclick="switchCategory('', this)">推荐</span>
                 <span class="nav-item" onclick="switchCategory('latest', this)">最新</span>
-                <span class="nav-item" onclick="switchCategory('rank', this)">排行</span>
+                <span class="nav-item" onclick="window.location.href='oldrank.html'">排行</span>
                 <span class="nav-item" onclick="switchCategory('影视音乐', this)">影视音乐</span>
                 <span class="nav-item" onclick="switchCategory('实用工具', this)">实用工具</span>
                 <span class="nav-item" onclick="switchCategory('学习必备', this)">学习必备</span>
@@ -254,7 +252,6 @@
 
     <div class="fab" onclick="openSharePage()">+</div>
 
-    <!-- 底部导航栏结构已同步为 me.html 风格 -->
     <nav class="bottom-nav clearfix">
         <div class="bottom-item active">
             <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_W4dgFlZKZZ_1766889744282.png" class="nav-icon-img">
@@ -290,10 +287,12 @@
         var currentFilter = '';
         var currentPage = 1;
         var isLoading = false;
+        var slideIndex = 0;
 
         function getApps(filter, isRefresh) {
             if (isLoading) return;
-            var mail = localStorage.getItem('usermail') || 'guest';
+            var mail = 'guest';
+            try { mail = localStorage.getItem('usermail') || 'guest'; } catch(e) {}
             var listDiv = document.getElementById('appList');
             if (isRefresh) {
                 listDiv.innerHTML = '<div class="loading-spinner"></div>';
@@ -364,31 +363,41 @@
                 html += '<div class="carousel-slide" style="background-image:url('+data[i]+')"></div>';
             }
             track.innerHTML = html;
+
+            setInterval(function() {
+                slideIndex++;
+                if (slideIndex >= data.length) slideIndex = 0;
+                track.style.webkitTransform = 'translate3d(-' + (slideIndex * 50) + '%, 0, 0)';
+            }, 3000);
         }
 
         function closeAdModal() { document.getElementById('adModal').style.display = 'none'; }
         function openMePage() { window.location.href = 'oldme.html'; }
-        function openSearchPage() { window.location.href = 'search.html'; }
-        function openSharePage() { window.location.href = 'share.html'; }
-        function openMessagePage() { window.location.href = 'xiaoxi.html'; }
-        function openMall() { window.location.href = 'mall.html'; }
+        function openSearchPage() { window.location.href = 'oldsearch.html'; }
+        function openSharePage() { window.location.href = 'oldshare.html'; }
+        function openMessagePage() { window.location.href = 'oldxiaoxi.html'; }
+        function openMall() { window.location.href = 'oldmall.html'; }
 
         window.onload = function() {
             initCarousel();
             getApps('', true);
-            if(localStorage.getItem('ad_show') !== new Date().toDateString()) {
-                document.getElementById('adModal').style.display = '-webkit-box';
-                localStorage.setItem('ad_show', new Date().toDateString());
-            }
+            try {
+                if(localStorage.getItem('ad_show') !== new Date().toDateString()) {
+                    var adModal = document.getElementById('adModal');
+                    adModal.style.display = 'block';
+                    adModal.style.display = '-webkit-box';
+                    localStorage.setItem('ad_show', new Date().toDateString());
+                }
+            } catch(e) {}
         };
 
         var startY = 0;
-        document.addEventListener('touchstart', function(e) { startY = e.touches[0].pageY; });
+        document.addEventListener('touchstart', function(e) { startY = e.touches[0].pageY; }, false);
         document.addEventListener('touchend', function(e) {
             if (window.scrollY <= 0 && e.changedTouches[0].pageY - startY > 120) {
                 location.reload();
             }
-        });
+        }, false);
     </script>
 </body>
 </html>
