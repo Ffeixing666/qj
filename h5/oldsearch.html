@@ -1,0 +1,496 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>搜索中心（旧兼容）</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #F2F2F7;
+            font-family: Helvetica, STHeiti, "Microsoft YaHei", sans-serif;
+            color: #1C1C1E;
+            -webkit-user-select: none;
+        }
+
+        .nav-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 44px;
+            background-color: #FFFFFF;
+            border-bottom: 1px solid #B2B2B2;
+            z-index: 1000;
+        }
+
+        .nav-content {
+            padding: 5px 10px;
+            height: 34px;
+        }
+
+        .back-area {
+            float: left;
+            width: 30px;
+            height: 34px;
+            line-height: 34px;
+        }
+
+        .back-icon {
+            width: 12px;
+            height: 12px;
+            border-left: 2px solid #007AFF;
+            border-bottom: 2px solid #007AFF;
+            -webkit-transform: rotate(45deg);
+            margin-top: 10px;
+        }
+
+        .search-box-container {
+            margin-left: 35px;
+            margin-right: 50px;
+        }
+
+        .search-box {
+            background: #E5E5EA;
+            border-radius: 8px;
+            height: 28px;
+            padding: 3px 8px;
+            margin-top: 2px;
+        }
+
+        .search-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            outline: none;
+            height: 22px;
+        }
+
+        .cancel-btn {
+            float: right;
+            width: 45px;
+            height: 34px;
+            line-height: 34px;
+            color: #007AFF;
+            text-align: right;
+            font-size: 16px;
+        }
+
+        .container {
+            padding: 60px 15px 20px 15px;
+        }
+
+        .placeholder-view {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .placeholder-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .placeholder-sub {
+            font-size: 14px;
+            color: #8E8E93;
+        }
+
+        .search-history {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .history-header {
+            border-bottom: 1px solid #D1D1D6;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        .history-title {
+            float: left;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .clear-history {
+            float: right;
+            font-size: 13px;
+            color: #007AFF;
+        }
+
+        .history-tag {
+            display: inline-block;
+            background: #E9E9EB;
+            padding: 5px 12px;
+            border-radius: 12px;
+            margin: 5px;
+            font-size: 13px;
+        }
+
+        .app-card {
+            background: #FFFFFF;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #D1D1D6;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .app-icon {
+            float: left;
+            width: 50px;
+            height: 50px;
+            background-color: #F0F0F2;
+            border-radius: 10px;
+            background-size: cover;
+        }
+
+        .app-info {
+            margin-left: 60px;
+            margin-right: 60px;
+        }
+
+        .app-name {
+            font-size: 16px;
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .app-desc {
+            font-size: 12px;
+            color: #8E8E93;
+            height: 15px;
+            overflow: hidden;
+        }
+
+        .download-btn {
+            position: absolute;
+            right: 10px;
+            top: 20px;
+            background: #F0F0F7;
+            color: #007AFF;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .loading-pulse {
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+            color: #8E8E93;
+        }
+
+        .red-packet-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 9999;
+            display: none;
+        }
+
+        .red-packet-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 260px;
+            margin-left: -130px;
+            margin-top: -150px;
+            background: #FFF;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .red-packet-image {
+            width: 260px;
+            border-radius: 10px;
+        }
+
+        .red-packet-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            width: 30px;
+            height: 30px;
+            background: #FFF;
+            border-radius: 15px;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+        }
+
+        .action-menu {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 120px;
+            margin-left: -60px;
+            background: #000;
+            color: #FFF;
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            z-index: 10000;
+        }
+
+        .hidden { display: none; }
+        .clearfix:after { content: "."; display: block; height: 0; clear: both; visibility: hidden; }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <div class="nav-content clearfix">
+            <div class="back-area" onclick="closeSelf()">
+                <div class="back-icon"></div>
+            </div>
+            <div class="cancel-btn" onclick="performSearch()">搜索</div>
+            <div class="search-box-container">
+                <div class="search-box">
+                    <input type="text" class="search-input" id="searchInput" placeholder="搜索…" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="searchTips" class="placeholder-view">
+            <div class="placeholder-title">找你所想</div>
+            <div class="placeholder-sub">输入关键词，即刻探索精彩应用</div>
+            
+            <div id="searchHistory" class="search-history" style="display:none;">
+                <div class="history-header clearfix">
+                    <div class="history-title">最近搜索</div>
+                    <div class="clear-history" onclick="clearSearchHistory()">清空</div>
+                </div>
+                <div id="historyTags" class="history-tags"></div>
+            </div>
+        </div>
+
+        <div id="loading" class="hidden">
+            <div class="loading-pulse">正在搜索...</div>
+        </div>
+
+        <div id="searchResults" class="hidden">
+            <div style="font-size: 13px; color: #8E8E93; margin-bottom: 10px;">最佳匹配结果</div>
+            <div id="resultsList"></div>
+        </div>
+    </div>
+
+    <div class="red-packet-modal" id="redPacketModal">
+        <div class="red-packet-content">
+            <div class="red-packet-close" onclick="closeRedPacket()">X</div>
+            <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_yvCuW5Pdr_1771228346174.jpeg" class="red-packet-image" />
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        function isInActiveTimeRange() {
+            var now = new Date();
+            var startTime = new Date(2026, 1, 16, 18, 0, 0); 
+            var endTime = new Date(2026, 1, 17, 1, 0, 0);
+            return now >= startTime && now <= endTime;
+        }
+
+        function showRedPacket() {
+            if (isInActiveTimeRange()) {
+                document.getElementById('redPacketModal').style.display = 'block';
+            }
+        }
+
+        function closeRedPacket() {
+            document.getElementById('redPacketModal').style.display = 'none';
+        }
+
+        function closeSelf() {
+            if (window.plus) {
+                plus.webview.currentWebview().close('pop-out', 300);
+            } else {
+                window.history.back();
+            }
+        }
+
+        function createAppItem(app) {
+            var iconUrl = app.图标 || '';
+            var name = app.名称 || '未知应用';
+            var desc = app.简介 || '暂无简介';
+            var id = app.id;
+
+            var html = '<div class="app-card" onclick="openAppDetail(\'' + id + '\')">';
+            html += '<div class="app-icon" style="background-image:url(' + iconUrl + ')"></div>';
+            html += '<div class="app-info">';
+            html += '<div class="app-name">' + name + '</div>';
+            html += '<div class="app-desc">' + desc + '</div>';
+            html += '</div>';
+            html += '<div class="download-btn">获取</div>';
+            html += '</div>';
+            return html;
+        }
+
+        function openAppDetail(appId) {
+            var url = 'oldxiangqing.html?id=' + appId;
+            if (window.plus) {
+                var ws = plus.webview.create(url, url, { backbuttonMaximize: false });
+                ws.show('pop-in', 300);
+            } else {
+                window.location.href = url;
+            }
+        }
+
+        function saveSearchHistory(keyword) {
+            if (!keyword) return;
+            var historyStr = localStorage.getItem('searchHistory') || '[]';
+            var history = JSON.parse(historyStr);
+            
+            var newHistory = [];
+            newHistory.push(keyword);
+            for(var i=0; i<history.length; i++){
+                if(history[i] !== keyword && newHistory.length < 10){
+                    newHistory.push(history[i]);
+                }
+            }
+            localStorage.setItem('searchHistory', JSON.stringify(newHistory));
+            loadSearchHistory();
+        }
+
+        function loadSearchHistory() {
+            var historyStr = localStorage.getItem('searchHistory') || '[]';
+            var history = JSON.parse(historyStr);
+            var tagsDiv = document.getElementById('historyTags');
+            var historyDiv = document.getElementById('searchHistory');
+
+            if (history.length > 0) {
+                var html = '';
+                for (var i = 0; i < history.length; i++) {
+                    html += '<div class="history-tag" id="tag_' + i + '">' + history[i] + '</div>';
+                }
+                tagsDiv.innerHTML = html;
+                historyDiv.style.display = 'block';
+
+                for (var j = 0; j < history.length; j++) {
+                    (function(idx){
+                        var el = document.getElementById('tag_' + idx);
+                        var word = history[idx];
+                        el.onclick = function() {
+                            document.getElementById('searchInput').value = word;
+                            performSearch();
+                        };
+                        addLongPress(el, word);
+                    })(j);
+                }
+            } else {
+                historyDiv.style.display = 'none';
+            }
+        }
+
+        function addLongPress(el, word) {
+            var timer;
+            el.ontouchstart = function() {
+                timer = setTimeout(function() {
+                    if(confirm('是否删除该历史记录？')) {
+                        deleteHistory(word);
+                    }
+                }, 800);
+            };
+            el.ontouchend = function() {
+                clearTimeout(timer);
+            };
+        }
+
+        function deleteHistory(word) {
+            var history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+            var newHistory = [];
+            for(var i=0; i<history.length; i++) {
+                if(history[i] !== word) newHistory.push(history[i]);
+            }
+            localStorage.setItem('searchHistory', JSON.stringify(newHistory));
+            loadSearchHistory();
+        }
+
+        function clearSearchHistory() {
+            localStorage.removeItem('searchHistory');
+            loadSearchHistory();
+        }
+
+        function performSearch() {
+            var keyword = document.getElementById('searchInput').value;
+            if (!keyword) return;
+            saveSearchHistory(keyword);
+
+            document.getElementById('searchTips').className = 'hidden';
+            document.getElementById('searchResults').className = 'hidden';
+            document.getElementById('loading').className = '';
+
+            var mail = localStorage.getItem('usermail');
+            if (!mail) {
+                renderError('请先登录', 'me.html');
+                return;
+            }
+
+            var xhr = new XMLHttpRequest();
+            var url = "https://apirank.qujiaweb.top/?mode=search_apps&mail=" + encodeURIComponent(mail) + "&keyword=" + encodeURIComponent(keyword);
+            
+            xhr.open("GET", url, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4) {
+                    document.getElementById('loading').className = 'hidden';
+                    document.getElementById('searchResults').className = '';
+                    if (xhr.status == 200) {
+                        var res = JSON.parse(xhr.responseText);
+                        if (res.code === 200 && res.fields) {
+                            var list = document.getElementById('resultsList');
+                            if (res.fields.length > 0) {
+                                var html = '';
+                                for (var i = 0; i < res.fields.length; i++) {
+                                    html += createAppItem(res.fields[i]);
+                                }
+                                list.innerHTML = html;
+                            } else {
+                                renderError('未找到相关应用', null);
+                            }
+                        } else if (res.code === 403) {
+                            window.location.href = 'oldindex.html';
+                        } else {
+                            renderError('搜索失败，请重试', null);
+                        }
+                    } else {
+                        renderError('网络错误', null);
+                    }
+                }
+            };
+            xhr.send();
+        }
+
+        function renderError(msg, jump) {
+            var list = document.getElementById('resultsList');
+            var clickAttr = jump ? 'onclick="location.href=\'old' + jump + '\'"' : '';
+            list.innerHTML = '<div class="app-card" style="text-align:center" ' + clickAttr + '>' + msg + '</div>';
+        }
+
+        document.getElementById('searchInput').onkeyup = function(e) {
+            var val = this.value;
+            if (val === '分10块' || val === '分十块') {
+                showRedPacket();
+            }
+            if ((e.keyCode || e.which) == 13) {
+                performSearch();
+            }
+        };
+
+        window.onload = function() {
+            loadSearchHistory();
+        };
+    </script>
+</body>
+</html>
