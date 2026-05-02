@@ -1,0 +1,327 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>排行榜（旧兼容）</title>
+    <style type="text/css">
+        body { 
+            margin: 0; padding: 0; 
+            background-color: #F2F2F7; 
+            color: #1C1C1E; 
+            font-family: Helvetica, Arial, sans-serif;
+            -webkit-text-size-adjust: none;
+        }
+
+        header {
+            position: relative; top: 0; width: 100%;
+            background-color: #F2F2F7;
+            border-bottom: 1px solid #C8C8CC;
+            height: 44px; line-height: 44px;
+            text-align: center;
+        }
+        .back-btn { 
+            position: absolute; left: 10px; top: 6px;
+            width: 32px; height: 32px; 
+            background-color: #E3E3E6; border-radius: 8px;
+            cursor: pointer;
+        }
+        .header-title { font-size: 17px; font-weight: bold; }
+
+        .tab-box { 
+            background-color: #F2F2F7; 
+            padding: 10px 16px; 
+            border-bottom: 1px solid #D1D1D6;
+            clear: both; overflow: hidden;
+        }
+        .tab-item { 
+            float: left; font-size: 15px; color: #8E8E93; 
+            font-weight: bold; padding-bottom: 5px; margin-right: 20px;
+        }
+        .tab-item.active { 
+            color: #1C1C1E; border-bottom: 3px solid #007AFF;
+        }
+
+        #loading-view {
+            padding: 50px 0; text-align: center;
+        }
+        .ios-loader {
+            margin: 0 auto; width: 24px; height: 24px;
+            border: 3px solid #E3E3E6; border-top: 3px solid #007AFF;
+            border-radius: 20px;
+            -webkit-animation: spin 0.8s linear infinite;
+        }
+        @-webkit-keyframes spin {
+            from { -webkit-transform: rotate(0deg); }
+            to { -webkit-transform: rotate(360deg); }
+        }
+
+        .panel { padding: 0 16px 80px; display: none; }
+        .panel.active { display: block; }
+
+        .podium { 
+            height: 150px; margin: 40px 0 20px; 
+            display: table; width: 100%; border-spacing: 10px 0;
+        }
+        .podium-card { 
+            display: table-cell; vertical-align: bottom; 
+            text-align: center; border-radius: 12px 12px 6px 6px;
+            position: relative; padding-bottom: 10px;
+        }
+        .podium-card img { 
+            width: 50px; height: 50px; border-radius: 10px; 
+            border: 2px solid #FFF; background: #FFF;
+            margin-bottom: 5px;
+        }
+        .podium-card .name { 
+            font-size: 11px; color: #FFF; width: 90%; 
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            margin: 0 auto;
+        }
+        .podium-card .num { font-size: 24px; font-weight: 900; color: #FFF; opacity: 0.8; }
+        
+        .p-2 { background: #8E8E93; height: 110px; }
+        .p-1 { background: #FF9500; height: 140px; }
+        .p-3 { background: #A25E2E; height: 95px; }
+
+        .update-tip { 
+            color: #8E8E93; font-size: 12px; margin: 15px 0;
+            border-left: 3px solid #007AFF; padding-left: 8px; 
+        }
+
+        .item-card {
+            background: #FFFFFF; padding: 12px; border-radius: 16px;
+            margin-bottom: 12px; border: 1px solid #E5E5EA;
+            clear: both; overflow: hidden;
+        }
+        .item-rank { 
+            float: left; width: 25px; font-size: 16px; font-weight: bold; 
+            color: #AEAEB2; margin-top: 15px;
+        }
+        .item-icon { 
+            float: left; width: 50px; height: 50px; border-radius: 10px; 
+            margin-right: 12px; background: #EEE;
+        }
+        .item-body { float: left; width: 55%; }
+        .item-name { font-size: 15px; font-weight: bold; color: #1C1C1E; margin-bottom: 3px; }
+        .item-desc { font-size: 12px; color: #8E8E93; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .item-val { 
+            float: right; font-size: 11px; font-weight: bold; 
+            color: #007AFF; background: #E5F1FF; 
+            padding: 4px 8px; border-radius: 8px; margin-top: 12px;
+        }
+
+        .load-more-tip { text-align: center; padding: 20px 0; color: #8E8E93; font-size: 13px; }
+
+        .toast {
+            position: fixed; bottom: 50px; left: 10%; width: 80%;
+            background: rgba(0,0,0,0.8); color: #FFF; 
+            padding: 10px 0; text-align: center;
+            border-radius: 20px; font-size: 14px; display: none; z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="back-btn" onclick="goBack()">
+        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABmJLR0QA/wD/AP+gvaeTAAAAZUlEQVQ4y2NgGLmAiYGB4T8DA8N/SjFMM9wwmBq6ArIitIuR5XExmG6Am8GoYpCBYYy/IEmT5At0S7E6mBhAmInmUvIDuofwALqf8ACat3AAXFm6AnS70S6GuY9mYmBgeEBS8pMKALp9OAnNf99pAAAAAElFTkSuQmCC" style="margin-top:6px;width:20px;"/>
+    </div>
+    <div class="header-title">排行榜（旧兼容）</div>
+</header>
+
+<div class="tab-box">
+    <div class="tab-item active" id="btn-0" onclick="changeTab(0)">好评如潮</div>
+    <div class="tab-item" id="btn-1" onclick="changeTab(1)">随心看看</div>
+</div>
+
+<div id="loading-view">
+    <div class="ios-loader"></div>
+    <p style="margin-top:10px; color:#8E8E93; font-size:12px;">加载中...</p>
+</div>
+
+<div id="panel-0" class="panel active">
+    <div class="podium" id="podium-wrap"></div>
+    <div class="update-tip">近期投币榜单，每周更新</div>
+    <div id="hot-list"></div>
+</div>
+
+<div id="panel-1" class="panel">
+    <div id="random-list" style="margin-top:15px;"></div>
+    <div id="load-more" class="load-more-tip" style="display:none;">正在发现更多...</div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script type="text/javascript">
+    var API = "https://apirank.qujiaweb.top";
+    var isRequesting = false;
+    var allRandomData = []; 
+    var currentRandomCount = 0;
+    var PAGE_SIZE = 20;
+    var isTab1 = false;
+
+    function goBack() {
+        if(window.plus){
+            plus.webview.currentWebview().close('pop-out');
+        } else {
+            history.back();
+        }
+    }
+
+    function showMsg(text) {
+        var t = document.getElementById('toast');
+        t.innerText = text;
+        t.style.display = 'block';
+        setTimeout(function() { t.style.display = 'none'; }, 2000);
+    }
+
+    function changeTab(idx) {
+        isTab1 = (idx === 1);
+        var tabs = document.getElementsByClassName('tab-item');
+        var panels = document.getElementsByClassName('panel');
+        for(var i=0; i<tabs.length; i++){
+            tabs[i].className = (i === idx) ? 'tab-item active' : 'tab-item';
+            panels[i].className = (i === idx) ? 'panel active' : 'panel';
+        }
+        if(isTab1) checkScroll();
+    }
+
+    function ajax(url, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    callback(JSON.parse(xhr.responseText));
+                } else {
+                    showMsg("服务器连接失败");
+                }
+            }
+        };
+        xhr.send();
+    }
+
+    function fetchData() {
+        if(isRequesting) return;
+        isRequesting = true;
+        var mail = localStorage.getItem('usermail'); 
+        if(!mail) {
+            showMsg("未检测到登录信息");
+            isRequesting = false;
+            return;
+        }
+        
+        ajax(API + "/?mode=get_ranking_data&mail=" + encodeURIComponent(mail), function(data) {
+            isRequesting = false;
+            if (data.code === 200) {
+                renderHot(data.hotList);
+                allRandomData = data.randomList || [];
+                allRandomData.sort(function() { return 0.5 - Math.random(); });
+                initRandom(); 
+                document.getElementById('loading-view').style.display = 'none';
+            } else {
+                showMsg(data.msg || "同步失败");
+            }
+        });
+    }
+
+    function renderHot(list) {
+        var wrap = document.getElementById('podium-wrap');
+        var listWrap = document.getElementById('hot-list');
+        wrap.innerHTML = ""; listWrap.innerHTML = "";
+        
+        if(!list || list.length === 0) {
+            wrap.style.display = 'none';
+            listWrap.innerHTML = '<p style="text-align:center;color:#999;padding-top:40px;">暂无数据</p>';
+            return;
+        }
+
+        var top3 = list.slice(0, 3);
+        var order = [1, 0, 2]; 
+        for(var j=0; j<order.length; j++) {
+            var i = order[j];
+            var item = top3[i];
+            var card = document.createElement('div');
+            card.className = 'podium-card p-' + (i+1);
+            if(item) {
+                card.onclick = (function(id){ return function(){ openApp(id); } })(item.id);
+                card.innerHTML = '<img src="'+item.图标+'"><div class="name">'+item.名称+'</div><div class="num">'+(i+1)+'</div>';
+            } else {
+                card.style.visibility = 'hidden';
+            }
+            wrap.appendChild(card);
+        }
+
+        for(var k=3; k<list.length; k++) {
+            listWrap.appendChild(createRow(list[k], k + 1, true));
+        }
+    }
+
+    function initRandom() {
+        document.getElementById('random-list').innerHTML = "";
+        currentRandomCount = 0;
+        loadMoreRandom();
+    }
+
+    function loadMoreRandom() {
+        if (currentRandomCount >= allRandomData.length) {
+            document.getElementById('load-more').innerHTML = "到底啦";
+            return;
+        }
+        var wrap = document.getElementById('random-list');
+        var nextBatch = allRandomData.slice(currentRandomCount, currentRandomCount + PAGE_SIZE);
+        for(var i=0; i<nextBatch.length; i++) {
+            wrap.appendChild(createRow(nextBatch[i], 0, false));
+        }
+        currentRandomCount += nextBatch.length;
+        document.getElementById('load-more').style.display = 'block';
+    }
+
+    function createRow(item, rank, isHot) {
+        var div = document.createElement('div');
+        div.className = 'item-card';
+        div.onclick = (function(id){ return function(){ openApp(id); } })(item.id);
+        
+        var rankHtml = (isHot && rank > 0) ? '<div class="item-rank">' + rank + '</div>' : '';
+        var valHtml = !isHot ? '<div class="item-val">' + (item.积分 || 0) + ' 积分</div>' : ''https://gemini.google.com/app/8d0cff325e25e37b;
+        
+        div.innerHTML = rankHtml + 
+            '<img class="item-icon" src="' + item.图标 + '">' +
+            '<div class="item-body">' +
+                '<div class="item-name">' + item.名称 + '</div>' +
+                '<div class="item-desc">' + (item.简介 || '暂无介绍') + '</div>' +
+            '</div>' + valHtml;
+        return div;
+    }
+
+    function openApp(id) {
+        var url = 'oldxiangqing.html?id=' + id;
+        if(window.plus) {
+            var nwv = plus.webview.create(url, 'app_detail_' + id);
+            nwv.show('pop-in', 300);
+        } else {
+            window.location.href = url;
+        }
+    }
+
+    function checkScroll() {
+        if (!isTab1) return;
+        var scrollHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        var clientHeight = window.innerHeight || document.documentElement.clientHeight;
+        if (scrollTop + clientHeight >= scrollHeight - 200) {
+            loadMoreRandom();
+        }
+    }
+
+    window.onscroll = checkScroll;
+
+    if(window.plus){
+        document.addEventListener('plusready', fetchData);
+    } else {
+        window.onload = fetchData;
+    }
+</script>
+</body>
+</html>
