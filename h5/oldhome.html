@@ -289,6 +289,27 @@
         var isLoading = false;
         var slideIndex = 0;
 
+        // 轮播图数据对象（包含跳转逻辑）
+        var carouselData = [
+            {
+                img: 'https://creation.bcmcdn.com/716/appcraft/IMAGE__2anY_mk7_1771559520857.png',
+                action: function() {
+                    var url = "http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=gBER7PtiZVD0cimKXXCGu87ub4okQ8uY&authKey=JqXVtNhWXAcqEXIDqLrxdKu0%2BSQYS5j0l9Rq7dZeZzl7VMD7SFOb%2FEtEqSA0aFg1&noverify=0&group_code=480414235";
+                    if (window.plus) { plus.runtime.openURL(url); } else { window.open(url, '_blank'); }
+                }
+            },
+            {
+                img: 'https://creation.bcmcdn.com/716/appcraft/IMAGE_N2kJ1Zg64_1772885279386.jpeg',
+                action: function() {
+                    var url = 'oldactivity.html';
+                    if (window.plus) {
+                        var ws = plus.webview.create(url, url, { backbuttonMaximize: false });
+                        ws.show('pop-in', 300);
+                    } else { window.location.href = url; }
+                }
+            }
+        ];
+
         function getApps(filter, isRefresh) {
             if (isLoading) return;
             var mail = 'guest';
@@ -352,23 +373,28 @@
             getApps(filter, true);
         }
 
+        // 初始化轮播图并添加点击事件
         function initCarousel() {
             var track = document.getElementById('track');
-            var data = [
-                'https://creation.bcmcdn.com/716/appcraft/IMAGE__2anY_mk7_1771559520857.png',
-                'https://creation.bcmcdn.com/716/appcraft/IMAGE_N2kJ1Zg64_1772885279386.jpeg'
-            ];
             var html = '';
-            for(var i=0; i<data.length; i++) {
-                html += '<div class="carousel-slide" style="background-image:url('+data[i]+')"></div>';
+            for(var i=0; i < carouselData.length; i++) {
+                // 绑定点击索引
+                html += '<div class="carousel-slide" style="background-image:url('+carouselData[i].img+')" onclick="handleCarouselClick('+i+')"></div>';
             }
             track.innerHTML = html;
 
             setInterval(function() {
                 slideIndex++;
-                if (slideIndex >= data.length) slideIndex = 0;
+                if (slideIndex >= carouselData.length) slideIndex = 0;
                 track.style.webkitTransform = 'translate3d(-' + (slideIndex * 50) + '%, 0, 0)';
             }, 3000);
+        }
+
+        // 处理点击跳转逻辑
+        function handleCarouselClick(index) {
+            if (carouselData[index] && typeof carouselData[index].action === 'function') {
+                carouselData[index].action();
+            }
         }
 
         function closeAdModal() { document.getElementById('adModal').style.display = 'none'; }
