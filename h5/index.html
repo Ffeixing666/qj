@@ -4,6 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>趣加应用</title>
+    
+    <!-- 旧设备检测与跳转脚本 (必须放在最前面且使用老语法，防止旧浏览器因不支持下方ES6语法而整块罢工) -->
+    <script>
+        (function() {
+            var ua = navigator.userAgent;
+            var needRedirect = false;
+
+            // 1. 检测 iOS 版本小于 10
+            var iosMatch = ua.match(/(iPhone|iPod|iPad).*OS\s+(\d+)_/i);
+            if (iosMatch && parseInt(iosMatch[2], 10) < 10) {
+                needRedirect = true;
+            }
+
+            // 2. 检测 Chrome 内核 (包含 Android WebView / 很多国产浏览器) 版本小于 100
+            var chromeMatch = ua.match(/Chrome\/(\d+)/i);
+            if (chromeMatch && parseInt(chromeMatch[1], 10) < 100) {
+                needRedirect = true;
+            }
+
+            // 3. 检测 Firefox 版本小于 100
+            var firefoxMatch = ua.match(/Firefox\/(\d+)/i);
+            if (firefoxMatch && parseInt(firefoxMatch[1], 10) < 100) {
+                needRedirect = true;
+            }
+
+            // 如果匹配到旧设备，执行无痕跳转
+            if (needRedirect) {
+                window.location.replace('oldindex.html');
+            }
+        })();
+    </script>
+
     <style>
         :root {
             --bg-color: #F2F2F7;
@@ -133,15 +165,15 @@
 
     <div id="ban-modal">
         <div class="ban-content">
-            <div class="ban-title">账号受限</div>
+            <div class="ban-title">⚠️ 当前账号已封禁</div>
             <div class="ban-body">
-                抱歉，检测到您的账号存在异常情况，目前已被系统限制访问。<br><br>
-                1. 请确保遵守社区使用协议。<br>
-                2. 禁止任何形式的恶意攻击行为。<br>
-                3. 系统自动监测违规实时封禁。
+                可能存在的原因：<br>
+            1.上传病毒、低俗等不良内容。<br>
+            2.刷评论、引战等违规行为。<br>
+            3.抓包、外挂等篡改数据行为。<br>
             </div>
             <div style="font-size: 14px; color: var(--text-color); opacity: 0.5;">
-                如有疑问请联络：<br>
+                如有疑问请联系：<br>
                 <a href="mailto:110045310@qq.com" class="ban-mail">110045310@qq.com</a>
             </div>
         </div>
