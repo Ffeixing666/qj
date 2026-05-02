@@ -1,0 +1,376 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>个人主页（旧兼容）</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Helvetica, STHeiti, sans-serif;
+            background-color: #F2F2F7;
+            color: #1C1C1E;
+            -webkit-user-select: none;
+        }
+        .profile-header {
+            width: 100%;
+            height: 250px;
+            background: #333 url('https://img2.baidu.com/it/u=2641058412,3559859313&fm=253&app=138&f=JPEG?w=500&h=889') no-repeat center center;
+            background-size: cover;
+            position: relative;
+        }
+        .header-mask {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url(about:blank);
+            background-color: rgba(0,0,0,0.3);
+        }
+        .top-nav {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            height: 44px;
+            z-index: 10;
+        }
+        .back-btn {
+            position: absolute;
+            left: 16px;
+            top: 6px;
+            width: 32px;
+            height: 32px;
+            background-color: rgba(255,255,255,0.3);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+        .back-icon {
+            display: block;
+            width: 8px;
+            height: 8px;
+            border-left: 2px solid #ffffff;
+            border-bottom: 2px solid #ffffff;
+            -webkit-transform: rotate(45deg);
+            margin: 10px 0 0 12px;
+        }
+        .edit-btn {
+            position: absolute;
+            right: 16px;
+            top: 6px;
+            padding: 5px 12px;
+            background-color: rgba(255,255,255,0.3);
+            border-radius: 15px;
+            color: #ffffff;
+            font-size: 13px;
+            border: 1px solid rgba(255,255,255,0.4);
+            text-decoration: none;
+        }
+        .user-info-box {
+            position: absolute;
+            bottom: 40px;
+            left: 20px;
+            z-index: 5;
+            color: #ffffff;
+        }
+        .avatar-wrap {
+            width: 70px;
+            height: 70px;
+            border-radius: 35px;
+            background: #ffffff;
+            padding: 2px;
+            overflow: hidden;
+        }
+        .avatar-wrap img {
+            width: 100%;
+            height: 100%;
+            border-radius: 35px;
+        }
+        .user-name {
+            font-size: 22px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+        .user-tagline {
+            font-size: 13px;
+            margin-top: 4px;
+            color: #eeeeee;
+        }
+        .points-pill {
+            display: inline-block;
+            background-color: rgba(255,255,255,0.2);
+            padding: 3px 10px;
+            border-radius: 12px;
+            margin-top: 8px;
+            font-size: 12px;
+        }
+        .main-container {
+            margin-top: -20px;
+            background-color: #F2F2F7;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            position: relative;
+            z-index: 6;
+            min-height: 400px;
+        }
+        .tab-section {
+            padding: 15px 20px 10px;
+            border-bottom: 1px solid #E5E5EA;
+        }
+        .tab-btn {
+            display: inline-block;
+            margin-right: 20px;
+            font-size: 16px;
+            color: #8E8E93;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .tab-btn.active {
+            color: #007AFF;
+            border-bottom: 2px solid #007AFF;
+        }
+        .content-list {
+            padding: 10px 16px;
+        }
+        .item-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid #E5E5EA;
+        }
+        .item-icon {
+            float: left;
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            margin-right: 12px;
+            background-color: #007AFF;
+            overflow: hidden;
+        }
+        .item-info {
+            margin-left: 62px;
+            margin-right: 60px;
+        }
+        .item-title {
+            font-size: 15px;
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .item-desc {
+            font-size: 12px;
+            color: #8E8E93;
+            margin-top: 3px;
+            height: 1.2em;
+            overflow: hidden;
+        }
+        .status-badge {
+            position: absolute;
+            right: 12px;
+            top: 20px;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+        .status-shared { background: #EAF9EE; color: #34C759; }
+        .status-failed { background: #FFF0EF; color: #FF3B30; }
+        .empty-state {
+            padding: 60px 0;
+            text-align: center;
+            color: #8E8E93;
+        }
+        .clearfix:after {
+            content: "."; display: block; height: 0; clear: both; visibility: hidden;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="profile-header">
+        <div class="header-mask"></div>
+        <div class="top-nav">
+            <div class="back-btn" onclick="handleBack()">
+                <b class="back-icon"></b>
+            </div>
+            <div class="edit-btn" id="editBtn" onclick="openSettingPage()" style="display:none;">编辑资料</div>
+        </div>
+
+        <div class="user-info-box">
+            <div class="avatar-wrap">
+                <img id="userAvatar" src="https://img2.baidu.com/it/u=2641058412,3559859313&fm=253&app=138&f=JPEG?w=500&h=889" alt="avatar" />
+            </div>
+            <div class="user-name" id="userName"></div>
+            <div class="user-tagline" id="userTag"></div>
+            
+            <div class="points-pill">
+                <span id="userPoints">0</span> 积分
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="tab-section">
+            <div id="tabApp" class="tab-btn active" onclick="switchTab('app')">应用</div>
+            <div id="tabWeb" class="tab-btn" onclick="switchTab('web')">网页</div>
+        </div>
+
+        <div id="appList" class="content-list">
+            <div class="empty-state">加载中...</div>
+        </div>
+
+        <div id="webList" class="content-list" style="display: none;">
+            <div class="empty-state">
+                <p style="font-size: 15px;">敬请期待</p>
+                <p style="font-size: 12px; margin-top: 5px;">正在连接更广阔的世界</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        function getUrlParam(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]); return null;
+        }
+
+        function toast(msg) {
+            if (window.plus) {
+                plus.nativeUI.toast(msg);
+            } else {
+                alert(msg);
+            }
+        }
+
+        function handleBack() {
+            if (window.plus) {
+                plus.webview.currentWebview().close('auto');
+            } else {
+                history.back();
+            }
+        }
+
+        function switchTab(type) {
+            var tabApp = document.getElementById('tabApp');
+            var tabWeb = document.getElementById('tabWeb');
+            var appList = document.getElementById('appList');
+            var webList = document.getElementById('webList');
+
+            if (type === 'app') {
+                tabApp.className = 'tab-btn active';
+                tabWeb.className = 'tab-btn';
+                appList.style.display = 'block';
+                webList.style.display = 'none';
+            } else {
+                tabApp.className = 'tab-btn';
+                tabWeb.className = 'tab-btn active';
+                appList.style.display = 'none';
+                webList.style.display = 'block';
+            }
+        }
+
+        function htmlEntityToEmoji(str) {
+            if(!str) return "";
+            return str.replace(/&#(\d+);/g, function(match, code) {
+                return String.fromCharCode(code);
+            });
+        }
+
+        function updateUserInfo(info) {
+            if(info.头像) document.getElementById('userAvatar').src = info.头像;
+            document.getElementById('userName').innerHTML = htmlEntityToEmoji(info.昵称 || '用户');
+            document.getElementById('userTag').innerHTML = htmlEntityToEmoji(info.个性签名 || '暂无签名');
+            document.getElementById('userPoints').innerHTML = info.积分 || '0';
+            if(info.背景图片) {
+                document.getElementsByClassName('profile-header')[0].style.backgroundImage = "url('" + info.背景图片 + "')";
+            }
+        }
+
+        function createXHR() {
+            if (window.XMLHttpRequest) return new XMLHttpRequest();
+            return new ActiveXObject("Microsoft.XMLHTTP");
+        }
+
+        function ajaxGet(url, callback) {
+            var xhr = createXHR();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4) {
+                    if (xhr.status == 200) {
+                        callback(JSON.parse(xhr.responseText));
+                    } else {
+                        toast("网络请求失败");
+                    }
+                }
+            };
+            xhr.open("GET", url, true);
+            xhr.send(null);
+        }
+
+        function loadData() {
+            var mail = localStorage.getItem('usermail');
+            var user = getUrlParam('user');
+            
+            if (!mail || !user) {
+                toast("请登录");
+                return;
+            }
+
+            if (mail === user) {
+                document.getElementById('editBtn').style.display = 'block';
+            }
+
+            ajaxGet('https://apirank.qujiaweb.top/?mode=get_other_user_info&mail=' + encodeURIComponent(mail) + '&user=' + encodeURIComponent(user), function(res){
+                if (res.code === 200 && res.fields && res.fields.length > 0) {
+                    updateUserInfo(res.fields[0]);
+                } else if (res.code === 403) {
+                    window.location.href = 'oldindex.html';
+                }
+            });
+
+            ajaxGet('https://apirank.qujiaweb.top/?mode=get_other_user_apps&mail=' + encodeURIComponent(mail) + '&user=' + encodeURIComponent(user), function(res){
+                var list = document.getElementById('appList');
+                if (res.code === 200 && res.fields && res.fields.length > 0) {
+                    var html = '';
+                    for (var i = 0; i < res.fields.length; i++) {
+                        var app = res.fields[i];
+                        html += '<div class="item-card clearfix" onclick="openDetail(' + app.id + ')">';
+                        html += '<div class="item-icon" style="background-image:url(\'' + (app.图标 || '') + '\');background-size:cover;"></div>';
+                        html += '<div class="item-info">';
+                        html += '<div class="item-title">' + htmlEntityToEmoji(app.名称) + '</div>';
+                        html += '<div class="item-desc">' + htmlEntityToEmoji(app.简介) + '</div>';
+                        html += '</div>';
+                        html += '<div class="status-badge status-shared">已分享</div>';
+                        html += '</div>';
+                    }
+                    list.innerHTML = html;
+                } else {
+                    list.innerHTML = '<div class="empty-state">暂无分享记录</div>';
+                }
+            });
+        }
+
+        function openDetail(id) {
+            var url = 'oldxiangqing.html?id=' + id;
+            if (window.plus) {
+                var ws = plus.webview.create(url, url);
+                ws.show('pop-in', 300);
+            } else {
+                window.location.href = url;
+            }
+        }
+
+        function openSettingPage() {
+            var url = 'oldsetting.html';
+            if (window.plus) {
+                var ws = plus.webview.create(url, url);
+                ws.show('pop-in', 300);
+            } else {
+                window.location.href = url;
+            }
+        }
+
+        window.onload = loadData;
+    </script>
+</body>
+</html>
