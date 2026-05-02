@@ -199,7 +199,7 @@
 
         function goHome() {
             if (window.plus) {
-                var h = plus.webview.create('oldhome.html', 'home.html', {
+                var h = plus.webview.create('oldoldhome.html', 'oldhome.html', {
                     backbuttonMaximize: false,
                     scrollIndicator: 'none'
                 });
@@ -208,7 +208,7 @@
                     plus.webview.currentWebview().close('none'); 
                 }, 500);
             } else {
-                window.location.replace('home.html');
+                window.location.replace('oldhome.html');
             }
         }
 
