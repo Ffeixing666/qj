@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>应用详情</title>
+<style>
+* {
+-webkit-user-select: none;
+user-select: none;
+-webkit-touch-callout: none;
+box-sizing: border-box;
+-webkit-tap-highlight-color: transparent;
+}
+body {
+margin: 0;
+padding: 0;
+background-color: #ffffff;
+font-family: "Helvetica Neue", Helvetica, "PingFang SC", sans-serif;
+color: #000000;
+line-height: 1.5;
+width: 100%;
+overflow-x: hidden;
+-webkit-text-size-adjust: 100%;
+}
+.nav-bar {
+position: fixed;
+top: 0;
+width: 100%;
+height: 44px;
+z-index: 900;
+background-color: rgba(255, 255, 255, 0.95);
+border-bottom: 1px solid #F2F2F7;
+}
+.back-btn {
+position: absolute;
+left: 16px;
+top: 6px;
+width: 32px;
+height: 32px;
+border-radius: 16px;
+background: rgba(0,0,0,0.05);
+}
+.back-icon {
+position: absolute;
+left: 13px;
+top: 11px;
+width: 10px;
+height: 10px;
+border-left: 2px solid #007AFF;
+border-bottom: 2px solid #007AFF;
+-webkit-transform: rotate(45deg);
+transform: rotate(45deg);
+}
+.app-header {
+padding: 64px 20px 24px;
+overflow: hidden;
+}
+.app-icon {
+float: left;
+width: 100px;
+height: 100px;
+border-radius: 22px;
+background: #e3e3e8;
+background: -webkit-linear-gradient(-45deg, #f5f5f7 0%, #e3e3e8 100%);
+box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+margin-right: 20px;
+border: 1px solid rgba(0,0,0,0.1);
+}
+.app-title-group {
+overflow: hidden;
+}
+.app-name {
+font-size: 24px;
+font-weight: bold;
+margin-bottom: 4px;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+.app-package-container {
+overflow: hidden;
+cursor: pointer;
+}
+.app-package {
+float: left;
+font-size: 13px;
+color: #8E8E93;
+font-family: monospace;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+max-width: 90%;
+}
+.app-package-arrow {
+float: left;
+font-size: 13px;
+color: #8E8E93;
+margin-left: 4px;
+}
+.info-grid {
+overflow-x: auto;
+white-space: nowrap;
+padding: 0 20px 30px;
+-webkit-overflow-scrolling: touch;
+}
+.info-grid::-webkit-scrollbar { display: none; }
+.info-item {
+display: inline-block;
+text-align: center;
+min-width: 75px;
+margin-right: 24px;
+position: relative;
+vertical-align: top;
+}
+.info-item:after {
+content: "";
+position: absolute;
+right: -12px;
+top: 20%;
+height: 60%;
+width: 1px;
+background: #D1D1D6;
+}
+.info-item:last-child:after { display: none; }
+.info-item:last-child { margin-right: 0; }
+.info-label { font-size: 11px; color: #8E8E93; font-weight: bold; margin-bottom: 4px; }
+.info-value { font-size: 15px; font-weight: bold; color: #48484A; white-space: normal; }
+.section {
+padding: 24px 20px;
+border-top: 1px solid #F2F2F7;
+}
+.section-title {
+font-size: 20px;
+font-weight: bold;
+margin-bottom: 16px;
+overflow: hidden;
+}
+.section-title span {
+float: right;
+font-size: 14px;
+color: #007AFF;
+font-weight: normal;
+cursor: pointer;
+margin-top: 4px;
+}
+.screenshot-list {
+overflow-x: auto;
+white-space: nowrap;
+-webkit-overflow-scrolling: touch;
+font-size: 0;
+}
+.screenshot-list::-webkit-scrollbar { display: none; }
+.screenshot-item {
+display: inline-block;
+width: 180px;
+height: 320px;
+background: #f5f5f7;
+border-radius: 12px;
+margin-right: 12px;
+border: 1px solid rgba(0,0,0,0.05);
+background-size: cover;
+background-position: center;
+vertical-align: top;
+}
+.screenshot-item:last-child { margin-right: 0; }
+.description {
+font-size: 15px;
+color: #3A3A3C;
+line-height: 1.6;
+word-wrap: break-word;
+-webkit-user-select: text;
+user-select: text;
+-webkit-touch-callout: default;
+}
+.comment-container { display: block; }
+.comment-card {
+background: #F9F9FB;
+border-radius: 15px;
+padding: 16px;
+border: 1px solid rgba(0,0,0,0.03);
+margin-bottom: 12px;
+}
+.comment-header { overflow: hidden; margin-bottom: 8px; }
+.user-avatar {
+float: left;
+width: 32px;
+height: 32px;
+border-radius: 16px;
+margin-right: 10px;
+background: #FF9500;
+color: white;
+text-align: center;
+line-height: 32px;
+font-size: 14px;
+font-weight: bold;
+}
+.user-meta { float: left; width: 50%; }
+.user-name { font-size: 14px; font-weight: bold; color: #000000; }
+.comment-time { font-size: 11px; color: #8E8E93; }
+.rating-stars { float: right; color: #FF9500; font-size: 12px; line-height: 32px; }
+.comment-body {
+font-size: 14px;
+color: #3A3A3C;
+line-height: 1.5;
+word-wrap: break-word;
+}
+.bottom-bar {
+position: fixed;
+bottom: 0;
+width: 100%;
+background: rgba(255, 255, 255, 0.95);
+padding: 10px 16px;
+border-top: 1px solid rgba(0,0,0,0.1);
+z-index: 1000;
+box-sizing: border-box;
+height: 64px;
+}
+.btn-icon-left {
+position: absolute;
+left: 16px;
+top: 10px;
+width: 44px;
+height: 44px;
+background: #F2F2F7;
+border-radius: 12px;
+text-align: center;
+color: #007AFF;
+font-size: 10px;
+font-weight: bold;
+}
+.btn-icon-right {
+position: absolute;
+right: 16px;
+top: 10px;
+width: 44px;
+height: 44px;
+background: #F2F2F7;
+border-radius: 12px;
+text-align: center;
+color: #007AFF;
+font-size: 10px;
+font-weight: bold;
+}
+.btn-icon-inner1 { display: block; font-size: 18px; margin-top: 5px; }
+.btn-icon-inner2 { display: block; margin-top: 1px; }
+.get-btn-main {
+position: absolute;
+left: 70px;
+right: 70px;
+top: 10px;
+height: 44px;
+background: #007AFF;
+color: white;
+border: none;
+border-radius: 12px;
+font-size: 17px;
+font-weight: bold;
+width: auto;
+-webkit-appearance: none;
+}
+.get-btn-full {
+display: block;
+width: 100%;
+height: 44px;
+background: #007AFF;
+color: white;
+border: none;
+border-radius: 12px;
+font-size: 17px;
+font-weight: bold;
+margin-top: 10px;
+-webkit-appearance: none;
+}
+.download-progress-modal {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0, 0, 0, 0.5);
+z-index: 2000;
+display: none;
+}
+.progress-container {
+position: absolute;
+top: 50%;
+left: 50%;
+width: 85%;
+max-width: 400px;
+-webkit-transform: translate(-50%, -50%);
+background: white;
+border-radius: 20px;
+padding: 30px;
+box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+box-sizing: border-box;
+}
+.progress-title {
+font-size: 18px;
+font-weight: bold;
+text-align: center;
+margin-bottom: 20px;
+color: #000000;
+}
+.progress-bar {
+width: 100%;
+height: 8px;
+background: #F2F2F7;
+border-radius: 4px;
+overflow: hidden;
+margin-bottom: 15px;
+}
+.progress-fill {
+height: 100%;
+background: #007AFF;
+border-radius: 4px;
+width: 0%;
+-webkit-transition: width 0.3s;
+}
+.progress-text {
+font-size: 14px;
+color: #8E8E93;
+text-align: center;
+margin-bottom: 20px;
+}
+.progress-cancel {
+width: 100%;
+height: 44px;
+background: #F2F2F7;
+border: none;
+border-radius: 12px;
+font-size: 16px;
+font-weight: bold;
+color: #000000;
+-webkit-appearance: none;
+}
+.modal-overlay {
+position: fixed;
+top: 0; left: 0; width: 100%; height: 100%;
+background: rgba(0,0,0,0.4);
+display: none;
+z-index: 2000;
+}
+.modal-sheet {
+position: absolute;
+bottom: 0;
+left: 0;
+width: 100%;
+background: white;
+border-radius: 20px 20px 0 0;
+padding: 20px;
+box-sizing: border-box;
+-webkit-transform: translateY(100%);
+-webkit-transition: -webkit-transform 0.3s;
+}
+.modal-sheet.show { -webkit-transform: translateY(0); }
+.modal-title { font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 20px; }
+.coin-options { overflow: hidden; margin: 0 -10px; }
+.coin-opt {
+float: left;
+width: 50%;
+padding: 0 10px;
+box-sizing: border-box;
+}
+.coin-opt-inner {
+padding: 16px;
+border: 2px solid #F2F2F7;
+border-radius: 15px;
+text-align: center;
+}
+.coin-num { font-size: 24px; font-weight: bold; color: #007AFF; display: block; }
+.coin-label { font-size: 13px; color: #8E8E93; }
+.star-rating { text-align: center; margin: 20px 0; }
+.star-rating span { font-size: 24px; color: #D1D1D6; margin: 0 4px; }
+.star-rating span.active { color: #FF9500; }
+.comment-input {
+width: 100%;
+height: 100px;
+border: 1px solid #F2F2F7;
+border-radius: 12px;
+padding: 12px;
+font-size: 15px;
+box-sizing: border-box;
+margin-bottom: 20px;
+font-family: inherit;
+-webkit-appearance: none;
+}
+.upload-grid { overflow: hidden; margin-bottom: 20px; margin-right: -10px; }
+.upload-item {
+float: left;
+width: 25%;
+padding-right: 10px;
+margin-bottom: 10px;
+box-sizing: border-box;
+}
+.upload-item-inner {
+width: 100%;
+height: 0;
+padding-bottom: 100%;
+background: #F2F2F7;
+border-radius: 10px;
+position: relative;
+background-size: cover;
+background-position: center;
+}
+.upload-add-inner {
+border: 2px dashed #D1D1D6;
+background: transparent;
+text-align: center;
+color: #8E8E93;
+font-size: 24px;
+box-sizing: border-box;
+}
+.upload-add-text {
+position: absolute;
+top: 50%;
+left: 0;
+width: 100%;
+margin-top: -14px;
+}
+.upload-del {
+position: absolute;
+top: 4px;
+right: 4px;
+width: 20px;
+height: 20px;
+background: rgba(0, 0, 0, 0.7);
+color: white;
+border-radius: 10px;
+text-align: center;
+line-height: 20px;
+font-size: 14px;
+}
+.reply-card {
+background: #F5F5F7;
+border-radius: 12px;
+padding: 12px;
+margin-bottom: 8px;
+border: 1px solid rgba(0,0,0,0.03);
+}
+</style>
+</head>
+<body>
+<div class="nav-bar">
+<div class="back-btn" onclick="handleBack()">
+<div class="back-icon"></div>
+</div>
+</div>
+<div class="app-header">
+<div class="app-icon" id="appIconBg"></div>
+<div class="app-title-group">
+<div class="app-name" id="appName">加载中...</div>
+<div class="app-package-container" onclick="handlePackageClick()">
+<div class="app-package" id="appPackage">加载中...</div>
+<div class="app-package-arrow">›</div>
+</div>
+</div>
+</div>
+<div class="info-grid">
+<div class="info-item">
+<div class="info-label">应用大小</div>
+<div class="info-value" id="infoSize"></div>
+</div>
+<div class="info-item">
+<div class="info-label">应用版本</div>
+<div class="info-value" id="infoVer"></div>
+</div>
+<div class="info-item">
+<div class="info-label">安卓版本</div>
+<div class="info-value" id="infoAnd"></div>
+</div>
+<div class="info-item">
+<div class="info-label">系统位数</div>
+<div class="info-value" id="infoBit"></div>
+</div>
+<div class="info-item">
+<div class="info-label">分享时间</div>
+<div class="info-value" id="infoTime"></div>
+</div>
+<div class="info-item">
+<div class="info-label">分享用户</div>
+<div class="info-value" id="infoUser"></div>
+</div>
+</div>
+<div class="section">
+<div class="section-title">截图</div>
+<div class="screenshot-list" id="screenshotList"></div>
+</div>
+<div class="section">
+<div class="section-title">简介</div>
+<div class="description" id="appDesc">加载中...</div>
+</div>
+<div class="section" style="margin-bottom: 80px;" id="commentSectionWrapper">
+<div class="section-title" id="commentTitleText">评论 <span onclick="openCommentModal()">写评论</span></div>
+<div class="comment-container" id="commentContainer">
+<div style="text-align: center; padding: 20px; color: #8E8E93;">加载中...</div>
+</div>
+</div>
+<div class="modal-overlay" id="commentModal" onclick="closeCommentModal()">
+<div class="modal-sheet" onclick="cancelBubble(event)">
+<div class="modal-title">发表评论</div>
+<div class="star-rating" id="starRating">
+<span onclick="setRating(1)">★</span>
+<span onclick="setRating(2)">★</span>
+<span onclick="setRating(3)">★</span>
+<span onclick="setRating(4)">★</span>
+<span onclick="setRating(5)">★</span>
+</div>
+<textarea class="comment-input" id="commentContent" placeholder="说说你的使用心得..."></textarea>
+<div class="upload-grid" id="imageGrid">
+<div class="upload-item" onclick="triggerUpload()">
+<div class="upload-item-inner upload-add-inner">
+<div class="upload-add-text">+</div>
+</div>
+</div>
+</div>
+<input type="file" id="fileInput" style="display:none;" accept="image/*" onchange="handleFileSelect(event)">
+<button class="get-btn-full" onclick="submitComment()">立即发表</button>
+</div>
+</div>
+<div class="modal-overlay" id="replyModal" onclick="closeReplyModal()">
+<div class="modal-sheet" onclick="cancelBubble(event)">
+<div class="modal-title" id="replyTitle">回复 用户名</div>
+<textarea class="comment-input" id="replyContent" placeholder="写下你的回复..."></textarea>
+<div class="upload-grid" id="replyImageGrid">
+<div class="upload-item" onclick="triggerReplyUpload()">
+<div class="upload-item-inner upload-add-inner">
+<div class="upload-add-text">+</div>
+</div>
+</div>
+</div>
+<input type="file" id="replyFileInput" style="display:none;" accept="image/*" onchange="handleReplyFileSelect(event)">
+<button class="get-btn-full" onclick="submitReply()">立即回复</button>
+</div>
+</div>
+<div class="bottom-bar">
+<div class="btn-icon-left" onclick="toggleCollect()">
+<span class="btn-icon-inner1" id="collectIcon">☆</span>
+<span class="btn-icon-inner2">收藏</span>
+</div>
+<button class="get-btn-main" id="downloadBtn" onclick="startDownload(event)">获取</button>
+<div class="btn-icon-right" onclick="openCoinModal()">
+<span class="btn-icon-inner1">🪙</span>
+<span class="btn-icon-inner2" id="coinText">投币</span>
+</div>
+</div>
+<div class="modal-overlay" id="coinModal" onclick="closeCoinModal()">
+<div class="modal-sheet" onclick="cancelBubble(event)">
+<div class="modal-title">为应用投币</div>
+<div class="coin-options">
+<div class="coin-opt" onclick="doCoin(1)">
+<div class="coin-opt-inner">
+<span class="coin-num">1</span>
+<span class="coin-label">积分</span>
+</div>
+</div>
+<div class="coin-opt" onclick="doCoin(2)">
+<div class="coin-opt-inner">
+<span class="coin-num">2</span>
+<span class="coin-label">积分</span>
+</div>
+</div>
+</div>
+<button class="get-btn-full" style="background: #F2F2F7; color: #000000;" onclick="closeCoinModal()">取消</button>
+</div>
+</div>
+<div class="download-progress-modal" id="downloadProgressModal">
+<div class="progress-container">
+<div class="progress-title">下载中</div>
+<div class="progress-bar">
+<div class="progress-fill" id="progressFill"></div>
+</div>
+<div class="progress-text" id="progressText">准备中...</div>
+<button class="progress-cancel" onclick="cancelDownload()">取消下载</button>
+</div>
+</div>
+<script>
+var screenshotUrls = [];
+var isSaving = false;
+var pageActive = true;
+var currentDownloadTask = null;
+var currentAppInfo = null;
+var currentRating = 0;
+var uploadedImages = [];
+var replyImages = [];
+var currentReplyTarget = null;
+function cancelBubble(e) {
+if (!e) e = window.event;
+if (e.stopPropagation) e.stopPropagation();
+else e.cancelBubble = true;
+}
+function ajax(opts, cb) {
+var xhr = new XMLHttpRequest();
+xhr.open(opts.method || 'GET', opts.url, true);
+if (opts.headers) {
+for (var k in opts.headers) {
+if (opts.headers.hasOwnProperty(k)) {
+xhr.setRequestHeader(k, opts.headers[k]);
+}
+}
+}
+xhr.onreadystatechange = function() {
+if (xhr.readyState === 4) {
+if (xhr.status >= 200 && xhr.status < 300) {
+try {
+var json = JSON.parse(xhr.responseText);
+cb(null, json);
+} catch(e) {
+cb(e, null);
+}
+} else {
+cb(new Error(xhr.status), null);
+}
+}
+};
+xhr.send(opts.body || null);
+}
+function getUrlParam(name) {
+var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)');
+var r = window.location.search.substr(1).match(reg);
+if (r != null) return decodeURIComponent(r[2]);
+return null;
+}
+function handleBack() {
+pageActive = false;
+if (window.plus) {
+var webview = plus.webview.currentWebview();
+webview.back();
+setTimeout(function() {
+webview.canBack(function(e) {
+if (!e.canBack) webview.close('auto');
+});
+}, 100);
+} else {
+window.history.back();
+}
+}
+function handlePackageClick() {
+if (!pageActive) return;
+var pkgElem = document.getElementById('appPackage');
+if (!pkgElem) return;
+var pkgName = pkgElem.innerText || pkgElem.textContent;
+if (!pkgName || pkgName === '加载中...') return;
+var url = 'moreapp.html?baoming=' + encodeURIComponent(pkgName);
+if (window.plus) {
+var ws = plus.webview.create(url, url, {backbuttonMaximize: false});
+ws.show('pop-in', 300);
+} else {
+window.location.href = url;
+}
+}
+function toggleCollect() {
+if (!pageActive) return;
+var icon = document.getElementById('collectIcon');
+var appId = getUrlParam('id');
+if (icon.innerText === '☆' || icon.textContent === '☆') {
+icon.innerText = '★';
+icon.style.color = '#FF9500';
+addToCollection(appId);
+showToast('收藏成功');
+} else {
+icon.innerText = '☆';
+icon.style.color = '#007AFF';
+removeFromCollection(appId);
+showToast('取消收藏');
+}
+}
+function addToCollection(appId) {
+try {
+var colStr = localStorage.getItem('appCollection') || '[]';
+var collection = JSON.parse(colStr);
+var exists = false;
+for(var i=0; i<collection.length; i++){
+if(collection[i].id === appId) { exists = true; break; }
+}
+if (!exists && currentAppInfo) {
+collection.push({
+id: appId,
+name: currentAppInfo['名称'] || '',
+icon: currentAppInfo['图标'] || '',
+description: currentAppInfo['简介'] || '',
+timestamp: new Date().getTime()
+});
+localStorage.setItem('appCollection', JSON.stringify(collection));
+}
+} catch (e) {}
+}
+function removeFromCollection(appId) {
+try {
+var colStr = localStorage.getItem('appCollection') || '[]';
+var collection = JSON.parse(colStr);
+var newCol = [];
+for(var i=0; i<collection.length; i++){
+if(collection[i].id !== appId) newCol.push(collection[i]);
+}
+localStorage.setItem('appCollection', JSON.stringify(newCol));
+} catch (e) {}
+}
+function isCollected(appId) {
+try {
+var colStr = localStorage.getItem('appCollection') || '[]';
+var collection = JSON.parse(colStr);
+for(var i=0; i<collection.length; i++){
+if(collection[i].id === appId) return true;
+}
+} catch (e) {}
+return false;
+}
+function updateCollectButton() {
+if (!pageActive) return;
+var appId = getUrlParam('id');
+var icon = document.getElementById('collectIcon');
+if (isCollected(appId)) {
+icon.innerText = '★';
+icon.style.color = '#FF9500';
+} else {
+icon.innerText = '☆';
+icon.style.color = '#007AFF';
+}
+}
+function openCoinModal() {
+if (!pageActive) return;
+var modal = document.getElementById('coinModal');
+var sheet = modal.querySelector('.modal-sheet');
+modal.style.display = 'block';
+setTimeout(function() {
+if (pageActive && sheet) sheet.className = 'modal-sheet show';
+}, 10);
+}
+function closeCoinModal() {
+if (!pageActive) return;
+var modal = document.getElementById('coinModal');
+var sheet = modal.querySelector('.modal-sheet');
+if (sheet) sheet.className = 'modal-sheet';
+setTimeout(function() {
+if (pageActive && modal) modal.style.display = 'none';
+}, 300);
+}
+function doCoin(num) {
+if (!pageActive) return;
+var appId = getUrlParam('id');
+var userMail = localStorage.getItem('usermail');
+if (!userMail) { showToast('请先登录'); closeCoinModal(); return; }
+if (!currentAppInfo) { showToast('应用信息加载中'); closeCoinModal(); return; }
+if (currentAppInfo['邮箱'] === userMail) { showToast('不能给自己的应用投币'); closeCoinModal(); return; }
+var userCoin = parseInt(localStorage.getItem('userpoints') || '0', 10);
+if (userCoin < num) { showToast('积分不足'); closeCoinModal(); return; }
+showLoading();
+var mode = num === 1 ? 'coin_1' : 'coin_2';
+ajax({
+method: 'POST',
+url: 'https://apirank.qujiaweb.top/?mode=' + mode,
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify({mail: userMail, appid: appId})
+}, function(err, data) {
+if (!pageActive) return;
+hideLoading();
+closeCoinModal();
+if (!err && data && data.code === 200) {
+showToast('投币成功！');
+localStorage.setItem('userpoints', (userCoin - num).toString());
+var appCoin = parseInt(currentAppInfo['积分'] || '0', 10) + num;
+currentAppInfo['积分'] = appCoin;
+updateCoinDisplay();
+} else {
+showToast((data && data.msg) ? data.msg : '投币失败');
+}
+});
+}
+function updateCoinDisplay() {
+if (!pageActive) return;
+var coinBtnText = document.getElementById('coinText');
+if (coinBtnText && currentAppInfo) {
+var currentAppCoin = parseInt(currentAppInfo['积分'] || 0, 10);
+coinBtnText.innerText = currentAppCoin > 99 ? '99币+' : currentAppCoin + '币';
+}
+}
+function showLoading() {
+if (window.plus) plus.nativeUI.showWaiting('加载中...');
+else document.body.style.opacity = '0.7';
+}
+function hideLoading() {
+if (window.plus) plus.nativeUI.closeWaiting();
+else document.body.style.opacity = '1';
+}
+function showToast(message) {
+if (!pageActive) return;
+if (window.plus && plus.nativeUI) plus.nativeUI.toast(message);
+else alert(message);
+}
+function copyToClipboardWithFallback(text, copyType) {
+if (window.plus && plus.device) {
+try {
+plus.device.setClipboard(text, function() {
+showToast(copyType === 'comment' ? '评论已复制' : '密码已复制');
+}, function(err) {
+tryExecCommand(text, copyType);
+});
+return;
+} catch (e) {}
+}
+tryExecCommand(text, copyType);
+}
+function tryExecCommand(text, copyType) {
+var textArea = document.createElement('textarea');
+textArea.value = text;
+textArea.style.position = 'fixed';
+textArea.style.left = '-999999px';
+textArea.style.top = '-999999px';
+document.body.appendChild(textArea);
+textArea.focus();
+textArea.select();
+try {
+var successful = document.execCommand('copy');
+if (successful) showToast(copyType === 'comment' ? '评论已复制' : '密码已复制');
+else showToast('复制失败，请手动复制');
+} catch (err) {
+showToast('复制失败');
+}
+document.body.removeChild(textArea);
+}
+function formatFileSize(bytes) {
+if (bytes === 0) return '0 B';
+var k = 1024;
+var sizes = ['B', 'KB', 'MB', 'GB'];
+var i = Math.floor(Math.log(bytes) / Math.log(k));
+return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+function showDownloadProgress() {
+if (!pageActive) return;
+var m = document.getElementById('downloadProgressModal');
+if (m) m.style.display = 'block';
+}
+function hideDownloadProgress() {
+if (!pageActive) return;
+var m = document.getElementById('downloadProgressModal');
+if (m) m.style.display = 'none';
+}
+function updateDownloadProgress(progress, downloadedSize, totalSize) {
+if (!pageActive) return;
+var pf = document.getElementById('progressFill');
+var pt = document.getElementById('progressText');
+if (pf) pf.style.width = progress + '%';
+if (pt) {
+var d = formatFileSize(downloadedSize);
+var t = formatFileSize(totalSize);
+pt.innerText = d + ' / ' + t + ' (' + progress + '%)';
+}
+}
+function cancelDownload() {
+if (currentDownloadTask) {
+currentDownloadTask.abort();
+currentDownloadTask = null;
+hideDownloadProgress();
+showToast('下载已取消');
+}
+}
+function downloadWithPlus(url) {
+if (!window.plus) return;
+showDownloadProgress();
+var downloadTask = plus.downloader.createDownload(url, {}, function(download, status) {
+hideDownloadProgress();
+currentDownloadTask = null;
+if (status === 200) {
+showToast('下载完成');
+plus.runtime.openFile(download.filename);
+} else {
+showToast('下载失败，请重试');
+}
+});
+currentDownloadTask = downloadTask;
+downloadTask.addEventListener('statechanged', function(task, status) {
+if (task.state === 3) {
+var progress = Math.round((task.downloadedSize / task.totalSize) * 100);
+updateDownloadProgress(progress, task.downloadedSize, task.totalSize);
+}
+});
+downloadTask.start();
+}
+function parselanzouUrl(url, password, callback) {
+var apiUrl = 'https://api.pearapi.ai/api/lanzou/api.php?url=' + encodeURIComponent(url) + '&pwd=' + encodeURIComponent(password || '');
+ajax({url: apiUrl}, function(err, data) {
+if (!err && data && data.code === 200 && data.data && data.data.downloadurl) {
+callback(data.data.downloadurl);
+} else {
+callback(null);
+}
+});
+}
+function startDownload(e) {
+if (!pageActive || !currentAppInfo) return;
+var btn = e.target || e.srcElement;
+btn.innerText = "处理中...";
+var url = currentAppInfo['链接'];
+var password = currentAppInfo['密码'];
+if (url.indexOf('lanz') > -1) {
+btn.innerText = "解析中...";
+parselanzouUrl(url, password, function(directUrl) {
+if (directUrl) {
+if (window.plus) downloadWithPlus(directUrl);
+else window.open(directUrl, '_blank');
+} else {
+if (password && password !== '') copyToClipboardWithFallback(password);
+if (window.plus) plus.runtime.openURL(url);
+else window.open(url, '_blank');
+}
+if (pageActive) btn.innerText = "获取";
+});
+} else if (url.indexOf('.apk') > -1) {
+if (window.plus) downloadWithPlus(url);
+else window.open(url, '_blank');
+if (pageActive) btn.innerText = "获取";
+} else {
+if (password && password !== '') copyToClipboardWithFallback(password);
+if (window.plus) plus.runtime.openURL(url);
+else window.open(url, '_blank');
+if (pageActive) btn.innerText = "获取";
+}
+}
+function formatTimestamp(timestamp) {
+if (!timestamp) return '--';
+var date = new Date(parseInt(timestamp, 10) * 1000);
+var month = date.getMonth() + 1;
+var day = date.getDate();
+var mStr = month < 10 ? '0' + month : '' + month;
+var dStr = day < 10 ? '0' + day : '' + day;
+return mStr + '-' + dStr;
+}
+function handleNullValue(val) {
+return (val === null || val === undefined || val === '') ? '--' : val;
+}
+function getAppDetail() {
+var appId = getUrlParam('id');
+if (!appId) { if (pageActive) alert('缺少应用ID'); return; }
+if (pageActive) { document.body.style.opacity = '1'; showLoading(); }
+var userMail = localStorage.getItem('usermail');
+if (!userMail) { if (pageActive) { alert('请先登录'); hideLoading(); } return; }
+if (!pageActive) return;
+var reqUrl = 'https://apirank.qujiaweb.top/?mode=get_app_detail&id=' + appId + '&mail=' + userMail;
+ajax({url: reqUrl}, function(err, data) {
+if (!pageActive) return;
+hideLoading();
+if (err) { alert('获取失败'); return; }
+if (data.fields && data.fields.length > 0) {
+var app = data.fields[0];
+renderAppDetail(app);
+var appIdNum = parseInt(appId, 10);
+if (!isNaN(appIdNum) && appIdNum >= 1 && appIdNum <= 1108) {
+var sections = document.querySelectorAll('.section');
+if (sections.length >= 2) {
+var ss = sections[1];
+var warn = document.createElement('div');
+warn.style.cssText = "background: #FFF5F5; border-left: 4px solid #FF6B6B; padding: 12px 16px; margin: 10px 20px; border-radius: 8px; font-size: 14px; color: #D32F2F;";
+warn.innerHTML = '该应用来自旧版客户端，可能存在部分问题';
+if (ss.nextSibling) ss.parentNode.insertBefore(warn, ss.nextSibling);
+else ss.parentNode.appendChild(warn);
+}
+}
+saveToHistory(appId, app);
+updateCollectButton();
+setTimeout(function() { if (pageActive) getAppComments(appId); }, 300);
+} else if (data.code === 403) {
+window.location.href = 'index.html';
+} else {
+alert(data.msg || '应用已删除');
+}
+});
+}
+function saveToHistory(appId, app) {
+try {
+var hs = localStorage.getItem('appHistory') || '[]';
+var history = JSON.parse(hs);
+var newH = [];
+for (var i=0; i<history.length; i++) {
+if (history[i].id !== appId) newH.push(history[i]);
+}
+var hItem = {
+id: appId,
+name: handleNullValue(app['名称']),
+icon: handleNullValue(app['图标']),
+description: handleNullValue(app['简介']),
+timestamp: new Date().getTime()
+};
+newH.unshift(hItem);
+if (newH.length > 20) newH = newH.slice(0, 20);
+localStorage.setItem('appHistory', JSON.stringify(newH));
+} catch(e) {}
+}
+function fromCodePoint(codePoint) {
+if (codePoint > 0xFFFF) {
+codePoint -= 0x10000;
+return String.fromCharCode((codePoint >> 10) + 0xD800, (codePoint % 0x400) + 0xDC00);
+}
+return String.fromCharCode(codePoint);
+}
+function htmlEntityToEmoji(str) {
+return str.replace(/&#(\d+);/g, function(match, code) {
+return fromCodePoint(parseInt(code, 10));
+});
+}
+function emojiToHtmlEntity(str) {
+var result = '';
+for (var i = 0; i < str.length; i++) {
+var code = str.charCodeAt(i);
+if (code >= 0xD800 && code <= 0xDBFF) {
+var lowCode = str.charCodeAt(i + 1);
+if (lowCode >= 0xDC00 && lowCode <= 0xDFFF) {
+var codePoint = ((code - 0xD800) * 0x400) + (lowCode - 0xDC00) + 0x10000;
+result += '&#' + codePoint + ';';
+i++;
+continue;
+}
+}
+result += str.charAt(i);
+}
+return result;
+}
+function renderAppDetail(app) {
+if (!pageActive) return;
+currentAppInfo = app;
+var appIconBg = document.getElementById('appIconBg');
+if (appIconBg && app['图标']) {
+appIconBg.style.backgroundImage = 'url(' + app['图标'] + ')';
+appIconBg.style.backgroundSize = 'cover';
+appIconBg.style.backgroundPosition = 'center';
+}
+var an = document.getElementById('appName');
+if (an) an.innerText = handleNullValue(app['名称']);
+var ap = document.getElementById('appPackage');
+if (ap) ap.innerText = (app['包名'] === null || app['包名'] === undefined || app['包名'] === '') ? '暂无包名' : app['包名'];
+var sList = document.getElementById('screenshotList');
+if (sList && app['图片']) {
+var urls = app['图片'].split(',');
+screenshotUrls = [];
+for (var i=0; i<urls.length; i++) {
+var u = urls[i].replace(/^\s+|\s+$/g, '');
+if (u !== "") screenshotUrls.push(u);
+}
+sList.innerHTML = '';
+for (var j=0; j<screenshotUrls.length; j++) {
+var div = document.createElement('div');
+div.className = 'screenshot-item';
+div.style.backgroundImage = 'url(' + screenshotUrls[j] + ')';
+(function(idx) {
+div.onclick = function() { if (pageActive) previewScreenshots(idx); };
+})(j);
+sList.appendChild(div);
+}
+}
+document.getElementById('infoSize').innerText = handleNullValue(app['大小']);
+document.getElementById('infoVer').innerText = handleNullValue(app['版本']);
+document.getElementById('infoAnd').innerText = handleNullValue(app['安卓版本']);
+document.getElementById('infoBit').innerText = handleNullValue(app['位数']);
+document.getElementById('infoTime').innerText = formatTimestamp(app['时间']);
+var iu = document.getElementById('infoUser');
+iu.innerText = handleNullValue(app['用户']);
+iu.style.cursor = 'pointer';
+iu.onclick = function() {
+if (!pageActive) return;
+if (app['邮箱']) {
+var url = 'page.html?user=' + app['邮箱'];
+if (window.plus) plus.webview.open(url, url, {backbuttonMaximize:false}, 'pop-in', 300);
+else window.location.href = url;
+}
+};
+var desc = document.getElementById('appDesc');
+if (desc) {
+var dStr = handleNullValue(app['简介']);
+dStr = htmlEntityToEmoji(dStr);
+dStr = dStr.replace(/\n/g, '<br>');
+desc.innerHTML = dStr;
+}
+updateCoinDisplay();
+}
+function previewScreenshots(index) {
+if (!pageActive) return;
+if (!window.plus) { alert('请在App环境中预览'); return; }
+plus.nativeUI.previewImage(screenshotUrls, {
+current: index,
+loop: true,
+indicator: 'number',
+onLongPress: function(e) { saveImageToGallery(e.url); }
+});
+}
+function saveImageToGallery(filePath) {
+if (!pageActive) return;
+if (isSaving) { showToast('保存中...'); return; }
+isSaving = true;
+if (window.plus && plus.gallery && typeof plus.gallery.save === 'function') {
+plus.gallery.save(filePath, function() {
+if (pageActive) { isSaving = false; showToast('保存成功'); }
+}, function() {
+if (pageActive) { isSaving = false; showToast('保存失败'); }
+});
+} else {
+isSaving = false;
+showToast('保存失败');
+}
+}
+function openCommentModal() {
+var m = document.getElementById('commentModal');
+var s = m.querySelector('.modal-sheet');
+m.style.display = 'block';
+setTimeout(function() { s.className = 'modal-sheet show'; }, 10);
+}
+function closeCommentModal() {
+var m = document.getElementById('commentModal');
+var s = m.querySelector('.modal-sheet');
+s.className = 'modal-sheet';
+setTimeout(function() { m.style.display = 'none'; }, 300);
+}
+function setRating(num) {
+currentRating = num;
+var stars = document.getElementById('starRating').getElementsByTagName('span');
+for (var i=0; i<stars.length; i++) {
+if (i < num) stars[i].className = 'active';
+else stars[i].className = '';
+}
+}
+function triggerUpload() { document.getElementById('fileInput').click(); }
+function handleFileSelect(event) {
+var file = event.target.files[0];
+if (!file) return;
+if (window.plus) plus.nativeUI.showWaiting('上传中...');
+var fd = new FormData();
+fd.append('file', file);
+ajax({
+method: 'POST',
+url: 'https://apirank.qujiaweb.top/?mode=upload_meituan',
+body: fd
+}, function(err, res) {
+if (window.plus) plus.nativeUI.closeWaiting();
+event.target.value = '';
+if (!err && res && res.full_url) {
+uploadedImages.push(res.full_url);
+renderUploadGrid();
+} else {
+showToast('上传失败');
+}
+});
+}
+function renderUploadGrid() {
+var grid = document.getElementById('imageGrid');
+grid.innerHTML = '';
+for (var i=0; i<uploadedImages.length; i++) {
+var item = document.createElement('div');
+item.className = 'upload-item';
+item.innerHTML = '<div class="upload-item-inner" style="background-image:url(' + uploadedImages[i] + ')"><div class="upload-del" onclick="removeImage(' + i + ')">×</div></div>';
+grid.appendChild(item);
+}
+var addBtn = document.createElement('div');
+addBtn.className = 'upload-item';
+addBtn.onclick = triggerUpload;
+addBtn.innerHTML = '<div class="upload-item-inner upload-add-inner"><div class="upload-add-text">+</div></div>';
+grid.appendChild(addBtn);
+}
+function removeImage(idx) { uploadedImages.splice(idx, 1); renderUploadGrid(); }
+function submitComment() {
+if (currentRating === 0) { showToast('请先进行评分'); return; }
+var content = document.getElementById('commentContent').value;
+content = content.replace(/^\s+|\s+$/g, '');
+if (!content) { showToast('请输入内容'); return; }
+var appId = getUrlParam('id');
+var userMail = localStorage.getItem('usermail');
+if (!appId || !userMail) { showToast('缺少参数'); return; }
+var processed = emojiToHtmlEntity(content);
+if (window.plus) plus.nativeUI.showWaiting('提交中...');
+ajax({
+method: 'POST',
+url: 'https://apirank.qujiaweb.top/?mode=submit_comment&mail=' + userMail,
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify({
+appid: appId,
+content: processed,
+images: uploadedImages.join(','),
+mail: userMail,
+rating: currentRating
+})
+}, function(err, res) {
+if (window.plus) plus.nativeUI.closeWaiting();
+if (!err && res && res.code === 200) {
+showToast('发表成功');
+closeCommentModal();
+currentRating = 0;
+uploadedImages = [];
+document.getElementById('commentContent').value = '';
+setRating(0);
+renderUploadGrid();
+getAppComments(appId);
+} else {
+showToast('发表失败');
+}
+});
+}
+function getAppComments(appId) {
+var userMail = localStorage.getItem('usermail');
+if (!userMail) return;
+ajax({
+url: 'https://apirank.qujiaweb.top/?mode=get_app_comments&appid=' + appId + '&mail=' + userMail
+}, function(err, res) {
+var cc = document.getElementById('commentContainer');
+if (!err && res && res.fields && res.fields.length > 0) {
+renderComments(res.fields);
+var ct = document.getElementById('commentTitleText');
+if (ct) {
+var cCount = 0;
+for(var i=0; i<res.fields.length; i++) {
+if(!res.fields[i].rootid || res.fields[i].rootid === '') cCount++;
+}
+ct.innerHTML = '评论（' + cCount + '） <span onclick="openCommentModal()">写评论</span>';
+}
+} else {
+if (cc) cc.innerHTML = '<div style="text-align: center; padding: 20px; color: #8E8E93;">暂无评论，快来抢沙发</div>';
+}
+});
+}
+function renderComments(comments) {
+var cc = document.getElementById('commentContainer');
+if (!cc) return;
+cc.innerHTML = '';
+var primary = [];
+var replies = [];
+for (var i=0; i<comments.length; i++) {
+if (!comments[i].rootid || comments[i].rootid === '') primary.push(comments[i]);
+else replies.push(comments[i]);
+}
+if (primary.length === 0) {
+cc.innerHTML = '<div style="text-align: center; padding: 20px; color: #8E8E93;">暂无评论，快来抢沙发</div>';
+return;
+}
+for (var j=0; j<primary.length; j++) {
+var c = primary[j];
+var card = document.createElement('div');
+card.className = 'comment-card';
+card.setAttribute('data-id', c.createdAt);
+var rating = c['评分'] || 5;
+var rStars = '';
+for(var sr=0; sr<5; sr++) { rStars += (sr < rating ? '★' : '☆'); }
+var aStyle = 'background: #007AFF;';
+if (c['头像']) aStyle = 'background-image: url(' + c['头像'] + '); background-size: cover; background-position: center;';
+var pCon = c['内容'] || '';
+pCon = pCon.replace(/&#(\d+);/g, function(match, code) { return fromCodePoint(parseInt(code, 10)); });
+pCon = pCon.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+pCon = pCon.replace(/\n/g, '<br>');
+var imgH = '';
+if (c['图片']) {
+var urls = c['图片'].split(',');
+var vUrls = [];
+for(var u=0; u<urls.length; u++) {
+var tm = urls[u].replace(/^\s+|\s+$/g, '');
+if(tm !== '') vUrls.push(tm);
+}
+if (vUrls.length > 0) {
+imgH += '<div class="screenshot-list" style="margin-top:10px;">';
+for(var vu=0; vu<vUrls.length; vu++) {
+imgH += '<div class="screenshot-item" style="width:100px;height:100px;background-image:url(' + vUrls[vu] + ')" onclick="previewCommentImage(\'' + vUrls[vu] + '\')"></div>';
+}
+imgH += '</div>';
+}
+}
+var cHtml = '<div class="comment-header">';
+cHtml += '<div class="user-avatar" style="' + aStyle + '">' + (c['头像'] ? '' : (c['用户'] ? c['用户'].charAt(0) : 'U')) + '</div>';
+cHtml += '<div class="user-meta"><div class="user-name">' + c['用户'] + '</div><div class="comment-time">' + formatTimestamp(c['时间']) + '</div></div>';
+cHtml += '<div class="rating-stars">' + rStars + '</div></div>';
+cHtml += '<div class="comment-body">' + pCon + '</div>' + imgH;
+var cReps = [];
+for(var ri=0; ri<replies.length; ri++) {
+if(replies[ri].rootid === c.createdAt) cReps.push(replies[ri]);
+}
+if (cReps.length > 0) {
+cHtml += '<div class="replies-container" style="margin-top:12px;padding-top:12px;border-top:1px solid #eaeaec;"></div>';
+}
+card.innerHTML = cHtml;
+addLongPressEvent(card, c);
+(function(cObj) {
+var av = card.querySelector('.user-avatar');
+var un = card.querySelector('.user-name');
+var navFunc = function(e) {
+cancelBubble(e);
+if (cObj['邮箱']) {
+var url = 'page.html?user=' + cObj['邮箱'];
+if (window.plus) plus.webview.open(url, url, {backbuttonMaximize:false}, 'pop-in', 300);
+else window.location.href = url;
+}
+};
+if (av) av.onclick = navFunc;
+if (un) un.onclick = navFunc;
+card.onclick = function(e) {
+var target = e.target || e.srcElement;
+if (getClosest(target, 'screenshot-item') || getClosest(target, 'replies-container')) return;
+handleReplyComment(cObj);
+};
+})(c);
+var repCon = card.querySelector('.replies-container');
+if (repCon) {
+for (var rk=0; rk<cReps.length; rk++) {
+var rep = cReps[rk];
+var pName = '';
+if (rep.parentid !== rep.rootid) {
+for(var cfi=0; cfi<comments.length; cfi++) {
+if(comments[cfi].createdAt === rep.parentid) pName = comments[cfi]['用户'];
+}
+}
+if (rep.parentid !== rep.rootid && !pName) continue;
+var rc = document.createElement('div');
+rc.className = 'reply-card';
+var raStyle = 'background: #FF9500;';
+if (rep['头像']) raStyle = 'background-image: url(' + rep['头像'] + '); background-size: cover; background-position: center;';
+var rpCon = rep['内容'] || '';
+rpCon = rpCon.replace(/&#(\d+);/g, function(match, code) { return fromCodePoint(parseInt(code, 10)); });
+rpCon = rpCon.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+rpCon = rpCon.replace(/\n/g, '<br>');
+if (pName) rpCon = '<span style="color:#000;font-weight:bold;">回复</span><span style="color:#007AFF;font-weight:bold;">' + pName + '</span> <span style="color:#000;">' + rpCon + '</span>';
+var rImgH = '';
+if (rep['图片']) {
+var rUrls = rep['图片'].split(',');
+var rVUrls = [];
+for(var ru=0; ru<rUrls.length; ru++) {
+var rtm = rUrls[ru].replace(/^\s+|\s+$/g, '');
+if(rtm !== '') rVUrls.push(rtm);
+}
+if (rVUrls.length > 0) {
+rImgH += '<div class="screenshot-list" style="margin-top:8px;">';
+for(var rvu=0; rvu<rVUrls.length; rvu++) {
+rImgH += '<div class="screenshot-item" style="width:80px;height:80px;background-image:url(' + rVUrls[rvu] + ')" onclick="previewCommentImage(\'' + rVUrls[rvu] + '\')"></div>';
+}
+rImgH += '</div>';
+}
+}
+rc.innerHTML = '<div class="comment-header" style="margin-bottom:6px;"><div class="user-avatar" style="width:28px;height:28px;line-height:28px;font-size:12px;' + raStyle + '">' + (rep['头像'] ? '' : (rep['用户'] ? rep['用户'].charAt(0) : 'U')) + '</div><div class="user-meta" style="width:60%;"><div class="user-name" style="font-size:13px;">' + rep['用户'] + '</div><div class="comment-time" style="font-size:10px;">' + formatTimestamp(rep['时间']) + '</div></div></div><div class="comment-body" style="font-size:13px;">' + rpCon + '</div>' + rImgH;
+addLongPressEvent(rc, rep);
+(function(rObj) {
+var rav = rc.querySelector('.user-avatar');
+var run = rc.querySelector('.user-name');
+var rnavFunc = function(e) {
+cancelBubble(e);
+if (rObj['邮箱']) {
+var url = 'page.html?user=' + rObj['邮箱'];
+if (window.plus) plus.webview.open(url, url, {backbuttonMaximize:false}, 'pop-in', 300);
+else window.location.href = url;
+}
+};
+if (rav) rav.onclick = rnavFunc;
+if (run) run.onclick = rnavFunc;
+rc.onclick = function(e) {
+var target = e.target || e.srcElement;
+if (getClosest(target, 'screenshot-item')) return;
+cancelBubble(e);
+handleReplyComment(rObj);
+};
+})(rep);
+repCon.appendChild(rc);
+}
+}
+cc.appendChild(card);
+}
+}
+function getClosest(elem, className) {
+while (elem && elem.nodeType === 1) {
+if ((' ' + elem.className + ' ').indexOf(' ' + className + ' ') > -1) return elem;
+elem = elem.parentNode;
+}
+return null;
+}
+function previewCommentImage(url) {
+if (!window.plus) { alert('请在App环境中预览'); return; }
+plus.nativeUI.previewImage([url], {
+current: 0, loop: true, indicator: 'number',
+onLongPress: function(e) { saveImageToGallery(e.url); }
+});
+}
+function addLongPressEvent(elem, comment) {
+var pressTimer = null;
+var startX = 0, startY = 0;
+elem.oncontextmenu = function(e) { if(e.preventDefault) e.preventDefault(); return false; };
+elem.ontouchstart = function(e) {
+cancelBubble(e);
+startX = e.touches[0].clientX;
+startY = e.touches[0].clientY;
+pressTimer = setTimeout(function() { showActionMenu(elem, comment); }, 600);
+};
+elem.ontouchmove = function(e) {
+cancelBubble(e);
+var mx = Math.abs(e.touches[0].clientX - startX);
+var my = Math.abs(e.touches[0].clientY - startY);
+if (mx > 10 || my > 10) clearTimeout(pressTimer);
+};
+elem.ontouchend = function(e) { clearTimeout(pressTimer); };
+elem.ontouchcancel = function(e) { clearTimeout(pressTimer); };
+}
+function showActionMenu(elem, comment) {
+if (!comment || !comment['时间']) return;
+var userMail = localStorage.getItem('usermail');
+var isOwn = String(comment['邮箱']) === String(userMail);
+var oldMenu = document.getElementById('actionMenuBox');
+if (oldMenu) oldMenu.parentNode.removeChild(oldMenu);
+var menu = document.createElement('div');
+menu.id = 'actionMenuBox';
+menu.style.cssText = "position: fixed; top: 50%; left: 50%; margin-top: -60px; margin-left: -90px; width: 180px; background: rgba(0, 0, 0, 0.9); color: white; border-radius: 12px; padding: 16px 0; z-index: 9999; font-size: 16px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4); text-align: center;";
+var html = '<div id="miReply" style="padding: 14px 0;">回复</div>';
+if (isOwn) {
+html += '<div id="miDel" style="padding: 14px 0; border-top: 1px solid rgba(255,255,255,0.1);">删除</div>';
+html += '<div id="miCopy" style="padding: 14px 0; border-top: 1px solid rgba(255,255,255,0.1);">复制</div>';
+} else {
+html += '<div id="miCopy" style="padding: 14px 0; border-top: 1px solid rgba(255,255,255,0.1);">复制</div>';
+}
+menu.innerHTML = html;
+document.body.appendChild(menu);
+var mReply = document.getElementById('miReply');
+var mDel = document.getElementById('miDel');
+var mCopy = document.getElementById('miCopy');
+if (mReply) mReply.onclick = function() { handleReplyComment(comment); };
+if (mDel) mDel.onclick = function() { handleDeleteComment(comment['时间']); };
+if (mCopy) mCopy.onclick = function() { handleCopyComment(comment); };
+setTimeout(function() {
+document.onclick = function closeMenu(e) {
+var target = e.target || e.srcElement;
+if (!getClosest(target, 'action-menu') && target !== elem && !getClosest(target, 'comment-card') && !getClosest(target, 'reply-card')) {
+if (menu.parentNode) menu.parentNode.removeChild(menu);
+document.onclick = null;
+}
+};
+}, 100);
+}
+function handleCopyComment(comment) {
+var pCon = comment['内容'] || '';
+pCon = pCon.replace(/&#(\d+);/g, function(m, c) { return fromCodePoint(parseInt(c, 10)); });
+copyToClipboardWithFallback(pCon, 'comment');
+var m = document.getElementById('actionMenuBox');
+if (m && m.parentNode) m.parentNode.removeChild(m);
+}
+function handleReplyComment(comment) {
+if (!comment) return;
+currentReplyTarget = comment;
+openReplyModal(comment);
+var m = document.getElementById('actionMenuBox');
+if (m && m.parentNode) m.parentNode.removeChild(m);
+}
+function handleDeleteComment(commentId) {
+var userMail = localStorage.getItem('usermail');
+if (!userMail) { showToast('请先登录'); return; }
+if (window.plus) {
+plus.nativeUI.confirm('确定要删除这条评论吗？', function(res) {
+if (res.index === 0) deleteComment(commentId, userMail);
+}, '提示', ['确定', '取消']);
+} else {
+if (confirm('确定要删除这条评论吗？')) deleteComment(commentId, userMail);
+}
+var m = document.getElementById('actionMenuBox');
+if (m && m.parentNode) m.parentNode.removeChild(m);
+}
+function deleteComment(commentId, userMail) {
+if (window.plus) plus.nativeUI.showWaiting('删除中...');
+ajax({
+method: 'POST',
+url: 'https://apirank.qujiaweb.top/?mode=delete_comment&mail=' + userMail,
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify({ comment_id: commentId, mail: userMail })
+}, function(err, res) {
+if (window.plus) plus.nativeUI.closeWaiting();
+if (!err && res && res.code === 200) {
+showToast('删除成功');
+var appId = getUrlParam('id');
+getAppComments(appId);
+} else { showToast('删除失败'); }
+});
+}
+function openReplyModal(comment) {
+var m = document.getElementById('replyModal');
+var s = m.querySelector('.modal-sheet');
+var rt = document.getElementById('replyTitle');
+if (rt && comment['用户']) rt.innerText = '回复 ' + comment['用户'];
+document.getElementById('replyContent').value = '';
+replyImages = [];
+renderReplyUploadGrid();
+m.style.display = 'block';
+setTimeout(function() { s.className = 'modal-sheet show'; }, 10);
+}
+function closeReplyModal() {
+var m = document.getElementById('replyModal');
+var s = m.querySelector('.modal-sheet');
+s.className = 'modal-sheet';
+setTimeout(function() { m.style.display = 'none'; }, 300);
+}
+function triggerReplyUpload() { document.getElementById('replyFileInput').click(); }
+function handleReplyFileSelect(event) {
+var file = event.target.files[0];
+if (!file) return;
+if (window.plus) plus.nativeUI.showWaiting('上传中...');
+var fd = new FormData();
+fd.append('file', file);
+ajax({
+method: 'POST',
+url: 'https://apirank.qujiaweb.top/?mode=upload_meituan',
+body: fd
+}, function(err, res) {
+if (window.plus) plus.nativeUI.closeWaiting();
+event.target.value = '';
+if (!err && res && res.full_url) {
+replyImages.push(res.full_url);
+renderReplyUploadGrid();
+} else { showToast('上传失败'); }
+});
+}
+function renderReplyUploadGrid() {
+var grid = document.getElementById('replyImageGrid');
+grid.innerHTML = '';
+for (var i=0; i<replyImages.length; i++) {
+var item = document.createElement('div');
+item.className = 'upload-item';
+item.innerHTML = '<div class="upload-item-inner" style="background-image:url(' + replyImages[i] + ')"><div class="upload-del" onclick="removeReplyImage(' + i + ')">×</div></div>';
+grid.appendChild(item);
+}
+var addBtn = document.createElement('div');
+addBtn.className = 'upload-item';
+addBtn.onclick = triggerReplyUpload;
+addBtn.innerHTML = '<div class="upload-item-inner upload-add-inner"><div class="upload-add-text">+</div></div>';
+grid.appendChild(addBtn);
+}
+function removeReplyImage(idx) { replyImages.splice(idx, 1); renderReplyUploadGrid(); }
+function submitReply() {
+var content = document.getElementById('replyContent').value;
+content = content.replace(/^\s+|\s+$/g, '');
+if (!content) { showToast('请输入回复内容'); return; }
+if (!currentReplyTarget) return;
+var appId = getUrlParam('id');
+var userMail = localStorage.getItem('usermail');
+if (!appId || !userMail) return;
+var processed = emojiToHtmlEntity(content);
+if (window.plus) plus.nativeUI.showWaiting('提交中...');
+ajax({
+method: 'POST',
+url: 'https://apirank.qujiaweb.top/?mode=submit_reply&mail=' + userMail,
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify({
+appid: appId,
+content: processed,
+images: replyImages.join(','),
+mail: userMail,
+target_user: currentReplyTarget['用户'],
+target_mail: currentReplyTarget['邮箱'],
+parentid: currentReplyTarget.createdAt,
+rootid: currentReplyTarget.rootid || currentReplyTarget.createdAt
+})
+}, function(err, res) {
+if (window.plus) plus.nativeUI.closeWaiting();
+if (!err && res && res.code === 200) {
+showToast('回复成功');
+closeReplyModal();
+replyImages = [];
+currentReplyTarget = null;
+getAppComments(appId);
+} else { showToast('回复失败'); }
+});
+}
+window.onload = function() {
+setTimeout(function() { if (pageActive) getAppDetail(); }, 200);
+};
+document.addEventListener('plusready', function() {
+plus.key.addEventListener('backbutton', handleBack);
+}, false);
+</script>
+</body>
+</html>
