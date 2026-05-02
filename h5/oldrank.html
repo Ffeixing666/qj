@@ -284,7 +284,7 @@
         div.onclick = (function(id){ return function(){ openApp(id); } })(item.id);
         
         var rankHtml = (isHot && rank > 0) ? '<div class="item-rank">' + rank + '</div>' : '';
-        var valHtml = !isHot ? '<div class="item-val">' + (item.积分 || 0) + ' 积分</div>' : ''https://gemini.google.com/app/8d0cff325e25e37b;
+        var valHtml = !isHot ? '<div class="item-val">' + (item.积分 || 0) + ' 积分</div>' : '';
         
         div.innerHTML = rankHtml + 
             '<img class="item-icon" src="' + item.图标 + '">' +
