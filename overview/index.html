@@ -1,1 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>趣加应用·首页</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <style type="text/css">
+        /* 基础样式 */
+        body { margin: 0; padding: 0; font-family: -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif; background-color: #f5f5f7; color: #1d1d1f; -webkit-text-size-adjust: 100%; }
+        .header { padding: 30px 20px 10px; position: relative; background: #f5f5f7; }
+        .date { font-size: 13px; color: #86868b; font-weight: 600; text-transform: uppercase; }
+        .greeting { font-size: 28px; margin-top: 4px; font-weight: 700; letter-spacing: -0.5px; }
+        .avatar { position: absolute; right: 20px; top: 35px; width: 36px; height: 36px; }
+        .avatar img { width: 100%; height: 100%; border-radius: 50%; -webkit-border-radius: 50%; border: 1px solid #d2d2d7; }
 
+        /* 内容布局 */
+        .content { padding: 10px 20px 80px; }
+        .big-card { background: #ffffff; border-radius: 16px; -webkit-border-radius: 16px; margin-bottom: 20px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08); -webkit-box-shadow: 0 4px 12px rgba(0,0,0,0.08); cursor: pointer; }
+        .big-card img { width: 100%; display: block; }
+        
+        /* 模拟双列布局 */
+        .card-row { display: table; width: 100%; border-spacing: 12px 0; margin-left: -6px; margin-right: -6px; table-layout: fixed; }
+        .card-cell { display: table-cell; width: 50%; vertical-align: top; }
+        .small-card { background: #ffffff; border-radius: 14px; -webkit-border-radius: 14px; margin-bottom: 20px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08); -webkit-box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .small-card img { width: 100%; display: block; }
+
+        /* 底部导航 */
+        .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: rgba(255,255,255,0.9); -webkit-backdrop-filter: blur(10px); border-top: 1px solid #d2d2d7; display: table; width: 100%; z-index: 999; }
+        .tab { display: table-cell; text-align: center; vertical-align: middle; font-size: 11px; color: #86868b; text-decoration: none; }
+        .tab.active { color: #0071e3; font-weight: 600; }
+
+        /* 夜间模式降级处理 */
+        body.night { background-color: #000000; color: #f5f5f7; }
+        body.night .header { background: #000000; }
+        body.night .big-card, body.night .small-card { background: #1c1c1e; }
+        body.night .tab-bar { background: rgba(28,28,30,0.9); border-top: 1px solid #38383a; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="date" id="date-box">MAY 2</div>
+        <div class="greeting" id="greeting-box">你好</div>
+        <div class="avatar">
+            <img src="https://static.codemao.cn/pickduck/Skysohyxee.png?hash=FpFGPF9E7DX_Yci_Ir3RSwWk90hk" alt="头像">
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="big-card" onclick="navigate('https://creation.bcmcdn.com/716/appcraft/IMAGE_Q_lG8a2PT_1777683959367.jpeg')">
+            <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_Q_lG8a2PT_1777683959367.jpeg" alt="大图">
+        </div>
+
+        <div class="big-card" onclick="navigate('https://db0ai4hqk7tsfy.database.nocode.cn/storage/v1/object/public/qujia//%E8%B6%A3%E5%8A%A0%E5%BA%94%E7%94%A82.0.1.apk')">
+            <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_TwC30fcS0_1771255851333.png" alt="通知">
+        </div>
+
+        <div class="big-card" onclick="navigate('youxiang.html')">
+            <img src="https://static.codemao.cn/pickduck/HJOerRylgl.jpeg?hash=FgiPkKIR1sAS2aG__z9VjNc49erm" alt="大图">
+        </div>
+
+        <div class="card-row">
+            <div class="card-cell">
+                <div class="small-card" onclick="navigate('https://qujiaweb.top/h5')">
+                    <img src="https://static.codemao.cn/pickduck/B1fBl8llle.jpeg?hash=Fl56Tzy3gZuEo7dMKUbIYrKa9nhu" alt="左图">
+                </div>
+            </div>
+            <div class="card-cell">
+                <div class="small-card" onclick="navigate('https://qujiaweb.top/h5')">
+                    <img src="https://static.codemao.cn/pickduck/Hy5LeLlgle.jpeg?hash=Fk6llCJByUDoqOeJQA5f8WSeY25Y" alt="右图">
+                </div>
+            </div>
+        </div>
+
+        <div class="big-card">
+            <img src="https://static.codemao.cn/pickduck/Byb7iZhdlx.png?hash=FrzY4E-VfDQuFzg-1PTluPfmA0Nl" alt="大图">
+        </div>
+
+        <div class="card-row">
+            <div class="card-cell">
+                <div class="small-card" onclick="navigate('https://qujiaweb.top/pcresource')">
+                    <img src="https://static.codemao.cn/pickduck/Hk3pg8glll.jpeg?hash=FotZaK5lf7pAWoRw7lHFw6CN7eJX" alt="左图">
+                </div>
+            </div>
+            <div class="card-cell">
+                <div class="small-card" onclick="navigate('https://qujiaweb.top/pcresource')">
+                    <img src="https://static.codemao.cn/pickduck/Hy-9lLlgxe.jpeg?hash=Fud36_9FEnr8SS_uFFpW9IfbOKY8" alt="右图">
+                </div>
+            </div>
+        </div>
+
+        <div class="big-card" onclick="navigate('https://open.lihouse.xyz/omnia/player/bcmc/JSON_p04qo36q_omnia_1755350985042.json')">
+            <img src="https://static.codemao.cn/pickduck/rkBPXLexee.jpeg?hash=FvTRyj9dpw94xgxqd0XQvAvFvY1o" alt="大图">
+        </div>
+
+        <div class="big-card" onclick="navigate('https://qujiaweb.top/ai')">
+            <img src="https://static.codemao.cn/pickduck/SJuQA1lpge.png?hash=FlpCOObivn55y1hNbXtq3-IzXKIJ" alt="大图">
+        </div>
+    </div>
+
+    <div class="tab-bar">
+        <div class="tab active" onclick="location.href='index.html'">首页</div>
+        <div class="tab" onclick="location.href='me.html'">更多</div>
+    </div>
+
+    <script type="text/javascript">
+        function setDateAndGreeting() {
+            var now = new Date();
+            var days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            var months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+            var dateStr = months[now.getMonth()] + ' ' + now.getDate() + '日 · ' + days[now.getDay()];
+            document.getElementById('date-box').innerHTML = dateStr;
+            var hours = now.getHours();
+            var greeting = '';
+            if (hours >= 5 && hours < 11) { greeting = '早上好'; }
+            else if (hours >= 11 && hours < 17) { greeting = '下午好'; }
+            else { 
+                greeting = '晚上好';
+                document.body.className = 'night';
+            }
+            document.getElementById('greeting-box').innerHTML = greeting;
+        }
+        function navigate(url) { window.location.href = url; }
+        window.onload = function() {
+            setDateAndGreeting();
+            var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (!isMobile) { /* 保持原逻辑 */ }
+        };
+    </script>
+</body>
+</html>
