@@ -5,47 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>趣加应用应用详情</title>
     <style>
-        
-        :root {
-            --primary-color: #007AFF; 
-            --primary-hover: #005BB5;
-            --bg-color: #F5F7FA;
-            --card-bg: #FFFFFF;
-            --text-main: #1D1D1F;
-            --text-sub: #86868B;
-            --radius-lg: 24px;
-            --radius-md: 16px;
-            --radius-sm: 8px;
-        }
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #ebedee;
+            background: -webkit-linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
             background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
-            color: var(--text-main);
+            color: #1D1D1F;
             min-height: 100vh;
+            display: -webkit-box;
+            display: -webkit-flex;
             display: flex;
+            -webkit-box-pack: center;
+            -webkit-justify-content: center;
             justify-content: center;
+            -webkit-box-align: start;
+            -webkit-align-items: flex-start;
             align-items: flex-start;
             padding: 20px;
         }
 
-        
         .app-card {
-            background-color: var(--card-bg);
+            background-color: #FFFFFF;
             width: 100%;
             max-width: 500px;
-            border-radius: var(--radius-lg);
+            border-radius: 24px;
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
             padding: 30px 20px;
             margin-top: 20px;
             overflow: hidden;
         }
 
-        
         .header {
+            display: -webkit-box;
+            display: -webkit-flex;
             display: flex;
+            -webkit-box-align: center;
+            -webkit-align-items: center;
             align-items: center;
             margin-bottom: 25px;
         }
@@ -66,80 +63,94 @@
             font-size: 24px;
             font-weight: 600;
             line-height: 1.2;
-            color: var(--text-main);
+            color: #1D1D1F;
         }
 
         .tag-line {
             font-size: 13px;
-            color: var(--text-sub);
+            color: #86868B;
             margin-top: 6px;
         }
 
-        
         .action-area { margin-bottom: 25px; }
-        
+
         #downloadButton {
             display: block;
             width: 100%;
             padding: 16px 0;
-            background-color: var(--primary-color);
+            background-color: #007AFF;
             color: white;
             font-size: 16px;
             font-weight: 600;
             border: none;
             border-radius: 50px;
             cursor: pointer;
+            -webkit-transition: all 0.3s ease;
             transition: all 0.3s ease;
             box-shadow: 0 8px 20px rgba(0, 122, 255, 0.3);
         }
 
         #downloadButton:hover {
-            background-color: var(--primary-hover);
+            background-color: #005BB5;
+            -webkit-transform: translateY(-2px);
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(0, 122, 255, 0.4);
         }
         #downloadButton:active {
+            -webkit-transform: translateY(1px);
             transform: translateY(1px);
         }
 
-        
         #password-container {
             background: #F2F2F7;
-            border-radius: var(--radius-md);
+            border-radius: 16px;
             padding: 16px 20px;
+            display: -webkit-box;
+            display: -webkit-flex;
             display: flex;
+            -webkit-box-align: center;
+            -webkit-align-items: center;
             align-items: center;
+            -webkit-box-pack: justify;
+            -webkit-justify-content: space-between;
             justify-content: space-between;
             margin-bottom: 25px;
         }
 
-        .pwd-left { display: flex; align-items: center; gap: 10px; }
-        #password-label { font-size: 14px; color: var(--text-sub); font-weight: 500;}
-        #password-value { font-family: 'Courier New', Courier, monospace; font-size: 16px; font-weight: bold; color: var(--primary-color); }
-        
-        .pwd-right { display: flex; align-items: center; gap: 8px;}
+        .pwd-left { 
+            display: -webkit-box; display: -webkit-flex; display: flex; 
+            -webkit-box-align: center; -webkit-align-items: center; align-items: center; 
+        }
+        #password-label { font-size: 14px; color: #86868B; font-weight: 500; margin-right: 10px;}
+        #password-value { font-family: 'Courier New', Courier, monospace; font-size: 16px; font-weight: bold; color: #007AFF; }
+
+        .pwd-right { 
+            display: -webkit-box; display: -webkit-flex; display: flex; 
+            -webkit-box-align: center; -webkit-align-items: center; align-items: center; 
+        }
         #copy-button {
             padding: 6px 14px;
             background-color: white;
-            color: var(--primary-color);
+            color: #007AFF;
             border: 1px solid rgba(0, 122, 255, 0.2);
             border-radius: 20px;
             cursor: pointer;
             font-size: 13px;
             font-weight: 500;
+            -webkit-transition: all 0.2s ease;
             transition: all 0.2s ease;
+            margin-left: 8px;
         }
-        #copy-button:hover { background-color: var(--primary-color); color: white; }
+        #copy-button:hover { background-color: #007AFF; color: white; }
         #copy-message { font-size: 12px; color: #34C759; display: none; font-weight: 500;}
 
-        
         .screenshots {
+            display: -webkit-box;
+            display: -webkit-flex;
             display: flex;
-            gap: 12px;
             overflow-x: auto;
             padding-bottom: 10px;
             margin-bottom: 25px;
-            
             scrollbar-width: none; 
             -ms-overflow-style: none;
         }
@@ -148,59 +159,67 @@
         .screenshots img {
             height: 240px;
             width: auto;
-            border-radius: var(--radius-md);
+            border-radius: 16px;
             object-fit: cover;
             cursor: zoom-in;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            -webkit-transition: -webkit-transform 0.2s;
             transition: transform 0.2s;
+            margin-right: 12px;
         }
-        .screenshots img:hover { transform: scale(1.02); }
+        .screenshots img:hover { 
+            -webkit-transform: scale(1.02);
+            transform: scale(1.02); 
+        }
 
-        
         .desc-area { margin-top: 10px; }
-        .section-title { font-size: 18px; font-weight: 600; margin-bottom: 12px; color: var(--text-main); }
+        .section-title { font-size: 18px; font-weight: 600; margin-bottom: 12px; color: #1D1D1F; }
         #description {
             font-size: 15px;
             line-height: 1.6;
-            color: var(--text-sub);
+            color: #86868B;
             white-space: pre-wrap;
         }
 
-   
         #loading-container {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
-            display: none; /* 默认隐藏，由JS控制 */
-            justify-content: center; align-items: center; flex-direction: column;
+            backdrop-filter: blur(5px);
+            display: none; /* 默认隐藏 */
+            -webkit-box-pack: center; -webkit-justify-content: center; justify-content: center; 
+            -webkit-box-align: center; -webkit-align-items: center; align-items: center; 
+            -webkit-box-orient: vertical; -webkit-flex-direction: column; flex-direction: column;
             z-index: 9999;
         }
         .spinner {
             width: 48px; height: 48px;
             border: 4px solid rgba(0, 122, 255, 0.2);
-            border-top-color: var(--primary-color);
+            border-top-color: #007AFF;
             border-radius: 50%;
+            -webkit-animation: spin 1s linear infinite;
             animation: spin 1s linear infinite;
         }
         .loading-text {
-            margin-top: 16px; font-size: 14px; color: var(--text-sub); font-weight: 500;
+            margin-top: 16px; font-size: 14px; color: #86868B; font-weight: 500;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @-webkit-keyframes spin { to { -webkit-transform: rotate(360deg); transform: rotate(360deg); } }
+        @keyframes spin { to { -webkit-transform: rotate(360deg); transform: rotate(360deg); } }
 
-     
         #image-viewer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.9);
             display: none;
-            justify-content: center; align-items: center;
+            -webkit-box-pack: center; -webkit-justify-content: center; justify-content: center; 
+            -webkit-box-align: center; -webkit-align-items: center; align-items: center;
             z-index: 10000;
-            touch-action: none; 
         }
         #viewer-img {
             max-width: 95%; max-height: 95%;
             object-fit: contain;
+            -webkit-transform-origin: center center;
             transform-origin: center center;
+            -webkit-transition: -webkit-transform 0.1s ease-out;
             transition: transform 0.1s ease-out;
             will-change: transform;
         }
@@ -212,21 +231,17 @@
 </head>
 <body>
 
-   
     <div id="loading-container">
         <div class="spinner"></div>
         <div class="loading-text">加载中</div>
     </div>
-
 
     <div id="image-viewer">
         <div class="close-tip">点击任意处关闭</div>
         <img id="viewer-img" src="" alt="预览图">
     </div>
 
-    
     <div class="app-card">
-        
         <div class="header">
             <img id="iconImg" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="应用图标">
             <div class="title-area">
@@ -235,12 +250,10 @@
             </div>
         </div>
 
-        
         <div class="action-area">
             <button id="downloadButton">立即下载</button>
         </div>
 
-  
         <div id="password-container" style="display: none;">
             <div class="pwd-left">
                 <span id="password-label">提取码</span>
@@ -252,13 +265,11 @@
             </div>
         </div>
 
-      
         <div class="screenshots">
             <img id="img1" src="" alt="截图1" style="display: none;">
             <img id="img2" src="" alt="截图2" style="display: none;">
         </div>
 
-      
         <div class="desc-area">
             <h3 class="section-title">应用简介</h3>
             <div id="description">暂无介绍</div>
@@ -267,69 +278,111 @@
 
 <script>
     window.onload = function() {
-        
-        const urlParams = new URLSearchParams(window.location.search);
-        const appIcon = urlParams.get('icon');
-        const appName = urlParams.get('name') || '未知应用';
-        const downloadLink = urlParams.get('link') || '';
-        const password = urlParams.get('pwd');
-        const img1Url = urlParams.get('图片一');
-        const img2Url = urlParams.get('图片二');
-        const description = urlParams.get('简介');
+        // 兼容 iOS 9 的 URL 参数获取方案
+        function getQueryString(name) {
+            // 处理转码的情况
+            var reg = new RegExp('(^|&)' + encodeURIComponent(name) + '=([^&]*)(&|$)', 'i');
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) {
+                return decodeURIComponent(r[2]);
+            }
+            // 处理未转码的情况
+            var reg2 = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');
+            var r2 = window.location.search.substr(1).match(reg2);
+            if (r2 != null) {
+                return decodeURIComponent(r2[2]);
+            }
+            return null;
+        }
 
-    
+        var appIcon = getQueryString('icon');
+        var appName = getQueryString('name') || '未知应用';
+        var downloadLink = getQueryString('link') || '';
+        var password = getQueryString('pwd');
+        var img1Url = getQueryString('图片一');
+        var img2Url = getQueryString('图片二');
+        var description = getQueryString('简介');
+
         if (appIcon) document.getElementById('iconImg').src = appIcon;
         document.getElementById('appName').innerText = appName;
         if (description) document.getElementById('description').innerText = description;
         
-        const img1DOM = document.getElementById('img1');
-        const img2DOM = document.getElementById('img2');
+        var img1DOM = document.getElementById('img1');
+        var img2DOM = document.getElementById('img2');
         if (img1Url) { img1DOM.src = img1Url; img1DOM.style.display = 'block'; }
         if (img2Url) { img2DOM.src = img2Url; img2DOM.style.display = 'block'; }
 
-   
-        const passwordContainer = document.getElementById('password-container');
-        if (password && password.trim() !== '') {
+        var passwordContainer = document.getElementById('password-container');
+        if (password && password.replace(/(^\s*)|(\s*$)/g, "") !== '') {
+            // 兼容老版本浏览器显示 flex
+            passwordContainer.style.display = '-webkit-box';
+            passwordContainer.style.display = '-webkit-flex';
             passwordContainer.style.display = 'flex';
-            document.getElementById('password-value').innerText = password.split('?')[0];
             
+            var cleanPwd = password.split('?')[0];
+            document.getElementById('password-value').innerText = cleanPwd;
+            
+            // 兼容 iOS 9 的复制方案
             document.getElementById('copy-button').addEventListener('click', function() {
-                navigator.clipboard.writeText(password.split('?')[0]).then(function() {
-                    const copyMessage = document.getElementById('copy-message');
+                var textarea = document.createElement("textarea");
+                textarea.value = cleanPwd;
+                // 隐藏输入框，避免屏幕跳动
+                textarea.style.position = "absolute";
+                textarea.style.opacity = "0";
+                textarea.style.left = "-9999px";
+                document.body.appendChild(textarea);
+                
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    var copyMessage = document.getElementById('copy-message');
                     copyMessage.style.display = 'inline';
-                    setTimeout(() => { copyMessage.style.display = 'none'; }, 2000);
-                }).catch(function(err) {
+                    setTimeout(function() { copyMessage.style.display = 'none'; }, 2000);
+                } catch (err) {
                     console.error('无法复制密码: ', err);
-                });
+                }
+                document.body.removeChild(textarea);
             });
         }
 
-    
-        let finalDownloadUrl = downloadLink; 
-        const loader = document.getElementById('loading-container');
+        var finalDownloadUrl = downloadLink; 
+        var loader = document.getElementById('loading-container');
 
-        
-        if (downloadLink.includes('lan')) {
+        // 使用老旧且兼容性最好的 XMLHttpRequest 代替 Fetch
+        if (downloadLink.indexOf('lan') !== -1) {
+            loader.style.display = '-webkit-box';
+            loader.style.display = '-webkit-flex';
             loader.style.display = 'flex'; 
             
-            fetch(`https://api.pearapi.ai/api/lanzou/api.php?url=${encodeURIComponent(downloadLink)}&pwd=${password || ''}`)
-                .then(response => response.json())
-                .then(data => {
+            var apiUrl = "https://api.pearapi.ai/api/lanzou/api.php?url=" + encodeURIComponent(downloadLink) + "&pwd=" + encodeURIComponent(password || '');
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', apiUrl, true);
+            
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) { // 请求完成
                     loader.style.display = 'none'; 
-                    if (data && data.data && data.data.downloadurl && data.data.downloadurl.length > 0) {
-                        finalDownloadUrl = data.data.downloadurl;
-                       
-                        passwordContainer.style.display = 'none';
+                    if (xhr.status === 200) {
+                        try {
+                            var data = JSON.parse(xhr.responseText);
+                            if (data && data.data && data.data.downloadurl && data.data.downloadurl.length > 0) {
+                                finalDownloadUrl = data.data.downloadurl;
+                                passwordContainer.style.display = 'none';
+                            }
+                        } catch(e) {
+                            console.error('解析JSON失败', e);
+                        }
+                    } else {
+                        console.error('网络请求出错');
                     }
-                })
-                .catch(err => {
-                    console.error('解析失败', err);
-                    loader.style.display = 'none'; 
-                });
+                }
+            };
+            xhr.onerror = function() {
+                loader.style.display = 'none';
+                console.error('解析请求异常');
+            };
+            xhr.send();
         } 
-        
 
-        
         document.getElementById('downloadButton').addEventListener('click', function() {
             if (finalDownloadUrl) {
                 window.open(finalDownloadUrl, '_blank');
@@ -338,68 +391,75 @@
             }
         });
 
-        
-        const viewer = document.getElementById('image-viewer');
-        const viewerImg = document.getElementById('viewer-img');
-        let currentScale = 1;
-        let baseScale = 1;
-        let startDistance = 0;
+        // 大图及缩放相关代码，兼容 ES5
+        var viewer = document.getElementById('image-viewer');
+        var viewerImg = document.getElementById('viewer-img');
+        var currentScale = 1;
+        var baseScale = 1;
+        var startDistance = 0;
 
-     
+        // 手写求距离，替换 Math.hypot 以兼容老版本设备
         function getDistance(touches) {
-            return Math.hypot(touches[0].pageX - touches[1].pageX, touches[0].pageY - touches[1].pageY);
+            var dx = touches[0].pageX - touches[1].pageX;
+            var dy = touches[0].pageY - touches[1].pageY;
+            return Math.sqrt(dx * dx + dy * dy);
         }
 
-        
         function openViewer(src) {
             viewerImg.src = src;
+            viewer.style.display = '-webkit-box';
+            viewer.style.display = '-webkit-flex';
             viewer.style.display = 'flex';
             
             currentScale = 1;
             baseScale = 1;
+            viewerImg.style.webkitTransform = 'scale(1)';
             viewerImg.style.transform = 'scale(1)';
+            viewerImg.style.webkitTransition = '-webkit-transform 0.1s ease-out';
             viewerImg.style.transition = 'transform 0.1s ease-out';
         }
 
-        
-        if (img1Url) img1DOM.addEventListener('click', () => openViewer(img1Url));
-        if (img2Url) img2DOM.addEventListener('click', () => openViewer(img2Url));
+        if (img1Url) {
+            img1DOM.addEventListener('click', function() { openViewer(img1Url); });
+        }
+        if (img2Url) {
+            img2DOM.addEventListener('click', function() { openViewer(img2Url); });
+        }
 
-       
         viewer.addEventListener('click', function(e) {
             if (e.target === viewer || (e.target === viewerImg && currentScale <= 1.1)) {
                 viewer.style.display = 'none';
             }
         });
 
-        
         viewer.addEventListener('touchstart', function(e) {
             if (e.touches.length === 2) {
+                viewerImg.style.webkitTransition = 'none'; 
                 viewerImg.style.transition = 'none'; 
                 startDistance = getDistance(e.touches);
             }
-        }, { passive: false });
+        }, false);
 
-        
         viewer.addEventListener('touchmove', function(e) {
             if (e.touches.length === 2) {
                 e.preventDefault(); 
-                const currentDistance = getDistance(e.touches);
+                var currentDistance = getDistance(e.touches);
                 
                 currentScale = baseScale * (currentDistance / startDistance);
-                
                 currentScale = Math.max(1, Math.min(currentScale, 4)); 
-                viewerImg.style.transform = `scale(${currentScale})`;
+                
+                viewerImg.style.webkitTransform = 'scale(' + currentScale + ')';
+                viewerImg.style.transform = 'scale(' + currentScale + ')';
             }
-        }, { passive: false });
+        }, false);
 
-        
         viewer.addEventListener('touchend', function(e) {
             if (e.touches.length < 2) {
                 baseScale = currentScale;
+                viewerImg.style.webkitTransition = '-webkit-transform 0.1s ease-out'; 
                 viewerImg.style.transition = 'transform 0.1s ease-out'; 
             }
-        });
+        }, false);
     };
 </script>
 </body>
