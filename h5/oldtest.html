@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>实验室功能（旧兼容）</title>
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        html, body {
+            height: 100%;
+            width: 100%;
+            background-color: #ffffff;
+        }
+        /* 兼容旧版 iOS 的居中方案：使用 Table 布局 */
+        .wrapper-table {
+            display: table;
+            width: 100%;
+            height: 100%;
+            border-collapse: collapse;
+        }
+        .wrapper-cell {
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 20px;
+            color: #1e1e1e;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper-table">
+        <div class="wrapper-cell">
+            实验室功能
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        // 链接重定向逻辑：将所有 .html 结尾的跳转改为 old_xxx.html
+        // 此段落为示例，若页面中有 <a> 标签会自动应用
+        window.onload = function() {
+            var links = document.getElementsByTagName('a');
+            for (var i = 0; i < links.length; i++) {
+                var href = links[i].getAttribute('href');
+                if (href && href.indexOf('.html') !== -1 && href.indexOf('old_') === -1) {
+                    links[i].setAttribute('href', 'old_' + href);
+                }
+            }
+        };
+
+        // 核心功能：返回键万能段（兼容 HTML5+）
+        document.addEventListener('plusready', function() {
+            var webview = plus.webview.currentWebview();
+            plus.key.addEventListener('backbutton', function() {
+                webview.canBack(function(e) {
+                    if (e.canBack) {
+                        webview.back();
+                    } else {
+                        webview.close();
+                    }
+                });
+            });
+        }, false);
+    </script>
+</body>
+</html>
