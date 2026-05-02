@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>审核（旧兼容）</title>
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            -webkit-tap-highlight-color: rgba(0,0,0,0); 
+            -webkit-user-select: none;
+            -webkit-box-sizing: border-box;
+        }
+
+        body {
+            font-family: Helvetica, "STHeiti STXihei", "Microsoft YaHei", sans-serif;
+            background-color: #F2F2F7;
+            color: #1C1C1E;
+            overflow-x: hidden;
+            -webkit-text-size-adjust: none;
+        }
+
+        header {
+            position: relative; 
+            background: #F2F2F7;
+            z-index: 100; 
+            padding: 15px 16px;
+            border-bottom: 1px solid #D1D1D6;
+            overflow: hidden;
+        }
+        
+        .header-left {
+            display: -webkit-box;
+            -webkit-box-align: center;
+        }
+        
+        .back-btn {
+            width: 34px; 
+            height: 34px; 
+            background: #E3E3E6;
+            -webkit-border-radius: 10px; 
+            display: -webkit-box;
+            -webkit-box-pack: center;
+            -webkit-box-align: center;
+            cursor: pointer;
+            margin-right: 12px;
+        }
+        
+        .header-title {
+            font-size: 18px; 
+            font-weight: bold;
+        }
+
+        .app-list {
+            padding: 10px 16px 20px 16px;
+        }
+        
+        .app-item {
+            display: -webkit-box;
+            -webkit-box-align: center;
+            background: #FFFFFF;
+            padding: 12px; 
+            -webkit-border-radius: 16px; 
+            margin-bottom: 12px;
+            border: 1px solid #E5E5EA;
+        }
+        
+        .app-icon {
+            width: 60px; 
+            height: 60px; 
+            background: #f0f0f2; 
+            -webkit-border-radius: 14px;
+            margin-right: 14px;
+        }
+        
+        .app-info {
+            -webkit-box-flex: 1;
+            width: 0; 
+        }
+        
+        .app-name {
+            font-size: 16px; 
+            font-weight: bold; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            margin-bottom: 2px;
+        }
+        
+        .app-desc {
+            font-size: 12px; 
+            color: #8E8E93; 
+            overflow: hidden; 
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .app-meta {
+            font-size: 11px; 
+            color: #8E8E93; 
+            margin-top: 4px;
+        }
+
+        .review-actions {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            margin-left: 12px;
+        }
+        
+        .action-btn {
+            display: block;
+            padding: 6px 12px; 
+            -webkit-border-radius: 8px; 
+            font-size: 12px; 
+            font-weight: bold;
+            border: none; 
+            margin-bottom: 6px;
+            min-width: 60px;
+            text-align: center;
+        }
+        
+        .approve-btn {
+            background: #EAF9EE; 
+            color: #34C759;
+        }
+        
+        .reject-btn {
+            background: #FFF0EF; 
+            color: #FF3B30;
+        }
+
+        .loading-container {
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .loading-spinner {
+            width: 30px;
+            height: 30px;
+            margin: 0 auto 10px auto;
+            border: 3px solid #E3E3E6;
+            border-top: 3px solid #007AFF;
+            -webkit-border-radius: 50%;
+            -webkit-animation: spin 1s linear infinite;
+        }
+
+        @-webkit-keyframes spin {
+            0% { -webkit-transform: rotate(0deg); }
+            100% { -webkit-transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 14px;
+            color: #8E8E93;
+        }
+
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+        }
+        
+        .empty-icon {
+            font-size: 40px; 
+            margin-bottom: 16px;
+        }
+        
+        .empty-title {
+            font-size: 16px; 
+            font-weight: bold; 
+            margin-bottom: 8px;
+        }
+        
+        .empty-desc {
+            font-size: 14px; 
+            color: #8E8E93;
+        }
+
+        #toast {
+            position: fixed; 
+            top: 40px; 
+            left: 50%; 
+            margin-left: -70px;
+            width: 140px;
+            background: rgba(0,0,0,0.8); 
+            color: #fff; 
+            padding: 10px;
+            -webkit-border-radius: 20px; 
+            font-size: 14px; 
+            display: none; 
+            z-index: 999;
+            text-align: center;
+        }
+
+        .reason-dialog {
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            background: rgba(0,0,0,0.5); 
+            z-index: 9999; 
+            display: none;
+        }
+        
+        .reason-content {
+            background: white; 
+            -webkit-border-radius: 16px; 
+            padding: 20px; 
+            margin: 100px 20px;
+        }
+        
+        .reason-title {
+            font-size: 16px; 
+            font-weight: bold; 
+            margin-bottom: 15px;
+        }
+        
+        .reason-input {
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid #ddd;
+            -webkit-border-radius: 8px; 
+            font-size: 14px; 
+            height: 100px;
+        }
+        
+        .reason-buttons {
+            display: -webkit-box;
+            margin-top: 20px;
+        }
+        
+        .reason-btn {
+            -webkit-box-flex: 1;
+            display: block;
+            padding: 12px; 
+            -webkit-border-radius: 8px;
+            font-size: 14px; 
+            font-weight: bold; 
+            border: none;
+            text-align: center;
+        }
+        
+        .cancel-btn {
+            background: #E3E3E6; 
+            color: #1C1C1E;
+            margin-right: 10px;
+        }
+        
+        .confirm-btn {
+            background: #007AFF; 
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="toast"></div>
+
+    <div class="reason-dialog" id="reasonDialog">
+        <div class="reason-content">
+            <div class="reason-title">请填写下架理由</div>
+            <textarea class="reason-input" id="reasonInput" placeholder="请详细说明下架原因..."></textarea>
+            <div class="reason-buttons">
+                <div class="reason-btn cancel-btn" onclick="closeReasonDialog()">取消</div>
+                <div class="reason-btn confirm-btn" onclick="confirmReject()">确定</div>
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <div class="header-left">
+            <div class="back-btn" onclick="goBack()">
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAG9JREFUeNpi/P//PwMlgImBQsAYSkA5COzdu/ccVsAs9u/fzyAFMEKsxAasgFnYBAf7v3//AtUfOnSIAWZA9v///8No9v///z9YAVidX79+oUisYGBgoFm06O7uRoKByAAM9osXL5BjYGBgoLIdIMAAXas9p689v9EAAAAASUVORK5CYII=" width="20" height="20" />
+            </div>
+            <div class="header-title">应用审核</div>
+        </div>
+    </header>
+
+    <div class="app-list" id="appList">
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">加载中...</div>
+        </div>
+    </div>
+
+    <script src="https://static2.pgaot.com/Assets/js/jquery-2.2.4.min.js"></script>
+    
+    <script>
+        var API = 'https://apirank.qujiaweb.top/';
+        var currentAppId = '';
+
+        function toast(m) {
+            $('#toast').text(m).show();
+            setTimeout(function(){ $('#toast').hide(); }, 2000);
+        }
+
+        $(function() {
+            checkAdminPermission();
+        });
+
+        function checkAdminPermission() {
+            var mail = localStorage.getItem('usermail');
+            if (!mail) {
+                showEmptyState('请先登录', '登录后才能访问审核页面');
+                return;
+            }
+
+            $.ajax({
+                url: API,
+                data: { mode: 'check_admin', mail: mail },
+                type: 'GET',
+                dataType: 'json',
+                success: function(res) {
+                    if (res.code === 200 && res.fields && res.fields.length > 0) {
+                        getPendingApps();
+                    } else {
+                        showEmptyState('无权限访问', '您不是管理员，无法访问审核页面');
+                    }
+                },
+                error: function() {
+                    showEmptyState('网络错误', '请稍后重试');
+                }
+            });
+        }
+
+        function getPendingApps() {
+            var mail = localStorage.getItem('usermail');
+            $.ajax({
+                url: API,
+                data: { mode: 'get_pending_apps', mail: mail },
+                type: 'GET',
+                dataType: 'json',
+                success: function(res) {
+                    if (res.code === 200 && res.fields) {
+                        updateAppList(res.fields);
+                    } else {
+                        showEmptyState('暂无待审核应用', '所有应用均已审核');
+                    }
+                },
+                error: function() {
+                    showEmptyState('网络错误', '请稍后重试');
+                }
+            });
+        }
+
+        function updateAppList(apps) {
+            var $appList = $('#appList');
+            if (apps.length === 0) {
+                showEmptyState('暂无待审核应用', '所有应用均已审核');
+                return;
+            }
+
+            $appList.empty();
+
+            $.each(apps, function(i, app) {
+                var appItem = $('<div class="app-item"></div>');
+                
+                appItem.on('click', function(e) {
+                    if ($(e.target).hasClass('action-btn')) return;
+                    var url = 'oldxiangqing.html?id=' + app.id;
+                    if (window.plus) {
+                        var ws = plus.webview.create(url, url, {backbuttonMaximize: false});
+                        ws.show('pop-in', 300);
+                    } else {
+                        window.location.href = url;
+                    }
+                });
+
+                var iconStyle = app.图标 ? 'background: url(' + app.图标 + ') no-repeat center; background-size: cover;' : '';
+                var appIcon = $('<div class="app-icon" style="' + iconStyle + '"></div>');
+                
+                var appInfo = $('<div class="app-info"></div>');
+                appInfo.append('<div class="app-name">' + (app.名称 || '未知') + '</div>');
+                appInfo.append('<div class="app-desc">' + (app.简介 || '暂无简介') + '</div>');
+                appInfo.append('<div class="app-meta">上传者: ' + (app.用户 || '未知') + '</div>');
+
+                var reviewActions = $('<div class="review-actions"></div>');
+                var approveBtn = $('<div class="action-btn approve-btn">通过</div>');
+                approveBtn.on('click', function() { approveApp(app.id); });
+                
+                var rejectBtn = $('<div class="action-btn reject-btn">下架</div>');
+                rejectBtn.on('click', function() { openReasonDialog(app.id); });
+
+                reviewActions.append(approveBtn).append(rejectBtn);
+                appItem.append(appIcon).append(appInfo).append(reviewActions);
+                $appList.append(appItem);
+            });
+        }
+
+        function approveApp(appId) {
+            var mail = localStorage.getItem('usermail');
+            if (window.plus) plus.nativeUI.showWaiting('处理中...');
+
+            $.ajax({
+                url: API + '?mode=approve_app&mail=' + encodeURIComponent(mail),
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ appid: appId, mail: mail }),
+                dataType: 'json',
+                success: function(res) {
+                    if (window.plus) plus.nativeUI.closeWaiting();
+                    if (res.code === 200) {
+                        toast('审核通过');
+                        getPendingApps();
+                    } else {
+                        toast('失败：' + (res.msg || '未知'));
+                    }
+                },
+                error: function() {
+                    if (window.plus) plus.nativeUI.closeWaiting();
+                    toast('网络失败');
+                }
+            });
+        }
+
+        function openReasonDialog(appId) {
+            currentAppId = appId;
+            $('#reasonInput').val('');
+            $('#reasonDialog').show();
+        }
+
+        function closeReasonDialog() {
+            $('#reasonDialog').hide();
+        }
+
+        function confirmReject() {
+            var mail = localStorage.getItem('usermail');
+            var reason = $('#reasonInput').val();
+            if (!reason) { toast('请输入理由'); return; }
+
+            if (window.plus) plus.nativeUI.showWaiting('处理中...');
+
+            $.ajax({
+                url: API + '?mode=reject_app&mail=' + encodeURIComponent(mail),
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ appid: currentAppId, mail: mail, reason: reason }),
+                dataType: 'json',
+                success: function(res) {
+                    if (window.plus) plus.nativeUI.closeWaiting();
+                    if (res.code === 200) {
+                        toast('已下架');
+                        closeReasonDialog();
+                        getPendingApps();
+                    } else {
+                        toast('失败：' + (res.msg || '未知'));
+                    }
+                },
+                error: function() {
+                    if (window.plus) plus.nativeUI.closeWaiting();
+                    toast('网络失败');
+                }
+            });
+        }
+
+        function showEmptyState(title, desc) {
+            $('#appList').html('<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">' + title + '</div><div class="empty-desc">' + desc + '</div></div>');
+        }
+
+        function goBack() {
+            if (window.plus) {
+                plus.webview.currentWebview().close('pop-out', 300);
+            } else {
+                window.history.back();
+            }
+        }
+    </script>
+</body>
+</html>
