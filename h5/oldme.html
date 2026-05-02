@@ -71,7 +71,6 @@
         }
         .profile-left {
             float: left;
-            cursor: pointer;
         }
         .avatar {
             width: 52px;
@@ -83,6 +82,7 @@
             margin-right: 12px;
             background-size: cover;
             background-position: center;
+            cursor: pointer;
         }
         .user-meta {
             float: left;
@@ -92,6 +92,7 @@
             font-size: 18px;
             font-weight: bold;
             margin-bottom: 4px;
+            cursor: pointer;
         }
         .points-badge {
             background: #E3E3E6;
@@ -100,6 +101,7 @@
             font-size: 13px;
             color: #8E8E93;
             display: inline-block;
+            cursor: pointer;
         }
         .top-btns {
             float: right;
@@ -311,11 +313,13 @@
 <!-- 个人主页内容 -->
 <div id="profileSection" style="display: none;">
     <header class="clearfix">
-        <div class="profile-left" id="userProfileBtn">
+        <div class="profile-left">
+            <!-- 修改：头像和昵称点击跳转 oldpage.html -->
             <div class="avatar" id="uAvatar" style="background-image: url('https://creation.bcmcdn.com/716/appcraft/IMAGE_k7lDKB-Wr_1772007264168.jpeg');"></div>
             <div class="user-meta">
                 <div class="username" id="uName">加载中...</div>
-                <div class="points-badge">⭐ <span id="uPoints">0</span></div>
+                <!-- 修改：点击积分容器跳转 oldmall.html -->
+                <div class="points-badge" id="uPointsContainer">⭐ <span id="uPoints">0</span></div>
             </div>
         </div>
         <div class="top-btns">
@@ -355,7 +359,7 @@
 </div>
 
 <script>
-// 纯原生 JavaScript，完全兼容 iOS9，使用 GET 请求避免跨域预检
+// 纯原生 JavaScript，完全兼容 iOS6+
 (function() {
     var API_BASE = 'https://apirank.qujiaweb.top/';
     
@@ -414,11 +418,9 @@
         } catch(e) {}
     }
     
-    // GET 请求（简单请求，无预检）
     function ajaxGet(url, callback) {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url, true);
-        xhr.timeout = 10000;
         xhr.onreadystatechange = function() {
             if (xhr.readyState === 4) {
                 if (xhr.status >= 200 && xhr.status < 300) {
@@ -433,12 +435,6 @@
                 }
             }
         };
-        xhr.onerror = function() {
-            callback(new Error('Network error'), null);
-        };
-        xhr.ontimeout = function() {
-            callback(new Error('Timeout'), null);
-        };
         xhr.send();
     }
     
@@ -452,12 +448,10 @@
         }
         for (var i = 0; i < data.length; i++) {
             var item = data[i];
-            var name = item.名称 || item.name || '未知应用';
+            var name = escapeHtml(item.名称 || item.name || '未知应用');
             var icon = item.图标 || item.icon || '';
-            var desc = item.简介 || item.description || '暂无简介';
+            var desc = escapeHtml(item.简介 || item.description || '暂无简介');
             var id = item.id || item.ID || '';
-            name = escapeHtml(name);
-            desc = escapeHtml(desc);
             var iconStyle = icon ? 'style="background-image: url(' + encodeURI(icon) + ');"' : '';
             var statusHtml = '';
             if (item.是否推荐) {
@@ -479,214 +473,99 @@
         }
         var items = container.querySelectorAll('.app-item');
         for (var i = 0; i < items.length; i++) {
-            items[i].addEventListener('click', function(e) {
+            items[i].onclick = function() {
                 var id = this.getAttribute('data-id');
                 if (id) openDetail(id);
-            });
+            };
         }
     }
-    
-    function loadHistory() {
-        var data = getJson('appHistory', []);
-        renderList(data);
-    }
-    
-    function loadCollection() {
-        var data = getJson('appCollection', []);
-        renderList(data);
-    }
-    
+
+    function loadHistory() { renderList(getJson('appHistory', [])); }
+    function loadCollection() { renderList(getJson('appCollection', [])); }
     function loadUserApps() {
         var mail = getLocal('usermail', '');
-        if (!mail) {
-            renderList([]);
-            return;
-        }
+        if (!mail) return renderList([]);
         var container = document.getElementById('appList');
-        if (container) container.innerHTML = '<div class="loading-tip">加载中...</div>';
-        var url = API_BASE + '?mode=get_user_apps&mail=' + encodeURIComponent(mail);
-        ajaxGet(url, function(err, res) {
-            if (err) {
-                showToast('加载失败');
-                renderList([]);
-                return;
-            }
-            if (res && res.code === 200 && res.fields && isArray(res.fields)) {
-                renderList(res.fields);
-            } else {
-                renderList([]);
-            }
+        container.innerHTML = '<div class="loading-tip">加载中...</div>';
+        ajaxGet(API_BASE + '?mode=get_user_apps&mail=' + encodeURIComponent(mail), function(err, res) {
+            if (res && res.code === 200) renderList(res.fields);
+            else renderList([]);
         });
     }
-    
-    function fetchUnreadCount() {
-        var mail = getLocal('usermail', '');
-        if (!mail) return;
-        var url = API_BASE + '?mode=get_messages&mail=' + encodeURIComponent(mail);
-        ajaxGet(url, function(err, res) {
-            if (err) return;
-            if (res && res.code === 200 && res.fields && isArray(res.fields)) {
-                var count = 0;
-                for (var i = 0; i < res.fields.length; i++) {
-                    if (res.fields[i] && res.fields[i]['是否已读'] === '否') count++;
-                }
-                var badge = document.getElementById('unreadBadge');
-                if (count > 0) {
-                    badge.textContent = count;
-                    badge.style.display = 'block';
-                } else {
-                    badge.style.display = 'none';
-                }
-            }
-        });
-    }
-    
-    function checkAdmin() {
-        var mail = getLocal('usermail', '');
-        if (!mail) return;
-        var url = API_BASE + '?mode=get_user_info&mail=' + encodeURIComponent(mail);
-        ajaxGet(url, function(err, res) {
-            if (err) return;
-            if (res && res.code === 200 && res.fields && res.fields[0]) {
-                var user = res.fields[0];
-                var isAdmin = (user['是否管理'] === '是');
-                setLocal('isAdmin', isAdmin ? 'true' : 'false');
-                var reviewTab = document.getElementById('reviewTab');
-                if (isAdmin) {
-                    reviewTab.style.display = 'inline-block';
-                } else {
-                    reviewTab.style.display = 'none';
-                }
-            }
-        });
-    }
-    
+
     function initProfile() {
-        var username = getLocal('username', '用户');
-        var points = getLocal('userpoints', '0');
-        var avatar = getLocal('userpicture', 'https://creation.bcmcdn.com/716/appcraft/IMAGE_k7lDKB-Wr_1772007264168.jpeg');
-        document.getElementById('uName').textContent = username;
-        document.getElementById('uPoints').textContent = points;
-        document.getElementById('uAvatar').style.backgroundImage = 'url(' + avatar + ')';
-        checkAdmin();
-        fetchUnreadCount();
+        document.getElementById('uName').textContent = getLocal('username', '用户');
+        document.getElementById('uPoints').textContent = getLocal('userpoints', '0');
+        document.getElementById('uAvatar').style.backgroundImage = 'url(' + getLocal('userpicture', 'https://creation.bcmcdn.com/716/appcraft/IMAGE_k7lDKB-Wr_1772007264168.jpeg') + ')';
         loadHistory();
     }
-    
+
     function switchTab(type) {
         var tabs = document.querySelectorAll('.mid-tab-item');
         for (var i = 0; i < tabs.length; i++) {
-            tabs[i].classList.remove('active');
-            if (tabs[i].getAttribute('data-type') === type) {
-                tabs[i].classList.add('active');
-            }
+            tabs[i].className = (tabs[i].getAttribute('data-type') === type) ? 'mid-tab-item active' : 'mid-tab-item';
         }
         if (type === 'history') loadHistory();
         else if (type === 'collection') loadCollection();
         else if (type === 'mine') loadUserApps();
-        else if (type === 'review') openReviewPage();
     }
-    
-    // 登录：使用 GET 请求（需后端支持从 query 读取参数）
-    function doLogin() {
-        var email = document.getElementById('email').value.trim();
-        var pass = document.getElementById('pass').value.trim();
-        if (!email || !pass) {
-            showToast('请输入账号密码');
-            return;
-        }
-        showToast('登录中...');
-        var url = API_BASE + '?mode=login&email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(pass);
-        ajaxGet(url, function(err, res) {
-            if (err) {
-                showToast('网络错误: ' + (err.message || '未知错误'));
-                return;
-            }
-            if (res && res.code === 200 && res.fields && res.fields.length > 0) {
-                var u = res.fields[0];
-                if (u['是否封禁'] === '是') {
-                    showToast('账号已被封禁');
-                    return;
-                }
-                setLocal('usermail', u["邮箱"] || '');
-                setLocal('username', u["昵称"] || '用户');
-                setLocal('userpicture', u["头像"] || '');
-                setLocal('userpoints', u["积分"] || '0');
-                setLocal('isAdmin', (u["是否管理"] === '是') ? 'true' : 'false');
-                showToast('登录成功');
-                setTimeout(function() {
-                    location.reload();
-                }, 600);
-            } else {
-                showToast('账号或密码错误');
-            }
-        });
-    }
-    
-    function openDetail(id) {
-        var url = 'oldxiangqing.html?id=' + encodeURIComponent(id);
-        if (window.plus && plus.webview) {
-            var ws = plus.webview.create(url, url);
-            ws.show('pop-in', 300);
-        } else {
-            window.location.href = url;
-        }
-    }
-    function openHomePage() {
-        if (window.plus && plus.webview) {
-            var current = plus.webview.currentWebview();
-            if (current) current.close('pop-out', 300);
-        } else {
-            window.history.back();
-        }
-    }
-    function openSettingPage() { window.location.href = 'oldsetting.html'; }
-    function openMessagePage() { window.location.href = 'oldxiaoxi.html'; }
-    function openUserPage() {
+
+    // 路由函数
+    function openDetail(id) { window.location.href = 'oldxiangqing.html?id=' + encodeURIComponent(id); }
+    function openUserPage() { 
         var mail = getLocal('usermail', '');
         if (mail) window.location.href = 'oldpage.html?user=' + encodeURIComponent(mail);
         else showToast('请先登录');
     }
+    function openMallPage() { window.location.href = 'oldmall.html'; }
+    function openSettingPage() { window.location.href = 'oldsetting.html'; }
+    function openMessagePage() { window.location.href = 'oldxiaoxi.html'; }
     function openSharePage() { window.location.href = 'oldshare.html'; }
-    function openReviewPage() { window.location.href = 'oldguanli.html'; }
     function openRegisterPage() { window.location.href = 'oldzhuce.html'; }
-    
+
     document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('loginBtn').addEventListener('click', doLogin);
-        document.getElementById('registerBtn').addEventListener('click', openRegisterPage);
-        document.getElementById('userProfileBtn').addEventListener('click', openUserPage);
-        document.getElementById('msgBtn').addEventListener('click', openMessagePage);
-        document.getElementById('settingBtn').addEventListener('click', openSettingPage);
-        document.getElementById('fabBtn').addEventListener('click', openSharePage);
-        document.getElementById('homeBtn').addEventListener('click', openHomePage);
-        document.getElementById('profileNavBtn').addEventListener('click', function() {});
+        // 头像和昵称：跳转到 oldpage.html
+        document.getElementById('uAvatar').onclick = openUserPage;
+        document.getElementById('uName').onclick = openUserPage;
         
+        // 积分容器：跳转到 oldmall.html
+        document.getElementById('uPointsContainer').onclick = openMallPage;
+
+        document.getElementById('loginBtn').onclick = function() {
+            var email = document.getElementById('email').value.trim();
+            var pass = document.getElementById('pass').value.trim();
+            if(!email || !pass) return showToast('请输入账号密码');
+            ajaxGet(API_BASE + '?mode=login&email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(pass), function(err, res) {
+                if (res && res.code === 200 && res.fields[0]) {
+                    var u = res.fields[0];
+                    setLocal('usermail', u["邮箱"]);
+                    setLocal('username', u["昵称"]);
+                    setLocal('userpicture', u["头像"]);
+                    setLocal('userpoints', u["积分"]);
+                    location.reload();
+                } else showToast('登录失败');
+            });
+        };
+
+        document.getElementById('registerBtn').onclick = openRegisterPage;
+        document.getElementById('msgBtn').onclick = openMessagePage;
+        document.getElementById('settingBtn').onclick = openSettingPage;
+        document.getElementById('fabBtn').onclick = openSharePage;
+        document.getElementById('homeBtn').onclick = function() { window.history.back(); };
+
         var tabs = document.querySelectorAll('.mid-tab-item');
         for (var i = 0; i < tabs.length; i++) {
-            tabs[i].addEventListener('click', function(e) {
+            tabs[i].onclick = function() {
                 var type = this.getAttribute('data-type');
-                if (type === 'review') openReviewPage();
+                if (type === 'review') window.location.href = 'oldguanli.html';
                 else switchTab(type);
-            });
+            };
         }
-        
+
         var usermail = getLocal('usermail', '');
-        var loginSection = document.getElementById('loginSection');
-        var profileSection = document.getElementById('profileSection');
-        if (!usermail) {
-            loginSection.style.display = 'block';
-            profileSection.style.display = 'none';
-        } else {
-            loginSection.style.display = 'none';
-            profileSection.style.display = 'block';
-            initProfile();
-        }
-    });
-    
-    window.addEventListener('storage', function(e) {
-        if (e.key === 'usermail' && !e.newValue) {
-            location.reload();
-        }
+        document.getElementById('loginSection').style.display = usermail ? 'none' : 'block';
+        document.getElementById('profileSection').style.display = usermail ? 'block' : 'none';
+        if (usermail) initProfile();
     });
 })();
 </script>
