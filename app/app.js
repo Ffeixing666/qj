@@ -41,7 +41,7 @@ document.getElementById('password-value').innerText = password.split('?')[0];
 
     // 解析蓝奏云或123盘的下载链接
     if (downloadLink.includes('lan')) {
-        fetch(`https://api.pearktrue.cn/api/lanzou/api.php?url=${downloadLink}&pwd=${password}`)
+        fetch(`https://api.pearapi.ai/api/lanzou/api.php?url=${downloadLink}&pwd=${password}`)
             .then(response => response.json())
             .then(data => {
                 if (data && data.data && data.data.downloadurl) {
@@ -49,7 +49,7 @@ document.getElementById('password-value').innerText = password.split('?')[0];
                 }
             });
     } else if (downloadLink.includes('123')) {
-        fetch(`https://api.pearktrue.cn/api/123panparse/?url=${downloadLink}&pwd=${password}`)
+        fetch(`https://api.pearapi.ai/api/123panparse/?url=${downloadLink}&pwd=${password}`)
             .then(response => response.json())
             .then(data => {
                 if (data && data.data && data.data.downloadurl) {
