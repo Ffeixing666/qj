@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>趣加应用</title>
+    <style>
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #F2F2F7; 
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            display: block;
+            font-family: Helvetica, Arial, sans-serif;
+            overflow: hidden;
+        }
+
+     
+        .welcome-wrapper {
+            display: none; 
+            position: absolute;
+            top: 40%;
+            left: 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        .loading-text {
+            font-size: 30px;
+            font-weight: bold;
+            letter-spacing: 6px;
+            color: #1c1c1e;
+            position: relative;
+            height: 40px;
+        }
+
+        /* 动画降级：使用更简单的渐变 */
+        .text-item {
+            position: absolute;
+            width: 100%;
+            left: 0;
+            opacity: 0;
+            -webkit-animation: simpleFade 6s infinite;
+            animation: simpleFade 6s infinite;
+        }
+
+        .text-item:nth-child(2) {
+            -webkit-animation-delay: 3s;
+            animation-delay: 3s;
+        }
+
+        @-webkit-keyframes simpleFade {
+            0% { opacity: 0; }
+            15% { opacity: 1; }
+            45% { opacity: 1; }
+            60% { opacity: 0; }
+            100% { opacity: 0; }
+        }
+
+        @keyframes simpleFade {
+            0% { opacity: 0; }
+            15% { opacity: 1; }
+            45% { opacity: 1; }
+            60% { opacity: 0; }
+            100% { opacity: 0; }
+        }
+
+      
+        #ban-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #F2F2F7;
+            z-index: 1000;
+            display: none;
+            padding: 40px 20px;
+        }
+
+        .ban-content {
+            width: 100%;
+            margin-top: 60px;
+            text-align: center;
+        }
+
+        .ban-title {
+            color: #ff3b30;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .ban-body {
+            color: #3a3a3c;
+            font-size: 15px;
+            line-height: 1.7;
+            text-align: left;
+            margin-bottom: 30px;
+            padding: 0 10px;
+        }
+
+        .ban-mail {
+            color: #007aff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        
+        @media (prefers-color-scheme: dark) {
+            body, #ban-modal { background-color: #000000; }
+            .loading-text { color: #ffffff; }
+            .ban-body { color: #ebebf5; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="welcome-wrapper" id="ui-container">
+        <div class="loading-text">
+            <div class="text-item">欢迎回来</div>
+            <div class="text-item">马上就好</div>
+        </div>
+    </div>
+
+    <div id="ban-modal">
+        <div class="ban-content">
+            <div class="ban-title">账号受限</div>
+            <div class="ban-body">
+                抱歉，检测到您的账号存在异常情况，目前已被系统限制访问。<br><br>
+                1. 请确保遵守社区使用协议。<br>
+                2. 禁止任何形式的恶意攻击行为。<br>
+                3. 系统自动监测违规实时封禁。
+            </div>
+            <div style="font-size: 14px; color: #8e8e93;">
+                如有疑问请联络：<br>
+                <a href="mailto:110045310@qq.com" class="ban-mail">110045310@qq.com</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var API = 'https://apirank.qujiaweb.top/';
+        var hasInited = false;
+
+       
+        function ajax(options, callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.open(options.method || 'GET', options.url, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try {
+                            callback(null, JSON.parse(xhr.responseText));
+                        } catch (e) {
+                            callback(e, null);
+                        }
+                    } else {
+                        callback(new Error(xhr.status), null);
+                    }
+                }
+            };
+            xhr.send(options.body ? JSON.stringify(options.body) : null);
+        }
+
+        function updateStatusBarStyle() {
+            if (window.plus) {
+                var isDark = false;
+                try {
+                    isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                } catch(e) {}
+                
+                if (isDark) {
+                    plus.navigator.setStatusBarBackground('#000000');
+                    plus.navigator.setStatusBarStyle('light');
+                } else {
+                    plus.navigator.setStatusBarBackground('#F2F2F7');
+                    plus.navigator.setStatusBarStyle('dark');
+                }
+            }
+        }
+
+        function clearAndExit() {
+            var keys = ['usermail_login', 'userpass_login', 'usermail', 'username', 'userpicture', 'userpoints'];
+            for (var i = 0; i < keys.length; i++) {
+                localStorage.removeItem(keys[i]);
+            }
+            goHome();
+        }
+
+        function goHome() {
+            if (window.plus) {
+                var h = plus.webview.create('oldhome.html', 'home.html', {
+                    backbuttonMaximize: false,
+                    scrollIndicator: 'none'
+                });
+                h.show('fade-in', 250);
+                setTimeout(function() { 
+                    plus.webview.currentWebview().close('none'); 
+                }, 500);
+            } else {
+                window.location.replace('home.html');
+            }
+        }
+
+        function startApp() {
+            if (hasInited) return;
+            hasInited = true;
+
+            var m = localStorage.getItem('usermail_login');
+            var p = localStorage.getItem('userpass_login');
+
+            if (!m || !p) {
+                goHome();
+                return;
+            }
+
+            document.getElementById('ui-container').style.display = 'block';
+
+        
+            ajax({
+                method: 'POST',
+                url: API + '?mode=login',
+                body: { email: m, password: p }
+            }, function(err, res) {
+                if (err) {
+                    goHome();
+                    return;
+                }
+
+                if (res.code === 200 && res.fields && res.fields.length > 0) {
+                    var u = res.fields[0];
+                    localStorage.setItem('usermail', u["邮箱"]);
+                    localStorage.setItem('username', u["昵称"]);
+                    localStorage.setItem('userpicture', u["头像"]);
+                    localStorage.setItem('userpoints', u["积分"] || '0');
+                    goHome();
+                } else if (res.code === 403) {
+                    document.getElementById('ui-container').style.display = 'none';
+                    document.getElementById('ban-modal').style.display = 'block';
+                } else {
+                    alert("账号异常，请重新登录");
+                    clearAndExit();
+                }
+            });
+        }
+
+   
+        window.onload = function() {
+            updateStatusBarStyle();
+            startApp();
+        };
+
+        document.addEventListener('plusready', function() {
+            updateStatusBarStyle();
+            plus.navigator.setFullscreen(false);
+            plus.key.addEventListener('backbutton', function() {
+                if (document.getElementById('ban-modal').style.display === 'block') {
+                    plus.nativeUI.confirm("确定退出吗？", function(e) {
+                        if (e.index === 0) plus.runtime.quit();
+                    }, "提示", ["确定", "取消"]);
+                } else {
+                    plus.runtime.quit();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
