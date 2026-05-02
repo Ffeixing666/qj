@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -1058,7 +1059,7 @@ iu.style.cursor = 'pointer';
 iu.onclick = function() {
 if (!pageActive) return;
 if (app['邮箱']) {
-var url = 'page.html?user=' + app['邮箱'];
+var url = 'oldpage.html?user=' + app['邮箱'];
 if (window.plus) plus.webview.open(url, url, {backbuttonMaximize:false}, 'pop-in', 300);
 else window.location.href = url;
 }
@@ -1278,7 +1279,7 @@ var un = card.querySelector('.user-name');
 var navFunc = function(e) {
 cancelBubble(e);
 if (cObj['邮箱']) {
-var url = 'page.html?user=' + cObj['邮箱'];
+var url = 'oldoldpage.html?user=' + cObj['邮箱'];
 if (window.plus) plus.webview.open(url, url, {backbuttonMaximize:false}, 'pop-in', 300);
 else window.location.href = url;
 }
@@ -1335,7 +1336,7 @@ var run = rc.querySelector('.user-name');
 var rnavFunc = function(e) {
 cancelBubble(e);
 if (rObj['邮箱']) {
-var url = 'page.html?user=' + rObj['邮箱'];
+var url = 'oldoldpage.html?user=' + rObj['邮箱'];
 if (window.plus) plus.webview.open(url, url, {backbuttonMaximize:false}, 'pop-in', 300);
 else window.location.href = url;
 }
