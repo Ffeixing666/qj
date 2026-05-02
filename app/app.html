@@ -212,35 +212,35 @@
 </head>
 <body>
 
-    <!-- 加载动画层 -->
+   
     <div id="loading-container">
         <div class="spinner"></div>
-        <div class="loading-text">正在解析安全下载链路...</div>
+        <div class="loading-text">加载中</div>
     </div>
 
-    <!-- 图片大图查看器 -->
+
     <div id="image-viewer">
         <div class="close-tip">点击任意处关闭</div>
         <img id="viewer-img" src="" alt="预览图">
     </div>
 
-    <!-- 主容器 -->
+    
     <div class="app-card">
-        <!-- 头部 -->
+        
         <div class="header">
             <img id="iconImg" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="应用图标">
             <div class="title-area">
-                <h1 id="appName">加载中...</h1>
-                <div class="tag-line">安全验证 · 极速下载</div>
+                <h1 id="appName">加载中</h1>
+                <div class="tag-line">来自趣加应用APP</div>
             </div>
         </div>
 
-        <!-- 按钮区 -->
+        
         <div class="action-area">
-            <button id="downloadButton">获取应用</button>
+            <button id="downloadButton">立即下载</button>
         </div>
 
-        <!-- 提取码区 -->
+  
         <div id="password-container" style="display: none;">
             <div class="pwd-left">
                 <span id="password-label">提取码</span>
@@ -252,13 +252,13 @@
             </div>
         </div>
 
-        <!-- 截图区 -->
+      
         <div class="screenshots">
             <img id="img1" src="" alt="截图1" style="display: none;">
             <img id="img2" src="" alt="截图2" style="display: none;">
         </div>
 
-        <!-- 简介区 -->
+      
         <div class="desc-area">
             <h3 class="section-title">应用简介</h3>
             <div id="description">暂无介绍</div>
@@ -267,7 +267,7 @@
 
 <script>
     window.onload = function() {
-        // 1. 获取 URL 参数
+        
         const urlParams = new URLSearchParams(window.location.search);
         const appIcon = urlParams.get('icon');
         const appName = urlParams.get('name') || '未知应用';
@@ -277,7 +277,7 @@
         const img2Url = urlParams.get('图片二');
         const description = urlParams.get('简介');
 
-        // 2. 渲染基础数据
+    
         if (appIcon) document.getElementById('iconImg').src = appIcon;
         document.getElementById('appName').innerText = appName;
         if (description) document.getElementById('description').innerText = description;
@@ -287,7 +287,7 @@
         if (img1Url) { img1DOM.src = img1Url; img1DOM.style.display = 'block'; }
         if (img2Url) { img2DOM.src = img2Url; img2DOM.style.display = 'block'; }
 
-        // 3. 处理提取码与复制逻辑
+   
         const passwordContainer = document.getElementById('password-container');
         if (password && password.trim() !== '') {
             passwordContainer.style.display = 'flex';
@@ -304,32 +304,32 @@
             });
         }
 
-        // 4. 解析逻辑与加载动画
+    
         let finalDownloadUrl = downloadLink; 
         const loader = document.getElementById('loading-container');
 
-        // 如果是蓝奏云链接，立即显示转圈并请求
+        
         if (downloadLink.includes('lan')) {
-            loader.style.display = 'flex'; // 开始转圈
+            loader.style.display = 'flex'; 
             
             fetch(`https://api.pearapi.ai/api/lanzou/api.php?url=${encodeURIComponent(downloadLink)}&pwd=${password || ''}`)
                 .then(response => response.json())
                 .then(data => {
-                    loader.style.display = 'none'; // 数据返回，停止转圈
+                    loader.style.display = 'none'; 
                     if (data && data.data && data.data.downloadurl && data.data.downloadurl.length > 0) {
                         finalDownloadUrl = data.data.downloadurl;
-                        // 成功拿到有效直链，隐藏提取码区块
+                       
                         passwordContainer.style.display = 'none';
                     }
                 })
                 .catch(err => {
                     console.error('解析失败', err);
-                    loader.style.display = 'none'; // 失败也要停止转圈
+                    loader.style.display = 'none'; 
                 });
         } 
-        // 123盘解析已取消，其他情况不触发转圈，直接使用原链接
+        
 
-        // 下载按钮绑定
+        
         document.getElementById('downloadButton').addEventListener('click', function() {
             if (finalDownloadUrl) {
                 window.open(finalDownloadUrl, '_blank');
@@ -338,66 +338,66 @@
             }
         });
 
-        // 5. 图片查看器与手势缩放逻辑 (移动端二指缩放)
+        
         const viewer = document.getElementById('image-viewer');
         const viewerImg = document.getElementById('viewer-img');
         let currentScale = 1;
         let baseScale = 1;
         let startDistance = 0;
 
-        // 计算两指距离
+     
         function getDistance(touches) {
             return Math.hypot(touches[0].pageX - touches[1].pageX, touches[0].pageY - touches[1].pageY);
         }
 
-        // 打开大图
+        
         function openViewer(src) {
             viewerImg.src = src;
             viewer.style.display = 'flex';
-            // 重置缩放状态
+            
             currentScale = 1;
             baseScale = 1;
             viewerImg.style.transform = 'scale(1)';
             viewerImg.style.transition = 'transform 0.1s ease-out';
         }
 
-        // 点击图片打开大图
+        
         if (img1Url) img1DOM.addEventListener('click', () => openViewer(img1Url));
         if (img2Url) img2DOM.addEventListener('click', () => openViewer(img2Url));
 
-        // 关闭大图逻辑 (点击背景，或者点击未放大的图片)
+       
         viewer.addEventListener('click', function(e) {
             if (e.target === viewer || (e.target === viewerImg && currentScale <= 1.1)) {
                 viewer.style.display = 'none';
             }
         });
 
-        // 触摸开始：判断双指
+        
         viewer.addEventListener('touchstart', function(e) {
             if (e.touches.length === 2) {
-                viewerImg.style.transition = 'none'; // 缩放时取消过渡动画，跟随手势更紧密
+                viewerImg.style.transition = 'none'; 
                 startDistance = getDistance(e.touches);
             }
         }, { passive: false });
 
-        // 触摸移动：执行缩放
+        
         viewer.addEventListener('touchmove', function(e) {
             if (e.touches.length === 2) {
-                e.preventDefault(); // 阻止浏览器原生滚动或缩放
+                e.preventDefault(); 
                 const currentDistance = getDistance(e.touches);
-                // 根据起始距离计算缩放比例
+                
                 currentScale = baseScale * (currentDistance / startDistance);
-                // 限制缩放范围在 1x 到 4x 之间
+                
                 currentScale = Math.max(1, Math.min(currentScale, 4)); 
                 viewerImg.style.transform = `scale(${currentScale})`;
             }
         }, { passive: false });
 
-        // 触摸结束：保存当前的基准缩放值
+        
         viewer.addEventListener('touchend', function(e) {
             if (e.touches.length < 2) {
                 baseScale = currentScale;
-                viewerImg.style.transition = 'transform 0.1s ease-out'; // 恢复动画
+                viewerImg.style.transition = 'transform 0.1s ease-out'; 
             }
         });
     };
