@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>消息中心（旧兼容）</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: Helvetica, STHeiti, "Microsoft YaHei", sans-serif;
+            background-color: #F2F2F7;
+            color: #1C1C1E;
+            line-height: 1.4;
+            font-size: 14px;
+        }
+
+        .header {
+            position: relative;
+            background-color: #F2F2F7;
+            border-bottom: 1px solid #E5E5EA;
+            z-index: 100;
+        }
+
+        .nav-bar {
+            height: 44px;
+            width: 100%;
+            position: relative;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 50px;
+            height: 44px;
+        }
+
+        .back-icon {
+            width: 10px;
+            height: 10px;
+            border-left: 2px solid #007AFF;
+            border-bottom: 2px solid #007AFF;
+            -webkit-transform: rotate(45deg);
+            margin: 15px 0 0 18px;
+        }
+
+        .nav-title {
+            text-align: center;
+            line-height: 44px;
+            font-size: 17px;
+            font-weight: bold;
+        }
+
+        .nav-right {
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 44px;
+        }
+
+        .read-all-btn {
+            font-size: 14px;
+            color: #007AFF;
+            font-weight: bold;
+            line-height: 44px;
+            padding: 0 16px;
+        }
+
+        .tabs-container {
+            width: 100%;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 8px 0;
+            border-bottom: 1px solid #E5E5EA;
+        }
+
+        .tab-item {
+            display: inline-block;
+            padding: 6px 16px;
+            font-size: 14px;
+            color: #8E8E93;
+        }
+
+        .tab-item.active {
+            color: #007AFF;
+            font-weight: bold;
+            border-bottom: 2px solid #007AFF;
+        }
+
+        .msg-list {
+            padding: 12px 16px 40px 16px;
+        }
+
+        .msg-card {
+            background: #FFFFFF;
+            -webkit-border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+            -webkit-box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .msg-card-active {
+            background-color: #F9F9F9;
+        }
+
+        .avatar-box {
+            float: left;
+            width: 48px;
+            height: 48px;
+            background-color: #E5E5EA;
+            -webkit-border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .avatar-box img {
+            width: 48px;
+            height: 48px;
+        }
+
+        .msg-content {
+            margin-left: 60px;
+        }
+
+        .u-name {
+            font-size: 15px;
+            font-weight: bold;
+            color: #007AFF;
+            margin-bottom: 4px;
+        }
+
+        .u-action {
+            font-size: 14px;
+            color: #1C1C1E;
+            margin-bottom: 6px;
+            word-wrap: break-word;
+        }
+
+        .u-time {
+            font-size: 12px;
+            color: #8E8E93;
+        }
+
+        .unread-dot {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            width: 8px;
+            height: 8px;
+            background-color: #FF3B30;
+            -webkit-border-radius: 4px;
+            z-index: 1;
+        }
+
+        .empty-hint {
+            text-align: center;
+            padding-top: 100px;
+            color: #8E8E93;
+            font-size: 14px;
+            display: none;
+        }
+
+        .clearfix:after {
+            content: ".";
+            display: block;
+            height: 0;
+            clear: both;
+            visibility: hidden;
+        }
+
+        .action-menu {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 180px;
+            margin-left: -90px;
+            margin-top: -30px;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            -webkit-border-radius: 12px;
+            padding: 16px 0;
+            z-index: 9999;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="nav-bar">
+            <div class="back-btn" onclick="handleBack()">
+                <div class="back-icon"></div>
+            </div>
+            <div class="nav-title">消息</div>
+            <div class="nav-right">
+                <div class="read-all-btn" onclick="markAllAsRead()">一键已读</div>
+            </div>
+        </div>
+        <div class="tabs-container" id="tabsBox">
+            <div class="tab-item active" onclick="switchTab(this, '全部')">全部</div>
+            <div class="tab-item" onclick="switchTab(this, '评论')">评论</div>
+            <div class="tab-item" onclick="switchTab(this, '回复')">回复</div>
+            <div class="tab-item" onclick="switchTab(this, '投币')">投币</div>
+            <div class="tab-item" onclick="switchTab(this, '通知')">通知</div>
+        </div>
+    </div>
+
+    <div class="msg-list" id="msgList"></div>
+
+    <div class="empty-hint" id="emptyHint">暂无更多消息</div>
+
+    <script type="text/javascript">
+        var currentType = '全部';
+
+        function ajax(options) {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4) {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        var data = JSON.parse(xhr.responseText);
+                        options.success && options.success(data);
+                    } else {
+                        options.error && options.error();
+                    }
+                    options.complete && options.complete();
+                }
+            };
+            xhr.open(options.type || 'GET', options.url, true);
+            if (options.type == 'POST') {
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.send(JSON.stringify(options.data));
+            } else {
+                xhr.send(null);
+            }
+        }
+
+        document.addEventListener('plusready', function() {
+            var webview = plus.webview.currentWebview();
+            plus.key.addEventListener('backbutton', function() {
+                webview.canBack(function(e) {
+                    if (e.canBack) {
+                        webview.back();
+                    } else {
+                        if (plus.webview.all().length > 1) {
+                            webview.close('auto');
+                        } else {
+                            history.back();
+                        }
+                    }
+                });
+            });
+        });
+
+        function handleBack() {
+            if (window.plus) {
+                plus.webview.currentWebview().close('auto');
+            } else {
+                history.back();
+            }
+        }
+
+        function showLoading() {
+            if (window.plus) plus.nativeUI.showWaiting('加载中...');
+        }
+
+        function hideLoading() {
+            if (window.plus) plus.nativeUI.closeWaiting();
+        }
+
+        function showToast(msg) {
+            if (window.plus) {
+                plus.nativeUI.toast(msg);
+            } else {
+                alert(msg);
+            }
+        }
+
+        function formatTime(ts) {
+            var now = new Date().getTime();
+            var mTime = parseInt(ts) * 1000;
+            var diff = now - mTime;
+            var mins = Math.floor(diff / 60000);
+            var hours = Math.floor(mins / 60);
+            var days = Math.floor(hours / 24);
+
+            if (days > 0) return days + '天前';
+            if (hours > 0) return hours + '小时前';
+            if (mins > 0) return mins + '分钟前';
+            return '刚刚';
+        }
+
+        function fetchMessages(type) {
+            var usermail = localStorage.getItem('usermail');
+            if (!usermail) {
+                showToast('请先登录');
+                return;
+            }
+            showLoading();
+            var url = 'https://apirank.qujiaweb.top/?mode=get_messages&mail=' + encodeURIComponent(usermail);
+            if (type && type !== '全部') {
+                url += '&type=' + encodeURIComponent(type);
+            }
+
+            ajax({
+                url: url,
+                success: function(res) {
+                    if (res.code === 200 && res.fields) {
+                        renderMessages(res.fields);
+                    }
+                },
+                error: function() {
+                    showToast('获取消息失败');
+                },
+                complete: function() {
+                    hideLoading();
+                }
+            });
+        }
+
+        function renderMessages(messages) {
+            var list = document.getElementById('msgList');
+            var hint = document.getElementById('emptyHint');
+            var currentUserMail = localStorage.getItem('usermail');
+            
+            list.innerHTML = '';
+            var filtered = [];
+            for (var i = 0; i < messages.length; i++) {
+                if (messages[i]['发起人邮箱'] !== currentUserMail) {
+                    filtered.push(messages[i]);
+                }
+            }
+
+            if (filtered.length === 0) {
+                list.style.display = 'none';
+                hint.style.display = 'block';
+                return;
+            }
+
+            list.style.display = 'block';
+            hint.style.display = 'none';
+
+            for (var j = 0; j < filtered.length; j++) {
+                (function(msg) {
+                    var card = document.createElement('div');
+                    card.className = 'msg-card clearfix';
+                    
+                    var html = '';
+                    if (msg['是否已读'] === '否') {
+                        html += '<div class="unread-dot"></div>';
+                    }
+                    
+                    html += '<div class="avatar-box" id="av_' + j + '">';
+                    if (msg['发起人头像']) {
+                        html += '<img src="' + msg['发起人头像'] + '" onerror="this.style.display=\'none\'">';
+                    }
+                    html += '</div>';
+                    
+                    html += '<div class="msg-content">';
+                    html += '<div class="u-name" id="un_' + j + '">' + (msg['发起人昵称'] || '未知用户') + '</div>';
+                    html += '<div class="u-action" style="white-space:pre-wrap;">' + (msg['发起人内容'] || '') + '</div>';
+                    html += '<div class="u-time">' + formatTime(msg['时间'] || msg.createdAt) + '</div>';
+                    html += '</div>';
+                    
+                    card.innerHTML = html;
+
+                    var jumpUser = function(e) {
+                        e.cancelBubble = true;
+                        if (e.stopPropagation) e.stopPropagation();
+                        var u = 'oldpage.html?user=' + encodeURIComponent(msg['发起人邮箱']);
+                        if (window.plus) {
+                            plus.webview.open(u, u, {backbuttonMaximize:false}, 'pop-in', 250);
+                        } else {
+                            window.location.href = u;
+                        }
+                    };
+
+                    card.onclick = function() {
+                        card.className = 'msg-card clearfix msg-card-active';
+                        setTimeout(function(){ card.className = 'msg-card clearfix'; }, 100);
+                        
+                        var dots = card.getElementsByTagName('div');
+                        for(var d=0; d<dots.length; d++){
+                            if(dots[d].className === 'unread-dot') dots[d].style.display = 'none';
+                        }
+
+                        if (msg['是否已读'] === '否') {
+                            ajax({
+                                url: 'https://apirank.qujiaweb.top/?mode=mark_message_read&mail=' + encodeURIComponent(currentUserMail) + '&createdAt=' + encodeURIComponent(msg.createdAt)
+                            });
+                        }
+
+                        if (msg.appid) {
+                            var u = 'oldxiangqing.html?id=' + msg.appid;
+                            if (window.plus) {
+                                plus.webview.open(u, u, {backbuttonMaximize:false}, 'pop-in', 250);
+                            } else {
+                                window.location.href = u;
+                            }
+                        }
+                    };
+
+                    addLongPress(card, msg);
+                    list.appendChild(card);
+                    
+                    document.getElementById('av_' + j).onclick = jumpUser;
+                    document.getElementById('un_' + j).onclick = jumpUser;
+                })(filtered[j]);
+            }
+        }
+
+        function switchTab(el, type) {
+            var tabs = document.getElementById('tabsBox').getElementsByTagName('div');
+            for (var i = 0; i < tabs.length; i++) {
+                tabs[i].className = 'tab-item';
+            }
+            el.className = 'tab-item active';
+            currentType = type;
+            fetchMessages(type);
+        }
+
+        function markAllAsRead() {
+            var usermail = localStorage.getItem('usermail');
+            if (!usermail) return;
+            showLoading();
+            ajax({
+                url: 'https://apirank.qujiaweb.top/?mode=mark_all_read&mail=' + encodeURIComponent(usermail),
+                success: function(res) {
+                    if (res.code === 200) {
+                        showToast('已全部标记已读');
+                        fetchMessages(currentType);
+                    }
+                },
+                complete: function() {
+                    hideLoading();
+                }
+            });
+        }
+
+        function addLongPress(el, msg) {
+            var timer = null;
+            el.ontouchstart = function() {
+                timer = setTimeout(function() {
+                    showMenu(msg);
+                }, 800);
+            };
+            el.ontouchmove = function() {
+                clearTimeout(timer);
+            };
+            el.ontouchend = function() {
+                clearTimeout(timer);
+            };
+        }
+
+        function showMenu(msg) {
+            var old = document.getElementById('activeMenu');
+            if (old) document.body.removeChild(old);
+
+            var menu = document.createElement('div');
+            menu.id = 'activeMenu';
+            menu.className = 'action-menu';
+            menu.innerHTML = '<div style="padding:10px;">删除</div>';
+            menu.onclick = function() {
+                deleteMsg(msg.createdAt);
+                document.body.removeChild(menu);
+            };
+            document.body.appendChild(menu);
+
+            setTimeout(function() {
+                document.onclick = function() {
+                    if (document.getElementById('activeMenu')) {
+                        document.body.removeChild(menu);
+                    }
+                    document.onclick = null;
+                };
+            }, 100);
+        }
+
+        function deleteMsg(createdAt) {
+            var usermail = localStorage.getItem('usermail');
+            if (!confirm('确定删除吗？')) return;
+            showLoading();
+            ajax({
+                type: 'POST',
+                url: 'https://apirank.qujiaweb.top/?mode=delete_message&mail=' + usermail,
+                data: { createdAt: createdAt, mail: usermail },
+                success: function(res) {
+                    if (res.code === 200) {
+                        showToast('已删除');
+                        fetchMessages(currentType);
+                    }
+                },
+                complete: function() {
+                    hideLoading();
+                }
+            });
+        }
+
+        window.onload = function() {
+            fetchMessages('全部');
+        };
+    </script>
+</body>
+</html>
