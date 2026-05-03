@@ -232,7 +232,7 @@
             <nav class="nav-scroll">
                 <span class="nav-item active" onclick="switchCategory('', this)">推荐</span>
                 <span class="nav-item" onclick="switchCategory('latest', this)">最新</span>
-                <span class="nav-item" onclick="window.location.href='oldrank.html'">排行</span>
+                <span class="nav-item" onclick="openrank()">排行</span>
                 <span class="nav-item" onclick="switchCategory('影视音乐', this)">影视音乐</span>
                 <span class="nav-item" onclick="switchCategory('实用工具', this)">实用工具</span>
                 <span class="nav-item" onclick="switchCategory('学习必备', this)">学习必备</span>
@@ -398,6 +398,13 @@
         }
 
         function closeAdModal() { document.getElementById('adModal').style.display = 'none'; }
+        function openrank() { var url = 'oldrank.html';
+        if (window.plus && plus.webview) {
+            var ws = plus.webview.create(url, url);
+            ws.show('pop-in', 300);
+        } else {
+            window.location.href = url;
+        } }
         function openMePage() { var url = 'oldme.html';
         if (window.plus && plus.webview) {
             var ws = plus.webview.create(url, url);
