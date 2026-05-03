@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>趣加资源</title>
+    <!-- 使用较旧且兼容性好的 FontAwesome 4.7 -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style type="text/css">
+        /* 基础样式复位 */
+        * { -webkit-tap-highlight-color: rgba(0,0,0,0); box-sizing: border-box; }
+        body, html { margin: 0; padding: 0; font-family: "Helvetica Neue", Helvetica, STHeiTi, sans-serif; background-color: #f0f2f5; color: #333; }
+        
+        /* 黑夜模式样式 */
+        body.night { background-color: #1a1a1a; color: #ccc; }
+        body.night .header { background-color: #222; border-bottom: 1px solid #333; }
+        body.night .card { background-color: #2c2c2c; border: 1px solid #444; }
+        body.night .category-title { background: #333; }
+        body.night .search-box input { background: #333; border: 1px solid #444; color: #fff; }
+        body.night .footer { background: #111; }
+
+        /* 布局 */
+        .header { background-color: #ffffff; padding: 15px; border-bottom: 1px solid #ddd; text-align: center; }
+        .info-bar { padding: 10px; font-size: 14px; color: #666; text-align: center; }
+        .container { padding: 10px; max-width: 800px; margin: 0 auto; }
+        
+        /* 搜索框 */
+        .search-box { position: relative; margin: 10px 0; }
+        .search-box input { width: 100%; padding: 10px 15px 10px 35px; border-radius: 20px; border: 1px solid #ccc; font-size: 16px; outline: none; }
+        .search-box .fa-search { position: absolute; left: 12px; top: 12px; color: #999; }
+
+        /* 导航切换 */
+        .nav-tabs { text-align: center; margin-bottom: 15px; }
+        .nav-tabs a { display: inline-block; padding: 8px 20px; text-decoration: none; color: #3b82f6; border: 1px solid #3b82f6; margin: 0 5px; border-radius: 15px; font-size: 14px; }
+        .nav-tabs a.active { background: #3b82f6; color: #fff; }
+
+        /* 分类区块 */
+        .category-section { margin-bottom: 20px; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        body.night .category-section { background: #2c2c2c; }
+        .category-title { background: #f8f9fa; padding: 10px 15px; font-weight: bold; border-bottom: 1px solid #eee; display: block; color: #3b82f6; }
+        
+        /* 资源网格布局 (兼容老版浏览器) */
+        .grid { padding: 10px; font-size: 0; }
+        .card { 
+            display: inline-block; width: 48%; margin: 1%; vertical-align: top; 
+            background: #fff; border: 1px solid #eee; border-radius: 6px; 
+            padding: 8px; font-size: 13px; text-decoration: none; color: inherit;
+            text-align: center; overflow: hidden;
+        }
+        .card img { width: 40px; height: 40px; border-radius: 4px; margin-bottom: 5px; }
+        .card span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .footer { padding: 30px 10px; text-align: center; font-size: 12px; color: #999; background: #f8f9fa; margin-top: 20px; }
+
+        /* 弹窗模拟 */
+        #msg-box { display:none; position:fixed; top:40%; left:50%; width:200px; margin-left:-100px; background:rgba(0,0,0,0.8); color:#fff; padding:15px; text-align:center; border-radius:10px; z-index:100; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1 style="margin:0; font-size:22px; color:#3b82f6;"><i class="fa fa-rocket"></i> 趣加资源</h1>
+        <div id="greeting-box" style="margin-top:5px; font-weight:bold;"></div>
+        <div id="date-box" class="info-bar"></div>
+    </div>
+
+    <div class="container">
+        <!-- 搜索 -->
+        <div class="search-box">
+            <i class="fa fa-search"></i>
+            <input type="text" id="searchInput" placeholder="搜索资源..." oninput="handleSearch()">
+        </div>
+
+        <!-- 导航区 -->
+        <div class="nav-tabs">
+            <a href="?page=1" id="tab-pc">PC 资源</a>
+            <a href="?page=2" id="tab-web">WEB 资源</a>
+        </div>
+
+        <div id="contentContainer">
+            <!-- 动态内容渲染在这里 -->
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>趣加资源 - 致力于优质资源分享</p>
+        <p>© 2026 趣味加倍科技</p>
+    </div>
+
+    <div id="msg-box">解析中...</div>
+
+    <script type="text/javascript">
+        // 原始资源数据
+        var resources = {
+            "Office软件": [
+                { title: "Office2003完美版", url: "https://www.geegeng.com/s/crCc6xf4cM", imageUrl: "https://static.codemao.cn/pickduck/SJeg-TP8yx.jpeg?hash=Fvm8HRVhNspI7Bib15eOqhNnhhl1" },
+                { title: "Office2007三合一完美版", url: "https://www.geegeng.com/s/crCsX7EVSU", imageUrl: "https://static.codemao.cn/pickduck/SJeg-TP8yx.jpeg?hash=Fvm8HRVhNspI7Bib15eOqhNnhhl1" },
+                { title: "Office2010三合一完美版", url: "https://share.feijipan.com/s/6AVqK1Al", imageUrl: "https://static.codemao.cn/pickduck/B1CAlawIJg.jpeg?hash=FoPCQiA0kGPS6RL3cde4np7ESeer" },
+                { title: "Office2013三合一完美版", url: "https://share.feijipan.com/s/JOVqKd2L", imageUrl: "https://static.codemao.cn/pickduck/Hy93xaDUke.jpeg?hash=FgZL5SaN3JiYVqHPcm2JC4A_May6" },
+                { title: "Office2016三合一完美版", url: "https://share.feijipan.com/s/qMVqpCQ8", imageUrl: "https://static.codemao.cn/pickduck/Hy93xaDUke.jpeg?hash=FgZL5SaN3JiYVqHPcm2JC4A_May6" },
+                { title: "Office1997标准版", url: "https://www.123684.com/s/sBhZVv-BcZ4H", imageUrl: "https://static.codemao.cn/pickduck/B1rWMaPIye.jpeg?hash=FtZFcVJiw8bvk5vRIaj0LC1-6j7C" },
+                { title: "Office2000标准版", url: "https://www.123684.com/s/sBhZVv-acZ4H", imageUrl: "https://static.codemao.cn/pickduck/B1rWMaPIye.jpeg?hash=FtZFcVJiw8bvk5vRIaj0LC1-6j7C" },
+                { title: "Office2003标准版", url: "https://www.123684.com/s/sBhZVv-pcZ4H", imageUrl: "https://static.codemao.cn/pickduck/S1OueTv81g.jpeg?hash=Fvm8HRVhNspI7Bib15eOqhNnhhl1" },
+                { title: "Office2007专业增强版", url: "https://www.123684.com/s/sBhZVv-fcZ4H", imageUrl: "https://static.codemao.cn/pickduck/S1OueTv81g.jpeg?hash=Fvm8HRVhNspI7Bib15eOqhNnhhl1" },
+                { title: "Office2010专业增强版", url: "https://www.123684.com/s/sBhZVv-FtZ4H", imageUrl: "https://static.codemao.cn/pickduck/HyrigTvI1g.jpeg?hash=FoPCQiA0kGPS6RL3cde4np7ESeer" },
+                { title: "Office2013专业增强版", url: "https://www.123684.com/s/sBhZVv-JcZ4H", imageUrl: "https://static.codemao.cn/pickduck/r1Rm1TPIJe.jpeg?hash=FgZL5SaN3JiYVqHPcm2JC4A_May6" },
+                { title: "Office2016专业增强版", url: "https://www.123684.com/s/sBhZVv-gtZ4H", imageUrl: "https://static.codemao.cn/pickduck/r1Rm1TPIJe.jpeg?hash=FgZL5SaN3JiYVqHPcm2JC4A_May6" },
+                { title: "Office2019专业增强版", url: "https://www.123684.com/s/sBhZVv-wtZ4H", imageUrl: "https://static.codemao.cn/pickduck/r1Rm1TPIJe.jpeg?hash=FgZL5SaN3JiYVqHPcm2JC4A_May6" },
+                { title: "Office2021专业增强版", url: "https://www.123684.com/s/sBhZVv-ItZ4H", imageUrl: "https://static.codemao.cn/pickduck/BJ2L1TvLye.jpeg?hash=Fs25Q8QcXwcAnR1RF3cYj-WI-5Uu" },
+                { title: "神龙激活工具", url: "https://www.geegeng.com/s/crCotBDHoc", imageUrl: "https://static.codemao.cn/pickduck/rksnkpDL1x.jpeg?hash=Fgynv-MLXALSvOwL_FMR49Qod4cI" },
+                { title: "WPS2019专业版（教育部专用）", url: "https://www.123684.com/s/sBhZVv-6SZ4H", imageUrl: "https://static.codemao.cn/pickduck/rkZ-lpPUJl.jpeg?hash=FlQ-RlEETrQwPN6SjFRxxsxAG5Pt" },
+                { title: "WPS2016专业版（中国石油）", url: "https://www.123684.com/s/sBhZVv-Z5Z4H", imageUrl: "https://static.codemao.cn/pickduck/B1TA16wIkg.jpeg?hash=FnXTPtP0ZC3HLHiNgoqXkzxiEHV3" },
+            ],
+            "Adoble软件": [
+                { title: "Photoshop 2017", url: "https://www.123684.com/s/sBhZVv-YtZ4H", imageUrl: "https://static.codemao.cn/pickduck/HyTYbavI1x.jpeg?hash=Fj6r0szDlbuKywTbBFZYYqdXYvdd" },
+                { title: "Photoshop 2018", url: "https://www.123684.com/s/sBhZVv-GtZ4H", imageUrl: "https://static.codemao.cn/pickduck/HyTYbavI1x.jpeg?hash=Fj6r0szDlbuKywTbBFZYYqdXYvdd" },
+                { title: "Photoshop 2019", url: "https://www.123684.com/s/sBhZVv-y3c4H", imageUrl: "https://static.codemao.cn/pickduck/HyTYbavI1x.jpeg?hash=Fj6r0szDlbuKywTbBFZYYqdXYvdd" },
+                { title: "Photoshop 2020", url: "https://www.123684.com/s/sBhZVv-PtZ4H", imageUrl: "https://static.codemao.cn/pickduck/HyTYbavI1x.jpeg?hash=Fj6r0szDlbuKywTbBFZYYqdXYvdd" },
+                { title: "Photoshop 2021", url: "https://www.123684.com/s/sBhZVv-XtZ4H", imageUrl: "https://static.codemao.cn/pickduck/HyTYbavI1x.jpeg?hash=Fj6r0szDlbuKywTbBFZYYqdXYvdd" },
+                { title: "Photoshop 2022", url: "https://www.123684.com/s/sBhZVv-Thc4H", imageUrl: "https://static.codemao.cn/pickduck/HyTYbavI1x.jpeg?hash=Fj6r0szDlbuKywTbBFZYYqdXYvdd" },
+                { title: "Photoshop 2023", url: "https://www.123684.com/s/sBhZVv-3hc4H", imageUrl: "https://static.codemao.cn/pickduck/HyTYbavI1x.jpeg?hash=Fj6r0szDlbuKywTbBFZYYqdXYvdd" },
+                { title: "Premiere Pro 2017", url: "https://www.123865.com/s/sBhZVv-dhc4H", imageUrl: "https://static.codemao.cn/pickduck/Hkvw-pwI1x.jpeg?hash=FhWrCkQd7MDI4v02nq6-6g9oWcuo" },
+                { title: "Premiere Pro 2018", url: "https://www.123684.com/s/sBhZVv-63c4H", imageUrl: "https://static.codemao.cn/pickduck/Hkvw-pwI1x.jpeg?hash=FhWrCkQd7MDI4v02nq6-6g9oWcuo" },
+                { title: "Premiere Pro 2019", url: "https://www.123684.com/s/sBhZVv-vhc4H", imageUrl: "https://static.codemao.cn/pickduck/Hkvw-pwI1x.jpeg?hash=FhWrCkQd7MDI4v02nq6-6g9oWcuo" },
+                { title: "Premiere Pro 2020", url: "https://www.123684.com/s/sBhZVv-j3c4H", imageUrl: "https://static.codemao.cn/pickduck/Hkvw-pwI1x.jpeg?hash=FhWrCkQd7MDI4v02nq6-6g9oWcuo" },
+                { title: "Premiere Pro 2021", url: "https://www.123684.com/s/sBhZVv-V3c4H", imageUrl: "https://static.codemao.cn/pickduck/Hkvw-pwI1x.jpeg?hash=FhWrCkQd7MDI4v02nq6-6g9oWcuo" },
+                { title: "Premiere Pro 2022", url: "https://www.123684.com/s/sBhZVv-Hhc4H", imageUrl: "https://static.codemao.cn/pickduck/Hkvw-pwI1x.jpeg?hash=FhWrCkQd7MDI4v02nq6-6g9oWcuo" },
+                { title: "Premiere Pro 2023", url: "", imageUrl: "https://static.codemao.cn/pickduck/Hkvw-pwI1x.jpeg?hash=FhWrCkQd7MDI4v02nq6-6g9oWcuo" },
+                { title: " Adobe After Effects 2022", url: "https://www.123684.com/s/sBhZVv-hhc4H", imageUrl: "https://static.codemao.cn/pickduck/r1msWaPU1e.jpeg?hash=FuzisC8mEcjjzmOuV57EB8aMMG--" },
+                { title: " Adobe After Effects 2023", url: "https://www.123684.com/s/sBhZVv-hhc4H", imageUrl: "https://static.codemao.cn/pickduck/r1msWaPU1e.jpeg?hash=FuzisC8mEcjjzmOuV57EB8aMMG--" },
+            ],
+            "音视频处理工具": [
+                { title: "Tiniwow--免费工具", url: "https://tinywow.com", imageUrl: "https://static.codemao.cn/pickduck/ry0L1obllx.jpeg?hash=Fvm1JMDJNalNkWcevNtbsbjndp5x" },
+                { title: "MP4转MP3", url: "https://www.mp4tomp3.org/", imageUrl: "" },
+                { title: "MP3升降调", url: "https://audio.worthsee.com/pitch/format-MP3", imageUrl: "" },
+                { title: "视频转GIF", url: "http://tutieshi.com/video/", imageUrl: "" }
+            ],
+            "图片处理工具": [
+                { title: "图片压缩", url: "http://tutieshi.com", imageUrl: "" },
+                { title: "一键抠图", url: "http://remove.photos", imageUrl: "https://static.codemao.cn/pickduck/S1_YwIPAyx.jpeg?hash=FonqIoBKgeHorfpf4nwbw64dItkE" },
+                { title: "AI无损放大", url: "https://remove.photos/zh-cn/super-resolution", imageUrl: "" }
+            ],
+            "文档处理工具": [
+                { title: "PDF转Word", url: "https://www.pdfpai.com/pdf-to-word", imageUrl: "" },
+                { title: "PDF转Excel", url: "https://www.pdfpai.com/pdf-to-excel", imageUrl: "" }
+            ],
+            "免费影音": [
+                { title: "可可影视", url: "https://www.kkys01.com/", imageUrl: "https://static.codemao.cn/pickduck/HkW-z2RF1e.jpeg?hash=Fgxfplu8PKe1-ljFHltKGFTJSQ_h" },
+                { title: "昔枫音乐盒", url: "https://mu-jie.cc/musicBox/?src=www.jspoo.com#/", imageUrl: "" }
+            ],
+            "常见问题": [
+                { title: "病毒无法下载", url: "https://blog.csdn.net/shandongjiushen/article/details/148660610", imageUrl: "" },
+                { title: "趣加应用官网", url: "https://qjyy.mysxl.cn", imageUrl: "" }
+            ]
+        };
+
+        // --- 逻辑处理部分 ---
+
+        // 1. 获取URL参数
+        function getPageParam() {
+            var search = window.location.search;
+            if (search.indexOf('page=1') !== -1) return 1;
+            return 2; // 默认WEB
+        }
+
+        // 2. 设置问候语和日期 (您提供的脚本)
+        function setDateAndGreeting() {
+            var now = new Date();
+            var days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            var months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+            var dateStr = months[now.getMonth()] + ' ' + now.getDate() + '日 · ' + days[now.getDay()];
+            document.getElementById('date-box').innerHTML = dateStr;
+            
+            var hours = now.getHours();
+            var greeting = '';
+            if (hours >= 5 && hours < 11) { greeting = '早上好'; }
+            else if (hours >= 11 && hours < 17) { greeting = '下午好'; }
+            else { 
+                greeting = '晚上好';
+                document.body.className = 'night'; // 加入黑夜模式
+            }
+            document.getElementById('greeting-box').innerHTML = greeting;
+        }
+
+        // 3. 渲染页面
+        function render() {
+            var page = getPageParam();
+            var container = document.getElementById('contentContainer');
+            var html = '';
+
+            // 更新Tab状态
+            document.getElementById('tab-pc').className = (page === 1 ? 'active' : '');
+            document.getElementById('tab-web').className = (page === 2 ? 'active' : '');
+
+            var webCategories = ["音视频处理工具", "图片处理工具", "文档处理工具", "免费影音", "常见问题"];
+            
+            if (page === 2) {
+                // WEB 资源：先加智能推荐
+                html += renderSmartRecommend(webCategories);
+                for (var i = 0; i < webCategories.length; i++) {
+                    html += renderCategory(webCategories[i], resources[webCategories[i]]);
+                }
+            } else {
+                // PC 资源
+                var pcCategories = ["Office软件", "Adoble软件"];
+                for (var j = 0; j < pcCategories.length; j++) {
+                    html += renderCategory(pcCategories[j], resources[pcCategories[j]]);
+                }
+            }
+            container.innerHTML = html;
+        }
+
+        // 渲染单个分类
+        function renderCategory(title, items) {
+            if (!items || items.length === 0) return '';
+            var section = '<div class="category-section"><span class="category-title">' + title + '</span><div class="grid">';
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                var img = item.imageUrl || 'https://via.placeholder.com/40';
+                section += '<a class="card" href="javascript:void(0)" onclick="handleUrl(\''+item.url+'\')">' +
+                           '<img src="' + img + '" onerror="this.src=\'https://via.placeholder.com/40\'">' +
+                           '<span>' + item.title + '</span></a>';
+            }
+            section += '</div></div>';
+            return section;
+        }
+
+        // 智能推荐逻辑
+        function renderSmartRecommend(cats) {
+            var allWebItems = [];
+            for (var i = 0; i < cats.length; i++) {
+                allWebItems = allWebItems.concat(resources[cats[i]]);
+            }
+            // 打乱并取前10
+            allWebItems.sort(function() { return 0.5 - Math.random(); });
+            var sliceItems = allWebItems.slice(0, 10);
+            return renderCategory('<i class="fa fa-magic"></i> 智能推荐', sliceItems);
+        }
+
+        // 搜索功能 (兼容旧版)
+        function handleSearch() {
+            var kw = document.getElementById('searchInput').value.toLowerCase();
+            var container = document.getElementById('contentContainer');
+            if (kw === '') { render(); return; }
+
+            var html = '<div class="category-section"><span class="category-title">搜索结果</span><div class="grid">';
+            var count = 0;
+            for (var cat in resources) {
+                var items = resources[cat];
+                for (var i = 0; i < items.length; i++) {
+                    if (items[i].title.toLowerCase().indexOf(kw) !== -1) {
+                        var img = items[i].imageUrl || 'https://via.placeholder.com/40';
+                        html += '<a class="card" href="javascript:void(0)" onclick="handleUrl(\''+items[i].url+'\')">' +
+                               '<img src="' + img + '"><span>' + items[i].title + '</span></a>';
+                        count++;
+                    }
+                }
+            }
+            if (count === 0) html += '<p style="font-size:14px; padding:20px; text-align:center; width:100%;">未找到相关资源</p>';
+            html += '</div></div>';
+            container.innerHTML = html;
+        }
+
+        // 处理点击和123云盘解析
+        function handleUrl(url) {
+            if (!url) return;
+            if (url.indexOf('123') !== -1) {
+                var msg = document.getElementById('msg-box');
+                msg.style.display = 'block';
+                // iOS 6 使用 XHR 而非 Fetch
+                var xhr = new XMLHttpRequest();
+                var apiUrl = "https://api.pearapi.ai/api/123panparse/?url=" + encodeURIComponent(url);
+                xhr.open("GET", apiUrl, true);
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState == 4) {
+                        msg.style.display = 'none';
+                        try {
+                            var res = JSON.parse(xhr.responseText);
+                            if (res.code == 200 && res.data.downloadurl) {
+                                window.location.href = res.data.downloadurl;
+                            } else {
+                                alert("当前资源暂无直链，请登录123云盘下载");
+                                window.open(url);
+                            }
+                        } catch(e) { window.open(url); }
+                    }
+                };
+                xhr.send();
+            } else {
+                window.open(url);
+            }
+        }
+
+        // 初始化
+        window.onload = function() {
+            setDateAndGreeting();
+            render();
+        };
+    </script>
+</body>
+</html>
