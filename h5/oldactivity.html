@@ -448,6 +448,74 @@
             document.getElementById('page-title').innerHTML = '精选活动';
             isDetailMode = false;
         }
+        /* --- 5+App 统一返回键兼容逻辑 (支持多级返回 + 首页退出) --- */
+(function() {
+    var firstBackTime = 0;
+
+    // 统一返回处理函数
+    function handleBackEvent() {
+        var ws = plus.webview.currentWebview();
+        
+        // 1. 检查当前窗口是否可以返回上一页 (针对单页面内的 history 记录)
+        // 2. 检查当前窗口是否有父窗口 (如果是通过 create 创建的子窗口)
+        // 3. 判断是否是主入口 (通过 id 判断，或者没有 opener)
+        
+        var opener = ws.opener();
+        var canBack = false;
+
+        // 特殊情况：如果有封禁弹窗，强制拦截并处理退出逻辑
+        var banModal = document.getElementById('ban-modal');
+        var isModalVisible = false;
+        if (banModal) {
+            var display = banModal.style.display || window.getComputedStyle(banModal).display;
+            if (display === 'flex' || display === 'block') {
+                isModalVisible = true;
+            }
+        }
+
+        if (isModalVisible) {
+            // 如果封禁弹窗开着，点击返回键直接询问是否退出 App
+            plus.nativeUI.confirm("确定退出应用吗？", function(e) {
+                if (e.index === 0) {
+                    plus.runtime.quit();
+                }
+            }, "提示", ["确定", "取消"]);
+            return;
+        }
+
+        // 层级判断逻辑：
+        // 如果没有上级页面 (opener) 或者是指定的首页 ID
+        if (!opener || ws.id === "HBuilder" || ws.id === "main" || ws.id === "oldhome.html") {
+            // 首页/最外层：执行双击退出
+            var now = new Date().getTime();
+            if (now - firstBackTime < 2000) {
+                plus.runtime.quit();
+            } else {
+                firstBackTime = now;
+                plus.nativeUI.toast('再按一次退出应用');
+            }
+        } else {
+            // 子页面：执行关闭当前页，回到上一页
+            ws.close('pop-out', 300);
+        }
+    }
+
+    document.addEventListener('plusready', function() {
+        // 基础环境配置
+        plus.navigator.setFullscreen(false);
+        
+        // 安全调用状态栏更新
+        if (typeof updateStatusBarStyle === 'function') {
+            updateStatusBarStyle();
+        }
+
+        // 核心：监听物理返回键
+        plus.key.addEventListener('backbutton', function() {
+            handleBackEvent();
+        }, false);
+        
+    }, false);
+})();
     </script>
 </body>
 </html>
