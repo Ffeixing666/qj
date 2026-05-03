@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- 针对旧版 iOS 的全屏和状态栏设置 -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <title>积分商城（旧兼容）</title>
+    <title>积分商城</title>
     <style>
-        /* 保持原有 CSS 不变 */
+        /* 样式保持不变 */
         * { margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; -webkit-touch-callout: none; box-sizing: border-box; }
         body { font-family: Helvetica, STHeiti, sans-serif; background-color: #F2F2F7; color: #1C1C1E; padding-bottom: 60px; line-height: 1.4; font-size: 14px; }
         header { position: relative; background-color: #F2F2F7; border-bottom: 1px solid #D1D1D6; height: 50px; }
@@ -69,7 +68,7 @@
     <div class="container">
         <div class="points-card">
             <div class="points-label">当前可用积分</div>
-            <div class="points-balance" id="totalPoints">...</div>
+            <div class="points-balance" id="totalPoints">加载中...</div>
         </div>
 
         <div class="section-header">积分充值</div>
@@ -158,27 +157,96 @@
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
-                        var res;
                         try {
-                            res = JSON.parse(xhr.responseText);
+                            var res = JSON.parse(xhr.responseText);
                             options.success(res);
-                        } catch(e) {
-                            if(options.error) options.error();
-                        }
-                    } else {
-                        if(options.error) options.error();
-                    }
+                        } catch(e) { if(options.error) options.error(); }
+                    } else { if(options.error) options.error(); }
                 }
             };
             xhr.open(options.method || 'GET', options.url, true);
             if (options.method === 'POST') {
                 xhr.setRequestHeader('Content-Type', 'application/json');
                 xhr.send(JSON.stringify(options.data));
-            } else {
-                xhr.send();
-            }
+            } else { xhr.send(); }
         }
 
+        // ================= 核心修复：对齐 Key 名 =================
+        function initData() {
+            // 1. 完全对齐你提供的“我的”页面 Key 名
+            var savedEmail = localStorage.getItem('usermail'); 
+            var savedPoints = localStorage.getItem('userpoints') || '0';
+            
+            // 2. 哪怕服务器还没返回，先显示本地存的积分，防止显示 0 或 未登录
+            if (savedEmail) {
+                document.getElementById('totalPoints').innerHTML = savedPoints;
+            } else {
+                document.getElementById('totalPoints').innerHTML = '未登录';
+                return; // 未登录就不执行后续了
+            }
+
+            // 3. 异步去服务器同步最新的积分（同步完会自动更新本地 userpoints）
+            ajax({
+                url: 'https://apirank.qujiaweb.top/?mode=get_user_info&mail=' + encodeURIComponent(savedEmail),
+                success: function(res) {
+                    if (res && res.code === 200 && res.fields && res.fields[0]) {
+                        var latestPoints = res.fields[0]["积分"] || '0';
+                        document.getElementById('totalPoints').innerHTML = latestPoints;
+                        localStorage.setItem('userpoints', latestPoints); // 同步回本地
+                    }
+                }
+            });
+
+            // 4. 加载积分明细
+            fetchLogs(savedEmail);
+        }
+
+        function fetchLogs(mail) {
+            ajax({
+                url: 'https://apirank.qujiaweb.top/?mode=get_coin_log&mail=' + encodeURIComponent(mail),
+                success: function(res) {
+                    if (res.code === 200) {
+                        updateLogUI(res.fields || []);
+                    }
+                },
+                error: function() {
+                    document.getElementById('coinLogContainer').innerHTML = '<div style="text-align:center;padding:20px;color:#8E8E93">加载失败</div>';
+                }
+            });
+        }
+
+        function updateLogUI(logs) {
+            var container = document.getElementById('coinLogContainer');
+            if(!logs || logs.length === 0) {
+                container.innerHTML = '<div style="text-align:center;padding:20px;color:#8E8E93">暂无记录</div>';
+                return;
+            }
+            container.innerHTML = '';
+            var adCount = 0, upCount = 0;
+            var d = new Date();
+            var todayStr = d.getFullYear() + '-' + (d.getMonth()+1 < 10 ? '0'+(d.getMonth()+1) : (d.getMonth()+1)) + '-' + (d.getDate() < 10 ? '0'+d.getDate() : d.getDate());
+
+            for (var i = 0; i < logs.length; i++) {
+                var log = logs[i];
+                var div = document.createElement('div');
+                div.className = 'detail-item';
+                var change = log["积分变动"] || '0';
+                div.innerHTML = '<div class="detail-info"><h4>'+(log.类型 || '积分变动')+'</h4><p>'+(log.时间 || '')+'</p></div><div class="detail-amount plus">'+change+'</div>';
+                container.appendChild(div);
+
+                if(log.时间 && log.时间.indexOf(todayStr) !== -1) {
+                    if(log.类型 === '观看广告奖励') adCount++;
+                    if(log.类型 === '上传资源奖励') upCount++;
+                }
+            }
+            
+            document.getElementById('adProgress').style.width = Math.min(adCount * 10, 100) + '%';
+            document.getElementById('adText').innerHTML = '今日进度 ' + Math.min(adCount, 10) + '/10';
+            document.getElementById('uploadProgress').style.width = Math.min(upCount * 10, 100) + '%';
+            document.getElementById('uploadText').innerHTML = '今日进度 ' + Math.min(upCount, 10) + '/10';
+        }
+
+        // 按钮交互逻辑保持原样
         function selectAmount(el, val) {
             var opts = document.getElementById('payOptions').getElementsByTagName('div');
             for(var i=0; i<opts.length; i++) {
@@ -208,7 +276,7 @@
         }
 
         function handlePay() {
-            var usermail = localStorage.getItem('usermail_login') || localStorage.getItem('usermail');
+            var usermail = localStorage.getItem('usermail');
             if (!usermail) { showToast('请先登录'); return; }
             showLoading();
             ajax({
@@ -219,9 +287,7 @@
                     hideLoading();
                     if (res.code === 200 && res.payUrl) {
                         window.location.href = res.payUrl;
-                    } else {
-                        showToast(res.msg || '获取失败');
-                    }
+                    } else { showToast(res.msg || '获取失败'); }
                 },
                 error: function() { hideLoading(); showToast('网络连接失败'); }
             });
@@ -232,7 +298,7 @@
         }
 
         function handleAd() {
-            var usermail = localStorage.getItem('usermail_login') || localStorage.getItem('usermail');
+            var usermail = localStorage.getItem('usermail');
             if (!usermail) { showToast('请先登录'); return; }
             if (window.plus && plus.ad) {
                 var adReward = plus.ad.createRewardedVideoAd({adpid:'1358284724'});
@@ -257,94 +323,8 @@
         function showLoading() { if (window.plus) plus.nativeUI.showWaiting('处理中...'); }
         function hideLoading() { if (window.plus) plus.nativeUI.closeWaiting(); }
 
-        // ================== 核心修复逻辑 ==================
-        function initData() {
-            // 取消了仅仅依赖 usermail_login，增加更广泛的容错处理
-            var savedEmail = localStorage.getItem('usermail_login') || localStorage.getItem('usermail') || localStorage.getItem('email');
-            
-            // 苹果上如果取不到密码，给一个空字符串，避免变量为null导致阻断
-            var savedPass = localStorage.getItem('userpass_login') || localStorage.getItem('userpass') || localStorage.getItem('pwd') || '';
-            
-            var logMail = savedEmail; 
-
-            // 封装获取日志的方法
-            function fetchLogs() {
-                if (logMail) {
-                    ajax({
-                        url: 'https://apirank.qujiaweb.top/?mode=get_coin_log&mail=' + encodeURIComponent(logMail),
-                        success: function(res) {
-                            if (res.code === 200) {
-                                updateLogUI(res.fields || []);
-                            }
-                        }
-                    });
-                } else {
-                    document.getElementById('coinLogContainer').innerHTML = '<div style="text-align:center;padding:20px;color:#8E8E93">暂无记录</div>';
-                }
-            }
-
-            // 【关键修复】不再强制要求有密码 ( && savedPass )，只要有邮箱就请求
-            if (savedEmail) {
-                ajax({
-                    method: 'POST',
-                    url: 'https://apirank.qujiaweb.top/?mode=login',
-                    data: { email: savedEmail, password: savedPass },
-                    success: function(res) {
-                        if (res.code === 200 && res.fields && res.fields[0]) {
-                            var p = res.fields[0]["积分"] || '0';
-                            document.getElementById('totalPoints').innerHTML = p;
-                        } else {
-                            // 如果服务器因为密码为空拒绝返回，就会显示 0，而不是未登录
-                            document.getElementById('totalPoints').innerHTML = '0';
-                        }
-                        // 登录请求成功后，延迟1秒再获取日志
-                        setTimeout(fetchLogs, 1000);
-                    },
-                    error: function() { 
-                        document.getElementById('totalPoints').innerHTML = '0'; 
-                        setTimeout(fetchLogs, 1000);
-                    }
-                });
-            } else {
-                // 如果连邮箱都取不到，才会显示未登录
-                document.getElementById('totalPoints').innerHTML = '未登录';
-                setTimeout(fetchLogs, 1000);
-            }
-        }
-
-        function updateLogUI(logs) {
-            var container = document.getElementById('coinLogContainer');
-            if(!logs || logs.length === 0) {
-                container.innerHTML = '<div style="text-align:center;padding:20px;color:#8E8E93">暂无记录</div>';
-                return;
-            }
-            container.innerHTML = '';
-            var adCount = 0, upCount = 0;
-            var d = new Date();
-            var todayStr = d.getFullYear() + '-' + (d.getMonth()+1 < 10 ? '0'+(d.getMonth()+1) : (d.getMonth()+1)) + '-' + (d.getDate() < 10 ? '0'+d.getDate() : d.getDate());
-
-            for (var i = 0; i < logs.length; i++) {
-                var log = logs[i];
-                var div = document.createElement('div');
-                div.className = 'detail-item';
-                var change = log["积分变动"] || '0';
-                div.innerHTML = '<div class="detail-info"><h4>'+log.类型+'</h4><p>'+log.时间+'</p></div><div class="detail-amount plus">'+change+'</div>';
-                container.appendChild(div);
-
-                if(log.时间 && log.时间.indexOf(todayStr) !== -1) {
-                    if(log.类型 === '观看广告奖励') adCount++;
-                    if(log.类型 === '上传资源奖励') upCount++;
-                }
-            }
-            
-            document.getElementById('adProgress').style.width = Math.min(adCount * 10, 100) + '%';
-            document.getElementById('adText').innerHTML = '今日进度 ' + Math.min(adCount, 10) + '/10';
-            document.getElementById('uploadProgress').style.width = Math.min(upCount * 10, 100) + '%';
-            document.getElementById('uploadText').innerHTML = '今日进度 ' + Math.min(upCount, 10) + '/10';
-        }
-
         window.onload = function() {
-            setTimeout(initData, 300); 
+            initData();
         };
     </script>
 </body>
