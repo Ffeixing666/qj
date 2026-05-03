@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <title>积分商城（旧兼容）</title>
     <style>
-        /* 保持你原有的 CSS 不变，已检查 iOS 6 兼容性 */
+        /* 保持原有 CSS 不变 */
         * { margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; -webkit-touch-callout: none; box-sizing: border-box; }
         body { font-family: Helvetica, STHeiti, sans-serif; background-color: #F2F2F7; color: #1C1C1E; padding-bottom: 60px; line-height: 1.4; font-size: 14px; }
         header { position: relative; background-color: #F2F2F7; border-bottom: 1px solid #D1D1D6; height: 50px; }
@@ -69,7 +69,6 @@
     <div class="container">
         <div class="points-card">
             <div class="points-label">当前可用积分</div>
-            <!-- 初始显示中，避免空白 -->
             <div class="points-balance" id="totalPoints">...</div>
         </div>
 
@@ -154,7 +153,6 @@
         var selectedAmount = null;
         var selectedType = null;
 
-        // 基础 AJAX 封装优化
         function ajax(options) {
             var xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function() {
@@ -165,7 +163,6 @@
                             res = JSON.parse(xhr.responseText);
                             options.success(res);
                         } catch(e) {
-                            console.log('JSON Parse Error');
                             if(options.error) options.error();
                         }
                     } else {
@@ -260,13 +257,15 @@
         function showLoading() { if (window.plus) plus.nativeUI.showWaiting('处理中...'); }
         function hideLoading() { if (window.plus) plus.nativeUI.closeWaiting(); }
 
-        // 核心初始化逻辑（已修复旧版 iOS 并发丢包问题并增加字段兼容）
+        // ================== 核心修复逻辑 ==================
         function initData() {
-            // 兼容旧版及各种环境可能的存储键名差异
-            var savedEmail = localStorage.getItem('usermail_login') || localStorage.getItem('usermail');
-            var savedPass = localStorage.getItem('userpass_login') || localStorage.getItem('userpass');
+            // 取消了仅仅依赖 usermail_login，增加更广泛的容错处理
+            var savedEmail = localStorage.getItem('usermail_login') || localStorage.getItem('usermail') || localStorage.getItem('email');
             
-            var logMail = savedEmail; // 使用合并处理后的邮箱去查日志
+            // 苹果上如果取不到密码，给一个空字符串，避免变量为null导致阻断
+            var savedPass = localStorage.getItem('userpass_login') || localStorage.getItem('userpass') || localStorage.getItem('pwd') || '';
+            
+            var logMail = savedEmail; 
 
             // 封装获取日志的方法
             function fetchLogs() {
@@ -284,8 +283,8 @@
                 }
             }
 
-            // 1. 先通过登录接口获取最新积分
-            if (savedEmail && savedPass) {
+            // 【关键修复】不再强制要求有密码 ( && savedPass )，只要有邮箱就请求
+            if (savedEmail) {
                 ajax({
                     method: 'POST',
                     url: 'https://apirank.qujiaweb.top/?mode=login',
@@ -295,20 +294,20 @@
                             var p = res.fields[0]["积分"] || '0';
                             document.getElementById('totalPoints').innerHTML = p;
                         } else {
+                            // 如果服务器因为密码为空拒绝返回，就会显示 0，而不是未登录
                             document.getElementById('totalPoints').innerHTML = '0';
                         }
-                        // 登录请求成功后，延迟1秒再获取日志（避免iOS 6并发请求冲突）
+                        // 登录请求成功后，延迟1秒再获取日志
                         setTimeout(fetchLogs, 1000);
                     },
                     error: function() { 
                         document.getElementById('totalPoints').innerHTML = '0'; 
-                        // 请求失败依然延迟1秒获取日志
                         setTimeout(fetchLogs, 1000);
                     }
                 });
             } else {
+                // 如果连邮箱都取不到，才会显示未登录
                 document.getElementById('totalPoints').innerHTML = '未登录';
-                // 即使条件不满足（未登录），也延迟1秒尝试用 logMail 获取可能存在的日志缓存
                 setTimeout(fetchLogs, 1000);
             }
         }
@@ -321,7 +320,6 @@
             }
             container.innerHTML = '';
             var adCount = 0, upCount = 0;
-            // 适配旧版日期格式
             var d = new Date();
             var todayStr = d.getFullYear() + '-' + (d.getMonth()+1 < 10 ? '0'+(d.getMonth()+1) : (d.getMonth()+1)) + '-' + (d.getDate() < 10 ? '0'+d.getDate() : d.getDate());
 
@@ -338,14 +336,13 @@
                     if(log.类型 === '上传资源奖励') upCount++;
                 }
             }
-            // 更新进度条
+            
             document.getElementById('adProgress').style.width = Math.min(adCount * 10, 100) + '%';
             document.getElementById('adText').innerHTML = '今日进度 ' + Math.min(adCount, 10) + '/10';
             document.getElementById('uploadProgress').style.width = Math.min(upCount * 10, 100) + '%';
             document.getElementById('uploadText').innerHTML = '今日进度 ' + Math.min(upCount, 10) + '/10';
         }
 
-        // 使用延后调用确保 DOM 已经完全准备好（解决某些旧版 iOS 加载空白问题）
         window.onload = function() {
             setTimeout(initData, 300); 
         };
