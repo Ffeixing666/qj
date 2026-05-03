@@ -454,6 +454,19 @@
                 location.reload();
             }
         }, false);
+        document.addEventListener('plusready', () => {
+            updateStatusBarStyle();
+            plus.navigator.setFullscreen(false);
+            plus.key.addEventListener('backbutton', () => {
+                if (document.getElementById('ban-modal').style.display === 'flex') {
+                    plus.nativeUI.confirm("确定退出吗？", (e) => {
+                        if (e.index === 0) plus.runtime.quit();
+                    }, "提示", ["确定", "取消"]);
+                } else {
+                    plus.runtime.quit();
+                }
+            });
+        });
     </script>
 </body>
 </html>
