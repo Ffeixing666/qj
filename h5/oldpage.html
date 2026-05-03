@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>个人主页（旧兼容）</title>
+    <title>个人主页（旧兼容版）</title>
     <style type="text/css">
         body {
             margin: 0;
@@ -23,7 +23,6 @@
         .header-mask {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: url(about:blank);
             background-color: rgba(0,0,0,0.3);
         }
         .top-nav {
@@ -88,6 +87,7 @@
             font-size: 22px;
             font-weight: bold;
             margin-top: 8px;
+            min-height: 26px;
         }
         .user-tagline {
             font-size: 13px;
@@ -135,8 +135,6 @@
             border-radius: 12px;
             padding: 12px;
             margin-bottom: 10px;
-            overflow: hidden;
-            position: relative;
             border: 1px solid #E5E5EA;
         }
         .item-icon {
@@ -146,7 +144,9 @@
             border-radius: 10px;
             margin-right: 12px;
             background-color: #007AFF;
-            overflow: hidden;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover;
         }
         .item-info {
             margin-left: 62px;
@@ -175,7 +175,6 @@
             border-radius: 6px;
         }
         .status-shared { background: #EAF9EE; color: #34C759; }
-        .status-failed { background: #FFF0EF; color: #FF3B30; }
         .empty-state {
             padding: 60px 0;
             text-align: center;
@@ -201,8 +200,8 @@
             <div class="avatar-wrap">
                 <img id="userAvatar" src="https://img2.baidu.com/it/u=2641058412,3559859313&fm=253&app=138&f=JPEG?w=500&h=889" alt="avatar" />
             </div>
-            <div class="user-name" id="userName"></div>
-            <div class="user-tagline" id="userTag"></div>
+            <div class="user-name" id="userName">正在载入...</div>
+            <div class="user-tagline" id="userTag">正在同步数据</div>
             
             <div class="points-pill">
                 <span id="userPoints">0</span> 积分
@@ -217,24 +216,25 @@
         </div>
 
         <div id="appList" class="content-list">
-            <div class="empty-state">加载中...</div>
+            <div class="empty-state">准备查询...</div>
         </div>
 
         <div id="webList" class="content-list" style="display: none;">
             <div class="empty-state">
                 <p style="font-size: 15px;">敬请期待</p>
-                <p style="font-size: 12px; margin-top: 5px;">正在连接更广阔的世界</p>
             </div>
         </div>
     </div>
 
     <script type="text/javascript">
+        // 工具函数：获取URL参数
         function getUrlParam(name) {
             var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
             var r = window.location.search.substr(1).match(reg);
             if (r != null) return unescape(r[2]); return null;
         }
 
+        // 提示框
         function toast(msg) {
             if (window.plus) {
                 plus.nativeUI.toast(msg);
@@ -243,6 +243,7 @@
             }
         }
 
+        // 返回上一页
         function handleBack() {
             if (window.plus) {
                 plus.webview.currentWebview().close('auto');
@@ -251,6 +252,7 @@
             }
         }
 
+        // 选项卡切换
         function switchTab(type) {
             var tabApp = document.getElementById('tabApp');
             var tabWeb = document.getElementById('tabWeb');
@@ -270,6 +272,7 @@
             }
         }
 
+        // 实体转义
         function htmlEntityToEmoji(str) {
             if(!str) return "";
             return str.replace(/&#(\d+);/g, function(match, code) {
@@ -277,6 +280,7 @@
             });
         }
 
+        // 更新用户信息UI
         function updateUserInfo(info) {
             if(info.头像) document.getElementById('userAvatar').src = info.头像;
             document.getElementById('userName').innerHTML = htmlEntityToEmoji(info.昵称 || '用户');
@@ -287,6 +291,7 @@
             }
         }
 
+        // 创建兼容性Ajax
         function createXHR() {
             if (window.XMLHttpRequest) return new XMLHttpRequest();
             return new ActiveXObject("Microsoft.XMLHTTP");
@@ -297,9 +302,13 @@
             xhr.onreadystatechange = function() {
                 if (xhr.readyState == 4) {
                     if (xhr.status == 200) {
-                        callback(JSON.parse(xhr.responseText));
+                        try {
+                            callback(JSON.parse(xhr.responseText));
+                        } catch(e) {
+                            callback({code: 500});
+                        }
                     } else {
-                        toast("网络请求失败");
+                        toast("网络连接不稳定");
                     }
                 }
             };
@@ -307,6 +316,7 @@
             xhr.send(null);
         }
 
+        // 核心加载逻辑：实现 staggered (交错) 延迟
         function loadData() {
             var mail = localStorage.getItem('usermail');
             var user = getUrlParam('user');
@@ -320,34 +330,48 @@
                 document.getElementById('editBtn').style.display = 'block';
             }
 
-            ajaxGet('https://apirank.qujiaweb.top/?mode=get_other_user_info&mail=' + encodeURIComponent(mail) + '&user=' + encodeURIComponent(user), function(res){
-                if (res.code === 200 && res.fields && res.fields.length > 0) {
-                    updateUserInfo(res.fields[0]);
-                } else if (res.code === 403) {
-                    window.location.href = 'oldindex.html';
-                }
-            });
-
-            ajaxGet('https://apirank.qujiaweb.top/?mode=get_other_user_apps&mail=' + encodeURIComponent(mail) + '&user=' + encodeURIComponent(user), function(res){
-                var list = document.getElementById('appList');
-                if (res.code === 200 && res.fields && res.fields.length > 0) {
-                    var html = '';
-                    for (var i = 0; i < res.fields.length; i++) {
-                        var app = res.fields[i];
-                        html += '<div class="item-card clearfix" onclick="openDetail(' + app.id + ')">';
-                        html += '<div class="item-icon" style="background-image:url(\'' + (app.图标 || '') + '\');background-size:cover;"></div>';
-                        html += '<div class="item-info">';
-                        html += '<div class="item-title">' + htmlEntityToEmoji(app.名称) + '</div>';
-                        html += '<div class="item-desc">' + htmlEntityToEmoji(app.简介) + '</div>';
-                        html += '</div>';
-                        html += '<div class="status-badge status-shared">已分享</div>';
-                        html += '</div>';
+            // [逻辑 1]：一开始先等 1 秒再查用户信息
+            setTimeout(function() {
+                var infoUrl = 'https://apirank.qujiaweb.top/?mode=get_other_user_info&mail=' + encodeURIComponent(mail) + '&user=' + encodeURIComponent(user);
+                
+                ajaxGet(infoUrl, function(res) {
+                    if (res.code === 200 && res.fields && res.fields.length > 0) {
+                        updateUserInfo(res.fields[0]);
+                    } else if (res.code === 403) {
+                        window.location.href = 'oldindex.html';
+                        return;
                     }
-                    list.innerHTML = html;
-                } else {
-                    list.innerHTML = '<div class="empty-state">暂无分享记录</div>';
-                }
-            });
+
+                    // [逻辑 2]：用户信息查完（无论成功失败）后，再等 1 秒查询应用列表
+                    document.getElementById('appList').innerHTML = '<div class="empty-state">同步应用列表中...</div>';
+                    
+                    setTimeout(function() {
+                        var appUrl = 'https://apirank.qujiaweb.top/?mode=get_other_user_apps&mail=' + encodeURIComponent(mail) + '&user=' + encodeURIComponent(user);
+                        
+                        ajaxGet(appUrl, function(resApp) {
+                            var list = document.getElementById('appList');
+                            if (resApp.code === 200 && resApp.fields && resApp.fields.length > 0) {
+                                var html = '';
+                                for (var i = 0; i < resApp.fields.length; i++) {
+                                    var app = resApp.fields[i];
+                                    html += '<div class="item-card clearfix" onclick="openDetail(' + app.id + ')" style="position:relative;">';
+                                    html += '<div class="item-icon" style="background-image:url(\'' + (app.图标 || '') + '\');"></div>';
+                                    html += '<div class="item-info">';
+                                    html += '<div class="item-title">' + htmlEntityToEmoji(app.名称) + '</div>';
+                                    html += '<div class="item-desc">' + htmlEntityToEmoji(app.简介) + '</div>';
+                                    html += '</div>';
+                                    html += '<div class="status-badge status-shared">已分享</div>';
+                                    html += '</div>';
+                                }
+                                list.innerHTML = html;
+                            } else {
+                                list.innerHTML = '<div class="empty-state">暂无分享记录</div>';
+                            }
+                        });
+                    }, 1000); // 应用查询前的1秒延迟
+
+                });
+            }, 1000); // 启动前的1秒延迟
         }
 
         function openDetail(id) {
