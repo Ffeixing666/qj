@@ -12,6 +12,7 @@
             --ios-red: #FF3B30;
             --text-main: #1C1C1E;
             --text-second: #8E8E93;
+            --line-color: #C6C6C8;
         }
 
         * {
@@ -25,6 +26,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", sans-serif;
+            background-color: #F2F2F7; /* 兜底背景色 */
             background-color: var(--ios-bg);
             color: var(--text-main);
             -webkit-font-smoothing: antialiased;
@@ -43,6 +45,7 @@
         .nav-bar {
             height: 44px;
             display: flex;
+            display: -webkit-flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 16px;
@@ -52,6 +55,7 @@
             width: 40px;
             height: 100%;
             display: flex;
+            display: -webkit-flex;
             align-items: center;
             cursor: pointer;
         }
@@ -59,6 +63,8 @@
         .back-icon {
             width: 12px;
             height: 12px;
+            border-left: 2.5px solid #007AFF;
+            border-bottom: 2.5px solid #007AFF;
             border-left: 2.5px solid var(--ios-blue);
             border-bottom: 2.5px solid var(--ios-blue);
             transform: rotate(45deg);
@@ -68,31 +74,36 @@
         .nav-title {
             font-size: 17px;
             font-weight: 600;
+            letter-spacing: -0.4px;
         }
 
         .nav-right { width: 40px; }
 
         .settings-container { padding: 16px 0 40px 0; }
 
-        .section-header {
-            padding-left: 32px;
-            margin-bottom: 8px;
-            font-size: 13px;
-            color: var(--text-second);
-        }
-
         .section-group {
+            background: #FFFFFF;
             background: var(--ios-card);
             margin: 0 16px 24px 16px;
             border-radius: 12px;
             overflow: hidden;
         }
 
+        .section-header {
+            padding-left: 32px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: var(--text-second);
+            text-transform: uppercase;
+        }
+
         .item {
             display: flex;
+            display: -webkit-flex;
             align-items: center;
             padding: 12px 16px;
             position: relative;
+            background: #FFFFFF;
             background: var(--ios-card);
         }
 
@@ -114,6 +125,7 @@
             border-radius: 6px;
             margin-right: 12px;
             display: flex;
+            display: -webkit-flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
@@ -127,7 +139,7 @@
         .bg-indigo { background-color: #5856D6; }
         .bg-red    { background-color: #FF3B30; }
 
-        .item-label { flex: 1; font-size: 16px; }
+        .item-label { flex: 1; font-size: 16px; font-weight: 400; }
 
         .item-arrow {
             width: 8px;
@@ -135,20 +147,31 @@
             border-top: 2px solid #C7C7CC;
             border-right: 2px solid #C7C7CC;
             transform: rotate(45deg);
+            -webkit-transform: rotate(45deg);
             margin-right: 4px;
         }
 
         .logout-btn {
             margin: 32px 16px 0 16px;
+            background: #FFFFFF;
             background: var(--ios-card);
             height: 52px;
             border-radius: 12px;
             display: flex;
+            display: -webkit-flex;
             align-items: center;
             justify-content: center;
+            color: #FF3B30;
             color: var(--ios-red);
             font-size: 17px;
             font-weight: 500;
+        }
+
+        .footer-info {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 12px;
+            color: var(--text-second);
         }
 
         /* 弹窗样式 */
@@ -162,13 +185,16 @@
             z-index: 1000;
         }
 
-        .custom-prompt-overlay.active { display: flex; }
+        .custom-prompt-overlay.active { display: flex; display: -webkit-flex; }
 
         .custom-prompt-box {
             width: 270px;
             background: rgba(255, 255, 255, 0.95);
             border-radius: 14px;
-            overflow: hidden;
+            display: flex;
+            display: -webkit-flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
 
         .custom-prompt-title {
@@ -188,10 +214,12 @@
             padding: 0 8px;
             font-size: 14px;
             outline: none;
+            -webkit-appearance: none;
         }
 
         .custom-prompt-footer {
             display: flex;
+            display: -webkit-flex;
             border-top: 0.5px solid rgba(0, 0, 0, 0.1);
             height: 44px;
         }
@@ -199,6 +227,7 @@
         .custom-prompt-btn {
             flex: 1;
             display: flex;
+            display: -webkit-flex;
             align-items: center;
             justify-content: center;
             font-size: 17px;
@@ -224,6 +253,7 @@
     <main class="settings-container">
         <div class="section-header">用户资料</div>
         <div class="section-group">
+            <!-- 修改昵称 -->
             <div class="item" onclick="navigate('nickname')">
                 <div class="icon-box bg-blue">
                     <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
@@ -231,6 +261,7 @@
                 <div class="item-label">修改昵称</div>
                 <div class="item-arrow"></div>
             </div>
+            <!-- 修改个签 -->
             <div class="item" onclick="navigate('bio')">
                 <div class="icon-box bg-green">
                     <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
@@ -238,6 +269,7 @@
                 <div class="item-label">修改个签</div>
                 <div class="item-arrow"></div>
             </div>
+            <!-- 修改头像 -->
             <div class="item" onclick="navigate('avatar')">
                 <div class="icon-box bg-orange">
                     <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
@@ -245,6 +277,7 @@
                 <div class="item-label">修改头像</div>
                 <div class="item-arrow"></div>
             </div>
+            <!-- 修改背景 -->
             <div class="item" onclick="navigate('background')">
                 <div class="icon-box bg-indigo">
                     <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM5 5h14v14H5V5zm9 5.08V7h-4v3.08l-2 1.5V17h8v-5.42l-2-1.5z"/></svg>
@@ -266,6 +299,7 @@
         </div>
 
         <div class="logout-btn" onclick="handleLogout()">退出当前账号</div>
+        <div class="footer-info">版本 v2.0.1</div>
     </main>
 
     <!-- 弹窗组件 -->
@@ -273,7 +307,7 @@
         <div class="custom-prompt-box">
             <div id="customPromptTitle" class="custom-prompt-title">提示</div>
             <div class="custom-prompt-content">
-                <input type="text" id="customPromptInput" class="custom-prompt-input">
+                <input type="text" id="customPromptInput" class="custom-prompt-input" placeholder="">
             </div>
             <div class="custom-prompt-footer">
                 <div class="custom-prompt-btn custom-prompt-btn-cancel" onclick="closeCustomPrompt()">取消</div>
@@ -282,133 +316,113 @@
         </div>
     </div>
 
-    <!-- 隐藏的文件上传控件 -->
+    <!-- 隐藏的 Web 文件上传控件 -->
     <input type="file" id="webFileInput" style="display:none;" accept="image/*">
 
     <script>
-        var promptCallback = null;
-        var currentMode = '';
-
-        // --- 核心 AJAX 请求函数 ---
-        function ajaxRequest(mode, data, callback) {
-            var mail = localStorage.getItem('usermail');
-            if (!mail) { toast('账号信息丢失，请重新登录'); return; }
-
-            var url = 'https://apirank.qujiaweb.top/?mode=' + mode + '&mail=' + encodeURIComponent(mail);
+        // --- 通用 AJAX 函数 (兼容旧系统) ---
+        function ajaxPost(url, data, callback) {
             var xhr = new XMLHttpRequest();
             xhr.open('POST', url, true);
-
-            // 如果是文件上传(FormData)，不设 Content-Type
             if (!(data instanceof FormData)) {
                 xhr.setRequestHeader('Content-Type', 'application/json');
                 data = JSON.stringify(data);
             }
-
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
                         try {
                             var res = JSON.parse(xhr.responseText);
                             callback(null, res);
-                        } catch (e) {
-                            callback('返回格式错误');
-                        }
-                    } else {
-                        callback('网络连接失败(' + xhr.status + ')');
-                    }
+                        } catch (e) { callback('解析失败'); }
+                    } else { callback('网络错误'); }
                 }
             };
             xhr.send(data);
         }
 
-        // --- 路由导航 ---
-        function navigate(type) {
-            currentMode = type;
+        // --- 核心业务逻辑 ---
+        var promptCallback = null;
+        var currentUploadType = ''; // 记录是 avatar 还是 background
+
+        function navigate(page) {
             var mail = localStorage.getItem('usermail');
             if (!mail) { toast('请先登录'); return; }
 
-            if (type === 'avatar' || type === 'background') {
+            if (page === 'avatar' || page === 'background') {
+                currentUploadType = page;
                 if (window.plus) {
-                    plus.gallery.pick(function(p) { uploadFile(p); }, function(e){}, {filter:"image"});
+                    // App环境：调起原生相册
+                    plus.gallery.pick(function(path) {
+                        uploadFileByPlus(path);
+                    }, function(e) {}, { filter: "image" });
                 } else {
+                    // 浏览器环境：点击隐藏的 file input
                     document.getElementById('webFileInput').click();
                 }
-            } else if (type === 'nickname') {
-                showCustomPrompt('修改昵称', false, function(v) { if(v) updateInfo('update_nickname', {nickname: v}); });
-            } else if (type === 'bio') {
-                showCustomPrompt('修改个签', false, function(v) { updateInfo('update_bio', {bio: v}); });
-            } else if (type === 'password') {
-                showCustomPrompt('修改密码', true, function(v) { 
-                    if(v && /^[a-zA-Z0-9_]{6,16}$/.test(v)) {
-                        updateInfo('update_password', {password: v});
-                    } else {
-                        toast('密码需6-16位字母数字');
-                    }
-                });
+            } else if (page === 'nickname') {
+                showCustomPrompt('修改昵称', false, function(v) { if(v) updateNickname(v); });
+            } else if (page === 'bio') {
+                showCustomPrompt('修改个签', false, function(v) { updateBio(v || ''); });
+            } else if (page === 'password') {
+                showCustomPrompt('修改密码', true, function(v) { if(v) updatePassword(v); });
             }
         }
 
-        // --- 文件上传逻辑 ---
-        function uploadFile(pathOrFile) {
-            if (window.plus) plus.nativeUI.showWaiting("正在上传...");
+        // --- 处理浏览器文件选择 ---
+        document.getElementById('webFileInput').onchange = function(e) {
+            var file = e.target.files[0];
+            if (!file) return;
             
             var fd = new FormData();
-            if (typeof pathOrFile === 'string') {
-                // 原生 App 环境
-                var task = plus.uploader.createUpload("https://apirank.qujiaweb.top/?mode=upload_meituan", {method:"POST"}, function(t, status) {
-                    plus.nativeUI.closeWaiting();
-                    if (status == 200) {
-                        var res = JSON.parse(t.responseText);
-                        if (res.full_url) finalizeImageUpdate(res.full_url);
-                        else toast('上传失败：未获取到地址');
-                    } else { toast('服务器响应异常'); }
-                });
-                task.addFile(pathOrFile, {key: "file"});
-                task.start();
-            } else {
-                // Web 环境
-                fd.append('file', pathOrFile);
-                ajaxRequest('upload_meituan', fd, function(err, res) {
-                    if (!err && res.full_url) finalizeImageUpdate(res.full_url);
-                    else toast(err || '上传失败');
-                });
-            }
-        }
-
-        // 监听 Web 文件选择
-        document.getElementById('webFileInput').onchange = function(e) {
-            if (this.files[0]) uploadFile(this.files[0]);
+            fd.append('file', file);
+            
+            if (window.plus) plus.nativeUI.showWaiting("正在上传...");
+            
+            ajaxPost('https://apirank.qujiaweb.top/?mode=upload_meituan', fd, function(err, res) {
+                if (window.plus) plus.nativeUI.closeWaiting();
+                if (!err && res.full_url) {
+                    executeUrlUpdate(res.full_url);
+                } else {
+                    toast('上传失败');
+                }
+            });
+            // 重置input
             this.value = '';
         };
 
-        // --- 最终更新数据库 ---
-        function finalizeImageUpdate(imgUrl) {
-            var mail = localStorage.getItem('usermail');
-            var mode = (currentMode === 'avatar') ? 'update_avatar' : 'update_background';
-            var data = { mail: mail };
-            data[currentMode] = imgUrl; // 动态设置键名为 avatar 或 background
+        // --- 处理 App 原生上传 ---
+        function uploadFileByPlus(path) {
+            plus.nativeUI.showWaiting("正在上传...");
+            var task = plus.uploader.createUpload("https://apirank.qujiaweb.top/?mode=upload_meituan", {method:"POST"}, function(t, status) {
+                plus.nativeUI.closeWaiting();
+                if (status == 200) {
+                    var res = JSON.parse(t.responseText);
+                    if (res.full_url) executeUrlUpdate(res.full_url);
+                    else toast('解析地址失败');
+                } else { toast('上传失败'); }
+            });
+            task.addFile(path, {key: "file"});
+            task.start();
+        }
 
-            ajaxRequest(mode, data, function(err, res) {
-                if (!err && res.code === 200) toast('更新成功');
-                else toast('保存失败，请重试');
+        // --- 统一执行数据库更新 ---
+        function executeUrlUpdate(imgUrl) {
+            var mail = localStorage.getItem('usermail');
+            var apiMode = (currentUploadType === 'avatar') ? 'update_avatar' : 'update_background';
+            var postData = { mail: mail };
+            postData[currentUploadType] = imgUrl;
+
+            ajaxPost('https://apirank.qujiaweb.top/?mode=' + apiMode + '&mail=' + mail, postData, function(err, res) {
+                if (!err && res.code === 200) {
+                    toast('修改成功');
+                } else {
+                    toast('保存失败');
+                }
             });
         }
 
-        function updateInfo(mode, params) {
-            var mail = localStorage.getItem('usermail');
-            params.mail = mail;
-            // 处理特殊字符
-            for (var key in params) {
-                if (typeof params[key] === 'string') params[key] = params[key].replace(/'/g, "~PGDBSD~");
-            }
-
-            ajaxRequest(mode, params, function(err, res) {
-                if (!err && res.code === 200) toast('修改成功');
-                else toast(err || '操作失败');
-            });
-        }
-
-        // --- UI 交互 ---
+        // --- 弹窗逻辑 ---
         function showCustomPrompt(title, isPwd, cb) {
             var ov = document.getElementById('customPromptOverlay');
             var inpt = document.getElementById('customPromptInput');
@@ -417,7 +431,7 @@
             inpt.type = isPwd ? 'password' : 'text';
             promptCallback = cb;
             ov.classList.add('active');
-            setTimeout(function(){ inpt.focus(); }, 300);
+            setTimeout(function(){ inpt.focus(); }, 200);
         }
 
         function closeCustomPrompt() {
@@ -426,101 +440,62 @@
 
         function confirmCustomPrompt() {
             var val = document.getElementById('customPromptInput').value;
-            if (promptCallback) promptCallback(val.trim());
+            if (promptCallback) promptCallback(val);
             closeCustomPrompt();
         }
 
+        // --- 更新接口 ---
+        function updateNickname(name) {
+            var mail = localStorage.getItem('usermail');
+            ajaxPost('https://apirank.qujiaweb.top/?mode=update_nickname&mail='+mail, {mail:mail, nickname:escapeEmoji(name)}, function(err,res){
+                if(!err && res.code===200) toast('修改成功');
+            });
+        }
+
+        function updateBio(bio) {
+            var mail = localStorage.getItem('usermail');
+            ajaxPost('https://apirank.qujiaweb.top/?mode=update_bio&mail='+mail, {mail:mail, bio:escapeEmoji(bio)}, function(err,res){
+                if(!err && res.code===200) toast('修改成功');
+            });
+        }
+
+        function updatePassword(pwd) {
+            if(!/^[a-zA-Z0-9_]+$/.test(pwd)) { toast('密码格式不符'); return; }
+            var mail = localStorage.getItem('usermail');
+            ajaxPost('https://apirank.qujiaweb.top/?mode=update_password&mail='+mail, {mail:mail, password:pwd}, function(err,res){
+                if(!err && res.code===200) toast('修改成功');
+            });
+        }
+
+        // --- 基础工具 ---
         function handleBack() {
             if (window.plus) plus.webview.currentWebview().close('auto');
             else history.back();
         }
 
         function toast(m) {
-            if (window.plus) plus.nativeUI.toast(m);
+            if (window.plus) plus.nativeUI.toast(m, {verticalAlign:'center'});
             else alert(m);
         }
 
+        function escapeEmoji(t) { return t.replace(/'/g, "~PGDBSD~"); }
+
         function handleLogout() {
-            if(confirm('确定退出登录吗？')) {
-                localStorage.removeItem('usermail');
-                localStorage.removeItem('userpass');
+            if(confirm('确定退出登录？')) {
+                localStorage.clear();
                 if (window.plus) {
-                    var main = plus.webview.getWebviewById('me.html');
-                    if (main) main.reload();
+                    var me = plus.webview.getWebviewById('me.html');
+                    if (me) me.reload();
                     plus.webview.currentWebview().close('auto');
                 } else {
-                    window.location.href = 'index.html';
+                    window.location.href = 'me.html';
                 }
             }
         }
-        /* --- 5+App 统一返回键兼容逻辑 (支持多级返回 + 首页退出) --- */
-(function() {
-    var firstBackTime = 0;
 
-    // 统一返回处理函数
-    function handleBackEvent() {
-        var ws = plus.webview.currentWebview();
-        
-        // 1. 检查当前窗口是否可以返回上一页 (针对单页面内的 history 记录)
-        // 2. 检查当前窗口是否有父窗口 (如果是通过 create 创建的子窗口)
-        // 3. 判断是否是主入口 (通过 id 判断，或者没有 opener)
-        
-        var opener = ws.opener();
-        var canBack = false;
-
-        // 特殊情况：如果有封禁弹窗，强制拦截并处理退出逻辑
-        var banModal = document.getElementById('ban-modal');
-        var isModalVisible = false;
-        if (banModal) {
-            var display = banModal.style.display || window.getComputedStyle(banModal).display;
-            if (display === 'flex' || display === 'block') {
-                isModalVisible = true;
-            }
-        }
-
-        if (isModalVisible) {
-            // 如果封禁弹窗开着，点击返回键直接询问是否退出 App
-            plus.nativeUI.confirm("确定退出应用吗？", function(e) {
-                if (e.index === 0) {
-                    plus.runtime.quit();
-                }
-            }, "提示", ["确定", "取消"]);
-            return;
-        }
-
-        // 层级判断逻辑：
-        // 如果没有上级页面 (opener) 或者是指定的首页 ID
-        if (!opener || ws.id === "HBuilder" || ws.id === "main" || ws.id === "oldhome.html") {
-            // 首页/最外层：执行双击退出
-            var now = new Date().getTime();
-            if (now - firstBackTime < 2000) {
-                plus.runtime.quit();
-            } else {
-                firstBackTime = now;
-                plus.nativeUI.toast('再按一次退出应用');
-            }
-        } else {
-            // 子页面：执行关闭当前页，回到上一页
-            ws.close('pop-out', 300);
-        }
-    }
-
-    document.addEventListener('plusready', function() {
-        // 基础环境配置
-        plus.navigator.setFullscreen(false);
-        
-        // 安全调用状态栏更新
-        if (typeof updateStatusBarStyle === 'function') {
-            updateStatusBarStyle();
-        }
-
-        // 核心：监听物理返回键
-        plus.key.addEventListener('backbutton', function() {
-            handleBackEvent();
-        }, false);
-        
-    }, false);
-})();
+        document.addEventListener('plusready', function() {
+            plus.key.addEventListener('backbutton', handleBack);
+        });
     </script>
 </body>
 </html>
