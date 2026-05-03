@@ -1,159 +1,237 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>积分商城</title>
-    <style>
-        :root {
-            --ios-bg: #F2F2F7;
-            --ios-card: #FFFFFF;
-            --ios-blue: #007AFF;
-            --ios-green: #34C759;
-            --ios-orange: #FF9500;
-            --ios-red: #FF3B30;
-            --text-main: #1C1C1E;
-            --text-second: #8E8E93;
-            --line-color: rgba(0,0,0,0.08);
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
-
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>积分商城（旧兼容）</title>
+    <style type="text/css">
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
-            background-color: var(--ios-bg);
-            color: var(--text-main);
+            margin: 0; padding: 0;
+            background-color: #F2F2F7;
+            color: #1C1C1E;
+            font-family: Helvetica, STHeiti, "Microsoft YaHei", sans-serif;
             padding-bottom: 60px;
-            line-height: 1.4;
+            -webkit-user-select: none;
+            -webkit-text-size-adjust: none;
         }
-
-    
         header {
-            position: sticky; top: 0; z-index: 100;
-            background-color: rgba(242, 242, 247, 0.8);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border-bottom: 0.5px solid var(--line-color);
-        }
-        .nav-bar { height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
-        .back-btn { width: 44px; height: 100%; display: flex; align-items: center; }
-        .back-icon { width: 12px; height: 12px; border-left: 2.5px solid var(--ios-blue); border-bottom: 2.5px solid var(--ios-blue); transform: rotate(45deg); }
-        .nav-title { font-size: 17px; font-weight: 600; letter-spacing: -0.4px; }
-
-        .container { padding: 16px; max-width: 600px; margin: 0 auto; }
-
-        
-        .points-card {
-            background: linear-gradient(135deg, #007AFF, #5856D6);
-            border-radius: 24px;
-            padding: 28px;
-            color: #fff;
-            margin-bottom: 24px;
-            box-shadow: 0 12px 24px rgba(0,122,255,0.2);
             position: relative;
-            overflow: hidden;
+            background-color: #F2F2F7;
+            border-bottom: 1px solid #D1D1D6;
+            width: 100%;
+            z-index: 100;
         }
-        .points-card::before {
-            content: ""; position: absolute; top: -20px; right: -20px;
-            width: 120px; height: 120px; background: rgba(255,255,255,0.1);
-            border-radius: 50%;
-        }
-        .points-label { font-size: 14px; opacity: 0.85; margin-bottom: 6px; font-weight: 500; }
-        .points-balance { font-size: 42px; font-weight: 800; letter-spacing: -1.5px; }
-
-        
-        .section-header { font-size: 19px; font-weight: 700; margin: 24px 0 12px 4px; color: var(--text-main); }
-        .pay-section {
-            background: var(--ios-card);
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-        }
-        .sub-label { font-size: 13px; color: var(--text-second); margin-bottom: 12px; display: block; font-weight: 500; }
-        
-        
-        .pay-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-        .pay-option {
-            border: 1.5px solid #F2F2F7;
-            background: #F2F2F7;
-            border-radius: 14px;
-            padding: 14px 0;
+        .nav-bar {
+            height: 44px;
+            line-height: 44px;
             text-align: center;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .back-btn {
+            position: absolute;
+            left: 0; top: 0;
+            width: 60px; height: 44px;
+        }
+        .back-icon {
+            display: block;
+            width: 12px; height: 12px;
+            border-left: 2px solid #007AFF;
+            border-bottom: 2px solid #007AFF;
+            -webkit-transform: rotate(45deg);
+            margin: 15px 0 0 20px;
+        }
+        .nav-title {
+            font-size: 17px;
+            font-weight: bold;
+        }
+        .container {
+            padding: 15px;
+        }
+        .points-card {
+            background-color: #007AFF;
+            background-image: -webkit-gradient(linear, left top, right bottom, from(#007AFF), to(#5856D6));
+            -webkit-border-radius: 20px;
+            padding: 25px;
+            color: #FFFFFF;
+            margin-bottom: 20px;
+            -webkit-box-shadow: 0 8px 15px rgba(0,122,255,0.2);
+        }
+        .points-label {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .points-balance {
+            font-size: 36px;
+            font-weight: bold;
+        }
+        .section-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0 10px 5px;
+        }
+        .pay-section {
+            background-color: #FFFFFF;
+            -webkit-border-radius: 15px;
+            padding: 15px;
+        }
+        .sub-label {
+            font-size: 12px;
+            color: #8E8E93;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .pay-grid {
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        .pay-option {
+            float: left;
+            width: 30%;
+            margin-right: 3%;
+            background-color: #F2F2F7;
+            border: 1px solid #F2F2F7;
+            -webkit-border-radius: 10px;
+            padding: 10px 0;
+            text-align: center;
+        }
+        .pay-option-last {
+            margin-right: 0;
         }
         .pay-option.active {
-            border-color: var(--ios-blue);
-            background: rgba(0, 122, 255, 0.04);
-            transform: translateY(-2px);
+            border-color: #007AFF;
+            background-color: #F0F7FF;
         }
-        .pay-option .amount { font-size: 18px; font-weight: 700; color: var(--text-main); }
-        .pay-option .desc { font-size: 11px; color: var(--text-second); margin-top: 2px; }
-        .pay-option.active .amount { color: var(--ios-blue); }
-
-        
-        .method-list { display: flex; flex-direction: column; gap: 10px; }
+        .pay-option .amount {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .pay-option .desc {
+            font-size: 10px;
+            color: #8E8E93;
+        }
+        .pay-option.active .amount {
+            color: #007AFF;
+        }
+        .method-list {
+            margin-top: 10px;
+        }
         .method-item {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 12px 16px; background: #F9F9FB; border-radius: 14px;
-            border: 1.5px solid transparent; transition: all 0.2s;
+            background-color: #F9F9FB;
+            -webkit-border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border: 1px solid #F9F9FB;
+            overflow: hidden;
         }
         .method-item.active {
-            border-color: var(--ios-blue);
-            background: rgba(0, 122, 255, 0.04);
+            border-color: #007AFF;
+            background-color: #F0F7FF;
         }
-        .method-left { display: flex; align-items: center; gap: 12px; }
-        .method-icon { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
-        .method-name { font-size: 15px; font-weight: 600; }
+        .method-left {
+            float: left;
+        }
+        .method-name {
+            font-size: 15px;
+            font-weight: bold;
+            line-height: 24px;
+            margin-left: 10px;
+        }
         .radio-circle {
-            width: 20px; height: 20px; border: 2px solid #D1D1D6;
-            border-radius: 50%; position: relative; transition: all 0.2s;
+            float: right;
+            width: 18px; height: 18px;
+            border: 2px solid #D1D1D6;
+            -webkit-border-radius: 50%;
+            margin-top: 2px;
         }
         .method-item.active .radio-circle {
-            border-color: var(--ios-blue); background: var(--ios-blue);
+            background-color: #007AFF;
+            border-color: #007AFF;
+            position: relative;
         }
-        .method-item.active .radio-circle::after {
-            content: ""; position: absolute; width: 8px; height: 4px;
-            border-left: 2px solid #fff; border-bottom: 2px solid #fff;
-            left: 5px; top: 5px; transform: rotate(-45deg);
+        .method-item.active .radio-circle:after {
+            content: "";
+            position: absolute;
+            width: 8px; height: 4px;
+            border-left: 2px solid #FFFFFF;
+            border-bottom: 2px solid #FFFFFF;
+            left: 4px; top: 4px;
+            -webkit-transform: rotate(-45deg);
         }
-
-        
         .pay-submit-btn {
-            width: 100%; height: 52px; background: var(--ios-blue); color: white;
-            border: none; border-radius: 16px; font-size: 17px; font-weight: 600;
-            margin-top: 24px; box-shadow: 0 8px 16px rgba(0,122,255,0.25);
-            display: none; align-items: center; justify-content: center;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            animation: slideUp 0.4s ease;
+            width: 100%;
+            height: 48px;
+            background-color: #007AFF;
+            color: #FFFFFF;
+            border: none;
+            -webkit-border-radius: 12px;
+            font-size: 17px;
+            font-weight: bold;
+            margin-top: 20px;
+            display: none;
         }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .pay-submit-btn:active { transform: scale(0.97); opacity: 0.9; }
-
-        
         .task-item {
-            background: var(--ios-card); border-radius: 20px; padding: 18px;
-            margin-bottom: 12px; display: flex; align-items: center; gap: 14px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            background-color: #FFFFFF;
+            -webkit-border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            overflow: hidden;
         }
-        .task-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .bg-orange { background: #FFF9F0; }
-        .bg-blue { background: #F0F7FF; }
-        .task-name { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
-        .task-reward { font-size: 13px; color: var(--ios-orange); font-weight: 600; }
-        .task-btn { padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 700; border: none; background: #F2F2F7; color: var(--ios-blue); }
-        .task-btn.btn-go { background: var(--ios-blue); color: #fff; }
-
-        .detail-card { background: var(--ios-card); border-radius: 20px; overflow: hidden; }
-        .detail-item { padding: 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid var(--line-color); }
-        .detail-info h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
-        .detail-info p { font-size: 12px; color: var(--text-second); }
-        .detail-amount { font-size: 16px; font-weight: 700; }
-        .plus { color: var(--ios-blue); }
-        .minus { color: var(--text-main); }
-        
-        .footer-tips { text-align: center; font-size: 12px; color: var(--text-second); padding: 24px 0; opacity: 0.8; }
-
-        .progress-bar-wrap { width: 100%; height: 6px; background: #E5E5EA; border-radius: 3px; margin-top: 10px; overflow: hidden; }
-        .progress-bar-fill { height: 100%; background: var(--ios-blue); transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        .task-icon {
+            float: left;
+            width: 44px; height: 44px;
+            -webkit-border-radius: 10px;
+            text-align: center;
+        }
+        .bg-orange { background-color: #FFF9F0; color: #FF9500; font-size: 20px; line-height: 44px; }
+        .bg-blue { background-color: #F0F7FF; color: #007AFF; font-size: 20px; line-height: 44px; }
+        .task-content {
+            margin-left: 55px;
+            margin-right: 70px;
+        }
+        .task-name { font-size: 15px; font-weight: bold; }
+        .task-reward { font-size: 12px; color: #FF9500; font-weight: bold; }
+        .task-btn {
+            float: right;
+            width: 60px;
+            height: 30px;
+            -webkit-border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            border: none;
+            background-color: #007AFF;
+            color: #FFFFFF;
+            margin-top: 7px;
+        }
+        .progress-bar-wrap {
+            width: 100%;
+            height: 5px;
+            background-color: #E5E5EA;
+            -webkit-border-radius: 3px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 5px;
+            background-color: #007AFF;
+            width: 0%;
+        }
+        .detail-card {
+            background-color: #FFFFFF;
+            -webkit-border-radius: 15px;
+        }
+        .detail-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #F2F2F7;
+            overflow: hidden;
+        }
+        .detail-info { float: left; }
+        .detail-info h4 { font-size: 14px; margin: 0; }
+        .detail-info p { font-size: 11px; color: #8E8E93; margin: 2px 0 0 0; }
+        .detail-amount { float: right; font-size: 15px; font-weight: bold; line-height: 34px; }
+        .plus { color: #007AFF; }
+        .minus { color: #1C1C1E; }
+        .footer-tips { text-align: center; font-size: 11px; color: #8E8E93; padding: 20px 0; }
+        .clear { clear: both; }
     </style>
 </head>
 <body>
@@ -161,56 +239,51 @@
     <header>
         <div class="nav-bar">
             <div class="back-btn" onclick="handleBack()"><div class="back-icon"></div></div>
-            <div class="nav-title">积分商城</div>
-            <div style="width:44px"></div>
+            <div class="nav-title">积分商城（旧兼容）</div>
         </div>
     </header>
 
-    <main class="container">
+    <div class="container">
         
         <div class="points-card">
-            <p class="points-label">当前可用积分</p>
+            <div class="points-label">当前可用积分</div>
             <div class="points-balance" id="totalPoints">0</div>
         </div>
 
-        
         <div class="section-header">积分充值</div>
         <div class="pay-section">
             <span class="sub-label">选择金额</span>
-            <div class="pay-grid" id="payOptions">
-                <div class="pay-option" data-amount="1">
+            <div class="pay-grid">
+                <div class="pay-option" onclick="selectAmount(this, 1)">
                     <div class="amount">￥1</div>
                     <div class="desc">50积分</div>
                 </div>
-                <div class="pay-option" data-amount="5">
+                <div class="pay-option" onclick="selectAmount(this, 5)">
                     <div class="amount">￥5</div>
                     <div class="desc">250积分</div>
                 </div>
-                <div class="pay-option" data-amount="10">
+                <div class="pay-option pay-option-last" onclick="selectAmount(this, 10)">
                     <div class="amount">￥10</div>
                     <div class="desc">500积分</div>
                 </div>
+                <div class="clear"></div>
             </div>
 
             <span class="sub-label">支付方式</span>
             <div class="method-list">
-                <div class="method-item" data-type="alipay">
+                <div class="method-item" onclick="selectType(this, 'alipay')">
                     <div class="method-left">
-                        <div class="method-icon">
-                            <svg viewBox="0 0 1024 1024" width="24" height="24"><path d="M891.56 128H132.44C71.32 128 21.33 177.99 21.33 239.11v545.78C21.33 846.01 71.32 896 132.44 896h759.12c61.12 0 111.11-49.99 111.11-111.11V239.11C1002.67 177.99 952.68 128 891.56 128z" fill="#1677FF"/><path d="M574.65 410.98c-30.82-14.73-63.5-27.46-97.35-37.52 40.54-46.06 72.82-100.91 87.05-161.78h-88.7c-9.7 34.61-26.68 67.57-49.19 96.69-28.53-7.55-58.46-12.87-89.47-15.54l-14.28 72.6c39.69 3.01 78.43 10.3 115.34 21.35-43.25 45.41-102.39 80.5-173.85 98.42l26.24 70.82c89.17-25.1 160.84-74.89 211.75-141.51 30.65 9.04 60.1 19.89 87.81 32.32l-15.35 64.15H332.22c-8.91 0-16.14 7.23-16.14 16.14v32.28c0 8.91 7.23 16.14 16.14 16.14h183.17c-21.78 45.92-56.78 86.13-102.43 116.51-28.54-18.42-53.7-42-74.58-69.57l-60.12 47.96c31.11 39.81 71.55 72.58 118.66 95.14-55.77 22.09-122.95 34.69-199.19 35.8l20.47 74.45c110.02-3.15 204.38-26.31 278.34-65.04 67.12 43.19 148.97 71.21 241.6 77.29l21.2-76.32c-79.08-4.22-149.25-24.96-207.28-59.01 56.45-38.31 100.23-91.13 125.79-152.68H752.4c8.91 0 16.14-7.23 16.14-16.14v-32.28c0-8.91-7.23-16.14-16.14-16.14H590l15.35-64.15z" fill="#FFF"/></svg>
-                        </div>
-                        <span class="method-name">支付宝支付</span>
+                        <span class="method-name" style="margin-left:0">支付宝支付</span>
                     </div>
                     <div class="radio-circle"></div>
+                    <div class="clear"></div>
                 </div>
-                <div class="method-item" data-type="wxpay">
+                <div class="method-item" onclick="selectType(this, 'wxpay')">
                     <div class="method-left">
-                        <div class="method-icon">
-                            <svg viewBox="0 0 1024 1024" width="24" height="24"><path d="M523.3 126.3c-238.1 0-431.1 169-431.1 377.3 0 118.6 62.4 224.2 161.4 300.9l-41.2 121.7c-2.4 7.1 5.3 13.5 11.8 9.9l144.1-80.4c50.5 16.5 106.1 25.5 164.5 25.5 19.5 0 38.6-1 57.2-2.9-10.4-36.4-16.2-74.8-16.2-114.5 0-192.5 178.2-348.6 398.1-348.6 0.2 0 0.5 0 0.7 0C749 220 645.7 126.3 523.3 126.3z" fill="#07C160"/><path d="M931.3 514c0-155.8-144.7-282.2-323.2-282.2s-323.2 126.3-323.2 282.2 144.7 282.2 323.2 282.2c43.8 0 85.5-7.6 123.4-21.2l108.1 60.3c4.8 2.7 10.6-2 8.9-7.3l-30.9-91.3c74.1-57.5 120.7-136.6 120.7-225.2z" fill="#07C160"/></svg>
-                        </div>
-                        <span class="method-name">微信支付</span>
+                        <span class="method-name" style="margin-left:0">微信支付</span>
                     </div>
                     <div class="radio-circle"></div>
+                    <div class="clear"></div>
                 </div>
             </div>
 
@@ -219,247 +292,236 @@
 
         <div class="section-header">我的任务</div>
         <div class="task-list">
-            <div class="task-item" onclick="handleAd()">
-                <div class="task-icon bg-orange">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#FF9500"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM8 15h2v2H8zm0-4h2v2H8zm0-4h2v2H8zm4 8h4v2h-4zm0-4h4v2h-4zm0-4h4v2h-4z"/></svg>
-                </div>
-                <div style="flex:1">
+            <div class="task-item">
+                <div class="task-icon bg-orange">A</div>
+                <button class="task-btn" onclick="handleAd()">去完成</button>
+                <div class="task-content">
                     <div class="task-name">每日观看广告</div>
                     <div class="task-reward">+3 积分/次</div>
-                    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width: 0%;"></div></div>
-                    <div style="font-size:12px; color:#8E8E93; margin-top:6px" class="task-progress-text">今日进度 0/10</div>
+                    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="adProgressFill"></div></div>
+                    <div style="font-size:10px; color:#8E8E93; margin-top:4px" id="adProgressText">今日进度 0/10</div>
                 </div>
-                <button class="task-btn">去完成</button>
             </div>
 
-            <div class="task-item" onclick="handleUpload()">
-                <div class="task-icon bg-blue">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#007AFF"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
-                </div>
-                <div style="flex:1">
+            <div class="task-item">
+                <div class="task-icon bg-blue">U</div>
+                <button class="task-btn" onclick="handleUpload()">去完成</button>
+                <div class="task-content">
                     <div class="task-name">每日上传资源</div>
                     <div class="task-reward">+10 积分/次</div>
-                    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width: 0%;"></div></div>
-                    <div style="font-size:12px; color:#8E8E93; margin-top:6px" class="task-progress-text">今日进度 0/10</div>
+                    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="upProgressFill"></div></div>
+                    <div style="font-size:10px; color:#8E8E93; margin-top:4px" id="upProgressText">今日进度 0/10</div>
                 </div>
-                <button class="task-btn">去完成</button>
             </div>
         </div>
 
         <div class="section-header">积分明细</div>
         <div class="detail-card" id="coinLogContainer">
-            <div class="detail-item" style="justify-content: center; padding: 40px 0; border:none">
-                <p style="font-size: 14px; color: var(--text-second);">加载中...</p>
+            <div class="detail-item" style="text-align:center; padding: 30px 0;">
+                <p style="font-size: 13px; color: #8E8E93;">加载中...</p>
             </div>
         </div>
         <p class="footer-tips">仅显示最近30天记录</p>
-    </main>
+    </div>
 
-    <script>
-        let selectedAmount = null;
-        let selectedType = null;
+    <script type="text/javascript">
+        var selectedAmount = null;
+        var selectedType = null;
+        var userPoints = 0;
 
-        
-        function initPayUI() {
-            const amountOpts = document.querySelectorAll('.pay-option');
-            const methodOpts = document.querySelectorAll('.method-item');
-            const payBtn = document.getElementById('payBtn');
-
-            amountOpts.forEach(opt => {
-                opt.addEventListener('click', function() {
-                    amountOpts.forEach(el => el.classList.remove('active'));
-                    this.classList.add('active');
-                    selectedAmount = this.getAttribute('data-amount');
-                    checkSelection();
-                });
-            });
-
-            methodOpts.forEach(opt => {
-                opt.addEventListener('click', function() {
-                    methodOpts.forEach(el => el.classList.remove('active'));
-                    this.classList.add('active');
-                    selectedType = this.getAttribute('data-type');
-                    checkSelection();
-                });
-            });
-
-            function checkSelection() {
-                if (selectedAmount && selectedType) {
-                    payBtn.style.display = 'flex';
-                }
+        function ajax(options) {
+            var xhr = new XMLHttpRequest();
+            var method = options.method || 'GET';
+            var url = options.url;
+            xhr.open(method, url, true);
+            if (method === 'POST') {
+                xhr.setRequestHeader('Content-Type', 'application/json');
             }
-        }
-
-        async function handlePay() {
-            const usermail = localStorage.getItem('usermail');
-            if (!usermail) { showToast('请先登录'); return; }
-
-            try {
-                showLoading();
-                const response = await fetch(`https://apirank.qujiaweb.top/?mode=create_pay_order`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        mail: usermail, 
-                        amount: selectedAmount,
-                        type: selectedType // 传给后端：alipay 或 wxpay
-                    })
-                });
-                const res = await response.json();
-                if (res.code === 200 && res.payUrl) {
-                    if (window.plus) {
-                        plus.runtime.openURL(res.payUrl);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        options.success(JSON.parse(xhr.responseText));
                     } else {
-                        window.location.href = res.payUrl;
+                        if (options.error) options.error();
                     }
-                } else {
-                    showToast(res.msg || '支付链接获取失败');
                 }
-            } catch (e) {
-                showToast('网络请求错误');
-            } finally {
-                hideLoading();
+            };
+            xhr.send(options.data ? JSON.stringify(options.data) : null);
+        }
+
+        function selectAmount(el, val) {
+            var opts = document.getElementsByClassName('pay-option');
+            for(var i=0; i<opts.length; i++) { opts[i].className = 'pay-option'; }
+            el.className = 'pay-option active';
+            selectedAmount = val;
+            checkSelection();
+        }
+
+        function selectType(el, val) {
+            var opts = document.getElementsByClassName('method-item');
+            for(var i=0; i<opts.length; i++) { opts[i].className = 'method-item'; }
+            el.className = 'method-item active';
+            selectedType = val;
+            checkSelection();
+        }
+
+        function checkSelection() {
+            if (selectedAmount && selectedType) {
+                document.getElementById('payBtn').style.display = 'block';
             }
         }
 
-        
+        function handlePay() {
+            var usermail = localStorage.getItem('usermail');
+            if (!usermail) { showToast('请先登录'); return; }
+            showLoading();
+            setTimeout(function() {
+                ajax({
+                    method: 'POST',
+                    url: 'https://apirank.qujiaweb.top/?mode=create_pay_order',
+                    data: { mail: usermail, amount: selectedAmount, type: selectedType },
+                    success: function(res) {
+                        hideLoading();
+                        if (res.code === 200 && res.payUrl) {
+                            if (window.plus) {
+                                plus.runtime.openURL(res.payUrl);
+                            } else {
+                                window.location.href = res.payUrl;
+                            }
+                        } else {
+                            showToast(res.msg || '获取失败');
+                        }
+                    },
+                    error: function() { hideLoading(); showToast('网络错误'); }
+                });
+            }, 500);
+        }
+
         function handleBack() {
-            if (window.plus) { plus.webview.currentWebview().close('auto'); } else { history.back(); }
+            if (window.plus) {
+                plus.webview.currentWebview().close('auto');
+            } else {
+                var prev = document.referrer;
+                if (prev && prev.indexOf('index.html') !== -1) {
+                    window.location.href = 'oldindex.html';
+                } else {
+                    history.back();
+                }
+            }
         }
 
         function handleAd() {
-            const usermail = localStorage.getItem('usermail');
+            var usermail = localStorage.getItem('usermail');
             if (!usermail) { showToast('请先登录'); return; }
             if (window.plus && plus.ad && plus.ad.createRewardedVideoAd) {
-                if (window._adRewardLoading) { showToast('广告加载中'); return; }
-                window._adRewardLoading = true;
-                let adReward = plus.ad.createRewardedVideoAd({adpid:'1358284724'});
-                adReward.onLoad(() => adReward.show());
-                adReward.onError(e => {
-                    showToast('广告失败: ' + JSON.stringify(e));
-                    adReward.destroy(); window._adRewardLoading = false;
-                });
-                adReward.onClose(e => {
-                    if(e.isEnded) { addAdRewardCoins(); } else { showToast('未看完无奖励'); }
-                    adReward.destroy(); window._adRewardLoading = false;
-                });
-                adReward.load();
+                showLoading();
+                setTimeout(function() {
+                    hideLoading();
+                    var adReward = plus.ad.createRewardedVideoAd({adpid:'1358284724'});
+                    adReward.onLoad(function() { adReward.show(); });
+                    adReward.onClose(function(e) {
+                        if(e.isEnded) { addAdRewardCoins(); }
+                        adReward.destroy();
+                    });
+                    adReward.load();
+                }, 300);
             } else { showToast('请在APP环境使用'); }
         }
 
-        async function addAdRewardCoins() {
-            const usermail = localStorage.getItem('usermail');
-            try {
-                showLoading();
-                const res = await fetch(`https://apirank.qujiaweb.top/?mode=ad_reward&mail=${encodeURIComponent(usermail)}`).then(r => r.json());
-                if (res.code === 200) { showToast('奖励领取成功'); init(); } else { showToast(res.msg); }
-            } catch(e) { showToast('领取失败'); } finally { hideLoading(); }
+        function addAdRewardCoins() {
+            var usermail = localStorage.getItem('usermail');
+            showLoading();
+            setTimeout(function() {
+                ajax({
+                    url: 'https://apirank.qujiaweb.top/?mode=ad_reward&mail=' + encodeURIComponent(usermail),
+                    success: function(res) {
+                        hideLoading();
+                        if (res.code === 200) { showToast('领取成功'); init(); } else { showToast(res.msg); }
+                    }
+                });
+            }, 800);
         }
 
-        function handleUpload() { handleBack(); }
-
-        function animateValue(obj, start, end, duration) {
-            let startTimestamp = null;
-            const step = (timestamp) => {
-                if (!startTimestamp) startTimestamp = timestamp;
-                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                obj.innerHTML = Math.floor(progress * (end - start) + start).toLocaleString();
-                if (progress < 1) window.requestAnimationFrame(step);
-            };
-            window.requestAnimationFrame(step);
+        function handleUpload() {
+            window.location.href = 'oldupload.html';
         }
 
         function showLoading() { if (window.plus) plus.nativeUI.showWaiting('请稍候...'); }
         function hideLoading() { if (window.plus) plus.nativeUI.closeWaiting(); }
         function showToast(m) { if (window.plus) { plus.nativeUI.toast(m); } else { alert(m); } }
 
-        async function fetchUserPoints() {
-            const savedEmail = localStorage.getItem('usermail_login');
-            const savedPass = localStorage.getItem('userpass_login');
+        function fetchUserPoints() {
+            var savedEmail = localStorage.getItem('usermail_login');
+            var savedPass = localStorage.getItem('userpass_login');
             if (savedEmail && savedPass) {
-                try {
-                    const res = await fetch(`https://apirank.qujiaweb.top/?mode=login`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: savedEmail, password: savedPass })
-                    }).then(r => r.json());
-                    if (res.code === 200 && res.fields && res.fields.length > 0) {
-                        const p = res.fields[0]["积分"] || '0';
-                        localStorage.setItem('userpoints', p);
-                        return parseInt(p);
-                    }
-                } catch(e) {}
-            }
-            return parseInt(localStorage.getItem('userpoints') || '0');
-        }
-
-        async function fetchCoinLog() {
-            const userMail = localStorage.getItem('usermail');
-            if (!userMail) return [];
-            try {
-                const res = await fetch(`https://apirank.qujiaweb.top/?mode=get_coin_log&mail=${encodeURIComponent(userMail)}`).then(r => r.json());
-                return res.code === 200 ? res.fields : [];
-            } catch(e) { return []; }
-        }
-
-        function updateTaskProgressUI(logs) {
-            const today = new Date().toISOString().split('T')[0];
-            const tLogs = logs.filter(l => (l.时间 || '').split(' ')[0] === today);
-            const counts = { ad: 0, upload: 0 };
-            tLogs.forEach(l => {
-                if (l.类型 === '观看广告奖励') counts.ad++;
-                else if (l.类型 === '上传资源奖励') counts.upload++;
-            });
-            const updateUI = (idx, count) => {
-                const fill = document.querySelector(`.task-item:nth-child(${idx}) .progress-bar-fill`);
-                const txt = document.querySelector(`.task-item:nth-child(${idx}) .task-progress-text`);
-                fill.style.width = `${Math.min(count*10, 100)}%`;
-                txt.textContent = `今日进度 ${count}/10`;
-            };
-            updateUI(1, counts.ad); updateUI(2, counts.upload);
-        }
-
-        function updateCoinLogUI(logs) {
-            const card = document.getElementById('coinLogContainer');
-            card.innerHTML = logs.length ? '' : '<div class="detail-item" style="justify-content: center; padding: 32px 16px; border:none"><p style="font-size: 14px; color: var(--text-second);">暂无积分记录</p></div>';
-            logs.forEach(log => {
-                const item = document.createElement('div');
-                item.className = 'detail-item';
-                let change = String(log["积分变动"] || '0');
-                if (!change.startsWith('+') && !change.startsWith('-') && parseInt(change) > 0) change = '+' + change;
-                const cls = change.startsWith('+') ? 'plus' : 'minus';
-                item.innerHTML = `<div class="detail-info"><h4>${log.类型}</h4><p>${log.时间}</p></div><div class="detail-amount ${cls}">${change}</div>`;
-                card.appendChild(item);
-            });
-        }
-
-        async function init() {
-            initPayUI();
-            const p = await fetchUserPoints();
-            animateValue(document.getElementById('totalPoints'), 0, p, 800);
-            const logs = await fetchCoinLog();
-            updateCoinLogUI(logs);
-            updateTaskProgressUI(logs);
-        }
-
-        window.onload = init;
-
-        document.addEventListener('plusready', function() {
-            var webview = plus.webview.currentWebview();
-            plus.key.addEventListener('backbutton', function() {
-                webview.canBack(function(e) {
-                    if (e.canBack) {
-                        webview.back();
-                    } else {
-                        if (plus.webview.all().length > 1) {
-                            webview.close('auto'); 
-                        } else {
-                            history.back();
+                ajax({
+                    method: 'POST',
+                    url: 'https://apirank.qujiaweb.top/?mode=login',
+                    data: { email: savedEmail, password: savedPass },
+                    success: function(res) {
+                        if (res.code === 200 && res.fields && res.fields.length > 0) {
+                            var p = res.fields[0]["积分"] || '0';
+                            localStorage.setItem('userpoints', p);
+                            document.getElementById('totalPoints').innerHTML = p;
                         }
                     }
                 });
+            }
+        }
+
+        function fetchLogs() {
+            var userMail = localStorage.getItem('usermail');
+            if (!userMail) return;
+            ajax({
+                url: 'https://apirank.qujiaweb.top/?mode=get_coin_log&mail=' + encodeURIComponent(userMail),
+                success: function(res) {
+                    if (res.code === 200) {
+                        updateUI(res.fields);
+                    }
+                }
             });
-        });
+        }
+
+        function updateUI(logs) {
+            var container = document.getElementById('coinLogContainer');
+            var html = '';
+            var adCount = 0, upCount = 0;
+            var today = new Date().getFullYear() + '-' + (new Date().getMonth()+1) + '-' + new Date().getDate();
+            
+            for(var i=0; i<logs.length; i++) {
+                var log = logs[i];
+                var change = String(log["积分变动"] || '0');
+                if (change.indexOf('+') === -1 && change.indexOf('-') === -1 && parseInt(change) > 0) change = '+' + change;
+                var cls = change.indexOf('+') !== -1 ? 'plus' : 'minus';
+                
+                html += '<div class="detail-item">' +
+                        '<div class="detail-info"><h4>' + log.类型 + '</h4><p>' + log.时间 + '</p></div>' +
+                        '<div class="detail-amount ' + cls + '">' + change + '</div>' +
+                        '</div>';
+                
+                if (log.时间.indexOf(today) !== -1) {
+                    if (log.类型 === '观看广告奖励') adCount++;
+                    if (log.类型 === '上传资源奖励') upCount++;
+                }
+            }
+            container.innerHTML = html || '<div style="text-align:center;padding:20px;color:#8E8E93">暂无记录</div>';
+            
+            document.getElementById('adProgressFill').style.width = (adCount * 10) + '%';
+            document.getElementById('adProgressText').innerHTML = '今日进度 ' + adCount + '/10';
+            document.getElementById('upProgressFill').style.width = (upCount * 10) + '%';
+            document.getElementById('upProgressText').innerHTML = '今日进度 ' + upCount + '/10';
+        }
+
+        function init() {
+            setTimeout(function() {
+                var p = localStorage.getItem('userpoints') || '0';
+                document.getElementById('totalPoints').innerHTML = p;
+                fetchUserPoints();
+                setTimeout(fetchLogs, 500);
+            }, 300);
+        }
+
+        window.onload = init;
     </script>
 </body>
 </html>
