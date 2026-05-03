@@ -5,11 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>趣加应用网页版</title>
     
+    <!-- 旧设备检测与跳转脚本 (必须放在最前面) -->
+    <script>
+        (function() {
+            var ua = navigator.userAgent;
+            var needRedirect = false;
+
+            // 1. 检测 iOS 版本小于 11
+            var iosMatch = ua.match(/(iPhone|iPod|iPad).*OS\s+(\d+)_/i);
+            if (iosMatch && parseInt(iosMatch[2], 10) < 11) {
+                needRedirect = true;
+            }
+
+            // 2. 检测 Chrome 内核版本小于 60
+            var chromeMatch = ua.match(/Chrome\/(\d+)/i);
+            if (chromeMatch && parseInt(chromeMatch[1], 10) < 60) {
+                needRedirect = true;
+            }
+
+            // 3. 检测 Firefox 版本小于 60
+            var firefoxMatch = ua.match(/Firefox\/(\d+)/i);
+            if (firefoxMatch && parseInt(firefoxMatch[1], 10) < 60) {
+                needRedirect = true;
+            }
+
+            // 如果匹配到旧设备，直接转到指定页面
+            if (needRedirect) {
+                window.location.replace('http://qujiaweb.top/overview');
+            }
+        })();
+    </script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
 
     <style>
-
         body.pc-mode, html.pc-mode {
             margin: 0;
             padding: 0;
@@ -39,17 +69,15 @@
             height: auto;
         }
 
-        
         body.mobile-mode {
             font-family: 'Noto Sans SC', sans-serif;
             background-color: #f5f7ff;
-            color: #212529; /* var(--dark) */
+            color: #212529;
             line-height: 1.6;
             margin: 0;
             padding: 0;
             overflow-x: hidden;
         }
-        
         
         .mobile-mode * {
             margin: 0;
@@ -209,7 +237,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-  
         @media (max-width: 768px) {
             .mobile-mode .button-group {
                 flex-direction: column;
@@ -295,7 +322,7 @@
                 body.className = "mobile-mode";
                 html.className = "mobile-mode";
                 mobileView.style.display = "block";
-                pcView.remove(); 
+                if (pcView) pcView.remove(); 
                 if (typeof particlesJS !== 'undefined') {
                     particlesJS('particles-js', {
                         "particles": {
@@ -317,7 +344,7 @@
                 body.className = "pc-mode";
                 html.className = "pc-mode";
                 pcView.style.display = "block";
-                mobileView.remove(); 
+                if (mobileView) mobileView.remove(); 
             }
         })();
     </script>
