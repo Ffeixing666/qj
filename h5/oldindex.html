@@ -198,17 +198,13 @@
         }
 
         function goHome() {
-            if (window.plus) {
-                // 使用5+ App标准的新窗口打开方式，替代原有的create+close逻辑
-                plus.webview.open('oldhome.html', 'oldhome.html', {
-                    scrollIndicator: 'none',
-                    scalable: false,
-                    backbuttonMaximize: false
-                }, 'fade-in', 250);
-            } else {
-                // H5环境下使用标准跳转，而非replace
-                window.location.href = 'oldhome.html';
-            }
+            var url = 'oldhome.html';
+        if (window.plus && plus.webview) {
+            var ws = plus.webview.create(url, url);
+            ws.show('pop-in', 300);
+        } else {
+            window.location.href = url;
+        }
         }
 
         function startApp() {
