@@ -398,11 +398,41 @@
         }
 
         function closeAdModal() { document.getElementById('adModal').style.display = 'none'; }
-        function openMePage() { window.location.href = 'oldme.html'; }
-        function openSearchPage() { window.location.href = 'oldsearch.html'; }
-        function openSharePage() { window.location.href = 'oldshare.html'; }
-        function openMessagePage() { window.location.href = 'oldxiaoxi.html'; }
-        function openMall() { window.location.href = 'oldmall.html'; }
+        function openMePage() { var url = 'oldme.html';
+        if (window.plus && plus.webview) {
+            var ws = plus.webview.create(url, url);
+            ws.show('pop-in', 300);
+        } else {
+            window.location.href = url;
+        } }
+        function openSearchPage() { var url = 'oldsearch.html';
+        if (window.plus && plus.webview) {
+            var ws = plus.webview.create(url, url);
+            ws.show('pop-in', 300);
+        } else {
+            window.location.href = url;
+        }}
+        function openSharePage() { var url = 'oldshare.html';
+        if (window.plus && plus.webview) {
+            var ws = plus.webview.create(url, url);
+            ws.show('pop-in', 300);
+        } else {
+            window.location.href = url;
+        } }
+        function openMessagePage() { var url = 'oldxiaoxi.html';
+        if (window.plus && plus.webview) {
+            var ws = plus.webview.create(url, url);
+            ws.show('pop-in', 300);
+        } else {
+            window.location.href = url;
+        } }
+        function openMall() { var url = 'oldmall.html';
+        if (window.plus && plus.webview) {
+            var ws = plus.webview.create(url, url);
+            ws.show('pop-in', 300);
+        } else {
+            window.location.href = url;
+        } }
 
         window.onload = function() {
             initCarousel();
