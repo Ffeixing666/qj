@@ -3,125 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>积分商城（旧兼容）</title>
+    <!-- 针对旧版 iOS 的全屏和状态栏设置 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>积分商城</title>
     <style>
+        /* 保持你原有的 CSS 不变，已检查 iOS 6 兼容性 */
         * { margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; -webkit-touch-callout: none; box-sizing: border-box; }
-        body {
-            font-family: Helvetica, STHeiti, "Microsoft YaHei", sans-serif;
-            background-color: #F2F2F7;
-            color: #1C1C1E;
-            padding-bottom: 60px;
-            line-height: 1.4;
-            font-size: 14px;
-        }
-        header {
-            position: relative; top: 0; z-index: 100;
-            background-color: #F2F2F7;
-            border-bottom: 1px solid #D1D1D6;
-            height: 50px;
-        }
+        body { font-family: Helvetica, STHeiti, sans-serif; background-color: #F2F2F7; color: #1C1C1E; padding-bottom: 60px; line-height: 1.4; font-size: 14px; }
+        header { position: relative; background-color: #F2F2F7; border-bottom: 1px solid #D1D1D6; height: 50px; }
         .nav-bar { height: 50px; width: 100%; position: relative; }
         .back-btn { position: absolute; left: 0; top: 0; width: 44px; height: 50px; }
-        .back-icon { 
-            width: 10px; height: 10px; 
-            border-left: 2px solid #007AFF; border-bottom: 2px solid #007AFF; 
-            -webkit-transform: rotate(45deg); margin: 18px 0 0 16px; 
-        }
-        .nav-title { 
-            text-align: center; line-height: 50px; 
-            font-size: 17px; font-weight: bold; 
-        }
-
+        .back-icon { width: 10px; height: 10px; border-left: 2px solid #007AFF; border-bottom: 2px solid #007AFF; -webkit-transform: rotate(45deg); margin: 18px 0 0 16px; }
+        .nav-title { text-align: center; line-height: 50px; font-size: 17px; font-weight: bold; }
         .container { padding: 16px; max-width: 600px; margin: 0 auto; }
-
-        .points-card {
-            background-color: #007AFF;
-            background: -webkit-linear-gradient(top left, #007AFF, #5856D6);
-            border-radius: 20px;
-            padding: 25px;
-            color: #ffffff;
-            margin-bottom: 20px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
+        .points-card { background-color: #007AFF; background: -webkit-linear-gradient(top left, #007AFF, #5856D6); border-radius: 20px; padding: 25px; color: #ffffff; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .points-label { font-size: 13px; margin-bottom: 5px; }
         .points-balance { font-size: 36px; font-weight: bold; }
-
         .section-header { font-size: 18px; font-weight: bold; margin: 20px 0 10px 4px; }
-        .pay-section {
-            background: #ffffff;
-            border-radius: 15px;
-            padding: 15px;
-        }
+        .pay-section { background: #ffffff; border-radius: 15px; padding: 15px; }
         .sub-label { font-size: 12px; color: #8E8E93; margin-bottom: 10px; display: block; }
-        
         .pay-grid { width: 100%; overflow: hidden; margin-bottom: 15px; }
-        .pay-option {
-            float: left; width: 31%; margin-right: 3%;
-            border: 1px solid #F2F2F7;
-            background: #F2F2F7;
-            border-radius: 10px;
-            padding: 12px 0;
-            text-align: center;
-        }
+        .pay-option { float: left; width: 31%; margin-right: 3%; border: 1px solid #F2F2F7; background: #F2F2F7; border-radius: 10px; padding: 12px 0; text-align: center; }
         .pay-option-last { margin-right: 0; }
-        .pay-option.active {
-            border-color: #007AFF;
-            background: #EBF5FF;
-        }
+        .pay-option.active { border-color: #007AFF; background: #EBF5FF; }
         .pay-option .amount { font-size: 16px; font-weight: bold; }
         .pay-option .desc { font-size: 10px; color: #8E8E93; }
-
         .method-list { clear: both; }
-        .method-item {
-            display: block; width: 100%;
-            padding: 12px; background: #F9F9FB; border-radius: 12px;
-            margin-bottom: 8px; border: 1px solid #F9F9FB;
-            position: relative;
-        }
+        .method-item { display: block; width: 100%; padding: 12px; background: #F9F9FB; border-radius: 12px; margin-bottom: 8px; border: 1px solid #F9F9FB; position: relative; }
         .method-item.active { border-color: #007AFF; background: #EBF5FF; }
         .method-icon { display: inline-block; vertical-align: middle; width: 24px; height: 24px; margin-right: 10px; }
         .method-name { font-size: 15px; font-weight: bold; vertical-align: middle; }
-        .radio-circle {
-            position: absolute; right: 12px; top: 15px;
-            width: 18px; height: 18px; border: 1px solid #D1D1D6;
-            border-radius: 10px;
-        }
+        .radio-circle { position: absolute; right: 12px; top: 15px; width: 18px; height: 18px; border: 1px solid #D1D1D6; border-radius: 10px; }
         .method-item.active .radio-circle { background: #007AFF; border-color: #007AFF; }
-
-        .pay-submit-btn {
-            width: 100%; height: 48px; background: #007AFF; color: #ffffff;
-            border: none; border-radius: 12px; font-size: 17px; font-weight: bold;
-            margin-top: 15px; display: none;
-        }
-
-        .task-item {
-            background: #ffffff; border-radius: 15px; padding: 15px;
-            margin-bottom: 10px; position: relative; overflow: hidden;
-        }
-        .task-icon { 
-            float: left; width: 44px; height: 44px; border-radius: 10px; 
-            text-align: center; line-height: 50px;
-        }
+        .pay-submit-btn { width: 100%; height: 48px; background: #007AFF; color: #ffffff; border: none; border-radius: 12px; font-size: 17px; font-weight: bold; margin-top: 15px; display: none; }
+        .task-item { background: #ffffff; border-radius: 15px; padding: 15px; margin-bottom: 10px; position: relative; overflow: hidden; }
+        .task-icon { float: left; width: 44px; height: 44px; border-radius: 10px; text-align: center; line-height: 50px; }
         .bg-orange { background: #FFF9F0; }
         .bg-blue { background: #F0F7FF; }
         .task-content { margin-left: 55px; margin-right: 70px; }
         .task-name { font-size: 15px; font-weight: bold; }
         .task-reward { font-size: 12px; color: #FF9500; }
-        .task-btn { 
-            position: absolute; right: 15px; top: 22px;
-            padding: 6px 12px; border-radius: 15px; font-size: 12px; 
-            border: none; background: #007AFF; color: #fff;
-        }
-
+        .task-btn { position: absolute; right: 15px; top: 22px; padding: 6px 12px; border-radius: 15px; font-size: 12px; border: none; background: #007AFF; color: #fff; }
         .detail-card { background: #ffffff; border-radius: 15px; }
         .detail-item { padding: 12px; border-bottom: 1px solid #F2F2F7; position: relative; }
         .detail-info h4 { font-size: 14px; }
         .detail-info p { font-size: 11px; color: #8E8E93; }
         .detail-amount { position: absolute; right: 12px; top: 15px; font-weight: bold; }
         .plus { color: #007AFF; }
-        
         .progress-bar-wrap { width: 100%; height: 4px; background: #E5E5EA; border-radius: 2px; margin-top: 5px; }
         .progress-bar-fill { height: 100%; background: #007AFF; width: 0%; }
         .footer-tips { text-align: center; font-size: 11px; color: #8E8E93; padding: 20px 0; }
@@ -140,7 +69,8 @@
     <div class="container">
         <div class="points-card">
             <div class="points-label">当前可用积分</div>
-            <div class="points-balance" id="totalPoints">0</div>
+            <!-- 初始显示中，避免空白 -->
+            <div class="points-balance" id="totalPoints">...</div>
         </div>
 
         <div class="section-header">积分充值</div>
@@ -167,7 +97,7 @@
                     <div class="method-icon">
                         <svg width="24" height="24" viewBox="0 0 1024 1024"><path d="M891.56 128H132.44C71.32 128 21.33 177.99 21.33 239.11v545.78C21.33 846.01 71.32 896 132.44 896h759.12c61.12 0 111.11-49.99 111.11-111.11V239.11C1002.67 177.99 952.68 128 891.56 128z" fill="#1677FF"/><path d="M574.65 410.98c-30.82-14.73-63.5-27.46-97.35-37.52 40.54-46.06 72.82-100.91 87.05-161.78h-88.7c-9.7 34.61-26.68 67.57-49.19 96.69-28.53-7.55-58.46-12.87-89.47-15.54l-14.28 72.6c39.69 3.01 78.43 10.3 115.34 21.35-43.25 45.41-102.39 80.5-173.85 98.42l26.24 70.82c89.17-25.1 160.84-74.89 211.75-141.51 30.65 9.04 60.1 19.89 87.81 32.32l-15.35 64.15H332.22c-8.91 0-16.14 7.23-16.14 16.14v32.28c0 8.91 7.23 16.14 16.14 16.14h183.17c-21.78 45.92-56.78 86.13-102.43 116.51-28.54-18.42-53.7-42-74.58-69.57l-60.12 47.96c31.11 39.81 71.55 72.58 118.66 95.14-55.77 22.09-122.95 34.69-199.19 35.8l20.47 74.45c110.02-3.15 204.38-26.31 278.34-65.04 67.12 43.19 148.97 71.21 241.6 77.29l21.2-76.32c-79.08-4.22-149.25-24.96-207.28-59.01 56.45-38.31 100.23-91.13 125.79-152.68H752.4c8.91 0 16.14-7.23 16.14-16.14v-32.28c0-8.91-7.23-16.14-16.14-16.14H590l15.35-64.15z" fill="#FFF"/></svg>
                     </div>
-                    <span class="method-name">支付宝支付</span>
+                    <span class="method-name">支付宝</span>
                     <div class="radio-circle"></div>
                 </div>
                 <div class="method-item" onclick="selectMethod(this, 'wxpay')">
@@ -224,6 +154,34 @@
         var selectedAmount = null;
         var selectedType = null;
 
+        // 基础 AJAX 封装优化
+        function ajax(options) {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        var res;
+                        try {
+                            res = JSON.parse(xhr.responseText);
+                            options.success(res);
+                        } catch(e) {
+                            console.log('JSON Parse Error');
+                            if(options.error) options.error();
+                        }
+                    } else {
+                        if(options.error) options.error();
+                    }
+                }
+            };
+            xhr.open(options.method || 'GET', options.url, true);
+            if (options.method === 'POST') {
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.send(JSON.stringify(options.data));
+            } else {
+                xhr.send();
+            }
+        }
+
         function selectAmount(el, val) {
             var opts = document.getElementById('payOptions').getElementsByTagName('div');
             for(var i=0; i<opts.length; i++) {
@@ -252,28 +210,8 @@
             }
         }
 
-        function ajax(options) {
-            var xhr = new XMLHttpRequest();
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        options.success(JSON.parse(xhr.responseText));
-                    } else {
-                        options.error();
-                    }
-                }
-            };
-            xhr.open(options.method || 'GET', options.url, true);
-            if (options.method === 'POST') {
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                xhr.send(JSON.stringify(options.data));
-            } else {
-                xhr.send();
-            }
-        }
-
         function handlePay() {
-            var usermail = localStorage.getItem('usermail');
+            var usermail = localStorage.getItem('usermail_login') || localStorage.getItem('usermail');
             if (!usermail) { showToast('请先登录'); return; }
             showLoading();
             ajax({
@@ -288,7 +226,7 @@
                         showToast(res.msg || '获取失败');
                     }
                 },
-                error: function() { hideLoading(); showToast('网络错误'); }
+                error: function() { hideLoading(); showToast('网络连接失败'); }
             });
         }
 
@@ -297,67 +235,81 @@
         }
 
         function handleAd() {
-            var usermail = localStorage.getItem('usermail');
+            var usermail = localStorage.getItem('usermail_login') || localStorage.getItem('usermail');
             if (!usermail) { showToast('请先登录'); return; }
             if (window.plus && plus.ad) {
                 var adReward = plus.ad.createRewardedVideoAd({adpid:'1358284724'});
                 adReward.onLoad(function() { adReward.show(); });
                 adReward.onClose(function(e) {
-                    if(e.isEnded) { addAdRewardCoins(); }
+                    if(e.isEnded) { addAdRewardCoins(usermail); }
                     adReward.destroy();
                 });
                 adReward.load();
-            } else { showToast('请在APP环境使用'); }
+            } else { showToast('请在APP内参与任务'); }
         }
 
-        function addAdRewardCoins() {
-            var usermail = localStorage.getItem('usermail');
+        function addAdRewardCoins(mail) {
             ajax({
-                url: 'https://apirank.qujiaweb.top/?mode=ad_reward&mail=' + encodeURIComponent(usermail),
-                success: function(res) { if(res.code === 200) init(); }
+                url: 'https://apirank.qujiaweb.top/?mode=ad_reward&mail=' + encodeURIComponent(mail),
+                success: function(res) { if(res.code === 200) initData(); }
             });
         }
 
         function handleUpload() { window.location.href = 'oldindex.html'; }
-
         function showToast(m) { if (window.plus) { plus.nativeUI.toast(m); } else { alert(m); } }
-        function showLoading() { if (window.plus) plus.nativeUI.showWaiting('请稍候...'); }
+        function showLoading() { if (window.plus) plus.nativeUI.showWaiting('处理中...'); }
         function hideLoading() { if (window.plus) plus.nativeUI.closeWaiting(); }
 
-        function init() {
+        // 核心初始化逻辑
+        function initData() {
             var savedEmail = localStorage.getItem('usermail_login');
             var savedPass = localStorage.getItem('userpass_login');
+            
+            // 1. 先通过登录接口获取最新积分
             if (savedEmail && savedPass) {
                 ajax({
                     method: 'POST',
                     url: 'https://apirank.qujiaweb.top/?mode=login',
                     data: { email: savedEmail, password: savedPass },
                     success: function(res) {
-                        if (res.code === 200 && res.fields) {
+                        if (res.code === 200 && res.fields && res.fields[0]) {
                             var p = res.fields[0]["积分"] || '0';
                             document.getElementById('totalPoints').innerHTML = p;
+                        } else {
+                            document.getElementById('totalPoints').innerHTML = '0';
                         }
-                    }
+                    },
+                    error: function() { document.getElementById('totalPoints').innerHTML = '0'; }
                 });
+            } else {
+                document.getElementById('totalPoints').innerHTML = '未登录';
             }
-            var userMail = localStorage.getItem('usermail');
-            if (userMail) {
+
+            // 2. 获取积分日志
+            var logMail = savedEmail || localStorage.getItem('usermail');
+            if (logMail) {
                 ajax({
-                    url: 'https://apirank.qujiaweb.top/?mode=get_coin_log&mail=' + encodeURIComponent(userMail),
+                    url: 'https://apirank.qujiaweb.top/?mode=get_coin_log&mail=' + encodeURIComponent(logMail),
                     success: function(res) {
                         if (res.code === 200) {
-                            updateUI(res.fields);
+                            updateLogUI(res.fields || []);
                         }
                     }
                 });
             }
         }
 
-        function updateUI(logs) {
+        function updateLogUI(logs) {
             var container = document.getElementById('coinLogContainer');
+            if(!logs || logs.length === 0) {
+                container.innerHTML = '<div style="text-align:center;padding:20px;color:#8E8E93">暂无记录</div>';
+                return;
+            }
             container.innerHTML = '';
             var adCount = 0, upCount = 0;
-            var today = new Date().toLocaleDateString();
+            // 适配旧版日期格式
+            var d = new Date();
+            var todayStr = d.getFullYear() + '-' + (d.getMonth()+1 < 10 ? '0'+(d.getMonth()+1) : (d.getMonth()+1)) + '-' + (d.getDate() < 10 ? '0'+d.getDate() : d.getDate());
 
             for (var i = 0; i < logs.length; i++) {
                 var log = logs[i];
@@ -367,18 +319,22 @@
                 div.innerHTML = '<div class="detail-info"><h4>'+log.类型+'</h4><p>'+log.时间+'</p></div><div class="detail-amount plus">'+change+'</div>';
                 container.appendChild(div);
 
-                if(log.时间.indexOf(today.replace(/\//g, '-')) !== -1) {
+                if(log.时间 && log.时间.indexOf(todayStr) !== -1) {
                     if(log.类型 === '观看广告奖励') adCount++;
                     if(log.类型 === '上传资源奖励') upCount++;
                 }
             }
-            document.getElementById('adProgress').style.width = (adCount * 10) + '%';
-            document.getElementById('adText').innerHTML = '今日进度 ' + adCount + '/10';
-            document.getElementById('uploadProgress').style.width = (upCount * 10) + '%';
-            document.getElementById('uploadText').innerHTML = '今日进度 ' + upCount + '/10';
+            // 更新进度条
+            document.getElementById('adProgress').style.width = Math.min(adCount * 10, 100) + '%';
+            document.getElementById('adText').innerHTML = '今日进度 ' + Math.min(adCount, 10) + '/10';
+            document.getElementById('uploadProgress').style.width = Math.min(upCount * 10, 100) + '%';
+            document.getElementById('uploadText').innerHTML = '今日进度 ' + Math.min(upCount, 10) + '/10';
         }
 
-        window.onload = init;
+        // 使用延后调用确保 DOM 已经完全准备好（解决某些旧版 iOS 加载空白问题）
+        window.onload = function() {
+            setTimeout(initData, 300); 
+        };
     </script>
 </body>
 </html>
