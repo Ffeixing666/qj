@@ -3,499 +3,249 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>设置（旧兼容）</title>
+    <title>设置</title>
     <style>
-        :root {
-            --ios-bg: #F2F2F7;
-            --ios-card: #FFFFFF;
-            --ios-blue: #007AFF;
-            --ios-red: #FF3B30;
-            --text-main: #1C1C1E;
-            --text-second: #8E8E93;
-            --line-color: #C6C6C8;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", sans-serif;
-            background-color: #F2F2F7; /* 兜底背景色 */
-            background-color: var(--ios-bg);
-            color: var(--text-main);
-            -webkit-font-smoothing: antialiased;
-        }
-
-        header {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background-color: rgba(242, 242, 247, 0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 0.5px solid rgba(0,0,0,0.1);
-        }
-
-        .nav-bar {
-            height: 44px;
-            display: flex;
-            display: -webkit-flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 16px;
-        }
-
-        .back-btn {
-            width: 40px;
-            height: 100%;
-            display: flex;
-            display: -webkit-flex;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .back-icon {
-            width: 12px;
-            height: 12px;
-            border-left: 2.5px solid #007AFF;
-            border-bottom: 2.5px solid #007AFF;
-            border-left: 2.5px solid var(--ios-blue);
-            border-bottom: 2.5px solid var(--ios-blue);
-            transform: rotate(45deg);
-            -webkit-transform: rotate(45deg);
-        }
-
-        .nav-title {
-            font-size: 17px;
-            font-weight: 600;
-            letter-spacing: -0.4px;
-        }
-
-        .nav-right { width: 40px; }
-
-        .settings-container { padding: 16px 0 40px 0; }
-
-        .section-group {
-            background: #FFFFFF;
-            background: var(--ios-card);
-            margin: 0 16px 24px 16px;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .section-header {
-            padding-left: 32px;
-            margin-bottom: 8px;
-            font-size: 13px;
-            color: var(--text-second);
-            text-transform: uppercase;
-        }
-
-        .item {
-            display: flex;
-            display: -webkit-flex;
-            align-items: center;
-            padding: 12px 16px;
-            position: relative;
-            background: #FFFFFF;
-            background: var(--ios-card);
-        }
-
-        .item:active { background-color: #E5E5EA; }
-
-        .item:not(:last-child)::after {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            left: 56px;
-            height: 0.5px;
-            background-color: rgba(0,0,0,0.1);
-        }
-
-        .icon-box {
-            width: 28px;
-            height: 28px;
-            border-radius: 6px;
-            margin-right: 12px;
-            display: flex;
-            display: -webkit-flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
+        :root { --ios-bg: #F2F2F7; --ios-card: #FFFFFF; --ios-blue: #007AFF; --ios-red: #FF3B30; --text-main: #1C1C1E; --text-second: #8E8E93; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, sans-serif; background-color: var(--ios-bg); color: var(--text-main); }
+        
+        /* 导航栏 */
+        header { position: sticky; top: 0; z-index: 100; background: rgba(242, 242, 247, 0.9); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 0.5px solid rgba(0,0,0,0.1); }
+        .nav-bar { height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
+        .back-icon { width: 12px; height: 12px; border-left: 2px solid var(--ios-blue); border-bottom: 2px solid var(--ios-blue); transform: rotate(45deg); }
+        .nav-title { font-size: 17px; font-weight: 600; }
+        
+        /* 列表样式 */
+        .settings-container { padding: 16px 0; }
+        .section-header { padding: 0 32px 8px; font-size: 13px; color: var(--text-second); text-transform: uppercase; }
+        .section-group { background: var(--ios-card); margin: 0 16px 24px; border-radius: 12px; overflow: hidden; }
+        .item { display: flex; align-items: center; padding: 12px 16px; background: var(--ios-card); position: relative; }
+        .item:active { background: #E5E5EA; }
+        .item:not(:last-child)::after { content: ""; position: absolute; bottom: 0; left: 56px; right: 0; height: 0.5px; background: rgba(0,0,0,0.1); }
+        
+        .icon-box { width: 28px; height: 28px; border-radius: 6px; margin-right: 12px; display: flex; align-items: center; justify-content: center; }
         .icon-box svg { width: 18px; height: 18px; fill: #fff; }
+        .item-label { flex: 1; font-size: 16px; }
+        .item-arrow { width: 8px; height: 8px; border-top: 2px solid #C7C7CC; border-right: 2px solid #C7C7CC; transform: rotate(45deg); }
 
-        .bg-blue   { background-color: #007AFF; }
-        .bg-green  { background-color: #34C759; }
-        .bg-orange { background-color: #FF9500; }
-        .bg-indigo { background-color: #5856D6; }
-        .bg-red    { background-color: #FF3B30; }
+        .logout-btn { margin: 20px 16px; background: var(--ios-card); height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--ios-red); font-size: 17px; }
 
-        .item-label { flex: 1; font-size: 16px; font-weight: 400; }
-
-        .item-arrow {
-            width: 8px;
-            height: 8px;
-            border-top: 2px solid #C7C7CC;
-            border-right: 2px solid #C7C7CC;
-            transform: rotate(45deg);
-            -webkit-transform: rotate(45deg);
-            margin-right: 4px;
-        }
-
-        .logout-btn {
-            margin: 32px 16px 0 16px;
-            background: #FFFFFF;
-            background: var(--ios-card);
-            height: 52px;
-            border-radius: 12px;
-            display: flex;
-            display: -webkit-flex;
-            align-items: center;
-            justify-content: center;
-            color: #FF3B30;
-            color: var(--ios-red);
-            font-size: 17px;
-            font-weight: 500;
-        }
-
-        .footer-info {
-            text-align: center;
-            margin-top: 24px;
-            font-size: 12px;
-            color: var(--text-second);
-        }
-
-        /* 弹窗样式 */
-        .custom-prompt-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(0, 0, 0, 0.4);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .custom-prompt-overlay.active { display: flex; display: -webkit-flex; }
-
-        .custom-prompt-box {
-            width: 270px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 14px;
-            display: flex;
-            display: -webkit-flex;
-            flex-direction: column;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .custom-prompt-title {
-            text-align: center;
-            font-size: 17px;
-            font-weight: 600;
-            padding: 20px 16px 12px;
-        }
-
-        .custom-prompt-content { padding: 0 16px 20px; }
-
-        .custom-prompt-input {
-            width: 100%;
-            height: 36px;
-            border: 1px solid rgba(0, 0, 0, 0.15);
-            border-radius: 6px;
-            padding: 0 8px;
-            font-size: 14px;
-            outline: none;
-            -webkit-appearance: none;
-        }
-
-        .custom-prompt-footer {
-            display: flex;
-            display: -webkit-flex;
-            border-top: 0.5px solid rgba(0, 0, 0, 0.1);
-            height: 44px;
-        }
-
-        .custom-prompt-btn {
-            flex: 1;
-            display: flex;
-            display: -webkit-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 17px;
-            color: #007AFF;
-            cursor: pointer;
-        }
-
-        .custom-prompt-btn-cancel { border-right: 0.5px solid rgba(0, 0, 0, 0.1); }
+        /* 弹窗 */
+        .prompt-ov { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 2000; }
+        .prompt-ov.active { display: flex; }
+        .prompt-box { width: 270px; background: #fff; border-radius: 14px; overflow: hidden; }
+        .prompt-title { padding: 20px 16px 10px; text-align: center; font-weight: 600; }
+        .prompt-input { width: 90%; margin: 10px 5%; height: 34px; border: 1px solid #ddd; padding: 0 8px; }
+        .prompt-btns { display: flex; border-top: 0.5px solid #eee; height: 44px; }
+        .p-btn { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--ios-blue); cursor: pointer; }
+        .p-btn:first-child { border-right: 0.5px solid #eee; }
     </style>
 </head>
 <body>
 
     <header>
         <div class="nav-bar">
-            <div class="back-btn" onclick="handleBack()">
-                <div class="back-icon"></div>
-            </div>
-            <div class="nav-title">设置</div>
-            <div class="nav-right"></div>
+            <div style="width:40px" onclick="goBack()"><div class="back-icon"></div></div>
+            <div class="nav-title">设置中心</div>
+            <div style="width:40px"></div>
         </div>
     </header>
 
-    <main class="settings-container">
-        <div class="section-header">用户资料</div>
+    <div class="settings-container">
+        <div class="section-header">个人资料</div>
         <div class="section-group">
-            <!-- 修改昵称 -->
-            <div class="item" onclick="navigate('nickname')">
-                <div class="icon-box bg-blue">
-                    <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                </div>
-                <div class="item-label">修改昵称</div>
-                <div class="item-arrow"></div>
+            <div class="item" onclick="openEditor('nickname')">
+                <div class="icon-box" style="background:#007AFF"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+                <div class="item-label">昵称</div><div class="item-arrow"></div>
             </div>
-            <!-- 修改个签 -->
-            <div class="item" onclick="navigate('bio')">
-                <div class="icon-box bg-green">
-                    <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                </div>
-                <div class="item-label">修改个签</div>
-                <div class="item-arrow"></div>
+            <div class="item" onclick="openEditor('bio')">
+                <div class="icon-box" style="background:#34C759"><svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z"/></svg></div>
+                <div class="item-label">签名</div><div class="item-arrow"></div>
             </div>
-            <!-- 修改头像 -->
-            <div class="item" onclick="navigate('avatar')">
-                <div class="icon-box bg-orange">
-                    <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
-                </div>
-                <div class="item-label">修改头像</div>
-                <div class="item-arrow"></div>
+            <div class="item" onclick="triggerUpload('avatar')">
+                <div class="icon-box" style="background:#FF9500"><svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg></div>
+                <div class="item-label">头像</div><div class="item-arrow"></div>
             </div>
-            <!-- 修改背景 -->
-            <div class="item" onclick="navigate('background')">
-                <div class="icon-box bg-indigo">
-                    <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM5 5h14v14H5V5zm9 5.08V7h-4v3.08l-2 1.5V17h8v-5.42l-2-1.5z"/></svg>
-                </div>
-                <div class="item-label">修改背景图</div>
-                <div class="item-arrow"></div>
+            <div class="item" onclick="triggerUpload('background')">
+                <div class="icon-box" style="background:#5856D6"><svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM5 5h14v14H5V5z"/></svg></div>
+                <div class="item-label">背景</div><div class="item-arrow"></div>
             </div>
         </div>
 
-        <div class="section-header">账号安全</div>
+        <div class="section-header">安全</div>
         <div class="section-group">
-            <div class="item" onclick="navigate('password')">
-                <div class="icon-box bg-red">
-                    <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
-                </div>
-                <div class="item-label">修改密码</div>
-                <div class="item-arrow"></div>
+            <div class="item" onclick="openEditor('password')">
+                <div class="icon-box" style="background:#FF3B30"><svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2z"/></svg></div>
+                <div class="item-label">密码</div><div class="item-arrow"></div>
             </div>
         </div>
 
-        <div class="logout-btn" onclick="handleLogout()">退出当前账号</div>
-        <div class="footer-info">版本 v2.0.1</div>
-    </main>
+        <div class="logout-btn" onclick="doLogout()">退出登录</div>
+    </div>
 
-    <!-- 弹窗组件 -->
-    <div id="customPromptOverlay" class="custom-prompt-overlay">
-        <div class="custom-prompt-box">
-            <div id="customPromptTitle" class="custom-prompt-title">提示</div>
-            <div class="custom-prompt-content">
-                <input type="text" id="customPromptInput" class="custom-prompt-input" placeholder="">
-            </div>
-            <div class="custom-prompt-footer">
-                <div class="custom-prompt-btn custom-prompt-btn-cancel" onclick="closeCustomPrompt()">取消</div>
-                <div class="custom-prompt-btn custom-prompt-btn-confirm" onclick="confirmCustomPrompt()">确定</div>
+    <!-- 隐藏上传 -->
+    <input type="file" id="fileInput" style="display:none" accept="image/*">
+
+    <!-- 弹窗 -->
+    <div id="p-ov" class="prompt-ov">
+        <div class="prompt-box">
+            <div id="p-title" class="prompt-title">输入内容</div>
+            <input type="text" id="p-input" class="prompt-input">
+            <div class="prompt-btns">
+                <div class="p-btn" onclick="closePrompt()">取消</div>
+                <div class="p-btn" style="font-weight:600" onclick="confirmPrompt()">确定</div>
             </div>
         </div>
     </div>
 
-    <!-- 隐藏的 Web 文件上传控件 -->
-    <input type="file" id="webFileInput" style="display:none;" accept="image/*">
-
     <script>
-        // --- 通用 AJAX 函数 (兼容旧系统) ---
-        function ajaxPost(url, data, callback) {
+        var curType = '';
+        var curCallback = null;
+
+        // --- 核心网络函数 ---
+        function sendAjax(mode, postData, callback) {
+            var mail = localStorage.getItem('usermail') || "";
+            // 构造 URL，确保 mail 参数始终可见
+            var url = 'https://apirank.qujiaweb.top/?mode=' + mode + '&mail=' + encodeURIComponent(mail);
+            
             var xhr = new XMLHttpRequest();
             xhr.open('POST', url, true);
-            if (!(data instanceof FormData)) {
-                xhr.setRequestHeader('Content-Type', 'application/json');
-                data = JSON.stringify(data);
+            
+            // 重要：如果是普通的更新请求，使用传统表单编码，兼容性最强
+            if (!(postData instanceof FormData)) {
+                xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                // 将对象转为 a=1&b=2 格式
+                var pair = [];
+                for(var k in postData) { 
+                    pair.push(encodeURIComponent(k) + '=' + encodeURIComponent(postData[k])); 
+                }
+                postData = pair.join('&');
             }
+
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
                         try {
                             var res = JSON.parse(xhr.responseText);
-                            callback(null, res);
-                        } catch (e) { callback('解析失败'); }
-                    } else { callback('网络错误'); }
+                            callback(res);
+                        } catch(e) { showToast("解析失败"); }
+                    } else {
+                        showToast("连接失败(" + xhr.status + ")");
+                    }
                 }
             };
-            xhr.send(data);
+            
+            xhr.onerror = function() { showToast("请求被拦截或网络断开(0)"); };
+            xhr.send(postData);
         }
 
-        // --- 核心业务逻辑 ---
-        var promptCallback = null;
-        var currentUploadType = ''; // 记录是 avatar 还是 background
-
-        function navigate(page) {
+        // --- 修改资料 ---
+        function updateInfo(mode, key, val) {
             var mail = localStorage.getItem('usermail');
-            if (!mail) { toast('请先登录'); return; }
+            var data = { mail: mail };
+            data[key] = val.replace(/'/g, "~PGDBSD~"); // 兼容你的 Emoji 处理
 
-            if (page === 'avatar' || page === 'background') {
-                currentUploadType = page;
-                if (window.plus) {
-                    // App环境：调起原生相册
-                    plus.gallery.pick(function(path) {
-                        uploadFileByPlus(path);
-                    }, function(e) {}, { filter: "image" });
-                } else {
-                    // 浏览器环境：点击隐藏的 file input
-                    document.getElementById('webFileInput').click();
-                }
-            } else if (page === 'nickname') {
-                showCustomPrompt('修改昵称', false, function(v) { if(v) updateNickname(v); });
-            } else if (page === 'bio') {
-                showCustomPrompt('修改个签', false, function(v) { updateBio(v || ''); });
-            } else if (page === 'password') {
-                showCustomPrompt('修改密码', true, function(v) { if(v) updatePassword(v); });
+            sendAjax(mode, data, function(res) {
+                if(res.code == 200) { showToast("修改成功"); }
+                else { showToast("修改失败:" + (res.msg || "错误")); }
+            });
+        }
+
+        // --- 图片处理 ---
+        function triggerUpload(type) {
+            curType = type;
+            if (window.plus) {
+                plus.gallery.pick(function(path) { uploadToMeituan(path); }, function(e){}, {filter:"image"});
+            } else {
+                document.getElementById('fileInput').click();
             }
         }
 
-        // --- 处理浏览器文件选择 ---
-        document.getElementById('webFileInput').onchange = function(e) {
-            var file = e.target.files[0];
-            if (!file) return;
-            
-            var fd = new FormData();
-            fd.append('file', file);
-            
-            if (window.plus) plus.nativeUI.showWaiting("正在上传...");
-            
-            ajaxPost('https://apirank.qujiaweb.top/?mode=upload_meituan', fd, function(err, res) {
-                if (window.plus) plus.nativeUI.closeWaiting();
-                if (!err && res.full_url) {
-                    executeUrlUpdate(res.full_url);
-                } else {
-                    toast('上传失败');
-                }
-            });
-            // 重置input
+        document.getElementById('fileInput').onchange = function(e) {
+            if(this.files[0]) uploadToMeituan(this.files[0]);
             this.value = '';
         };
 
-        // --- 处理 App 原生上传 ---
-        function uploadFileByPlus(path) {
-            plus.nativeUI.showWaiting("正在上传...");
-            var task = plus.uploader.createUpload("https://apirank.qujiaweb.top/?mode=upload_meituan", {method:"POST"}, function(t, status) {
-                plus.nativeUI.closeWaiting();
-                if (status == 200) {
-                    var res = JSON.parse(t.responseText);
-                    if (res.full_url) executeUrlUpdate(res.full_url);
-                    else toast('解析地址失败');
-                } else { toast('上传失败'); }
-            });
-            task.addFile(path, {key: "file"});
-            task.start();
-        }
-
-        // --- 统一执行数据库更新 ---
-        function executeUrlUpdate(imgUrl) {
-            var mail = localStorage.getItem('usermail');
-            var apiMode = (currentUploadType === 'avatar') ? 'update_avatar' : 'update_background';
-            var postData = { mail: mail };
-            postData[currentUploadType] = imgUrl;
-
-            ajaxPost('https://apirank.qujiaweb.top/?mode=' + apiMode + '&mail=' + mail, postData, function(err, res) {
-                if (!err && res.code === 200) {
-                    toast('修改成功');
-                } else {
-                    toast('保存失败');
-                }
-            });
-        }
-
-        // --- 弹窗逻辑 ---
-        function showCustomPrompt(title, isPwd, cb) {
-            var ov = document.getElementById('customPromptOverlay');
-            var inpt = document.getElementById('customPromptInput');
-            document.getElementById('customPromptTitle').textContent = title;
-            inpt.value = '';
-            inpt.type = isPwd ? 'password' : 'text';
-            promptCallback = cb;
-            ov.classList.add('active');
-            setTimeout(function(){ inpt.focus(); }, 200);
-        }
-
-        function closeCustomPrompt() {
-            document.getElementById('customPromptOverlay').classList.remove('active');
-        }
-
-        function confirmCustomPrompt() {
-            var val = document.getElementById('customPromptInput').value;
-            if (promptCallback) promptCallback(val);
-            closeCustomPrompt();
-        }
-
-        // --- 更新接口 ---
-        function updateNickname(name) {
-            var mail = localStorage.getItem('usermail');
-            ajaxPost('https://apirank.qujiaweb.top/?mode=update_nickname&mail='+mail, {mail:mail, nickname:escapeEmoji(name)}, function(err,res){
-                if(!err && res.code===200) toast('修改成功');
-            });
-        }
-
-        function updateBio(bio) {
-            var mail = localStorage.getItem('usermail');
-            ajaxPost('https://apirank.qujiaweb.top/?mode=update_bio&mail='+mail, {mail:mail, bio:escapeEmoji(bio)}, function(err,res){
-                if(!err && res.code===200) toast('修改成功');
-            });
-        }
-
-        function updatePassword(pwd) {
-            if(!/^[a-zA-Z0-9_]+$/.test(pwd)) { toast('密码格式不符'); return; }
-            var mail = localStorage.getItem('usermail');
-            ajaxPost('https://apirank.qujiaweb.top/?mode=update_password&mail='+mail, {mail:mail, password:pwd}, function(err,res){
-                if(!err && res.code===200) toast('修改成功');
-            });
-        }
-
-        // --- 基础工具 ---
-        function handleBack() {
-            if (window.plus) plus.webview.currentWebview().close('auto');
-            else history.back();
-        }
-
-        function toast(m) {
-            if (window.plus) plus.nativeUI.toast(m, {verticalAlign:'center'});
-            else alert(m);
-        }
-
-        function escapeEmoji(t) { return t.replace(/'/g, "~PGDBSD~"); }
-
-        function handleLogout() {
-            if(confirm('确定退出登录？')) {
-                localStorage.clear();
-                if (window.plus) {
-                    var me = plus.webview.getWebviewById('me.html');
-                    if (me) me.reload();
-                    plus.webview.currentWebview().close('auto');
-                } else {
-                    window.location.href = 'me.html';
-                }
+        function uploadToMeituan(fileOrPath) {
+            if(window.plus) plus.nativeUI.showWaiting("上传中...");
+            
+            var fd = new FormData();
+            if(typeof fileOrPath === 'string') {
+                // 原生 App 上传
+                var task = plus.uploader.createUpload("https://apirank.qujiaweb.top/?mode=upload_meituan", {method:"POST"}, function(t, status) {
+                    plus.nativeUI.closeWaiting();
+                    if(status == 200) {
+                        var res = JSON.parse(t.responseText);
+                        if(res.full_url) submitImg(res.full_url);
+                        else showToast("上传结果异常");
+                    } else { showToast("上传失败("+status+")"); }
+                });
+                task.addFile(fileOrPath, {key:"file"});
+                task.start();
+            } else {
+                // Web 上传
+                fd.append('file', fileOrPath);
+                sendAjax('upload_meituan', fd, function(res) {
+                    if(res.full_url) submitImg(res.full_url);
+                    else showToast("上传失败");
+                });
             }
         }
 
-        document.addEventListener('plusready', function() {
-            plus.key.addEventListener('backbutton', handleBack);
-        });
+        function submitImg(url) {
+            var mode = (curType === 'avatar') ? 'update_avatar' : 'update_background';
+            var data = { mail: localStorage.getItem('usermail') };
+            data[curType] = url;
+            sendAjax(mode, data, function(res) {
+                if(res.code == 200) showToast("更新成功");
+                else showToast("保存URL失败");
+            });
+        }
+
+        // --- UI ---
+        function openEditor(type) {
+            var titles = {nickname:'修改昵称', bio:'修改签名', password:'修改密码'};
+            var inpt = document.getElementById('p-input');
+            document.getElementById('p-title').innerText = titles[type];
+            inpt.value = '';
+            inpt.type = (type==='password' ? 'password' : 'text');
+            document.getElementById('p-ov').classList.add('active');
+            curCallback = function(val) {
+                if(!val && type!=='bio') return;
+                var mode = 'update_' + type;
+                updateInfo(mode, type, val);
+            };
+        }
+
+        function confirmPrompt() {
+            var v = document.getElementById('p-input').value;
+            if(curCallback) curCallback(v);
+            closePrompt();
+        }
+
+        function closePrompt() { document.getElementById('p-ov').classList.remove('active'); }
+
+        function showToast(m) {
+            if(window.plus) plus.nativeUI.toast(m);
+            else alert(m);
+        }
+
+        function goBack() {
+            if(window.plus) plus.webview.currentWebview().close('auto');
+            else history.back();
+        }
+
+        function doLogout() {
+            if(confirm('退出当前账号？')) {
+                localStorage.removeItem('usermail');
+                localStorage.removeItem('userpass');
+                if(window.plus) {
+                    var me = plus.webview.getWebviewById('me.html');
+                    if(me) me.reload();
+                    plus.webview.currentWebview().close('auto');
+                } else { window.location.href = 'index.html'; }
+            }
+        }
     </script>
 </body>
 </html>
