@@ -632,26 +632,69 @@
         }
     }
     function openHomePage() {
+        var url = 'oldhome.html';
         if (window.plus && plus.webview) {
-            var current = plus.webview.currentWebview();
-            if (current) current.close('pop-out', 300);
+            var ws = plus.webview.create(url, url);
+            ws.show('pop-in', 300);
         } else {
-            window.history.back();
+            window.location.href = url;
         }
     }
-    function openSettingPage() { window.location.href = 'oldsetting.html'; }
-    function openMessagePage() { window.location.href = 'oldxiaoxi.html'; }
+    function openSettingPage() { var url = 'oldsetting.html';
+        if (window.plus && plus.webview) {
+            var ws = plus.webview.create(url, url);
+            ws.show('pop-in', 300);
+        } else {
+            window.location.href = url;
+        } }
+    function openMessagePage() { var url = 'oldxiaoxi.html';
+        if (window.plus && plus.webview) {
+            var ws = plus.webview.create(url, url);
+            ws.show('pop-in', 300);
+        } else {
+            window.location.href = url;
+        } }
     function openUserPage() {
-        var mail = getLocal('usermail', '');
-        if (mail) window.location.href = 'oldpage.html?user=' + encodeURIComponent(mail);
-        else showToast('请先登录');
+    
+
+        var url = 'oldpage.html?user=' + encodeURIComponent(mail);
+        if (window.plus && plus.webview) {
+            var ws = plus.webview.create(url, url);
+            ws.show('pop-in', 300);
+        } else {
+            window.location.href = url;
+        }
     }
     function openMallPage() {
-        window.location.href = 'oldmall.html';
+        var url = 'oldmall.html';
+        if (window.plus && plus.webview) {
+            var ws = plus.webview.create(url, url);
+            ws.show('pop-in', 300);
+        } else {
+            window.location.href = url;
+        }
     }
-    function openSharePage() { window.location.href = 'oldshare.html'; }
-    function openReviewPage() { window.location.href = 'oldguanli.html'; }
-    function openRegisterPage() { window.location.href = 'oldzhuce.html'; }
+    function openSharePage() { var url = 'oldshare.html';
+        if (window.plus && plus.webview) {
+            var ws = plus.webview.create(url, url);
+            ws.show('pop-in', 300);
+        } else {
+            window.location.href = url;
+        } }
+    function openReviewPage() { var url = 'oldguanli.html';
+        if (window.plus && plus.webview) {
+            var ws = plus.webview.create(url, url);
+            ws.show('pop-in', 300);
+        } else {
+            window.location.href = url;
+        } }
+    function openRegisterPage() { var url = 'oldzhuce.html';
+        if (window.plus && plus.webview) {
+            var ws = plus.webview.create(url, url);
+            ws.show('pop-in', 300);
+        } else {
+            window.location.href = url;
+        } }
     
     document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('loginBtn').addEventListener('click', doLogin);
