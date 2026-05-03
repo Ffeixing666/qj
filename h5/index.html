@@ -11,21 +11,22 @@
             var ua = navigator.userAgent;
             var needRedirect = false;
 
-            // 1. 检测 iOS 版本小于 10
+            // 1. 检测 iOS 版本小于 11 (精准覆盖 iOS 6、7、8、9、10 这些不支持完整 ES6/async 的旧版)
             var iosMatch = ua.match(/(iPhone|iPod|iPad).*OS\s+(\d+)_/i);
-            if (iosMatch && parseInt(iosMatch[2], 10) < 10) {
+            if (iosMatch && parseInt(iosMatch[2], 10) < 11) {
                 needRedirect = true;
             }
 
-            // 2. 检测 Chrome 内核 (包含 Android WebView / 很多国产浏览器) 版本小于 100
+            // 2. 检测 Chrome 内核 (包含 Android WebView / 很多国产浏览器) 版本小于 60
+            // 修正：以前的 100 阈值太高了，会误杀 Chrome 70-99 之间完全支持现代语法的浏览器。60 是安全且合理的分界线。
             var chromeMatch = ua.match(/Chrome\/(\d+)/i);
-            if (chromeMatch && parseInt(chromeMatch[1], 10) < 100) {
+            if (chromeMatch && parseInt(chromeMatch[1], 10) < 60) {
                 needRedirect = true;
             }
 
-            // 3. 检测 Firefox 版本小于 100
+            // 3. 检测 Firefox 版本小于 60
             var firefoxMatch = ua.match(/Firefox\/(\d+)/i);
-            if (firefoxMatch && parseInt(firefoxMatch[1], 10) < 100) {
+            if (firefoxMatch && parseInt(firefoxMatch[1], 10) < 60) {
                 needRedirect = true;
             }
 
