@@ -740,19 +740,48 @@
     });
 })();
 
-    document.addEventListener('plusready', () => {
-            updateStatusBarStyle();
-            plus.navigator.setFullscreen(false);
-            plus.key.addEventListener('backbutton', () => {
-                if (document.getElementById('ban-modal').style.display === 'flex') {
-                    plus.nativeUI.confirm("确定退出吗？", (e) => {
-                        if (e.index === 0) plus.runtime.quit();
-                    }, "提示", ["确定", "取消"]);
-                } else {
+    document.addEventListener('plusready', function() {
+    // 1. 设置状态栏等常规操作
+    updateStatusBarStyle();
+    plus.navigator.setFullscreen(false);
+
+    // 2. 针对旧内核，先尝试移除可能存在的旧监听，再重新绑定
+    plus.key.removeEventListener('backbutton', function(){}); 
+    
+    plus.key.addEventListener('backbutton', function() {
+        const banModal = document.getElementById('ban-modal');
+        
+        // 兼容性检查：确保元素存在且能读取样式
+        const isModalVisible = banModal && (
+            banModal.style.display === 'flex' || 
+            window.getComputedStyle(banModal).display === 'flex'
+        );
+
+        if (isModalVisible) {
+            plus.nativeUI.confirm("确定退出吗？", (e) => {
+                // index 0 通常是“确定”
+                if (e.index === 0) {
                     plus.runtime.quit();
                 }
-            });
-        });
+            }, "提示", ["确定", "取消"]);
+        } else {
+            // 如果不在特定弹窗状态，建议执行“双击退出”逻辑，这在旧内核上更稳健
+            handleExit();
+        }
+    }, false);
+});
+
+// 稳健的退出逻辑：连续按两次返回键才退出，防止低内核误触
+let firstBackTime = 0;
+function handleExit() {
+    let now = Date.now();
+    if (now - firstBackTime < 2000) {
+        plus.runtime.quit();
+    } else {
+        firstBackTime = now;
+        plus.nativeUI.toast('再按一次退出应用');
+    }
+}
 </script>
 </body>
 </html>
