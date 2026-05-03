@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <title>积分商城</title>
     <style>
-        /* 样式保持不变 */
+        /* 样式保持不变，确保原生 iOS 质感 */
         * { margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; -webkit-touch-callout: none; box-sizing: border-box; }
         body { font-family: Helvetica, STHeiti, sans-serif; background-color: #F2F2F7; color: #1C1C1E; padding-bottom: 60px; line-height: 1.4; font-size: 14px; }
         header { position: relative; background-color: #F2F2F7; border-bottom: 1px solid #D1D1D6; height: 50px; }
@@ -171,34 +171,41 @@
             } else { xhr.send(); }
         }
 
-        // ================= 核心修复：对齐 Key 名 =================
+        // ================= 核心逻辑：带延迟的初始化 =================
         function initData() {
-            // 1. 完全对齐你提供的“我的”页面 Key 名
             var savedEmail = localStorage.getItem('usermail'); 
             var savedPoints = localStorage.getItem('userpoints') || '0';
             
-            // 2. 哪怕服务器还没返回，先显示本地存的积分，防止显示 0 或 未登录
+            // 立即渲染本地数据
             if (savedEmail) {
                 document.getElementById('totalPoints').innerHTML = savedPoints;
             } else {
                 document.getElementById('totalPoints').innerHTML = '未登录';
-                return; // 未登录就不执行后续了
+                return;
             }
 
-            // 3. 异步去服务器同步最新的积分（同步完会自动更新本地 userpoints）
+            // 1. 发起第一个请求：更新积分
             ajax({
                 url: 'https://apirank.qujiaweb.top/?mode=get_user_info&mail=' + encodeURIComponent(savedEmail),
                 success: function(res) {
                     if (res && res.code === 200 && res.fields && res.fields[0]) {
                         var latestPoints = res.fields[0]["积分"] || '0';
                         document.getElementById('totalPoints').innerHTML = latestPoints;
-                        localStorage.setItem('userpoints', latestPoints); // 同步回本地
+                        localStorage.setItem('userpoints', latestPoints);
                     }
+                    
+                    // 2. 重点：请求成功后，延迟 1 秒再请求明细
+                    setTimeout(function(){
+                        fetchLogs(savedEmail);
+                    }, 1000); 
+                },
+                error: function() {
+                    // 如果第一个请求失败，依然在 1 秒后尝试请求明细
+                    setTimeout(function(){
+                        fetchLogs(savedEmail);
+                    }, 1000);
                 }
             });
-
-            // 4. 加载积分明细
-            fetchLogs(savedEmail);
         }
 
         function fetchLogs(mail) {
@@ -207,10 +214,12 @@
                 success: function(res) {
                     if (res.code === 200) {
                         updateLogUI(res.fields || []);
+                    } else {
+                        document.getElementById('coinLogContainer').innerHTML = '<div style="text-align:center;padding:20px;color:#8E8E93">数据获取失败 ('+res.code+')</div>';
                     }
                 },
                 error: function() {
-                    document.getElementById('coinLogContainer').innerHTML = '<div style="text-align:center;padding:20px;color:#8E8E93">加载失败</div>';
+                    document.getElementById('coinLogContainer').innerHTML = '<div style="text-align:center;padding:20px;color:#8E8E93">网络请求超时</div>';
                 }
             });
         }
@@ -246,7 +255,6 @@
             document.getElementById('uploadText').innerHTML = '今日进度 ' + Math.min(upCount, 10) + '/10';
         }
 
-        // 按钮交互逻辑保持原样
         function selectAmount(el, val) {
             var opts = document.getElementById('payOptions').getElementsByTagName('div');
             for(var i=0; i<opts.length; i++) {
@@ -326,74 +334,6 @@
         window.onload = function() {
             initData();
         };
-        /* --- 5+App 统一返回键兼容逻辑 (支持多级返回 + 首页退出) --- */
-(function() {
-    var firstBackTime = 0;
-
-    // 统一返回处理函数
-    function handleBackEvent() {
-        var ws = plus.webview.currentWebview();
-        
-        // 1. 检查当前窗口是否可以返回上一页 (针对单页面内的 history 记录)
-        // 2. 检查当前窗口是否有父窗口 (如果是通过 create 创建的子窗口)
-        // 3. 判断是否是主入口 (通过 id 判断，或者没有 opener)
-        
-        var opener = ws.opener();
-        var canBack = false;
-
-        // 特殊情况：如果有封禁弹窗，强制拦截并处理退出逻辑
-        var banModal = document.getElementById('ban-modal');
-        var isModalVisible = false;
-        if (banModal) {
-            var display = banModal.style.display || window.getComputedStyle(banModal).display;
-            if (display === 'flex' || display === 'block') {
-                isModalVisible = true;
-            }
-        }
-
-        if (isModalVisible) {
-            // 如果封禁弹窗开着，点击返回键直接询问是否退出 App
-            plus.nativeUI.confirm("确定退出应用吗？", function(e) {
-                if (e.index === 0) {
-                    plus.runtime.quit();
-                }
-            }, "提示", ["确定", "取消"]);
-            return;
-        }
-
-        // 层级判断逻辑：
-        // 如果没有上级页面 (opener) 或者是指定的首页 ID
-        if (!opener || ws.id === "HBuilder" || ws.id === "main" || ws.id === "oldhome.html") {
-            // 首页/最外层：执行双击退出
-            var now = new Date().getTime();
-            if (now - firstBackTime < 2000) {
-                plus.runtime.quit();
-            } else {
-                firstBackTime = now;
-                plus.nativeUI.toast('再按一次退出应用');
-            }
-        } else {
-            // 子页面：执行关闭当前页，回到上一页
-            ws.close('pop-out', 300);
-        }
-    }
-
-    document.addEventListener('plusready', function() {
-        // 基础环境配置
-        plus.navigator.setFullscreen(false);
-        
-        // 安全调用状态栏更新
-        if (typeof updateStatusBarStyle === 'function') {
-            updateStatusBarStyle();
-        }
-
-        // 核心：监听物理返回键
-        plus.key.addEventListener('backbutton', function() {
-            handleBackEvent();
-        }, false);
-        
-    }, false);
-})();
     </script>
 </body>
 </html>
