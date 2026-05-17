@@ -1,124 +1,162 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-    <title>趣加应用·更多</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <style type="text/css">
-        body { margin: 0; padding: 0; font-family: -apple-system, sans-serif; background-color: #f5f5f7; color: #1d1d1f; }
-        .header { padding: 30px 20px 10px; position: relative; }
-        .greeting { font-size: 28px; font-weight: 700; }
-        .avatar { position: absolute; right: 20px; top: 35px; width: 36px; height: 36px; }
-        .avatar img { width: 100%; height: 100%; border-radius: 50%; -webkit-border-radius: 50%; }
+    <title>趣加应用·更多</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <style type="text/css">
+        body { margin: 0; padding: 0; font-family: -apple-system, sans-serif; background-color: #f5f5f7; color: #1d1d1f; }
+        .header { padding: 30px 20px 10px; position: relative; }
+        .greeting { font-size: 28px; font-weight: 700; }
+        .avatar { position: absolute; right: 20px; top: 35px; width: 36px; height: 36px; }
+        .avatar img { width: 100%; height: 100%; border-radius: 50%; -webkit-border-radius: 50%; }
 
-        .menu-content { padding: 15px; margin-bottom: 80px; }
-        .menu-item { background: #ffffff; padding: 16px; margin-bottom: 1px; display: table; width: 100%; box-sizing: border-box; cursor: pointer; }
-        /* 模拟 iOS 设置列表圆角 */
-        .menu-item:first-child { border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; }
-        .menu-item:last-child { border-radius: 0 0 12px 12px; -webkit-border-radius: 0 0 12px 12px; margin-bottom: 20px; }
-        /* 单独的项圆角 */
-        .menu-group-end { border-radius: 0 0 12px 12px !important; -webkit-border-radius: 0 0 12px 12px !important; margin-bottom: 15px !important; }
-        
-        .menu-text { display: table-cell; text-align: left; font-size: 16px; font-weight: 400; color: #1d1d1f; }
-        .menu-arrow { display: table-cell; text-align: right; font-size: 14px; color: #c7c7cc; width: 20px; }
+        .menu-content { padding: 15px; margin-bottom: 80px; }
+        .menu-item { background: #ffffff; padding: 16px; margin-bottom: 1px; display: table; width: 100%; box-sizing: border-box; cursor: pointer; }
+        /* 模拟 iOS 设置列表圆角 */
+        .menu-item:first-child { border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0; }
+        .menu-item:last-child { border-radius: 0 0 12px 12px; -webkit-border-radius: 0 0 12px 12px; margin-bottom: 20px; }
+        /* 单独的项圆角 */
+        .menu-group-end { border-radius: 0 0 12px 12px !important; -webkit-border-radius: 0 0 12px 12px !important; margin-bottom: 15px !important; }
+        
+        .menu-text { display: table-cell; text-align: left; font-size: 16px; font-weight: 400; color: #1d1d1f; }
+        .menu-arrow { display: table-cell; text-align: right; font-size: 14px; color: #c7c7cc; width: 20px; }
 
-        .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: rgba(255,255,255,0.9); -webkit-backdrop-filter: blur(10px); border-top: 1px solid #d2d2d7; display: table; width: 100%; z-index: 999; }
-        .tab { display: table-cell; text-align: center; vertical-align: middle; font-size: 11px; color: #86868b; text-decoration: none; }
-        .tab.active { color: #0071e3; font-weight: 600; }
+        .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: rgba(255,255,255,0.9); -webkit-backdrop-filter: blur(10px); border-top: 1px solid #d2d2d7; display: table; width: 100%; z-index: 999; }
+        .tab { display: table-cell; text-align: center; vertical-align: middle; font-size: 11px; color: #86868b; text-decoration: none; }
+        .tab.active { color: #0071e3; font-weight: 600; }
 
-        #copy-tip { display: none; position: fixed; top: 40%; left: 50%; margin-left: -80px; width: 160px; background-color: rgba(0, 0, 0, 0.7); color: white; padding: 12px; border-radius: 10px; text-align: center; font-size: 14px; z-index: 10000; }
-        
-        body.night { background-color: #000000; color: #f5f5f7; }
-        body.night .menu-item { background: #1c1c1e; border-bottom: 1px solid #2c2c2e; }
-        body.night .menu-text { color: #f5f5f7; }
-        body.night .tab-bar { background: rgba(28,28,30,0.9); border-top: 1px solid #38383a; }
-    </style>
+        #copy-tip { display: none; position: fixed; top: 40%; left: 50%; margin-left: -80px; width: 160px; background-color: rgba(0, 0, 0, 0.7); color: white; padding: 12px; border-radius: 10px; text-align: center; font-size: 14px; z-index: 10000; }
+        
+        body.night { background-color: #000000; color: #f5f5f7; }
+        body.night .menu-item { background: #1c1c1e; border-bottom: 1px solid #2c2c2e; }
+        body.night .menu-text { color: #f5f5f7; }
+        body.night .tab-bar { background: rgba(28,28,30,0.9); border-top: 1px solid #38383a; }
+    </style>
 </head>
 <body>
-    <div id="copy-tip">已复制到剪贴板</div>
+    <div id="copy-tip">已复制到剪贴板</div>
 
-    <div class="header">
-        <div class="greeting">更多</div>
-        <div class="avatar">
-            <img src="https://static.codemao.cn/pickduck/Skysohyxee.png?hash=FpFGPF9E7DX_Yci_Ir3RSwWk90hk" alt="头像">
-        </div>
-    </div>
-    
-    <div class="menu-content">
-        <div class="menu-item" onclick="navigate('http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=yJxHwjPZYyLi1dGgXYp2O5S0OEQZMFT2&authKey=U5249Kg66UYCjiwbAP0rgjND1W4wV5cd1rg5kxUEz0k0jda4Mvt7hD6JFZ6YSUFB&noverify=0&group_code=480414235')">
-            <div class="menu-text">加入QQ群</div>
-            <div class="menu-arrow">></div>
-        </div>
-        <div class="menu-item" onclick="navigate('https://db0ai4hqk7tsfy.database.nocode.cn/storage/v1/object/public/qujia//%E8%B6%A3%E5%8A%A0%E5%BA%94%E7%94%A82.0.1.apk')">
-            <div class="menu-text">官方App「趣加应用」下载</div>
-            <div class="menu-arrow">></div>
-        </div>
-        <div class="menu-item" onclick="navigate('https://qujiaweb.top/app/app.html?icon=https%3A%2F%2Fstatic.codemao.cn%2Fbcx%2FrJFXXjwDlx.png%3Fhash%3DFqe6YdMhcrWI6pxVt15AhkAGQCcr&name=趣加AI&link=https%3A%2F%2Fwwpa.lanzouo.com%2Ficq1738s1e5a&pwd=5qrv&简介=【最近更新】%0A修改了一些内容%0A【应用介绍】%0A官方软件，内容来自网络&图片一=https%3A%2F%2Fstatic.codemao.cn%2Fbcx%2FBJWNQsDDll.jpg%3Fhash%3DFsUeTtJLfs1w0Ec-NuryOcLuvc92&图片二=https%3A%2F%2Fstatic.codemao.cn%2Fbcx%2FS1U4Qiwwgl.jpg%3Fhash%3DFqy14VbHM-OOQjoGBRNgz2e9wnZ8')">
-            <div class="menu-text">官方App「趣加AI」下载</div>
-            <div class="menu-arrow">></div>
-        </div>
-        <div class="menu-item menu-group-end" onclick="navigate('https://qujiaweb.top/app/app.html?icon=https%3A%2F%2Fstatic.codemao.cn%2Fbcx%2FSksz1-Cuxe.jpg%3Fhash%3DFnBbtJlsdG5o7sdJ38LUZvFRW1co&name=趣加音乐0.1.0&link=https%3A%2F%2Fwwpa.lanzouo.com%2FiA4JR38s0jxc&pwd=1o0k&简介=【最近更新】%0A1.修复了首页排行榜、随机听功能%0A2.修复了播放页面时长显示、歌词显示问题%0A【应用介绍】%0A趣加音乐-一起免费畅听%0A支持搜索，查看，评论，收藏，下载等&图片一=https%3A%2F%2Fstatic.codemao.cn%2Fbcx%2FByLVgin3ge.jpeg%3Fhash%3DFgg7u6uUjhpkQ-C9fQ4e9NJdZ2VV&图片二=https%3A%2F%2Fstatic.codemao.cn%2Fbcx%2FHyTNeshngx.jpeg%3Fhash%3DFgsqSd7mEcyS-dmzC2h3zB9Kh0UD')">
-            <div class="menu-text">官方App「趣加音乐」下载</div>
-            <div class="menu-arrow">></div>
-        </div>
+    <div class="header">
+        <div class="greeting">更多</div>
+        <div class="avatar">
+            <img src="https://static.codemao.cn/pickduck/Skysohyxee.png?hash=FpFGPF9E7DX_Yci_Ir3RSwWk90hk" alt="头像">
+        </div>
+    </div>
+    
+    <div class="menu-content">
+        <div class="menu-item" onclick="navigate('http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=yJxHwjPZYyLi1dGgXYp2O5S0OEQZMFT2&authKey=U5249Kg66UYCjiwbAP0rgjND1W4wV5cd1rg5kxUEz0k0jda4Mvt7hD6JFZ6YSUFB&noverify=0&group_code=480414235')">
+            <div class="menu-text">加入QQ群</div>
+            <div class="menu-arrow">></div>
+        </div>
+        <div class="menu-item" onclick="navigate('https://db0ai4hqk7tsfy.database.nocode.cn/storage/v1/object/public/qujia//%E8%B6%A3%E5%8A%A0%E5%BA%94%E7%94%A82.0.1.apk')">
+            <div class="menu-text">官方App「趣加应用」下载</div>
+            <div class="menu-arrow">></div>
+        </div>
+        <div class="menu-item" onclick="navigate('https://qujiaweb.top/app/app.html?icon=https%3A%2F%2Fstatic.codemao.cn%2Fbcx%2FrJFXXjwDlx.png%3Fhash%3DFqe6YdMhcrWI6pxVt15AhkAGQCcr&name=趣加AI&link=https%3A%2F%2Fwwpa.lanzouo.com%2Ficq1738s1e5a&pwd=5qrv&简介=【最近更新】%0A修改了一些内容%0A【应用介绍】%0A官方软件，内容来自网络&图片一=https%3A%2F%2Fstatic.codemao.cn%2Fbcx%2FBJWNQsDDll.jpg%3Fhash%3DFsUeTtJLfs1w0Ec-NuryOcLuvc92&图片二=https%3A%2F%2Fstatic.codemao.cn%2Fbcx%2FS1U4Qiwwgl.jpg%3Fhash%3DFqy14VbHM-OOQjoGBRNgz2e9wnZ8')">
+            <div class="menu-text">官方App「趣加AI」下载</div>
+            <div class="menu-arrow">></div>
+        </div>
+        <div class="menu-item menu-group-end" onclick="navigate('https://qujiaweb.top/app/app.html?icon=https%3A%2F%2Fstatic.codemao.cn%2Fbcx%2FSksz1-Cuxe.jpg%3Fhash%3DFnBbtJlsdG5o7sdJ38LUZvFRW1co&name=趣加音乐0.1.0&link=https%3A%2F%2Fwwpa.lanzouo.com%2FiA4JR38s0jxc&pwd=1o0k&简介=【最近更新】%0A1.修复了首页排行榜、随机听功能%0A2.修复了播放页面时长显示、歌词显示问题%0A【应用介绍】%0A趣加音乐-一起免费畅听%0A支持搜索，查看，评论，收藏，下载等&图片一=https%3A%2F%2Fstatic.codemao.cn%2Fbcx%2FByLVgin3ge.jpeg%3Fhash%3DFgg7u6uUjhpkQ-C9fQ4e9NJdZ2VV&图片二=https%3A%2F%2Fstatic.codemao.cn%2Fbcx%2FHyTNeshngx.jpeg%3Fhash%3DFgsqSd7mEcyS-dmzC2h3zB9Kh0UD')">
+            <div class="menu-text">官方App「趣加音乐」下载</div>
+            <div class="menu-arrow">></div>
+        </div>
 
-        <div class="menu-item" style="border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0;" onclick="navigate('https://qjyy.mysxl.cn/1')">
-            <div class="menu-text">我要反馈</div>
-            <div class="menu-arrow">></div>
-        </div>
-        <div class="menu-item" onclick="showTip('缓存已清理')">
-            <div class="menu-text">清空缓存</div>
-            <div class="menu-arrow">></div>
-        </div>
-        <div class="menu-item menu-group-end" onclick="shareApp()">
-            <div class="menu-text">^_^觉得好用，分享给朋友</div>
-            <div class="menu-arrow">></div>
-        </div>
-    </div>
-    
-    <div class="tab-bar">
-        <div class="tab" onclick="location.href='index.html'">首页</div>
-        <div class="tab active" onclick="location.href='me.html'">更多</div>
-    </div>
-    
-    <script type="text/javascript">
-        function navigate(url) { window.location.href = url; }
-        function showTip(msg) {
-            var tip = document.getElementById('copy-tip');
-            tip.innerHTML = msg;
-            tip.style.display = 'block';
-            setTimeout(function() { tip.style.display = 'none'; }, 2000);
-        }
-        function shareApp() {
-            var text = '我发现了个宝藏资源网站「趣加应用」分享给你，qujiaweb.top';
-            var fallbackCopy = function() {
-                var input = document.createElement('textarea');
-                input.value = text;
-                input.style.position = 'fixed';
-                input.style.opacity = '0';
-                document.body.appendChild(input);
-                input.select();
-                try {
-                    document.execCommand('copy');
-                    showTip('文本已复制，快去粘贴吧');
-                } catch (err) {
-                    console.log('复制失败');
-                }
-                document.body.removeChild(input);
-            };
+        <div class="menu-item" style="border-radius: 12px 12px 0 0; -webkit-border-radius: 12px 12px 0 0;" onclick="navigate('https://qjyy.mysxl.cn/1')">
+            <div class="menu-text">我要反馈</div>
+            <div class="menu-arrow">></div>
+        </div>
+        <div class="menu-item" onclick="showTip('缓存已清理')">
+            <div class="menu-text">清空缓存</div>
+            <div class="menu-arrow">></div>
+        </div>
+        <div class="menu-item menu-group-end" onclick="shareApp()">
+            <div class="menu-text">^_^觉得好用，分享给朋友</div>
+            <div class="menu-arrow">></div>
+        </div>
+    </div>
+    
+    <div class="tab-bar">
+        <div class="tab" onclick="location.href='index.html'">首页</div>
+        <div class="tab active" onclick="location.href='me.html'">更多</div>
+    </div>
+    
+    <script type="text/javascript">
+        function navigate(url) { window.location.href = url; }
+        function showTip(msg) {
+            var tip = document.getElementById('copy-tip');
+            tip.innerHTML = msg;
+            tip.style.display = 'block';
+            setTimeout(function() { tip.style.display = 'none'; }, 2000);
+        }
+        
+        // 复制文本到剪贴板 (兼容所有浏览器)
+        function copyToClipboard(text) {
+            // 现代 Clipboard API
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(function() {
+                    showTip('文本已复制，快去粘贴吧');
+                }).catch(function() {
+                    // 降级到传统方法
+                    fallbackCopyText(text);
+                });
+            } else {
+                fallbackCopyText(text);
+            }
+        }
+        
+        // 传统 textarea 复制方法
+        function fallbackCopyText(text) {
+            var textarea = document.createElement('textarea');
+            textarea.value = text;
+            // 避免页面滚动
+            textarea.style.position = 'fixed';
+            textarea.style.top = '-9999px';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.select();
+            textarea.setSelectionRange(0, text.length); // 移动端兼容
+            var success = false;
+            try {
+                success = document.execCommand('copy');
+            } catch (err) {
+                console.log('复制失败', err);
+            }
+            document.body.removeChild(textarea);
+            if (success) {
+                showTip('文本已复制，快去粘贴吧');
+            } else {
+                showTip('复制失败，请手动复制');
+            }
+        }
 
-            if (navigator.share) {
-                navigator.share({ text: text }).catch(function(err) {
-                    fallbackCopy();
-                });
-            } else {
-                fallbackCopy();
-            }
-        }
-        window.onload = function() {
-            var hours = new Date().getHours();
-            if (hours < 5 || hours >= 17) { document.body.className = 'night'; }
-        };
-    </script>
+        // 新分享逻辑: 优先调用原生分享(negativeShare = native share)，失败/取消则复制文本
+        function shareApp() {
+            var shareText = "我发现了个宝藏资源网站「趣加应用」分享给你，qujiaweb.top";
+            
+            // 检测是否支持原生 Web Share API (移动端主流浏览器支持)
+            if (navigator.share) {
+                navigator.share({
+                    text: shareText,
+                    // 不加 title 和 url 完全按照文本要求，简洁直观
+                }).then(function() {
+                    // 原生分享成功 (用户选择了分享渠道并完成) => 无需额外提示，自然结束
+                    console.log('原生分享成功');
+                }).catch(function(error) {
+                    // 分享失败 或者 用户取消分享: 按照需求降级为复制文本并提示
+                    console.log('原生分享失败或取消，启用复制:', error);
+                    copyToClipboard(shareText);
+                });
+            } else {
+                // 完全不支持原生分享 (例如部分桌面浏览器) -> 直接复制
+                copyToClipboard(shareText);
+            }
+        }
+        
+        window.onload = function() {
+            var hours = new Date().getHours();
+            if (hours < 5 || hours >= 17) { document.body.className = 'night'; }
+        };
+    </script>
 </body>
 </html>
