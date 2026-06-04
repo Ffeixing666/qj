@@ -1502,76 +1502,75 @@
                 coinBtnText.textContent = coinCount > 99 ? '99币+' : coinCount + '币';
             }
 
-            const downloadBtn = document.getElementById('downloadBtn');
-            if (downloadBtn && app.链接) {
-                downloadBtn.onclick = async function(e) {
-                    if (!isPageActive()) return;
-                    const btn = e.target;
-                    btn.innerText = "处理中...";
-                    
-                    try {
-                        const url = app.链接;
-                        const password = app.密码;
-                        
-               
-                        if (url.includes('lanz')) {
-                      
-                            btn.innerText = "解析中...";
-                            const directUrl = await parselanzouUrl(url, password);
-                            
-                            if (directUrl) {
-                       
-                                if (window.plus) {
-                                    downloadWithPlus(directUrl);
-                                } else {
-                                    window.open(directUrl, '_blank');
-                                }
-                            } else {
-                     
-                                if (password && password !== null && password !== '') {
-                              
-                                    copyToClipboardWithFallback(password);
-                                }
-                                if (window.plus) {
-                                    plus.runtime.openURL(url);
-                                } else {
-                                    window.open(url, '_blank');
-                                }
-                            }
-                        } 
-                
-                        else if (url.includes('.apk')) {
-                    
-                            if (window.plus) {
-                                downloadWithPlus(url);
-                            } else {
-                                window.open(url, '_blank');
-                            }
-                        } 
-                  
-                        else {
-                       
-                            if (password && password !== null && password !== '') {
-                         
-                                copyToClipboardWithFallback(password);
-                            }
-                            
-                   
-                            if (window.plus) {
-                                plus.runtime.openURL(url);
-                            } else {
-                                window.open(url, '_blank');
-                            }
-                        }
-                    } catch (error) {
-                        console.error('下载处理失败:', error);
-                        showToast('处理失败，请重试');
-                    } finally {
-                        if (isPageActive()) {
-                            btn.innerText = "获取";
-                        }
-                    }
-                };
+            downloadBtn.onclick = async function(e) {
+    if (!isPageActive()) return;
+    const btn = e.target;
+    btn.innerText = "处理中...";
+    
+    try {
+        const url = app.链接;
+        const password = app.密码;
+
+        // ✅ 提前复制密码（如果有的话），保证在用户手势内完成
+        if (password && password !== null && password !== '') {
+            // 使用 plus 的 API 同步复制（不依赖浏览器手势）
+            if (window.plus && plus.device) {
+                plus.device.setClipboard(password, function() {
+                    showToast('密码已复制');
+                }, function(err) {
+                    // plus 复制失败时，再尝试 execCommand（仍在同步链路内）
+                    tryExecCommand(password, 'password');
+                });
+            } else {
+                // 普通浏览器使用 execCommand（当前仍在用户手势中）
+                tryExecCommand(password, 'password');
+            }
+        }
+
+        // 然后进行异步解析
+        if (url.includes('lanz')) {
+            btn.innerText = "解析中...";
+            const directUrl = await parselanzouUrl(url, password);
+            
+            if (directUrl) {
+                // 解析成功，直接下载，不再重复复制密码
+                if (window.plus) {
+                    downloadWithPlus(directUrl);
+                } else {
+                    window.open(directUrl, '_blank');
+                }
+            } else {
+                // 解析失败，打开原链接（密码已提前复制）
+                if (window.plus) {
+                    plus.runtime.openURL(url);
+                } else {
+                    window.open(url, '_blank');
+                }
+            }
+        } else if (url.includes('.apk')) {
+            // 直接下载 apk
+            if (window.plus) {
+                downloadWithPlus(url);
+            } else {
+                window.open(url, '_blank');
+            }
+        } else {
+            // 普通链接，打开链接（密码已提前复制）
+            if (window.plus) {
+                plus.runtime.openURL(url);
+            } else {
+                window.open(url, '_blank');
+            }
+        }
+    } catch (error) {
+        console.error('下载处理失败:', error);
+        showToast('处理失败，请重试');
+    } finally {
+        if (isPageActive()) {
+            btn.innerText = "获取";
+        }
+    }
+};
             }
         }
 
