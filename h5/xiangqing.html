@@ -1512,44 +1512,51 @@
                     try {
                         const url = app.链接;
                         const password = app.密码;
-
-                        // ✅ 提前复制密码（如果有），确保在用户手势中完成
-                        if (password && password !== null && password !== '') {
-                            if (window.plus && plus.device) {
-                                plus.device.setClipboard(password, function() {
-                                    showToast('密码已复制');
-                                }, function(err) {
-                                    tryExecCommand(password, 'password');
-                                });
-                            } else {
-                                tryExecCommand(password, 'password');
-                            }
-                        }
-
+                        
+               
                         if (url.includes('lanz')) {
+                      
                             btn.innerText = "解析中...";
                             const directUrl = await parselanzouUrl(url, password);
                             
                             if (directUrl) {
+                       
                                 if (window.plus) {
                                     downloadWithPlus(directUrl);
                                 } else {
                                     window.open(directUrl, '_blank');
                                 }
                             } else {
+                     
+                                if (password && password !== null && password !== '') {
+                              
+                                    copyToClipboardWithFallback(password);
+                                }
                                 if (window.plus) {
                                     plus.runtime.openURL(url);
                                 } else {
                                     window.open(url, '_blank');
                                 }
                             }
-                        } else if (url.includes('.apk')) {
+                        } 
+                
+                        else if (url.includes('.apk')) {
+                    
                             if (window.plus) {
                                 downloadWithPlus(url);
                             } else {
                                 window.open(url, '_blank');
                             }
-                        } else {
+                        } 
+                  
+                        else {
+                       
+                            if (password && password !== null && password !== '') {
+                         
+                                copyToClipboardWithFallback(password);
+                            }
+                            
+                   
                             if (window.plus) {
                                 plus.runtime.openURL(url);
                             } else {
