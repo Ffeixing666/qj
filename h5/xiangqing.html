@@ -1503,7 +1503,9 @@
             }
 
             const downloadBtn = document.getElementById('downloadBtn');
-            if (downloadBtn && app.链接) {downloadBtn.onclick = async function(e) {
+            if (downloadBtn && app.链接) {
+                
+                downloadBtn.onclick = async function(e) {
     if (!isPageActive()) return;
     const btn = e.target;
     btn.innerText = "处理中...";
