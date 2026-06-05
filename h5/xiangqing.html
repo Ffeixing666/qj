@@ -1504,7 +1504,6 @@
 
             const downloadBtn = document.getElementById('downloadBtn');
             if (downloadBtn && app.链接) {
-                
                 downloadBtn.onclick = async function(e) {
     if (!isPageActive()) return;
     const btn = e.target;
@@ -1586,6 +1585,8 @@
         if (isPageActive()) btn.innerText = "获取";
     }
 };
+            }
+        }
 
         window.onload = function() {
 
