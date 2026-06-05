@@ -5,6 +5,94 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>应用详情</title>
     <style>
+        /* ========== 密码通知弹窗 ========== */
+#pwdNotifyModal .pwd-notify-sheet {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border-radius: 20px 20px 0 0;
+    padding: 28px 24px calc(34px + env(safe-area-inset-bottom));
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+#pwdNotifyModal .pwd-notify-sheet.show {
+    transform: translateY(0);
+}
+
+.pwd-notify-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 12px;
+    background: #34C759; /* iOS 风格绿色勾 */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #fff;
+    font-weight: 700;
+}
+
+.pwd-notify-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 18px;
+}
+
+.pwd-notify-subtitle {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-sec);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pwd-notify-password-box {
+    display: inline-flex;
+    align-items: center;
+    background: #F2F2F7; /* 浅灰背景，与整体统一 */
+    border-radius: 14px;
+    padding: 12px 18px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.pwd-notify-password-text {
+    font-size: 24px;
+    font-weight: 700;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: var(--text-main);
+    margin-right: 14px;
+    letter-spacing: 1px;
+}
+
+.pwd-notify-copy-btn {
+    background: var(--ios-blue);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.pwd-notify-copy-btn:active {
+    opacity: 0.8;
+}
+
+.pwd-notify-hint {
+    font-size: 12px;
+    color: #8E8E93;
+    margin-top: 6px;
+    line-height: 1.5;
+    opacity: 0.8;
+}
         :root {
             --ios-blue: #007AFF;
             --ios-gray: #F2F2F7;
@@ -598,6 +686,19 @@
             <button class="progress-cancel" onclick="cancelDownload()">取消下载</button>
         </div>
     </div>
+    <!-- 密码已复制提示弹窗 -->
+<div class="modal-overlay" id="pwdNotifyModal" onclick="closePwdNotify()">
+    <div class="pwd-notify-sheet" onclick="event.stopPropagation()">
+        <div class="pwd-notify-icon">✓</div>
+        <div class="pwd-notify-title">已在浏览器打开分享页面</div>
+        <div class="pwd-notify-subtitle">资源提取码</div>
+        <div class="pwd-notify-password-box">
+            <span class="pwd-notify-password-text" id="notifyPassword">1234</span>
+            <button class="pwd-notify-copy-btn" onclick="copyNotifyPassword()">复制</button>
+        </div>
+        <div class="pwd-notify-hint">系统已自动复制密码至剪切板，如有覆盖请手动复制</div>
+    </div>
+</div>
 
     <script>
         
@@ -688,6 +789,50 @@
         }
 
         
+        // 显示密码通知弹窗
+function showPwdNotify(password) {
+    if (!isPageActive()) return;
+    // 设置密码
+    document.getElementById('notifyPassword').textContent = password || '';
+    const modal = document.getElementById('pwdNotifyModal');
+    const sheet = modal.querySelector('.pwd-notify-sheet');
+    modal.style.display = 'flex';
+    setTimeout(() => {
+        if (isPageActive() && sheet) sheet.classList.add('show');
+    }, 10);
+}
+
+// 关闭密码通知弹窗
+function closePwdNotify() {
+    const modal = document.getElementById('pwdNotifyModal');
+    if (!modal) return;
+    const sheet = modal.querySelector('.pwd-notify-sheet');
+    sheet.classList.remove('show');
+    setTimeout(() => {
+        if (isPageActive() && modal) modal.style.display = 'none';
+    }, 350);
+}
+
+// 通知弹窗内的“复制”按钮
+function copyNotifyPassword() {
+    const pw = document.getElementById('notifyPassword').textContent;
+    if (!pw) return;
+    // 直接使用 execCommand 复制（在用户手势内必然成功）
+    const ta = document.createElement('textarea');
+    ta.value = pw;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try {
+        document.execCommand('copy');
+        showToast('提取码已复制');
+    } catch(e) {
+        showToast('复制失败，请手动复制');
+    }
+    document.body.removeChild(ta);
+}
         function addToCollection(appId) {
             try {
                 
@@ -1505,7 +1650,6 @@
             const downloadBtn = document.getElementById('downloadBtn');
             if (downloadBtn && app.链接) {
                 downloadBtn.onclick = async function(e) {
-
     if (!isPageActive()) return;
     const btn = e.target;
     btn.innerText = "处理中...";
@@ -1514,7 +1658,7 @@
         const url = app.链接;
         const password = app.密码;
 
-        // 静默同步复制（不显示任何提示）
+        // 静默同步复制（不提示）
         function silentCopy(text) {
             if (!text) return;
             const ta = document.createElement('textarea');
@@ -1528,31 +1672,30 @@
             document.body.removeChild(ta);
         }
 
-        // 是否已经提前静默复制了密码
         let passwordPreCopied = false;
 
-        // 蓝奏云特殊处理：点击瞬间立刻复制密码，不提示
+        // 蓝奏云：提前静默复制密码
         if (url.includes('lanz') && password && password.trim() !== '') {
             silentCopy(password);
             passwordPreCopied = true;
         }
 
-        // 下面开始异步解析蓝奏云
         if (url.includes('lanz')) {
             btn.innerText = "解析中...";
             const directUrl = await parselanzouUrl(url, password);
 
             if (directUrl) {
-                // 解析成功，直接下载（密码其实已复制，但无提示，用户无感）
+                // 解析成功 → 直接下载
                 if (window.plus) {
                     downloadWithPlus(directUrl);
                 } else {
                     window.open(directUrl, '_blank');
                 }
             } else {
-                // 解析失败，打开原链接，此时补一个“密码已复制”提示
+                // 解析失败 → 打开原链接，并弹出通知框
                 if (passwordPreCopied) {
-                    showToast('密码已复制');
+                    // 不再使用 toast，改为弹窗
+                    showPwdNotify(password);
                 }
                 if (window.plus) {
                     plus.runtime.openURL(url);
@@ -1561,24 +1704,30 @@
                 }
             }
         }
-        // 直链 .apk 下载（无密码概念，保持原样）
         else if (url.includes('.apk')) {
+            // 直链下载，无需密码
             if (window.plus) {
                 downloadWithPlus(url);
             } else {
                 window.open(url, '_blank');
             }
         }
-        // 其他普通链接（如果有密码，按原来逻辑可能也需要复制？这里不做变动）
         else {
-            // 原有普通链接处理：直接打开链接前尝试复制密码（异步中失败也无妨，此处不动）
+            // 其他链接（带密码时提前静默复制，然后弹窗）
             if (password && password !== null && password !== '') {
-                copyToClipboardWithFallback(password);
+                silentCopy(password);
+                passwordPreCopied = true;
             }
+
             if (window.plus) {
                 plus.runtime.openURL(url);
             } else {
                 window.open(url, '_blank');
+            }
+
+            // 如果复制了密码，弹出通知框
+            if (passwordPreCopied) {
+                showPwdNotify(password);
             }
         }
     } catch (error) {
