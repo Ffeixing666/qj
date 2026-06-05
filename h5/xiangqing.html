@@ -1503,8 +1503,7 @@
             }
 
             const downloadBtn = document.getElementById('downloadBtn');
-            if (downloadBtn && app.链接) {
-                downloadBtn.onclick = async function(e) {
+            if (downloadBtn && app.链接) {downloadBtn.onclick = async function(e) {
     if (!isPageActive()) return;
     const btn = e.target;
     btn.innerText = "处理中...";
@@ -1513,44 +1512,25 @@
         const url = app.链接;
         const password = app.密码;
 
-        // ★ 完全可靠的静默复制函数（不依赖 5+，不触发原生菜单）
-        function silentCopy(text) {
+        // ✅ 只用现代 Clipboard API，绝不使用 execCommand，避免 App 端剪贴板污染
+        async function silentCopy(text) {
             if (!text) return;
-            // 优先使用现代 Clipboard API（仍在用户手势中）
             if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(text).catch(() => {
-                    execCommandCopy(text);
-                });
-            } else {
-                execCommandCopy(text);
-            }
-            // execCommand 备用方案，但不使用 select() 避免触发菜单
-            function execCommandCopy(t) {
-                const ta = document.createElement('textarea');
-                ta.value = t;
-                // 完全隐藏，不触发任何视觉/交互副作用
-                ta.style.position = 'fixed';
-                ta.style.left = '-99999px';
-                ta.style.top = '-99999px';
-                ta.style.opacity = '0';
-                ta.style.pointerEvents = 'none';
-                document.body.appendChild(ta);
-                // 使用 setSelectionRange 代替 select()
-                ta.focus();
-                ta.setSelectionRange(0, t.length);
                 try {
-                    document.execCommand('copy');
+                    await navigator.clipboard.writeText(text);
+                    // 等待 50ms 确保剪贴板真正写入（WebView 异步延迟）
+                    await new Promise(r => setTimeout(r, 50));
                 } catch (e) {
-                    // 静默失败，解析失败后会统一提示
+                    // 极少数设备不支持，静默失败（解析失败后仍会提示密码）
+                    console.warn('Clipboard API 不可用，放弃静默复制', e);
                 }
-                document.body.removeChild(ta);
             }
         }
 
-        // 蓝奏云链接：点击瞬间立刻静默复制密码（绝不提示）
+        // 蓝奏云链接：提前静默复制密码
         let passwordPreCopied = false;
         if (url.includes('lanz') && password && password.trim() !== '') {
-            silentCopy(password);
+            await silentCopy(password);   // 在用户手势内执行
             passwordPreCopied = true;
         }
 
@@ -1560,14 +1540,14 @@
             const directUrl = await parselanzouUrl(url, password);
 
             if (directUrl) {
-                // 解析成功：直接下载（密码已复制但无感知）
+                // 解析成功，直接下载
                 if (window.plus) {
                     downloadWithPlus(directUrl);
                 } else {
                     window.open(directUrl, '_blank');
                 }
             } else {
-                // 解析失败：补一个“密码已复制”提示，并打开原链接
+                // 解析失败：提示密码已复制，打开原链接
                 if (passwordPreCopied) {
                     showToast('密码已复制');
                 }
@@ -1578,7 +1558,7 @@
                 }
             }
         }
-        // 直链 .apk 下载
+        // 直链 apk 下载
         else if (url.includes('.apk')) {
             if (window.plus) {
                 downloadWithPlus(url);
@@ -1586,10 +1566,9 @@
                 window.open(url, '_blank');
             }
         }
-        // 其他普通链接：保持原有行为（复制密码 + 打开链接）
+        // 其他普通链接（保持原有复制逻辑）
         else {
             if (password && password !== null && password !== '') {
-                // 普通链接的复制允许提示，沿用之前的 copyToClipboardWithFallback
                 copyToClipboardWithFallback(password);
             }
             if (window.plus) {
@@ -1605,8 +1584,6 @@
         if (isPageActive()) btn.innerText = "获取";
     }
 };
-            }
-        }
 
         window.onload = function() {
 
