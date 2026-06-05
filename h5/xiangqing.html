@@ -1513,54 +1513,61 @@
         const url = app.链接;
         const password = app.密码;
 
-        // 静默同步复制（使用 navigator.clipboard，在用户手势内调用）
+        // ★ 完全可靠的静默复制函数（不依赖 5+，不触发原生菜单）
         function silentCopy(text) {
             if (!text) return;
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                // 注意：这里不 await，直接触发复制请求，浏览器会在手势内接受该请求
-                navigator.clipboard.writeText(text).catch(e => {
-                    console.warn('navigator.clipboard 复制失败，尝试 execCommand');
-                    fallbackExecCopy(text);
+            // 优先使用现代 Clipboard API（仍在用户手势中）
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).catch(() => {
+                    execCommandCopy(text);
                 });
             } else {
-                fallbackExecCopy(text);
+                execCommandCopy(text);
+            }
+            // execCommand 备用方案，但不使用 select() 避免触发菜单
+            function execCommandCopy(t) {
+                const ta = document.createElement('textarea');
+                ta.value = t;
+                // 完全隐藏，不触发任何视觉/交互副作用
+                ta.style.position = 'fixed';
+                ta.style.left = '-99999px';
+                ta.style.top = '-99999px';
+                ta.style.opacity = '0';
+                ta.style.pointerEvents = 'none';
+                document.body.appendChild(ta);
+                // 使用 setSelectionRange 代替 select()
+                ta.focus();
+                ta.setSelectionRange(0, t.length);
+                try {
+                    document.execCommand('copy');
+                } catch (e) {
+                    // 静默失败，解析失败后会统一提示
+                }
+                document.body.removeChild(ta);
             }
         }
 
-        function fallbackExecCopy(text) {
-            const ta = document.createElement('textarea');
-            ta.value = text;
-            ta.style.position = 'fixed';
-            ta.style.left = '-9999px';
-            document.body.appendChild(ta);
-            ta.focus();
-            ta.select();
-            try { document.execCommand('copy'); } catch(e) {}
-            document.body.removeChild(ta);
-        }
-
+        // 蓝奏云链接：点击瞬间立刻静默复制密码（绝不提示）
         let passwordPreCopied = false;
-
-        // 蓝奏云特殊处理：点击瞬间立刻复制密码，不提示
         if (url.includes('lanz') && password && password.trim() !== '') {
             silentCopy(password);
             passwordPreCopied = true;
         }
 
-        // 开始异步解析
+        // 异步解析蓝奏云
         if (url.includes('lanz')) {
             btn.innerText = "解析中...";
             const directUrl = await parselanzouUrl(url, password);
 
             if (directUrl) {
-                // 解析成功：直接下载（密码已静默复制，无感知）
+                // 解析成功：直接下载（密码已复制但无感知）
                 if (window.plus) {
                     downloadWithPlus(directUrl);
                 } else {
                     window.open(directUrl, '_blank');
                 }
             } else {
-                // 解析失败：补提示，打开原链接
+                // 解析失败：补一个“密码已复制”提示，并打开原链接
                 if (passwordPreCopied) {
                     showToast('密码已复制');
                 }
@@ -1571,7 +1578,7 @@
                 }
             }
         }
-        // 直链 .apk 下载（无密码概念）
+        // 直链 .apk 下载
         else if (url.includes('.apk')) {
             if (window.plus) {
                 downloadWithPlus(url);
@@ -1579,9 +1586,10 @@
                 window.open(url, '_blank');
             }
         }
-        // 其他普通链接：保持原有逻辑（如有密码尝试复制）
+        // 其他普通链接：保持原有行为（复制密码 + 打开链接）
         else {
             if (password && password !== null && password !== '') {
+                // 普通链接的复制允许提示，沿用之前的 copyToClipboardWithFallback
                 copyToClipboardWithFallback(password);
             }
             if (window.plus) {
