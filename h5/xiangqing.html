@@ -1505,6 +1505,7 @@
             const downloadBtn = document.getElementById('downloadBtn');
             if (downloadBtn && app.链接) {
                 downloadBtn.onclick = async function(e) {
+
     if (!isPageActive()) return;
     const btn = e.target;
     btn.innerText = "处理中...";
@@ -1513,46 +1514,45 @@
         const url = app.链接;
         const password = app.密码;
 
-        // 完全可靠的静默复制（只用 Clipboard API，杜绝 execCommand）
-        async function silentCopy(text) {
+        // 静默同步复制（不显示任何提示）
+        function silentCopy(text) {
             if (!text) return;
-            if (navigator.clipboard && window.isSecureContext) {
-                try {
-                    await navigator.clipboard.writeText(text);
-                    // 预留足够时间让 WebView 完成剪贴板底层写入
-                    await new Promise(r => setTimeout(r, 80));
-                } catch (e) {
-                    console.warn('Clipboard API 不可用', e);
-                }
-            }
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            try { document.execCommand('copy'); } catch(e) {}
+            document.body.removeChild(ta);
         }
 
+        // 是否已经提前静默复制了密码
         let passwordPreCopied = false;
 
-        // 蓝奏云链接：点击瞬间立刻复制密码
+        // 蓝奏云特殊处理：点击瞬间立刻复制密码，不提示
         if (url.includes('lanz') && password && password.trim() !== '') {
-            await silentCopy(password);
+            silentCopy(password);
             passwordPreCopied = true;
         }
 
-        // 开始解析
+        // 下面开始异步解析蓝奏云
         if (url.includes('lanz')) {
             btn.innerText = "解析中...";
             const directUrl = await parselanzouUrl(url, password);
 
             if (directUrl) {
-                // 解析成功，直接下载
+                // 解析成功，直接下载（密码其实已复制，但无提示，用户无感）
                 if (window.plus) {
                     downloadWithPlus(directUrl);
                 } else {
                     window.open(directUrl, '_blank');
                 }
             } else {
-                // 解析失败 → 提示密码，然后延时打开原链接
+                // 解析失败，打开原链接，此时补一个“密码已复制”提示
                 if (passwordPreCopied) {
                     showToast('密码已复制');
-                    // 延时 350ms 打开链接，确保原生写入 token 时密码已稳定，之后 token 会被覆盖（或至少密码在第一条）
-                    await new Promise(r => setTimeout(r, 350));
                 }
                 if (window.plus) {
                     plus.runtime.openURL(url);
@@ -1561,7 +1561,26 @@
                 }
             }
         }
-        // ……其余逻辑保持不变
+        // 直链 .apk 下载（无密码概念，保持原样）
+        else if (url.includes('.apk')) {
+            if (window.plus) {
+                downloadWithPlus(url);
+            } else {
+                window.open(url, '_blank');
+            }
+        }
+        // 其他普通链接（如果有密码，按原来逻辑可能也需要复制？这里不做变动）
+        else {
+            // 原有普通链接处理：直接打开链接前尝试复制密码（异步中失败也无妨，此处不动）
+            if (password && password !== null && password !== '') {
+                copyToClipboardWithFallback(password);
+            }
+            if (window.plus) {
+                plus.runtime.openURL(url);
+            } else {
+                window.open(url, '_blank');
+            }
+        }
     } catch (error) {
         console.error('下载处理失败:', error);
         if (isPageActive()) showToast('操作失败，请重试');
