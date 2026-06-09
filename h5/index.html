@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>趣加应用</title>
     
     <!-- 旧设备检测与跳转脚本 (必须放在最前面且使用老语法，防止旧浏览器因不支持下方ES6语法而整块罢工) -->
@@ -18,6 +18,7 @@
             }
 
             // 2. 检测 Chrome 内核 (包含 Android WebView / 很多国产浏览器) 版本小于 60
+            // 修正：以前的 100 阈值太高了，会误杀 Chrome 70-99 之间完全支持现代语法的浏览器。60 是安全且合理的分界线。
             var chromeMatch = ua.match(/Chrome\/(\d+)/i);
             if (chromeMatch && parseInt(chromeMatch[1], 10) < 60) {
                 needRedirect = true;
@@ -37,140 +38,6 @@
     </script>
 
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: #000000; /* 后备色，全屏图会覆盖 */
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            overflow: hidden;
-            position: fixed;
-        }
-
-        /* ----- 全新的全屏加载容器 (原有ID保留，样式彻底重构为全屏视觉) ----- */
-        #ui-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: none;          /* 默认隐藏，登录流程开始时显示 */
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            z-index: 10;
-        }
-
-        /* 全屏背景图片层 */
-        .fullscreen-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('https://creation.bcmcdn.com/716/appcraft/IMAGE_lZjieEUVr_1780726032703.jpeg');
-            background-size: cover;
-            background-position: center center;
-            background-repeat: no-repeat;
-            background-color: #0a0a0a; /* 加载时占位色 */
-            z-index: 1;
-        }
-
-        /* 右上角圆形倒计时组件 */
-        .countdown-circle {
-            position: absolute;
-            top: max(20px, env(safe-area-inset-top, 20px));
-            right: max(20px, env(safe-area-inset-right, 20px));
-            width: 58px;
-            height: 58px;
-            background-color: rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            font-weight: 700;
-            font-family: monospace;
-            color: white;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            border: 1.5px solid rgba(255,255,255,0.3);
-            z-index: 20;
-            transition: all 0.2s ease;
-        }
-
-        /* 深色模式下额外微调圆环质感 */
-        @media (prefers-color-scheme: dark) {
-            .countdown-circle {
-                background-color: rgba(30, 30, 35, 0.85);
-                border-color: rgba(255,255,255,0.4);
-                box-shadow: 0 4px 14px rgba(0,0,0,0.4);
-            }
-        }
-
-        /* 针对刘海屏做安全区适配 */
-        @supports (padding-top: env(safe-area-inset-top)) {
-            .countdown-circle {
-                top: max(20px, env(safe-area-inset-top));
-                right: max(20px, env(safe-area-inset-right));
-            }
-        }
-
-        /* ----- 封禁模态框 (原有样式保留，并提高层级，完全覆盖UI) ----- */
-        #ban-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg-color, #F2F2F7);
-            z-index: 1000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 30px;
-        }
-
-        .ban-content {
-            width: 100%;
-            max-width: 340px;
-            text-align: center;
-        }
-
-        .ban-title {
-            color: var(--danger-color, #ff3b30);
-            font-size: 26px;
-            font-weight: 700;
-            margin-bottom: 25px;
-        }
-
-        .ban-body {
-            color: var(--text-color, #1c1c1e);
-            font-size: 16px;
-            line-height: 1.8;
-            text-align: left;
-            margin-bottom: 40px;
-            opacity: 0.8;
-        }
-
-        .ban-mail {
-            color: var(--accent-color, #007aff);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        /* 配合深色/浅色变量 (与原有逻辑一致) */
         :root {
             --bg-color: #F2F2F7;
             --text-color: #1c1c1e;
@@ -186,17 +53,117 @@
                 --accent-color: #0a84ff;
             }
         }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            transition: background-color 0.3s ease;
+        }
+
+        .welcome-wrapper {
+            position: relative;
+            display: none;
+            width: 100%;
+            height: 120px;
+            align-items: center;
+            justify-content: center;
+            transform: translateY(-40px);
+        }
+
+        .loading-text {
+            position: relative;
+            font-size: 34px;
+            font-weight: 600;
+            letter-spacing: 10px;
+            color: var(--text-color);
+            text-indent: 10px;
+        }
+
+        .text-item {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            white-space: nowrap;
+            animation: ultraFade 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        .text-item:nth-child(2) {
+            animation-delay: 3.5s;
+        }
+
+        @keyframes ultraFade {
+            0%, 5% { opacity: 0; }
+            20%, 45% { opacity: 1; }
+            60%, 100% { opacity: 0; }
+        }
+
+        #ban-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+        }
+
+        .ban-content {
+            width: 100%;
+            max-width: 340px;
+            text-align: center;
+        }
+
+        .ban-title {
+            color: var(--danger-color);
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 25px;
+        }
+
+        .ban-body {
+            color: var(--text-color);
+            font-size: 16px;
+            line-height: 1.8;
+            text-align: left;
+            margin-bottom: 40px;
+            opacity: 0.8;
+        }
+
+        .ban-mail {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
 
-    <!-- 全新的全屏加载容器，保留id="ui-container"，移除旧版文字动画，改用全屏大图+右上角假倒计时 -->
-    <div id="ui-container">
-        <div class="fullscreen-bg"></div>
-        <div class="countdown-circle" id="countdown-circle">3</div>
+    <div class="welcome-wrapper" id="ui-container">
+        <div class="loading-text">
+            <div class="text-item">欢迎回来</div>
+            <div class="text-item">马上就好</div>
+        </div>
     </div>
 
-    <!-- 封禁提示框，逻辑完全保留 -->
     <div id="ban-modal">
         <div class="ban-content">
             <div class="ban-title">⚠️ 当前账号已封禁</div>
@@ -214,54 +181,9 @@
     </div>
 
     <script>
-        // ---------- 全局变量 ----------
         const API = 'https://apirank.qujiaweb.top/';
         let hasInited = false;
-        let countdownTimer = null;          // 假倒计时定时器句柄
-        let currentCountdownValue = 3;      // 当前显示数字（辅助）
-        const countdownCircleEl = document.getElementById('countdown-circle');
 
-        // ---------- 停止假倒计时（清除定时器，数字保留不动）----------
-        function stopFakeCountdown() {
-            if (countdownTimer !== null) {
-                clearInterval(countdownTimer);
-                countdownTimer = null;
-            }
-            // 注意：停止后不修改圆圈内数字，保留最后一次显示（根据需求，到1之后停住，如果强制停止时数字不是1也保留现场）
-        }
-
-        // ---------- 启动假倒计时 (3 -> 2 -> 1 停在1) ----------
-        // 每次启动都会重置计时器并从3开始
-        function startFakeCountdown() {
-            // 先停止之前的倒计时
-            stopFakeCountdown();
-            
-            // 重置显示数字为3
-            currentCountdownValue = 3;
-            if (countdownCircleEl) {
-                countdownCircleEl.textContent = currentCountdownValue;
-            }
-            
-            // 启动新的倒计时 (每秒变化)
-            countdownTimer = setInterval(() => {
-                // 仅当当前值大于1时才递减，减到1后停止
-                if (currentCountdownValue > 1) {
-                    currentCountdownValue--;
-                    if (countdownCircleEl) {
-                        countdownCircleEl.textContent = currentCountdownValue;
-                    }
-                    // 当数字变成1后，停止计时器
-                    if (currentCountdownValue === 1) {
-                        stopFakeCountdown();   // 停止倒计时，定格在1
-                    }
-                } else {
-                    // 如果已经是1或者小于1，直接停止计时器确保不再变化
-                    stopFakeCountdown();
-                }
-            }, 1000);
-        }
-
-        // ---------- 原有功能：状态栏适配 ----------
         function updateStatusBarStyle() {
             if (window.plus) {
                 const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -275,17 +197,13 @@
             }
         }
 
-        // 清除本地缓存并退出/返回主页（原有逻辑，新增倒计时清理）
         function clearAndExit() {
-            stopFakeCountdown();   // 清理倒计时，避免跳转后仍运行
             const keys = ['usermail_login', 'userpass_login', 'usermail', 'username', 'userpicture', 'userpoints'];
             keys.forEach(k => localStorage.removeItem(k));
             goHome();
         }
 
-        // 跳转主页（home.html）
         function goHome() {
-            stopFakeCountdown();   // 跳转前停止假倒计时，避免内存泄漏
             if (window.plus) {
                 const h = plus.webview.create('home.html', 'home.html', {
                     backbuttonMaximize: false,
@@ -298,31 +216,20 @@
             }
         }
 
-        // ---------- 核心启动流程（完全保留原逻辑，仅视觉替换为全屏大图和假倒计时）----------
         async function startApp() {
             if (hasInited) return;
             hasInited = true;
 
-            // 从本地存储读取登录凭证
             const m = localStorage.getItem('usermail_login');
             const p = localStorage.getItem('userpass_login');
 
-            // 未登录直接跳转至主页 (不显示欢迎视觉)
             if (!m || !p) {
                 goHome();
                 return;
             }
 
-            // 显示新的全屏大图容器 (id='ui-container')
-            const uiContainer = document.getElementById('ui-container');
-            if (uiContainer) {
-                uiContainer.style.display = 'flex';
-            }
-            
-            // 启动右上角假倒计时 (视觉效果，与跳转逻辑独立)
-            startFakeCountdown();
+            document.getElementById('ui-container').style.display = 'flex';
 
-            // 发起后端验证请求
             try {
                 const response = await fetch(`${API}?mode=login`, {
                     method: 'POST',
@@ -332,83 +239,49 @@
                 const res = await response.json();
 
                 if (res.code === 200 && res.fields && res.fields.length > 0) {
-                    // 登录成功：保存用户信息
                     const u = res.fields[0];
                     localStorage.setItem('usermail', u["邮箱"]);
                     localStorage.setItem('username', u["昵称"]);
                     localStorage.setItem('userpicture', u["头像"]);
                     localStorage.setItem('userpoints', u["积分"] || '0');
-                    // ⚠️ 注意：跳转前停止假倒计时（不需要视觉残留）
-                    stopFakeCountdown();
                     goHome();
-                } 
-                else if (res.code === 403) {
-                    // 账号被封禁：隐藏全屏UI容器，显示封禁模态框，同时停止假倒计时
-                    stopFakeCountdown();
-                    if (uiContainer) uiContainer.style.display = 'none';
-                    const banModal = document.getElementById('ban-modal');
-                    if (banModal) banModal.style.display = 'flex';
-                } 
-                else {
-                    // 其他错误：账号异常，清空缓存并返回主页
+                } else if (res.code === 403) {
+                    document.getElementById('ui-container').style.display = 'none';
+                    document.getElementById('ban-modal').style.display = 'flex';
+                } else {
                     alert("账号异常，请重新登录");
-                    stopFakeCountdown();
                     clearAndExit();
                 }
             } catch (e) {
-                // 网络异常或请求失败: 稳妥做法跳转主页，避免卡在加载页（原逻辑）
-                console.warn("网络或请求异常，跳转主页");
-                stopFakeCountdown();
                 goHome();
             }
         }
 
-        // ---------- 监听系统主题变化（状态栏样式更新）----------
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateStatusBarStyle);
 
-        // 页面显示时启动（兼容pageshow和plusready场景）
         window.addEventListener('pageshow', () => {
             updateStatusBarStyle();
             startApp();
         });
 
-        // plus ready (针对5+ App环境)
         document.addEventListener('plusready', () => {
             updateStatusBarStyle();
             plus.navigator.setFullscreen(false);
-            // 重写返回键逻辑（保留原有封禁状态下的二次确认，以及在非封禁状态下退出应用）
             plus.key.addEventListener('backbutton', () => {
-                const banModal = document.getElementById('ban-modal');
-                // 如果封禁模态框可见
-                if (banModal && banModal.style.display === 'flex') {
+                if (document.getElementById('ban-modal').style.display === 'flex') {
                     plus.nativeUI.confirm("确定退出吗？", (e) => {
                         if (e.index === 0) plus.runtime.quit();
                     }, "提示", ["确定", "取消"]);
                 } else {
-                    // 其它情况（欢迎界面或者加载中）直接退出应用
                     plus.runtime.quit();
                 }
             });
         });
 
-        // DOM 已加载完成时尝试启动 (普通浏览器环境)
-        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        if (document.readyState === 'complete') {
             updateStatusBarStyle();
             startApp();
-        } else {
-            window.addEventListener('DOMContentLoaded', () => {
-                updateStatusBarStyle();
-                startApp();
-            });
         }
-        
-        // 额外安全清理：页面卸载时清理定时器，防止后台运行导致报错（针对单页离场）
-        window.addEventListener('beforeunload', () => {
-            if (countdownTimer) {
-                clearInterval(countdownTimer);
-                countdownTimer = null;
-            }
-        });
     </script>
 </body>
 </html>
