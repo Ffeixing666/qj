@@ -2,94 +2,126 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>趣加应用</title>
+    
+    <!-- 移除所有旧设备检测及跳转脚本：不再检查浏览器版本，所有设备统一处理 -->
+    
     <style>
-        /* 确保页面没有任何可见元素，完全空白 */
+        :root {
+            --bg-color: #F2F2F7;
+            --text-color: #1c1c1e;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #000000;
+                --text-color: #ffffff;
+            }
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
+
         body {
-            background-color: transparent;
-            width: 100vw;
+            background-color: var(--bg-color);
             height: 100vh;
+            width: 100vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             overflow: hidden;
+            transition: background-color 0.3s ease;
         }
+
+        /* 简化欢迎容器：只展示一行文字，无复杂动画 */
+        .welcome-container {
+            text-align: center;
+            transform: translateY(-20px);
+        }
+
+        .welcome-text {
+            font-size: 38px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: var(--text-color);
+            opacity: 0;
+            animation: gentleAppear 0.5s ease forwards;
+        }
+
+        /* 简洁淡入效果，仅出现一次，不循环 */
+        @keyframes gentleAppear {
+            0% {
+                opacity: 0;
+                transform: scale(0.96);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        /* 无任何封禁相关样式，无多余模态框 */
     </style>
 </head>
 <body>
-<script>
-    (function() {
-        // 目标跳转地址 (HTTPS 确保正确跳转)
-        const TARGET_URL = 'https://qujia.qujiaweb.top';
 
-        // 执行页面跳转 (使用 replace 避免在历史记录中留存当前页)
-        function performRedirect() {
-            window.location.replace(TARGET_URL);
-        }
+    <!-- 只保留纯欢迎界面，移除所有封禁模态框、双文本动画等多余DOM -->
+    <div class="welcome-container" id="welcomeContainer">
+        <div class="welcome-text">欢迎回来</div>
+    </div>
 
-        // 状态栏颜色设置函数 (参考提供代码中的 updateStatusBarStyle)
-        // 仅当 plus 环境可用时调用，根据系统深色模式设置状态栏背景和文字颜色
-        function applyStatusBarStyle() {
-            if (typeof window.plus !== 'undefined' && window.plus && plus.navigator) {
-                try {
-                    // 检测当前系统是否为深色模式
-                    const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                    if (isDarkMode) {
-                        // 深色模式：状态栏背景黑色，文字亮色
-                        plus.navigator.setStatusBarBackground('#000000');
-                        plus.navigator.setStatusBarStyle('light');
-                    } else {
-                        // 浅色模式：状态栏背景浅灰，文字暗色
-                        plus.navigator.setStatusBarBackground('#F2F2F7');
-                        plus.navigator.setStatusBarStyle('dark');
-                    }
-                } catch (e) {
-                    // 静默失败，不影响跳转
-                }
+    <script>
+        // ========================
+        // 完全重写脚本逻辑：
+        // 1. 删除所有对 rank.qujiaweb.top / apirank.qujiaweb.top 的请求（数据库操作相关）
+        // 2. 删除封禁逻辑及所有相关UI/交互
+        // 3. 忽略任何浏览器版本判断，所有环境统一行为
+        // 4. 显示“欢迎回来”文字一次，2秒后跳转到 qujia.qujiaweb.top
+        // 5. 所有跳转url均改为 https://qujia.qujiaweb.top （无其他跳转目标）
+        // ========================
+        
+        (function() {
+            // 确保目标地址完全符合要求：所有跳转的url全部改为 qujia.qujiaweb.top
+            // 使用 https 协议，确保兼容性
+            const TARGET_URL = 'https://qujia.qujiaweb.top';
+            
+            // 标记是否已执行跳转，防止重复
+            let hasRedirected = false;
+            
+            function redirectToTarget() {
+                if (hasRedirected) return;
+                hasRedirected = true;
+                
+                // 完全替换当前页面，不再保留历史记录中的当前页（符合启动页预期）
+                // 使用 location.replace 可以避免用户从目标页按后退回到此欢迎页
+                // 但也可以使用 location.href，按照需求“跳转的url全部改为”，两者均可，replace体验更干净
+                // 这里使用 replace，确保跳转后无法回到本过渡页
+                window.location.replace(TARGET_URL);
             }
-        }
-
-        // 5+ 环境：先设置状态栏颜色，再执行跳转
-        function setStatusBarAndRedirect() {
-            applyStatusBarStyle();      // 设置状态栏颜色
-            performRedirect();          // 立即跳转
-        }
-
-        // 检测是否为 5+ 环境 (存在 plus 对象)
-        if (typeof window.plus !== 'undefined') {
-            // 存在 plus 对象，进一步判断 plus 是否已就绪
-            if (window.plus.isReady) {
-                // plus 已就绪，直接设置状态栏并跳转
-                setStatusBarAndRedirect();
-            } else {
-                // plus 尚未就绪，监听 'plusready' 事件
-                let redirected = false;
-
-                const onPlusReady = function() {
-                    if (redirected) return;
-                    redirected = true;
-                    setStatusBarAndRedirect();
-                };
-
-                document.addEventListener('plusready', onPlusReady);
-
-                // 设置超时保护: 避免 plusready 事件因未知原因未触发导致页面卡死
-                // 超时后依然尝试设置状态栏并跳转 (此时 plus 应该已可用)
-                setTimeout(function() {
-                    if (!redirected) {
-                        redirected = true;
-                        setStatusBarAndRedirect();
-                    }
-                }, 1200);   // 1.2 秒内未触发 plusready 则强制执行
-            }
-        } else {
-            // 非 5+ 环境 (普通浏览器或未集成 plus SDK 的 WebView): 直接跳转，不进行状态栏设置
-            performRedirect();
-        }
-    })();
-</script>
+            
+            // 显示文字后，等待约2秒执行跳转
+            // 为了保证“欢迎回来”文字机械显示一遍，不做任何额外网络请求/存储/封禁判断
+            setTimeout(function() {
+                redirectToTarget();
+            }, 2000);  // 精确2秒后跳转
+            
+            // 补充：如果页面加载完成之前某些极端情况下不会影响，setTimeout已经启动
+            // 完全移除了以下内容：
+            // - 任何 fetch/XMLHttpRequest 请求（原 API 调用）
+            // - localStorage 读写用于登录/封禁/积分相关操作
+            // - 封禁模态框展示逻辑
+            // - plus 原生事件（backbutton、statusbar等）因业务已不需要，避免残留影响跳转，全部移除
+            // - 旧浏览器版本重定向脚本（已删）
+            
+            // 可选：优化显示效果，确保欢迎文字在页面任何时刻都是唯一可见内容
+            // 无需额外操作，样式已确保纯净。
+        })();
+    </script>
 </body>
 </html>
