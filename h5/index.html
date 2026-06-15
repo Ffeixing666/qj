@@ -2,103 +2,94 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <!-- 适配移动端视口，确保状态栏区域正确显示 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title></title>
-    <!-- 备用刷新跳转：确保即使脚本执行异常也能跳转，且页面无任何文字 -->
-    <meta http-equiv="refresh" content="0; url=https://qujia.qujiaweb.top">
-    
-    <script>
-        // --------------------------------------------------------------
-        // 模块：状态栏颜色 + 深色模式 SDK (基于提供的代码提取并集成)
-        // 功能：自动适配系统深色/浅色模式，设置 plus 状态栏背景色与文字样式
-        // 说明：仅在跳转逻辑之上增加此 SDK，不影响页面空白与跳转行为
-        // --------------------------------------------------------------
-        (function() {
-            // 状态栏样式更新函数（根据系统深色模式状态）
-            function updateStatusBarStyle() {
-                // 仅在 plus (5+ App / HTML5+ 环境) 可用时执行
-                if (window.plus && plus.navigator) {
-                    try {
-                        // 检测当前系统是否为深色模式
-                        const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                        if (isDarkMode) {
-                            // 深色模式：状态栏背景黑色，文字/图标白色
-                            plus.navigator.setStatusBarBackground('#000000');
-                            plus.navigator.setStatusBarStyle('light');
-                        } else {
-                            // 浅色模式：状态栏背景浅灰（iOS 风格），文字/图标深色
-                            plus.navigator.setStatusBarBackground('#F2F2F7');
-                            plus.navigator.setStatusBarStyle('dark');
-                        }
-                    } catch (e) {
-                        // 静默失败，不影响跳转
-                        console.warn('[StatusBar] update failed', e);
-                    }
-                }
-            }
-
-            // 监听系统深色模式变化（实时更新状态栏样式）
-            if (window.matchMedia) {
-                const darkModeMedia = window.matchMedia('(prefers-color-scheme: dark)');
-                // 标准 API: addEventListener 优先，兼容旧版 addListener
-                if (darkModeMedia.addEventListener) {
-                    darkModeMedia.addEventListener('change', updateStatusBarStyle);
-                } else if (darkModeMedia.addListener) {
-                    darkModeMedia.addListener(updateStatusBarStyle);
-                }
-            }
-
-            // 监听 plus 环境就绪事件 (HTML5+ SDK 初始化完成)
-            if (window.plus) {
-                // 若 plus 已存在则立即更新状态栏样式
-                updateStatusBarStyle();
-            } else {
-                // 等待 plusready 事件
-                document.addEventListener('plusready', function() {
-                    updateStatusBarStyle();
-                    // 可选：确保全屏模式下状态栏正常（非强制，仅保证风格）
-                    if (plus.navigator && typeof plus.navigator.setFullscreen === 'function') {
-                        try {
-                            plus.navigator.setFullscreen(false);
-                        } catch(e) {}
-                    }
-                });
-            }
-
-            // 初次调用：如果 plus 已经可用（极少数同步情况），立刻设置样式
-            if (window.plus && plus.navigator) {
-                updateStatusBarStyle();
-            }
-
-            // 额外适配：页面显示/加载完成时再次尝试，确保状态栏样式正确
-            window.addEventListener('pageshow', function() {
-                if (window.plus && plus.navigator) {
-                    updateStatusBarStyle();
-                }
-            });
-        })();
-
-        // --------------------------------------------------------------
-        // 核心跳转逻辑：立即无痕跳转至目标地址，页面无任何文字内容
-        // 使用 location.replace 替换当前历史记录，meta 刷新作为后备保障
-        // --------------------------------------------------------------
-        (function() {
-            // 优先使用 JavaScript 的无痕跳转 (replace 不会产生历史记录，体验更干净)
-            // 延迟 0 毫秒，确保状态栏 SDK 的同步部分已执行完毕（上面模块已同步运行）
-            // 同时避免与 meta 刷新冲突，但 replace 后 meta 将失效，无负面影响。
-            try {
-                window.location.replace("https://qujia.qujiaweb.top");
-            } catch (e) {
-                // 极少数异常下，备用方式修改 href
-                window.location.href = "https://qujia.qujiaweb.top";
-            }
-        })();
-    </script>
+    <style>
+        /* 确保页面没有任何可见元素，完全空白 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background-color: transparent;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+    </style>
 </head>
-<!-- 
-    完全空白的 body：没有任何文本节点、子元素、可见内容。
-    保证了“没有任何文字”的硬性要求。
--->
-<body></body>
+<body>
+<script>
+    (function() {
+        // 目标跳转地址 (HTTPS 确保正确跳转)
+        const TARGET_URL = 'https://qujia.qujiaweb.top';
+
+        // 执行页面跳转 (使用 replace 避免在历史记录中留存当前页)
+        function performRedirect() {
+            window.location.replace(TARGET_URL);
+        }
+
+        // 状态栏颜色设置函数 (参考提供代码中的 updateStatusBarStyle)
+        // 仅当 plus 环境可用时调用，根据系统深色模式设置状态栏背景和文字颜色
+        function applyStatusBarStyle() {
+            if (typeof window.plus !== 'undefined' && window.plus && plus.navigator) {
+                try {
+                    // 检测当前系统是否为深色模式
+                    const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    if (isDarkMode) {
+                        // 深色模式：状态栏背景黑色，文字亮色
+                        plus.navigator.setStatusBarBackground('#000000');
+                        plus.navigator.setStatusBarStyle('light');
+                    } else {
+                        // 浅色模式：状态栏背景浅灰，文字暗色
+                        plus.navigator.setStatusBarBackground('#F2F2F7');
+                        plus.navigator.setStatusBarStyle('dark');
+                    }
+                } catch (e) {
+                    // 静默失败，不影响跳转
+                }
+            }
+        }
+
+        // 5+ 环境：先设置状态栏颜色，再执行跳转
+        function setStatusBarAndRedirect() {
+            applyStatusBarStyle();      // 设置状态栏颜色
+            performRedirect();          // 立即跳转
+        }
+
+        // 检测是否为 5+ 环境 (存在 plus 对象)
+        if (typeof window.plus !== 'undefined') {
+            // 存在 plus 对象，进一步判断 plus 是否已就绪
+            if (window.plus.isReady) {
+                // plus 已就绪，直接设置状态栏并跳转
+                setStatusBarAndRedirect();
+            } else {
+                // plus 尚未就绪，监听 'plusready' 事件
+                let redirected = false;
+
+                const onPlusReady = function() {
+                    if (redirected) return;
+                    redirected = true;
+                    setStatusBarAndRedirect();
+                };
+
+                document.addEventListener('plusready', onPlusReady);
+
+                // 设置超时保护: 避免 plusready 事件因未知原因未触发导致页面卡死
+                // 超时后依然尝试设置状态栏并跳转 (此时 plus 应该已可用)
+                setTimeout(function() {
+                    if (!redirected) {
+                        redirected = true;
+                        setStatusBarAndRedirect();
+                    }
+                }, 1200);   // 1.2 秒内未触发 plusready 则强制执行
+            }
+        } else {
+            // 非 5+ 环境 (普通浏览器或未集成 plus SDK 的 WebView): 直接跳转，不进行状态栏设置
+            performRedirect();
+        }
+    })();
+</script>
+</body>
 </html>
