@@ -5,18 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>趣加应用</title>
     
-    <!-- 移除所有旧设备检测及跳转脚本：不再检查浏览器版本，所有设备统一处理 -->
-    
+    <script>
+        (function() {
+            var ua = navigator.userAgent;
+            var needRedirect = false;
+
+            var iosMatch = ua.match(/(iPhone|iPod|iPad).*OS\s+(\d+)_/i);
+            if (iosMatch && parseInt(iosMatch[2], 10) < 11) {
+                needRedirect = true;
+            }
+
+            var chromeMatch = ua.match(/Chrome\/(\d+)/i);
+            if (chromeMatch && parseInt(chromeMatch[1], 10) < 60) {
+                needRedirect = true;
+            }
+
+            var firefoxMatch = ua.match(/Firefox\/(\d+)/i);
+            if (firefoxMatch && parseInt(firefoxMatch[1], 10) < 60) {
+                needRedirect = true;
+            }
+
+            if (needRedirect) {
+                window.location.replace('https://qujia.qujiaweb.top');
+            }
+        })();
+    </script>
+
     <style>
         :root {
             --bg-color: #F2F2F7;
             --text-color: #1c1c1e;
+            --danger-color: #ff3b30;
+            --accent-color: #007aff;
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg-color: #000000;
                 --text-color: #ffffff;
+                --danger-color: #ff453a;
+                --accent-color: #0a84ff;
             }
         }
 
@@ -39,89 +67,101 @@
             transition: background-color 0.3s ease;
         }
 
-        /* 简化欢迎容器：只展示一行文字，无复杂动画 */
-        .welcome-container {
-            text-align: center;
-            transform: translateY(-20px);
+        .welcome-wrapper {
+            position: relative;
+            display: none;
+            width: 100%;
+            height: 120px;
+            align-items: center;
+            justify-content: center;
+            transform: translateY(-40px);
         }
 
-        .welcome-text {
-            font-size: 38px;
+        .loading-text {
+            position: relative;
+            font-size: 34px;
             font-weight: 600;
-            letter-spacing: 2px;
+            letter-spacing: 10px;
             color: var(--text-color);
-            opacity: 0;
-            animation: gentleAppear 0.5s ease forwards;
+            text-indent: 10px;
         }
 
-        /* 简洁淡入效果，仅出现一次，不循环 */
-        @keyframes gentleAppear {
-            0% {
-                opacity: 0;
-                transform: scale(0.96);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
+        .text-item {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            white-space: nowrap;
         }
-        
-        /* 无任何封禁相关样式，无多余模态框 */
     </style>
 </head>
 <body>
 
-    <!-- 只保留纯欢迎界面，移除所有封禁模态框、双文本动画等多余DOM -->
-    <div class="welcome-container" id="welcomeContainer">
-        <div class="welcome-text">欢迎回来</div>
+    <div class="welcome-wrapper" id="ui-container">
+        <div class="loading-text">
+            <div class="text-item">欢迎回来</div>
+        </div>
     </div>
 
     <script>
-        // ========================
-        // 完全重写脚本逻辑：
-        // 1. 删除所有对 rank.qujiaweb.top / apirank.qujiaweb.top 的请求（数据库操作相关）
-        // 2. 删除封禁逻辑及所有相关UI/交互
-        // 3. 忽略任何浏览器版本判断，所有环境统一行为
-        // 4. 显示“欢迎回来”文字一次，2秒后跳转到 qujia.qujiaweb.top
-        // 5. 所有跳转url均改为 https://qujia.qujiaweb.top （无其他跳转目标）
-        // ========================
-        
-        (function() {
-            // 确保目标地址完全符合要求：所有跳转的url全部改为 qujia.qujiaweb.top
-            // 使用 https 协议，确保兼容性
-            const TARGET_URL = 'https://qujia.qujiaweb.top';
-            
-            // 标记是否已执行跳转，防止重复
-            let hasRedirected = false;
-            
-            function redirectToTarget() {
-                if (hasRedirected) return;
-                hasRedirected = true;
-                
-                // 完全替换当前页面，不再保留历史记录中的当前页（符合启动页预期）
-                // 使用 location.replace 可以避免用户从目标页按后退回到此欢迎页
-                // 但也可以使用 location.href，按照需求“跳转的url全部改为”，两者均可，replace体验更干净
-                // 这里使用 replace，确保跳转后无法回到本过渡页
-                window.location.replace(TARGET_URL);
+        function updateStatusBarStyle() {
+            if (window.plus) {
+                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (isDark) {
+                    plus.navigator.setStatusBarBackground('#000000');
+                    plus.navigator.setStatusBarStyle('light');
+                } else {
+                    plus.navigator.setStatusBarBackground('#F2F2F7');
+                    plus.navigator.setStatusBarStyle('dark');
+                }
             }
-            
-            // 显示文字后，等待约2秒执行跳转
-            // 为了保证“欢迎回来”文字机械显示一遍，不做任何额外网络请求/存储/封禁判断
+        }
+
+        function redirectToTarget() {
+            var targetUrl = 'https://qujia.qujiaweb.top';
+            if (window.plus) {
+                var targetWebview = plus.webview.create(targetUrl, targetUrl, {
+                    backbuttonMaximize: false,
+                    scrollIndicator: 'none'
+                });
+                targetWebview.show('fade-in', 250);
+                setTimeout(function() {
+                    plus.webview.currentWebview().close('none');
+                }, 500);
+            } else {
+                window.location.replace(targetUrl);
+            }
+        }
+
+        function showWelcomeAndRedirect() {
+            var container = document.getElementById('ui-container');
+            if (container) {
+                container.style.display = 'flex';
+            }
             setTimeout(function() {
                 redirectToTarget();
-            }, 2000);  // 精确2秒后跳转
-            
-            // 补充：如果页面加载完成之前某些极端情况下不会影响，setTimeout已经启动
-            // 完全移除了以下内容：
-            // - 任何 fetch/XMLHttpRequest 请求（原 API 调用）
-            // - localStorage 读写用于登录/封禁/积分相关操作
-            // - 封禁模态框展示逻辑
-            // - plus 原生事件（backbutton、statusbar等）因业务已不需要，避免残留影响跳转，全部移除
-            // - 旧浏览器版本重定向脚本（已删）
-            
-            // 可选：优化显示效果，确保欢迎文字在页面任何时刻都是唯一可见内容
-            // 无需额外操作，样式已确保纯净。
-        })();
+            }, 2000);
+        }
+
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateStatusBarStyle);
+
+        window.addEventListener('pageshow', function() {
+            updateStatusBarStyle();
+            showWelcomeAndRedirect();
+        });
+
+        document.addEventListener('plusready', function() {
+            updateStatusBarStyle();
+            plus.navigator.setFullscreen(false);
+            plus.key.addEventListener('backbutton', function() {
+                plus.runtime.quit();
+            });
+        });
+
+        if (document.readyState === 'complete') {
+            updateStatusBarStyle();
+            showWelcomeAndRedirect();
+        }
     </script>
 </body>
 </html>
