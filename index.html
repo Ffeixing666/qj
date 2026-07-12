@@ -36,10 +36,12 @@
         })();
     </script>
 
+    <link rel="icon" href="https://cdn-community.bcmcdn.com/47/community/5JFjrpLS7PeRXWHeS56p1nzRaSnw6qvF2W65F98NDvvG.jpeg?hash=Fl93yXRBidgKIWYbooTWROtcqGXs" type="image/jpeg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
 
     <style>
+        /* PC 模式：全屏 iframe，无角标 */
         body.pc-mode, html.pc-mode {
             margin: 0;
             padding: 0;
@@ -55,20 +57,9 @@
             height: 100%;
             border: none;
         }
-        .pc-mode .fixed-image {
-            position: fixed;
-            bottom: 3px;
-            right: 3px;
-            z-index: 9999;
-            max-width: 150px; 
-            cursor: pointer;
-        }
-        .pc-mode .fixed-image img {
-            display: block;
-            width: 100%;
-            height: auto;
-        }
+        /* 已移除 .fixed-image 相关样式 */
 
+        /* 移动端模式 */
         body.mobile-mode {
             font-family: 'Noto Sans SC', sans-serif;
             background-color: #f5f7ff;
@@ -258,13 +249,13 @@
 </head>
 <body>
 
+    <!-- PC 包装：仅显示 iframe，无角标 -->
     <div id="pc-wrapper">
-        <iframe src="https://app-ar7sfvuq9tkx.appmiaoda.com/pc-software" class="fullscreen-iframe"></iframe>
-        <div class="fixed-image">
-            <img src="https://creation.bcmcdn.com/716/appcraft/IMAGE_izsbOFvjO_1775484649035.png" alt="Floating Image">
-        </div>
+        <iframe src="https://qujiaweb.top/pc" class="fullscreen-iframe"></iframe>
+        <!-- 已移除右下角图片 -->
     </div>
 
+    <!-- 移动端包装 -->
     <div id="mobile-wrapper">
         <div id="particles-js"></div>
         <div class="container">
@@ -311,6 +302,7 @@
     <script>
         (function() {
             var ua = navigator.userAgent;
+            // 判断是否为移动设备
             var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
             
             var pcView = document.getElementById('pc-wrapper');
@@ -319,10 +311,12 @@
             var html = document.documentElement;
 
             if (isMobile) {
+                // 移动端：显示移动包装，移除 PC 包装
                 body.className = "mobile-mode";
                 html.className = "mobile-mode";
                 mobileView.style.display = "block";
                 if (pcView) pcView.remove(); 
+                // 初始化 particles
                 if (typeof particlesJS !== 'undefined') {
                     particlesJS('particles-js', {
                         "particles": {
@@ -341,6 +335,7 @@
                     });
                 }
             } else {
+                // PC：显示 PC 包装（全屏 iframe），移除移动包装
                 body.className = "pc-mode";
                 html.className = "pc-mode";
                 pcView.style.display = "block";
