@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>趣加应用</title>
+    
+    <script>
+        (function() {
+            var ua = navigator.userAgent;
+            var needRedirect = false;
+
+            var iosMatch = ua.match(/(iPhone|iPod|iPad).*OS\s+(\d+)_/i);
+            if (iosMatch && parseInt(iosMatch[2], 10) < 11) {
+                needRedirect = true;
+            }
+
+            var chromeMatch = ua.match(/Chrome\/(\d+)/i);
+            if (chromeMatch && parseInt(chromeMatch[1], 10) < 60) {
+                needRedirect = true;
+            }
+
+            var firefoxMatch = ua.match(/Firefox\/(\d+)/i);
+            if (firefoxMatch && parseInt(firefoxMatch[1], 10) < 60) {
+                needRedirect = true;
+            }
+
+            if (needRedirect) {
+                window.location.replace('https://qujia.qujiaweb.top');
+            }
+        })();
+    </script>
+
+    <style>
+        :root {
+            --bg-color: #F2F2F7;
+            --text-color: #1c1c1e;
+            --danger-color: #ff3b30;
+            --accent-color: #007aff;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #000000;
+                --text-color: #ffffff;
+                --danger-color: #ff453a;
+                --accent-color: #0a84ff;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            transition: background-color 0.3s ease;
+        }
+
+        .welcome-wrapper {
+            position: relative;
+            display: none;
+            width: 100%;
+            height: 120px;
+            align-items: center;
+            justify-content: center;
+            transform: translateY(-40px);
+        }
+
+        .loading-text {
+            position: relative;
+            font-size: 34px;
+            font-weight: 600;
+            letter-spacing: 10px;
+            color: var(--text-color);
+            text-indent: 10px;
+        }
+
+        .text-item {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="welcome-wrapper" id="ui-container">
+        <div class="loading-text">
+            <div class="text-item">欢迎回来</div>
+        </div>
+    </div>
+
+    <script>
+        function updateStatusBarStyle() {
+            if (window.plus) {
+                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (isDark) {
+                    plus.navigator.setStatusBarBackground('#000000');
+                    plus.navigator.setStatusBarStyle('light');
+                } else {
+                    plus.navigator.setStatusBarBackground('#F2F2F7');
+                    plus.navigator.setStatusBarStyle('dark');
+                }
+            }
+        }
+
+        function redirectToTarget() {
+            var targetUrl = 'https://qujia.qujiaweb.top';
+            if (window.plus) {
+                var targetWebview = plus.webview.create(targetUrl, targetUrl, {
+                    backbuttonMaximize: false,
+                    scrollIndicator: 'none'
+                });
+                targetWebview.show('fade-in', 250);
+                setTimeout(function() {
+                    plus.webview.currentWebview().close('none');
+                }, 500);
+            } else {
+                window.location.replace(targetUrl);
+            }
+        }
+
+        function showWelcomeAndRedirect() {
+            var container = document.getElementById('ui-container');
+            if (container) {
+                container.style.display = 'flex';
+            }
+            setTimeout(function() {
+                redirectToTarget();
+            }, 500);
+        }
+
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateStatusBarStyle);
+
+        window.addEventListener('pageshow', function() {
+            updateStatusBarStyle();
+            showWelcomeAndRedirect();
+        });
+
+        document.addEventListener('plusready', function() {
+            updateStatusBarStyle();
+            plus.navigator.setFullscreen(false);
+            plus.key.addEventListener('backbutton', function() {
+                plus.runtime.quit();
+            });
+        });
+
+        if (document.readyState === 'complete') {
+            updateStatusBarStyle();
+            showWelcomeAndRedirect();
+        }
+    </script>
+</body>
+</html>
