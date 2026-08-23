@@ -3,345 +3,351 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>趣加应用网页版</title>
+    <title>趣加应用</title>
     
-    <!-- 旧设备检测与跳转脚本 (必须放在最前面) -->
     <script>
         (function() {
             var ua = navigator.userAgent;
             var needRedirect = false;
 
-            // 1. 检测 iOS 版本小于 11
             var iosMatch = ua.match(/(iPhone|iPod|iPad).*OS\s+(\d+)_/i);
             if (iosMatch && parseInt(iosMatch[2], 10) < 11) {
                 needRedirect = true;
             }
 
-            // 2. 检测 Chrome 内核版本小于 60
             var chromeMatch = ua.match(/Chrome\/(\d+)/i);
             if (chromeMatch && parseInt(chromeMatch[1], 10) < 60) {
                 needRedirect = true;
             }
 
-            // 3. 检测 Firefox 版本小于 60
             var firefoxMatch = ua.match(/Firefox\/(\d+)/i);
             if (firefoxMatch && parseInt(firefoxMatch[1], 10) < 60) {
                 needRedirect = true;
             }
 
-            // 如果匹配到旧设备，直接转到指定页面
             if (needRedirect) {
-                window.location.replace('http://qujiaweb.top/overview');
+                window.location.replace('https://qujia.qujiaweb.top');
             }
         })();
     </script>
 
-    <link rel="icon" href="https://cdn-community.bcmcdn.com/47/community/5JFjrpLS7PeRXWHeS56p1nzRaSnw6qvF2W65F98NDvvG.jpeg?hash=Fl93yXRBidgKIWYbooTWROtcqGXs" type="image/jpeg">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
-
     <style>
-        /* PC 模式：全屏 iframe，无角标 */
-        body.pc-mode, html.pc-mode {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-            overflow: hidden; 
+        :root {
+            --bg-color: #F2F2F7;
+            --text-color: #1c1c1e;
+            --danger-color: #ff3b30;
+            --accent-color: #007aff;
+            --overlay-bg: rgba(0, 0, 0, 0.4);
+            --card-bg: #ffffff;
+            --card-radius: 24px;
+            --shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            --btn-primary: #007aff;
+            --btn-outline: #007aff;
         }
-        .pc-mode .fullscreen-iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        /* 已移除 .fixed-image 相关样式 */
 
-        /* 移动端模式 */
-        body.mobile-mode {
-            font-family: 'Noto Sans SC', sans-serif;
-            background-color: #f5f7ff;
-            color: #212529;
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #000000;
+                --text-color: #ffffff;
+                --danger-color: #ff453a;
+                --accent-color: #0a84ff;
+                --overlay-bg: rgba(0, 0, 0, 0.6);
+                --card-bg: #1c1c1e;
+                --shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+                --btn-primary: #0a84ff;
+                --btn-outline: #0a84ff;
+            }
         }
-        
-        .mobile-mode * {
+
+        * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .mobile-mode :root {
-            --primary: #4a6bdf;
-            --primary-dark: #3a56b2;
-            --secondary: #6c757d;
-            --light: #f8f9fa;
-            --dark: #212529;
-            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        }
-        
-        .mobile-mode .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        
-        .mobile-mode #particles-js {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            z-index: -1;
-            opacity: 0.5;
-        }
-        
-        .mobile-mode header {
-            padding: 60px 0 40px;
-            text-align: center;
-            position: relative;
-        }
-        
-        .mobile-mode .title {
-            font-size: clamp(2rem, 5vw, 3.5rem);
-            font-weight: 700;
-            margin-bottom: 40px;
-            background: linear-gradient(90deg, #4a6bdf, #8a2be2);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUp 0.8s ease-out forwards;
-        }
-        
-        .mobile-mode .button-group {
+        body {
+            background-color: var(--bg-color);
+            height: 100vh;
+            width: 100vw;
             display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin-bottom: 80px;
-        }
-        
-        .mobile-mode .btn {
-            position: relative;
-            display: inline-flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 18px 30px;
-            border-radius: 12px;
-            font-weight: 500;
-            text-decoration: none;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             overflow: hidden;
-            z-index: 1;
-            min-width: 220px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        
-        .mobile-mode .btn-primary {
-            background: #4a6bdf;
-            color: white;
-            animation: fadeInUp 0.8s ease-out 0.2s forwards;
-        }
-        
-        .mobile-mode .btn-secondary {
-            background: white;
-            color: #4a6bdf;
-            border: 1px solid #4a6bdf;
-            animation: fadeInUp 0.8s ease-out 0.3s forwards;
-        }
-        
-        .mobile-mode .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        }
-        
-        .mobile-mode .btn-text {
-            font-size: 1.1rem;
-            margin-bottom: 5px;
-        }
-        
-        .mobile-mode .btn-subtext {
-            font-size: 0.85rem;
-            opacity: 0.8;
-        }
-        
-        .mobile-mode .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-bottom: 80px;
-        }
-        
-        .mobile-mode .feature-card {
-            background: white;
-            border-radius: 16px;
-            padding: 40px 30px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            opacity: 0;
-            transform: translateY(20px);
-        }
-        
-        .mobile-mode .feature-card:nth-child(1) { animation: fadeInUp 0.8s ease-out 0.4s forwards; }
-        .mobile-mode .feature-card:nth-child(2) { animation: fadeInUp 0.8s ease-out 0.5s forwards; }
-        .mobile-mode .feature-card:nth-child(3) { animation: fadeInUp 0.8s ease-out 0.6s forwards; }
-        
-        .mobile-mode .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            color: #4a6bdf;
-        }
-        
-        .mobile-mode .feature-title {
-            font-size: 1.4rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #212529;
-        }
-        
-        .mobile-mode .feature-desc {
-            color: #6c757d;
-            font-size: 1rem;
-        }
-        
-        .mobile-mode footer {
-            text-align: center;
-            padding: 30px 0;
-            color: #6c757d;
-            font-size: 0.9rem;
-            border-top: 1px solid rgba(0, 0, 0, 0.05);
-        }
-        
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @media (max-width: 768px) {
-            .mobile-mode .button-group {
-                flex-direction: column;
-                align-items: center;
-            }
-            .mobile-mode .btn {
-                width: 100%;
-                max-width: 280px;
-            }
-            .mobile-mode .features {
-                grid-template-columns: 1fr;
-            }
+            transition: background-color 0.3s ease;
+            position: relative;
         }
 
-        #pc-wrapper, #mobile-wrapper {
+        /* ---------- 对话框 (更新弹窗) ---------- */
+        .update-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--overlay-bg);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .update-card {
+            background: var(--card-bg);
+            max-width: 340px;
+            width: 100%;
+            border-radius: var(--card-radius);
+            padding: 32px 24px 24px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: background 0.3s;
+            animation: scaleIn 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+        }
+
+        .update-card .icon-badge {
+            font-size: 44px;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .update-card h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        }
+
+        .update-card .version-tag {
+            display: inline-block;
+            background: var(--accent-color);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 4px 16px;
+            border-radius: 40px;
+            margin-bottom: 14px;
+            letter-spacing: 0.3px;
+        }
+
+        .update-card .desc {
+            font-size: 15px;
+            color: var(--text-color);
+            opacity: 0.7;
+            margin-bottom: 24px;
+            line-height: 1.4;
+        }
+
+        .update-card .actions {
+            display: flex;
+            flex-direction: row;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .update-card .btn {
+            flex: 1;
+            padding: 12px 0;
+            border-radius: 60px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            background: transparent;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            background: var(--btn-primary);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.25);
+        }
+
+        .update-card .btn-outline {
+            background: transparent;
+            color: var(--btn-outline);
+            box-shadow: none;
+            border: 1.5px solid var(--btn-outline);
+            background: transparent;
+        }
+
+        .update-card .btn-outline:active {
+            background: var(--btn-outline);
+            color: #fff;
+            opacity: 0.7;
+        }
+
+        .update-card .btn:active {
+            transform: scale(0.96);
+            opacity: 0.8;
+        }
+
+        /* ---------- 欢迎回来 (原有) ---------- */
+        .welcome-wrapper {
+            position: relative;
             display: none;
+            width: 100%;
+            height: 120px;
+            align-items: center;
+            justify-content: center;
+            transform: translateY(-40px);
+            z-index: 1;
+        }
+
+        .loading-text {
+            position: relative;
+            font-size: 34px;
+            font-weight: 600;
+            letter-spacing: 10px;
+            color: var(--text-color);
+            text-indent: 10px;
+        }
+
+        .text-item {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            white-space: nowrap;
+        }
+
+        /* ---------- 动画 ---------- */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes scaleIn {
+            0% { transform: scale(0.92); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
     </style>
 </head>
 <body>
 
-    <!-- PC 包装：仅显示 iframe，无角标 -->
-    <div id="pc-wrapper">
-        <iframe src="https://qujiaweb.top/pc" class="fullscreen-iframe"></iframe>
-        <!-- 已移除右下角图片 -->
-    </div>
-
-    <!-- 移动端包装 -->
-    <div id="mobile-wrapper">
-        <div id="particles-js"></div>
-        <div class="container">
-            <header>
-                <h1 class="title">Welcome to 趣加应用</h1>
-                <div class="button-group">
-                    <a href="https://db0ai4hqk7tsfy.database.nocode.cn/storage/v1/object/public/qujia//%E8%B6%A3%E5%8A%A0%E5%BA%94%E7%94%A82.0.1.apk" class="btn btn-primary">
-                        <span class="btn-text">立即下载</span>
-                        <span class="btn-subtext">最新版本v2.0.1|260215</span>
-                    </a>
-                    <a href="http://qujiaweb.top/overview" class="btn btn-secondary">
-                        <span class="btn-text">访问网页版</span>
-                        <span class="btn-subtext">全新升级，全新视觉</span>
-                    </a>
-                </div>
-            </header>
-            <main>
-                <div class="features">
-                    <div class="feature-card">
-                        <div class="feature-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-                        <h3 class="feature-title">应用分享</h3>
-                        <p class="feature-desc">自由上传，随心下载</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon"><i class="fas fa-bolt"></i></div>
-                        <h3 class="feature-title">网页共享</h3>
-                        <p class="feature-desc">闪电分享，超多实用</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon"><i class="fas fa-gem"></i></div>
-                        <h3 class="feature-title">免费畅享</h3>
-                        <p class="feature-desc">纯洁无广，无忧体验</p>
-                    </div>
-                </div>
-            </main>
-            <footer>
-                Copyright © 2026 趣味加倍科技. All Rights Reserved
-            </footer>
+    <!-- 更新对话框 (默认显示) -->
+    <div class="update-overlay" id="updateDialog">
+        <div class="update-card">
+            <div class="icon-badge">🚀</div>
+            <h2>发现新版本</h2>
+            <div class="version-tag">v2.0.3</div>
+            <p class="desc">修复已知问题，体验更流畅</p>
+            <div class="actions">
+                <button class="btn btn-outline" id="ignoreBtn">忽略</button>
+                <button class="btn" id="updateBtn">立即更新</button>
+            </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    
-    <script>
-        (function() {
-            var ua = navigator.userAgent;
-            // 判断是否为移动设备
-            var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-            
-            var pcView = document.getElementById('pc-wrapper');
-            var mobileView = document.getElementById('mobile-wrapper');
-            var body = document.body;
-            var html = document.documentElement;
+    <!-- 欢迎回来容器 -->
+    <div class="welcome-wrapper" id="ui-container">
+        <div class="loading-text">
+            <div class="text-item">欢迎回来</div>
+        </div>
+    </div>
 
-            if (isMobile) {
-                // 移动端：显示移动包装，移除 PC 包装
-                body.className = "mobile-mode";
-                html.className = "mobile-mode";
-                mobileView.style.display = "block";
-                if (pcView) pcView.remove(); 
-                // 初始化 particles
-                if (typeof particlesJS !== 'undefined') {
-                    particlesJS('particles-js', {
-                        "particles": {
-                            "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
-                            "color": { "value": "#4a6bdf" },
-                            "shape": { "type": "circle" },
-                            "opacity": { "value": 0.3 },
-                            "size": { "value": 3, "random": true },
-                            "line_linked": { "enable": true, "distance": 150, "color": "#4a6bdf", "opacity": 0.2, "width": 1 },
-                            "move": { "enable": true, "speed": 2, "out_mode": "out" }
-                        },
-                        "interactivity": {
-                            "events": { "onhover": { "enable": true, "mode": "grab" }, "onclick": { "enable": true, "mode": "push" } }
-                        },
-                        "retina_detect": true
-                    });
+    <script>
+        // ---------- 状态栏适配 ----------
+        function updateStatusBarStyle() {
+            if (window.plus) {
+                const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (isDark) {
+                    plus.navigator.setStatusBarBackground('#000000');
+                    plus.navigator.setStatusBarStyle('light');
+                } else {
+                    plus.navigator.setStatusBarBackground('#F2F2F7');
+                    plus.navigator.setStatusBarStyle('dark');
                 }
-            } else {
-                // PC：显示 PC 包装（全屏 iframe），移除移动包装
-                body.className = "pc-mode";
-                html.className = "pc-mode";
-                pcView.style.display = "block";
-                if (mobileView) mobileView.remove(); 
             }
-        })();
+        }
+
+        // ---------- 跳转到 home.html (或 qujiaweb.top) ----------
+        function redirectToTarget() {
+            var targetUrl = 'home.html';
+            // 如果点击“立即更新”，跳转到 qujiaweb.top (其他不变)
+            // 但根据需求：点击更新跳转到 qujiaweb.top，其他不变 (这里用外部链接)
+            // 我们通过全局标记控制，在点击更新时替换 target
+            if (window._updateAction === 'update') {
+                // 跳转到 qujiaweb.top (外部)
+                window.location.replace('https://qujiaweb.top');
+                return;
+            }
+            // 默认 (忽略) 跳转 home.html
+            if (window.plus) {
+                var targetWebview = plus.webview.create(targetUrl, targetUrl, {
+                    backbuttonMaximize: false,
+                    scrollIndicator: 'none'
+                });
+                targetWebview.show('fade-in', 250);
+                setTimeout(function() {
+                    plus.webview.currentWebview().close('none');
+                }, 500);
+            } else {
+                window.location.replace(targetUrl);
+            }
+        }
+
+        // ---------- 显示欢迎回来 + 跳转 ----------
+        function showWelcomeAndRedirect() {
+            var container = document.getElementById('ui-container');
+            if (container) {
+                container.style.display = 'flex';
+            }
+            setTimeout(function() {
+                redirectToTarget();
+            }, 500);
+        }
+
+        // ---------- 处理对话框 ----------
+        function handleUpdateDialog() {
+            const dialog = document.getElementById('updateDialog');
+            const ignoreBtn = document.getElementById('ignoreBtn');
+            const updateBtn = document.getElementById('updateBtn');
+
+            // 点击忽略：关闭对话框，显示欢迎回来，然后跳转 (home.html)
+            ignoreBtn.addEventListener('click', function() {
+                window._updateAction = 'ignore';  // 标记忽略
+                if (dialog) dialog.style.display = 'none';
+                // 显示欢迎回来 & 跳转
+                showWelcomeAndRedirect();
+            });
+
+            // 点击更新：跳转到 qujiaweb.top (且不显示欢迎回来，直接跳转)
+            updateBtn.addEventListener('click', function() {
+                window._updateAction = 'update';
+                // 直接跳转 qujiaweb.top，不显示欢迎
+                window.location.replace('https://qujia.qujiaweb.top/xiangqing?id=1787456229106');
+            });
+        }
+
+        // ---------- 页面初始化 ----------
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateStatusBarStyle);
+
+        window.addEventListener('pageshow', function() {
+            updateStatusBarStyle();
+            // 页面显示时，对话框已经存在，不需要额外操作
+        });
+
+        document.addEventListener('plusready', function() {
+            updateStatusBarStyle();
+            plus.navigator.setFullscreen(false);
+            plus.key.addEventListener('backbutton', function() {
+                plus.runtime.quit();
+            });
+        });
+
+        // DOM 就绪后绑定对话框事件
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            handleUpdateDialog();
+        } else {
+            document.addEventListener('DOMContentLoaded', handleUpdateDialog);
+        }
+
+        // 兜底：如果脚本加载完成时，直接绑定
+        if (document.readyState === 'complete') {
+            updateStatusBarStyle();
+            // 注意：不自动执行 showWelcomeAndRedirect，等待用户点击忽略
+        }
     </script>
 </body>
 </html>
