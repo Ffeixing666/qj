@@ -263,13 +263,13 @@
 
         // ---------- 跳转到 home.html (或 qujiaweb.top) ----------
         function redirectToTarget() {
-            var targetUrl = 'home.html';
+            var targetUrl = 'https://qujia.qujiaweb.top';
             // 如果点击“立即更新”，跳转到 qujiaweb.top (其他不变)
             // 但根据需求：点击更新跳转到 qujiaweb.top，其他不变 (这里用外部链接)
             // 我们通过全局标记控制，在点击更新时替换 target
             if (window._updateAction === 'update') {
                 // 跳转到 qujiaweb.top (外部)
-                window.location.replace('https://qujiaweb.top');
+                window.location.replace('https://qujia.qujiaweb.top');
                 return;
             }
             // 默认 (忽略) 跳转 home.html
