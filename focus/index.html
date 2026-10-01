@@ -2,9 +2,12 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<!-- 修复：去掉 maximum-scale=1 / user-scalable=no。
+     这两个参数在「添加到主屏幕」的独立模式（standalone）下，
+     会让 iOS 认为页面禁止缩放，从而连带阻止输入框聚焦时弹出键盘。
+     去掉后键盘可正常弹出；用 CSS 的 touch-action 抑制双击缩放即可。 -->
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f6f7fb">
-      
 <title>趣加专注</title>
 <!-- 图标：iOS 会用它作为主屏幕图标 -->
 <link rel="apple-touch-icon" sizes="180x180"
@@ -33,12 +36,24 @@
   --green:#32b37b;
   --shadow:0 18px 50px rgba(30,35,50,.09);
   --radius:28px;
+  /* 两个主卡片统一高度，改这里即可整体调整 */
+  --card-h:600px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text)}
-body{overflow-x:hidden}
+html{-webkit-text-size-adjust:100%}
+/* touch-action:manipulation = 允许滑动与双指缩放，但去掉双击缩放，
+   替代原先的 user-scalable=no，不影响键盘弹出 */
+body{overflow-x:hidden;touch-action:manipulation}
 button,input{font:inherit}
 button{border:0;cursor:pointer}
+/* 保证输入框在 iOS 独立模式下可聚焦、可选中、可唤起键盘 */
+input{
+  -webkit-user-select:text;
+  user-select:text;
+  -webkit-appearance:none;
+  appearance:none;
+}
 .app{
   width:min(1180px,100%);
   margin:auto;
@@ -57,13 +72,13 @@ button{border:0;cursor:pointer}
 }
 .music-btn:active{transform:scale(.94)}
 .music-btn.on{color:var(--accent);background:#fff3f1}
-.main-grid{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(360px,.92fr);grid-template-rows:500px;gap:20px;align-items:stretch;min-height:0}
+.main-grid{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(360px,.92fr);grid-template-rows:var(--card-h);gap:20px;align-items:stretch;min-height:0}
 .card{
   background:var(--card);border:1px solid rgba(255,255,255,.9);
   box-shadow:var(--shadow);border-radius:var(--radius);
   backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
 }
-.clock-card{height:500px;min-height:500px;padding:clamp(25px,4vw,48px);display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden}
+.clock-card{height:var(--card-h);min-height:var(--card-h);padding:clamp(25px,4vw,48px);display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden}
 .clock-card:before,.clock-card:after{content:"";position:absolute;border-radius:50%;pointer-events:none}
 .clock-card:before{width:260px;height:260px;right:-120px;top:-110px;background:rgba(255,95,87,.08)}
 .clock-card:after{width:220px;height:220px;left:-150px;bottom:-130px;background:rgba(86,140,255,.06)}
@@ -84,7 +99,7 @@ button{border:0;cursor:pointer}
 .date{text-align:center;color:var(--sub);font-size:14px;min-height:21px}
 .focus-note{margin:34px auto 0;display:flex;align-items:center;justify-content:center;gap:8px;color:#5c5f68;font-size:13px}
 .pulse{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 6px rgba(255,95,87,.10)}
-.lookup-card{padding:clamp(22px,3vw,34px);height:500px;min-height:500px;max-height:500px;display:flex;flex-direction:column;overflow:hidden}
+.lookup-card{padding:clamp(22px,3vw,34px);height:var(--card-h);min-height:var(--card-h);max-height:var(--card-h);display:flex;flex-direction:column;overflow:hidden}
 .card-title{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px}
 .card-title h2{font-size:22px;letter-spacing:-.03em;margin:0}
 .card-title p{font-size:12px;color:var(--sub);margin:5px 0 0}
@@ -94,7 +109,7 @@ button{border:0;cursor:pointer}
 }
 .search:focus-within{background:#fff;border-color:rgba(255,95,87,.28);box-shadow:0 8px 25px rgba(30,35,50,.06)}
 .search svg{color:#8b8e98;flex:0 0 auto}
-.search input{min-width:0;flex:1;border:0;outline:0;background:transparent;color:var(--text);font-size:16px}
+.search input{min-width:0;flex:1;border:0;outline:0;background:transparent;color:var(--text);font-size:16px;height:100%;line-height:1.2}
 .search input::placeholder{color:#a4a6ad}
 .search button{height:40px;padding:0 16px;border-radius:13px;background:var(--text);color:#fff;font-size:14px;font-weight:600;transition:.2s}
 .search button:active{transform:scale(.96)}
@@ -125,9 +140,9 @@ button{border:0;cursor:pointer}
 .source{font-size:11px;color:#a0a2aa;margin-top:15px}
 .footer{padding:17px 4px 3px;color:#a0a2aa;text-align:center;font-size:11px}
 @media(max-width:860px){
-  .main-grid{grid-template-columns:1fr;grid-template-rows:500px 500px}
-  .clock-card{height:500px;min-height:500px}
-  .lookup-card{height:500px;min-height:500px;max-height:500px;padding:22px}
+  .main-grid{grid-template-columns:1fr;grid-template-rows:var(--card-h) var(--card-h)}
+  .clock-card{height:var(--card-h);min-height:var(--card-h)}
+  .lookup-card{height:var(--card-h);min-height:var(--card-h);max-height:var(--card-h);padding:22px}
 }
 @media(max-width:520px){
   .app{padding:14px}
@@ -189,7 +204,7 @@ button{border:0;cursor:pointer}
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path>
         </svg>
-        <input id="wordInput" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="输入英文单词，例如 abandon">
+        <input id="wordInput" type="text" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="输入英文单词，例如 abandon">
         <button type="submit">查询</button>
       </form>
 
@@ -280,6 +295,15 @@ musicBtn.addEventListener("click",async()=>{
 });
 
 const result=$("result"),input=$("wordInput"),form=$("searchForm");
+
+/* 独立模式（添加到主屏幕）下，键盘弹出会遮住输入框，
+   聚焦后稍微延迟再把它滚动到可视区域中部，保证看得见正在输入的内容。 */
+input.addEventListener("focus",()=>{
+  setTimeout(()=>{
+    try{ input.scrollIntoView({block:"center",behavior:"smooth"}); }catch(e){}
+  },300);
+});
+
 const cacheKey="focus_dictionary_cache_v2";
 const memory={};
 try{Object.assign(memory,JSON.parse(localStorage.getItem(cacheKey)||"{}"));}catch(e){}
