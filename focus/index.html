@@ -2,26 +2,16 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<!-- 修复：去掉 maximum-scale=1 / user-scalable=no。
-     这两个参数在「添加到主屏幕」的独立模式（standalone）下，
-     会让 iOS 认为页面禁止缩放，从而连带阻止输入框聚焦时弹出键盘。
-     去掉后键盘可正常弹出；用 CSS 的 touch-action 抑制双击缩放即可。 -->
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f6f7fb">
 <title>趣加专注</title>
-<!-- 图标：iOS 会用它作为主屏幕图标 -->
 <link rel="apple-touch-icon" sizes="180x180"
       href="https://cdn-community.bcmcdn.com/47/community/kLSeoWDDl54Xz6eUxD1CEvIEiv1hyGUxwHK8IlitgMqw.jpeg?hash=Fl2nHPUSk8H5si6fPwGbdWwCiHYg">
-
-<!-- 旧版 iOS 用这个可以去掉系统自动加的圆角高光效果（可选） -->
 <link rel="apple-touch-icon-precomposed"
       href="https://cdn-community.bcmcdn.com/47/community/kLSeoWDDl54Xz6eUxD1CEvIEiv1hyGUxwHK8IlitgMqw.jpeg?hash=Fl2nHPUSk8H5si6fPwGbdWwCiHYg">
-
-<!-- 主屏幕显示的名称 -->
 <meta name="apple-mobile-web-app-title" content="趣加专注">
-
-<!-- 下面两个是「全屏/类 App 体验」，想要才加 -->
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <style>
 :root{
@@ -36,18 +26,14 @@
   --green:#32b37b;
   --shadow:0 18px 50px rgba(30,35,50,.09);
   --radius:28px;
-  /* 两个主卡片统一高度，改这里即可整体调整 */
   --card-h:600px;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text)}
 html{-webkit-text-size-adjust:100%}
-/* touch-action:manipulation = 允许滑动与双指缩放，但去掉双击缩放，
-   替代原先的 user-scalable=no，不影响键盘弹出 */
 body{overflow-x:hidden;touch-action:manipulation}
 button,input{font:inherit}
 button{border:0;cursor:pointer}
-/* 保证输入框在 iOS 独立模式下可聚焦、可选中、可唤起键盘 */
 input{
   -webkit-user-select:text;
   user-select:text;
@@ -296,12 +282,39 @@ musicBtn.addEventListener("click",async()=>{
 
 const result=$("result"),input=$("wordInput"),form=$("searchForm");
 
-/* 独立模式（添加到主屏幕）下，键盘弹出会遮住输入框，
-   聚焦后稍微延迟再把它滚动到可视区域中部，保证看得见正在输入的内容。 */
-input.addEventListener("focus",()=>{
+/* ============================================================
+   iOS 独立模式键盘修复核心逻辑
+   ------------------------------------------------------------
+   问题：在“添加到主屏幕”的 PWA 中，用 setTimeout 延迟调用
+   input.focus() 会导致输入框获得焦点但软键盘不弹出。
+   原因：WebKit 要求 focus() 必须在用户触摸事件的同步调用栈中执行。
+
+   方案：在 touchstart 中同步创建一个屏幕外临时输入框并聚焦，
+   利用这个同步动作“预热”键盘；然后再把焦点转移到真正的输入框，
+   键盘会保持打开状态。
+   ============================================================ */
+function openIosKeyboard(){
+  const fake = document.createElement("input");
+  fake.setAttribute("type","text");
+  fake.setAttribute("style","position:fixed;top:-200px;left:-200px;width:1px;height:1px;opacity:0;");
+  document.body.appendChild(fake);
+  fake.focus();                       // 同步聚焦，唤醒键盘
   setTimeout(()=>{
-    try{ input.scrollIntoView({block:"center",behavior:"smooth"}); }catch(e){}
-  },300);
+    if(fake.parentNode) fake.parentNode.removeChild(fake);
+  },400);
+}
+
+/* 在 touchstart 中同步唤醒键盘，然后在下一个事件循环聚焦真正的输入框 */
+input.addEventListener("touchstart", function(){
+  if(document.activeElement === input) return;   // 已经聚焦就不重复处理
+  openIosKeyboard();                              // 同步调用，不可延迟
+  setTimeout(()=>{ input.focus(); }, 50);
+}, { passive: true });
+
+/* 桌面端 / 非触屏场景保持原有行为 */
+input.addEventListener("mousedown", function(){
+  if(document.activeElement === input) return;
+  setTimeout(()=>{ input.focus(); }, 0);
 });
 
 const cacheKey="focus_dictionary_cache_v2";
@@ -412,21 +425,18 @@ async function fetchJSON(url,timeout=6500){
 async function lookup(word){
   if(memory[word])return memory[word];
 
-  // 主线路：KeyKey 公共词典。免 Key，并开启本地词典兜底。
   const keykey="https://api.keykey.im/api/public/memory-card?word="+encodeURIComponent(word)+"&lang=en&includeLocalDictionaryFallback=true";
   try{
     const data=await fetchJSON(keykey,7000);
     return saveWord(word,normalizeKeyKey(data,word));
   }catch(e){}
 
-  // 第二线路：Wiktionary 公共 API。
   const wiki="https://en.wiktionary.org/api/rest_v1/page/definition/"+encodeURIComponent(word);
   try{
     const data=await fetchJSON(wiki,6500);
     return saveWord(word,normalizeWiki(data,word));
   }catch(e){}
 
-  // 最后线路：原免费词典，仅作为兼容性备用，不影响主线路。
   const primary="https://api.dictionaryapi.dev/api/v2/entries/en/"+encodeURIComponent(word);
   const data=await fetchJSON(primary,5500);
   return saveWord(word,normalizeFree(data));
@@ -499,8 +509,6 @@ document.querySelectorAll("#quickWords button").forEach(b=>b.addEventListener("c
   input.value=b.dataset.word;
   searchWord(b.dataset.word);
 }));
-
-// 首次载入时不主动联网查词，避免打开页面就产生请求。
 </script>
 </body>
 </html>
